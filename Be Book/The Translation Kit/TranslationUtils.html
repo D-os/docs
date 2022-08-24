@@ -1,0 +1,143 @@
+<HTML><HEAD><TITLE>The Translation Kit: BTranslationUtils</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BTranslationUtils"></A>BTranslationUtils
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/translation/TranslationUtils.h">be/translation/TranslationUtils.h</A>
+<P>
+Library:  libtranslation.so
+<P>
+<H6><A HREF="TranslationUtils.summary.html"><i>Summary</i></A></H6>
+<P>
+BTranslationUtils contains a set of static functions which load bitmap images.  The functions use the Translation Kit to convert the data from its native format to a <B><TT><A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A></TT></B> via a <B><TT><A HREF="BitmapStream.html#BBitmapStream">BBitmapStream</A></TT></B>, the upshot of which is that if you can convert the data to a translator bitmap, you can successfully use these functions.  The image may come from a file, resource, or <B><TT>BPositionIO</TT></B>.  The application is always responsible for deallocating the returned BBitmap.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="GetBitmap()"></A>GetBitmap()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<B><TT><FONT  color=000022 size=+1>GetBitmap(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> *<I><FONT  color=991122 face=HELVETICA>use</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+static <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<B><TT><FONT  color=000022 size=+1>GetBitmap(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> *<I><FONT  color=991122 face=HELVETICA>use</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+static <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<B><TT><FONT  color=000022 size=+1>GetBitmap(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> *<I><FONT  color=991122 face=HELVETICA>use</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+static <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<B><TT><FONT  color=000022 size=+1>GetBitmap(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, const char * <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> *<I><FONT  color=991122 face=HELVETICA>use</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+static <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<B><TT><FONT  color=000022 size=+1>GetBitmap(</TT></B></FONT>BPositionIO *<I><FONT  color=991122 face=HELVETICA>stream</I></FONT>, <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> *<I><FONT  color=991122 face=HELVETICA>use</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The first version of the function returns the image held in the file <I><FONT  color=991122 face=HELVETICA>name</I></FONT> if it exists.  Otherwise, it returns the application resource of type <B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_BITMAP">B_TRANSLATOR_BITMAP</A></TT></B> named <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  The second version does the same thing, but uses an entry_ref, <I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, to locate the file.
+<P>
+The third and fourth versions of the function search for the specified resource and return the bitmap contained therein.
+<P>
+The final version returns the bitmap found in <I><FONT  color=991122 face=HELVETICA>stream</I></FONT>.  This form of the function is particularly useful when used with <B><TT>BMemoryIO</TT></B>.
+<P>
+In all cases, <I><FONT  color=991122 face=HELVETICA>use</I></FONT> specifies the <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> to use in translating the image.  If <I><FONT  color=991122 face=HELVETICA>use</I></FONT> is <B><TT>NULL</TT></B>, the default translator (as returned by <B><TT><A HREF="TranslatorRoster.html#Default()">BTranslatorRoster::Default()</A></TT></B>) is used.
+<P>
+If the file or stream doesn't contain a suitable bitmap, the functions return <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="TranslatorRoster.html#Default()">BTranslatorRoster::Default()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="GetBitmapFile()"></A>GetBitmapFile()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<B><TT><FONT  color=000022 size=+1>GetBitmapFile(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> *<I><FONT  color=991122 face=HELVETICA>use</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the image held in the file <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  If the file doesn't contain a suitable image, the function returns <B><TT>NULL</TT></B>.  <I><FONT  color=991122 face=HELVETICA>use</I></FONT> specifies the <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> used to translate the image.  If <I><FONT  color=991122 face=HELVETICA>use</I></FONT> is <B><TT>NULL</TT></B>, the default translator (as returned by <B><TT><A HREF="TranslatorRoster.html#Default()">BTranslatorRoster::Default()</A></TT></B>) is used.
+<P>
+<B>See also:  <TT><A HREF="TranslatorRoster.html#Default()">BTranslatorRoster::Default()</A>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+</TT></B>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

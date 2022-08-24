@@ -1,0 +1,162 @@
+<HTML><HEAD><TITLE>Keyboard: More on Keyboard Mapping</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Keyboard Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Keyboard%20Master%20Index.html"><FONT face=HELVETICA>Keyboard Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="More%20on%20Keyboard%20Mapping"></A>More on Keyboard Mapping
+</H1>
+<P>
+The key map records character values using the UTF-8 encoding of the Unicode Standard, making it possible to map keys to characters in any of the world's scripts.  UTF-8 encodes 16-bit Unicode values in a variable number of bytes (from one to four).  The main benefit to UTF-8 is that one-byte UTF characters $00 through $7F are identical to the ASCII standard that's been around for decades.
+<P>
+A <B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message holds the character mapped to the key the user pressed as an array of bytes named, simply, "byte".  The array is passed as a string to the <B><TT><A HREF="../The%20Interface%20Kit/MenuField.html#KeyDown()">KeyDown()</A></TT></B> hook function along with a count of the number of bytes in the string:
+<P>
+<LI>virtual void <B><TT>KeyDown(</TT></B>const char *<I>bytes</I>, int32 <I>numBytes<B><TT>)
+<P>
+</TT></B></I></UL>
+<P>
+See "Character Encoding" in the "Responding to the User" section of the Interface Kit for a description of UTF-8 encoding and <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_key_map()">get_key_map()</A></TT></B> for an explanation of the key map.
+<P>
+Most keys are mapped to more than one character.  The precise character that the key produces depends on which modifier keys are being held down and which lock states the keyboard is in at the time the key is pressed.
+<P>
+A few examples are given in the table below:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Key</B></TH>
+<TH>No modifiers</TH>
+<TH>Shift alone</TH>
+<TH>Option alone</TH>
+<TH>Shift &amp; Option</TH>
+<TH>Control</TH>
+<TR>
+<TD>0x15</TD>
+<TD>4</TD>
+<TD>$</TD>
+<TD></TD>
+<TD></TD>
+<TD>4</TD>
+<TR>
+<TD>0x18</TD>
+<TD>7</TD>
+<TD>&amp;</TD>
+<TD>xa6 </TD>
+<TD>xa4 </TD>
+<TD>7</TD>
+<TR>
+<TD>0x26</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_TAB">B_TAB</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_TAB">B_TAB</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_TAB">B_TAB</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_TAB">B_TAB</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_TAB">B_TAB</A></TT></B> </TD>
+<TR>
+<TD>0x2e</TD>
+<TD>i</TD>
+<TD>I</TD>
+<TD></TD>
+<TD></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_TAB">B_TAB</A></TT></B> </TD>
+<TR>
+<TD>0x40</TD>
+<TD>g</TD>
+<TD>G</TD>
+<TD>"</TD>
+<TD></TD>
+<TD>0x07</TD>
+<TR>
+<TD>0x43</TD>
+<TD>k</TD>
+<TD>K</TD>
+<TD></TD>
+<TD></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_PAGE_UP">B_PAGE_UP</A></TD>
+<TR>
+<TD></TT></B>0x51</TD>
+<TD>n</TD>
+<TD>N</TD>
+<TD>&ntilde;</TD>
+<TD>&Ntilde;</TD>
+<TD>0x0e</TD>
+<TR>
+<TD>0x55</TD>
+<TD>/</TD>
+<TD>?</TD>
+<TD>xb8 </TD>
+<TD>xc0 </TD>
+<TD>/ </TD>
+<TR>
+<TD>0x64</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_INSERT">B_INSERT</A></TT></B></TD>
+<TD>0</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_INSERT">B_INSERT</A></TT></B></TD>
+<TD>0</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_INSERT">B_INSERT</A></TT></B> </TD>
+</TABLE>
+<P>
+The mapping follows some fixed rules, including these:
+<P>
+<UL>
+<LI>If a Command key is held down, the Control keys are ignored.  Command trumps Control.  Otherwise, Command doesn't affect the character that's reported for the key.  If only Command is held down, the character that's reported is the same as if no modifiers were down; if Command and Option are held down, the character that's reported is the same as for Option alone; and so on.
+<P>
+<LI>If a Control key is held down (without a Command key), Shift, Option, and all keyboard locks are ignored.  Control trumps the other modifiers (except for Command).
+<P>
+<LI>Num Lock applies only to keys on the numerical keypad.  While this lock is on, the effect of the Shift key is inverted.  Num Lock alone yields the same character that's produced when a Shift key is down (and Num Lock is off).  Num Lock plus Shift yields the same character that's produced without either Shift or the lock.
+<P>
+<LI>Menu and Scroll Lock play no role in determining how keys are mapped to characters.
+<P>
+</UL>
+<P>
+The default key map also follows the conventional rules for Caps Lock and Control:
+<P>
+<UL>
+<LI>Caps Lock applies only to the 26 alphabetic keys on the main keyboard.  It serves to map the key to the same character as Shift.  Using Shift while the lock is on undoes the effect of the lock; the character that's reported is the same as if neither Shift nor Caps Lock applied.  For example, Shift-<I>G</I> and Caps Lock-<I>G</I> both are mapped to uppercase 'G', but Shift-Caps Lock-<I>G</I> is mapped to lowercase 'g'.
+<P>
+However, if the lock doesn't affect the character, Shift plus the lock is the same as Shift alone.  For example, Caps Lock-<I>7</I> produces '7' (the lock is ignored) and Shift<I>7</I> produces '&amp;' (Shift has an effect), so Shift-Caps Lock-<I>7</I> also produces '&amp;' (only Shift has an effect).
+<P>
+<LI>When Control is used with a key that otherwise produces an alphabetic character, the character that's reported has a value 0x40 less than the value of the uppercase version of the character (0x60 less than the lowercase version of the character).  This often results in a character that is produced independently by another key.  For example, Control<I>I</I> produces the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_TAB">B_TAB</A></TT></B> character and Control-<I>L</I> produces <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_PAGE_DOWN">B_PAGE_DOWN</A></TT></B>.
+<P>
+When Control is used with a key that doesn't produce an alphabetic character, the character that's reported is the same as if no modifiers were on.  For example, Control<I>7</I> produces a '7'.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Keyboard Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Keyboard%20Master%20Index.html"><FONT face=HELVETICA>Keyboard Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

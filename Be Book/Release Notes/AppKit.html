@@ -1,0 +1,443 @@
+<HTML><HEAD><TITLE>Release Notes: The Application Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Application%20Kit"></A>The Application Kit
+</H1>
+<P>
+<HR>
+<H2>
+<A NAME="BApplication"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>A</FONT>pplication
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/app/Appplication.h">app/Appplication.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="SetCursor()"></A>SetCursor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SetCursor(const <A HREF="#BCursor">BCursor</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>cursor</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> = <B><TT>true</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The new <B><TT><A HREF="#SetCursor()">SetCursor()</A></TT></B> function sets the cursor as a <A HREF="#BCursor">BCursor</A> object.  If  <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> is <B><TT>true</TT></B>, the function doesn't return until the cursor has actually been changed; otherwise, the function returns immediately.
+<P>
+<HR>
+<H2>
+<A NAME="BCursor"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>C</FONT>ursor
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/app/Cursor.h and app/AppDefs.h">app/Cursor.h and app/AppDefs.h</A>
+<P>
+The new <A HREF="#BCursor">BCursor</A> class and related API let you retrieve and set the cursor on an app-wide and view-specific basis.  The two Be-defined cursors, which used to be identified by name, are now represented by global <A HREF="#BCursor">BCursor</A> objects (from <B>app/AppDefs.h</B>):
+<P>
+<UL>
+<LI><B><TT>B_CURSOR_SYSTEM_DEFAULT</TT></B> is the "hand" cursor.
+<P>
+<LI><B><TT>B_CURSOR_I_BEAM</TT></B> is the insertion point cursor commonly used by text editors.
+<P>
+</UL>
+<P>
+The functions that control the app-wide cursor (<B><TT><A HREF="#SetCursor()">SetCursor()</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Application.html#ShowCursor()">ShowCursor()</A></TT></B>, etc) are, as before, defined by BApplication; the only protocol difference is that <B><TT><A HREF="#SetCursor()">SetCursor()</A></TT></B> now takes a <A HREF="#BCursor">BCursor</A> object as an argument.
+<P>
+To set the cursor for a specific <A HREF="InterfaceKit.html#BView">BView</A>, use the new <B><TT>BView::SetViewCursor()</TT></B> function.  In addition to an initial <A HREF="#BCursor*">BCursor*</A> argument, the function takes an optional boolean argument that, when <B><TT>true</TT></B>, tells the function to call <B><TT><A HREF="../The%20Interface%20Kit/ViewDrawing.html#Sync()">Sync()</A></TT></B> before returning.  This <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> argument is <B><TT>true</TT></B> by default.  With this new API, the <A HREF="InterfaceKit.html#BView">BView</A> doesn't need to watch for mouse-entered and mouse-exited events; the cursor will change automatically as the mouse enters and exits the view.
+<P>
+The old <B><TT><A HREF="../The%20Application%20Kit/misc.html#Cursor%20Constants">B_HAND_CURSOR</A></TT></B> and <B><TT><A HREF="../The%20Application%20Kit/misc.html#Cursor%20Constants">B_I_BEAM_CURSOR</A></TT></B> constants (app/AppDefs.h) have been deprecated. 
+<P>
+<HR>
+<H2>
+<A NAME="BHandler"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>H</FONT>andler
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/app/Handler.h">app/Handler.h</A>
+<P>
+<A HREF="#BHandler">BHandler</A> has a new "observe-notify" system in which a handler (the "observer") can register itself to be sent notifications from some other handler (the "notifier").  To register as an observer, a <A HREF="#BHandler">BHandler</A> calls <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B>.  When the notifier wants to broadcast a message to its observers, it calls <B><TT><A HREF="#SendNotices()">SendNotices()</A></TT></B>. 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The Beta 1 versions of these functions will change to match the protocol given here. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="StartWatching()"></A>StartWatching()
+, 
+<A NAME="StartWatchingAll()"></A>StartWatchingAll()
+, 
+<A NAME="StopWatching()"></A>StopWatching()
+, 
+<A NAME="StopWatchingAll()"></A>StopWatchingAll()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StartWatching(<A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>what</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StartWatchingAll(<A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StartWatching(<A HREF="#BHandler">BHandler</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>notifier</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>what</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StartWatchingAll(<A HREF="#BHandler">BHandler</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>notifier</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StopWatching(<A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>what</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StopWatchingAll(<A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StopWatching(<A HREF="#BHandler">BHandler</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>notifier</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>what</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StopWatchingAll(<A HREF="#BHandler">BHandler</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>notifier</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>StartWatching[All]()</TT></B> places this <A HREF="#BHandler">BHandler</A> on <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT>'s list of observers.  When the notifier broadcasts a notification, this object will receive a <B><TT><A HREF="SystemMessages.html#B_OBSERVER_NOTICE_CHANGE">B_OBSERVER_NOTICE_CHANGE</A></TT></B> message.  
+<P>
+The <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B> <I><FONT  color=991122 face=HELVETICA>what</I></FONT> argument lets the observer tell the notifier which sort of changes it wants to be notified about (where the values that <I><FONT  color=991122 face=HELVETICA>what</I></FONT> can take are defined by the notifier).  A handler can register for multiple <I><FONT  color=991122 face=HELVETICA>what</I></FONT> notifications with the same notifier by calling <B><TT><A HREF="#StartWatching()">StartWatching()</A> </TT></B>multiple times.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* It's assumed that notifier has defined the NEW_... values */
+&nbsp;&nbsp;&nbsp;handler->StartWatching(notifier, NEW_NAME);
+&nbsp;&nbsp;&nbsp;handler->StartWatching(notifier, NEW_LOCATION);
+&nbsp;&nbsp;&nbsp;handler->StartWatching(notifier, NEW_ATTITUDE);</PRE>
+<P>
+To receive notifications of all changes (as defined by <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT>), use the <B><TT><A HREF="#StartWatchingAll()">StartWatchingAll()</A></TT></B> functions.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT>-as-BMessenger version of <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B> lets you watch a notifier that's local or remote.  The <A HREF="#BHandler*">BHandler*</A> version can only watch local notifiers, but it can be called it before <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT> is attached to a BLooper.
+<P>
+<B><TT><A HREF="#StopWatching()">StopWatching()</A></TT></B> unregisters an observer for a given <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT>/<I><FONT  color=991122 face=HELVETICA>what</I></FONT> combination.  <B><TT><A HREF="#StopWatchingAll()">StopWatchingAll()</A></TT></B> completely unregisters the observer for that notifier.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>what</I></FONT> value(s) that an observer registers for here shows up in the notification message as the <B><TT>B_OBSERVE_WHICH_CHANGE</TT></B> field.  The notification message itself has a <B><TT>what</TT></B> of <B><TT><A HREF="SystemMessages.html#B_OBSERVER_NOTICE_CHANGE">B_OBSERVER_NOTICE_CHANGE</A></TT></B>.  For example, the handler that registered for the "NEW_*" changes above would respond to notifications thus:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void myHandler::MessageReceived(BMessage *msg)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 change;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (msg->what) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case B_OBSERVER_NOTICE_CHANGE:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg->FindField(B_OBSERVE_WHICH_CHANGE, &amp;change);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (change) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case NEW_NAME:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case NEW_LOCATION:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case NEW_ATTITUDE:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Keep in mind that the notifications are broadcast at the discretion of the notifier, through its <B><TT><A HREF="#SendNotices()">SendNotices()</A> </TT></B>function.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>notifier</I></FONT> (as a BMessenger) is invalid.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>Other errors</I></FONT>.  ...
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SendNotices()"></A>SendNotices()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> </TT></B><B><TT><FONT  color=000022 size=+1>SendNotices(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>what</I></FONT>, <B><TT>const <A HREF="#BMessage">BMessage</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>msg</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends a <B><TT><A HREF="SystemMessages.html#B_OBSERVER_NOTICE_CHANGE">B_OBSERVER_NOTICE_CHANGE</A></TT></B> message to each <A HREF="#BHandler">BHandler</A> object (or "observer") that's observing this handler (the "notifier").  To observe a notifier, the observer calls <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>what</I></FONT> argument describes the type of change that's prompting this notification; only those observers that have registered to be notified about <I><FONT  color=991122 face=HELVETICA>what</I></FONT> (or that are watching all changes) are sent notifications.  
+<P>
+The <B><TT><A HREF="SystemMessages.html#B_OBSERVER_NOTICE_CHANGE">B_OBSERVER_NOTICE_CHANGE</A></TT></B> messages that are sent are copied from <I><FONT  color=991122 face=HELVETICA>msg</I></FONT> with the <I><FONT  color=991122 face=HELVETICA>what</I></FONT> argument added as the "be:old_what" field.  Note that <I><FONT  color=991122 face=HELVETICA>msg</I></FONT>'s original <B><TT>what</TT></B> field is clobbered.
+<P>
+<HR>
+<H2>
+<A NAME="BMessage"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>essage
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/app/Message.h">app/Message.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="BMessage()"></A>BMessage()
+</H3>
+<P>
+The <A HREF="#BMessage">BMessage</A> constructor that takes a (BMessage *) argument has been retired:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessage(<A HREF="#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>msg</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>; <I><FONT  color=008844 face=HELVETICA>obsolete&mdash;do not use
+<P>
+</I></FONT>
+</TABLE></TABLE>
+
+<P>
+To replace the constructor in your code, simply de-reference the argument.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* OLD CODE: */
+&nbsp;&nbsp;&nbsp;void SomeFunc(BMessage *msg)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage new_msg(msg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* NEW CODE: */
+&nbsp;&nbsp;&nbsp;void SomeFunc(BMessage *msg)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage new_msg(*msg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This will cause <I><FONT  color=991122 face=HELVETICA>msg</I></FONT> to be copied into <I><FONT  color=991122 face=HELVETICA>new_msg</I></FONT>, but (to anticipate your objection) it <I>won't</I> incur a second (leaked) copy.
+<P>
+<HR>
+<H3>
+<A NAME="FindInt8()"></A>FindInt8()
+, 
+<A NAME="FindInt64()"></A>FindInt64()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int8</A></TT></B> <B><TT><FONT  color=000022 size=+1>FindInt8(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>index</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int64</A></TT></B> <B><TT><FONT  color=000022 size=+1>FindInt64(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>index</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+New direct-return versions of these functions (previously you could only retrieve an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int8</A></TT></B> or an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int64</A></TT></B> by reference).
+<P>
+<HR>
+<H2>
+<A NAME="BRoster"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>R</FONT>oster
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/app/Roster.h">app/Roster.h</A>
+<P>
+<A HREF="#BRoster">BRoster</A> now provides access to the system-wide "recent documents" and "recent applications" lists.  Also, some versions of <B><TT><A HREF="../The%20Application%20Kit/Roster.html#Launch()">Launch()</A></TT></B> have been deprecated in favor of new heavily <B><TT>const</TT></B>'d versions.
+<P>
+<HR>
+<H3>
+<A NAME="GetRecentDocuments()"></A>GetRecentDocuments()
+, 
+<A NAME="GetRecentFolders()"></A>GetRecentFolders()
+, 
+<A NAME="GetRecentApps()"></A>GetRecentApps()
+, 
+<A NAME="AddToRecentDocuments()"></A>AddToRecentDocuments()
+, 
+<A NAME="AddToFolders()"></A>AddToFolders()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>GetRecentDocuments(<A HREF="#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>refList
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>const char *</TT></B><I><FONT  color=991122 face=HELVETICA>fileType</I></FONT> = <B><TT>NULL</TT></B>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>const char *</TT></B><I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>GetRecentDocuments(<A HREF="#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>refList
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>const char *</TT></B><I><FONT  color=991122 face=HELVETICA>fileTypes</I></FONT>[],
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>fileTypesCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>const char *</TT></B><I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>GetRecentFolders(<A HREF="#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>refList
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>const char *</TT></B><I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>GetRecentApps(<A HREF="#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>refList
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>AddToRecentDocuments(const entry_ref *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>ref
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT>const char *</TT></B><I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>AddToRecentFolders(const entry_ref *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>ref
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT>const char *</TT></B><I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+These functions access the system-wide "recently opened documents," "recently opened folders," and "recently launched apps" lists.  These lists are displayed by file panels, <B>Deskbar</B>, and other parts of the system.  You can add to the document and folder lists, but not the app list (it's updated by the system).  You can't programatically delete items from these lists. 
+<P>
+The<B><TT> Get...</TT></B> functions retrieve the items as <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B>s which they add to the "refs" field of the <I><FONT  color=991122 face=HELVETICA>refList</I></FONT> <A HREF="#BMessage">BMessage</A> argument (<I><FONT  color=991122 face=HELVETICA>refList</I></FONT> must be allocated by the caller).  The items in "refs" are listed from most recent to least recent. 
+<P>
+<B><TT><A HREF="#GetRecentDocuments()">GetRecentDocuments()</A></TT></B> gets the <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B>s for the first <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT> items in the recent documents list.  The optional <I><FONT  color=991122 face=HELVETICA>fileType</I></FONT> and <I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> arguments let you specify that you only want to see files of a certain type and/or that were opened by a particular app.  The <I><FONT  color=991122 face=HELVETICA>fileTypes</I></FONT>/<I><FONT  color=991122 face=HELVETICA>fileTypesCount</I></FONT> version lets you specify a list of candidate file types.
+<P>
+<B><TT><A HREF="#GetRecentFolders()">GetRecentFolders()</A></TT></B> returns the first <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT> <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B>s in the recent folders list.  The optional <I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> lets you ask for folders that were opened by a particular app (only).
+<P>
+<B><TT><A HREF="#GetRecentApps()">GetRecentApps()</A></TT></B> returns the first <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT> <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B>s in the recent apps list.
+<P>
+<B><TT><A HREF="#AddToRecentDocuments()">AddToRecentDocuments()</A></TT></B> and <B><TT><A HREF="../The%20Application%20Kit/Roster.html#AddToRecentFolders()">AddToRecentFolders()</A></TT></B> adds the argument <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> to the named list.  <I><FONT  color=991122 face=HELVETICA>appSig</I></FONT>, if supplied, is the signature of the application that opened the document or folder. 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

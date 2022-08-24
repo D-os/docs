@@ -1,0 +1,433 @@
+<HTML><HEAD><TITLE>The Mail Kit: The Mail Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Mail Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Mail%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Mail Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Mail%20Kit"></A>The Mail Kit
+</H1>
+<P>
+The Mail Kit provides Internet e-mail messaging services.  These services include:
+<P>
+<LI>Configuration of the user's mail accounts.
+<P>
+<LI>Sending messages using the Simple Mail Transfer Protocol (SMTP).
+<P>
+<LI>Receiving messages via the Post Office Protocol (POP).
+<P>
+<LI>Automatic, timed sending and receiving of messages.
+<P>
+<LI>Encoding and decoding base-64 encoded data.
+<P>
+</UL>
+<P>
+An assortment of global C functions are provided by the Mail Kit to configure the mail daemon and process base-64 data.  See "<a href="maildaemon.html#The%20Mail%20Daemon">The Mail Daemon</a>" for information on how to use these functions.
+<P>
+Outgoing mail messages are constructed and sent using the <a href="MailMessage.html#BMailMessage">BMailMessage</a> class.
+<P>
+<HR>
+<H2>
+<A NAME="Mail%20Message%20Files"></A><FONT SIZE=6>M</FONT>ail <FONT SIZE=6>M</FONT>essage <FONT SIZE=6>F</FONT>iles
+</H2>
+<P>
+Every mail message is stored in an individual file with attached attributes that describe the message in detail; you can query the file system to obtain information about the sender, subject, and receiver of the message, among other things.  See "Querying Mail Messages" below for more detailed information and an example program.
+<P>
+Every message the user writes is saved in a file until it's sent by the mail daemon (and may or may not be deleted after being sent).  Likewise, messages that the mail daemon has retrieved are also stored in files on a local disk.
+<P>
+The process of sending a mail message works something like this:
+<P>
+<UL>
+<LI>The user writes a new mail message and chooses the mail writing program's "Send" option.
+<P>
+<LI>The mail writing program creates a <A HREF="MailMessage.html#BMailMessage">BMailMessage</A> object and configures it based on the user's inputs by setting the "To," "Subject," and other header fields appropriately, and by storing the message content into the BMailMessage.
+<P>
+<LI>The program then calls the <A HREF="MailMessage.html#BMailMessage">BMailMessage</A> object's <B><TT><A HREF="MailMessage.html#Send()">Send()</A></TT></B> function to tell the mail daemon to send the message.
+<P>
+<LI>The mail daemon creates a disk file that contains the message.  The message content is stored in the file itself, and attributes are created to contain the "To," "Subject," and other relevant header fields.  See "Querying Mail Messages" for more information.  The message's status attribute is set to "New".
+<P>
+<LI>The next time the mail daemon's <B><TT><A HREF="maildaemon.html#check_for_mail()">check_for_mail()</A></TT></B> function is called (either automatically or explicitly), the daemon sends the message via SMTP, then changes the message's status attribute to "Sent".  This is done for all mail messages whose status is "Pending".
+<P>
+</UL>
+<P>
+After sending outgoing messages, the mail daemon will also check to see if any incoming mail is waiting to be retrieved.  If there is, it proceeds something like this:
+<P>
+<UL>
+<LI>The mail daemon fetches the first message from the mail server via POP.
+<P>
+<LI>The daemon creates a new mail message file, and the message is written into the file.  The file contains the Internet headers, message content, and all enclosures (if any).
+<P>
+<LI>The mail daemon scans the message and adds attributes to the message file for each of the header fields, as well as a couple of extra attributes.  These are described in detail in "Querying Mail Messages" below.
+<P>
+<LI>The daemon continues reading mail messages from the mail server until there aren't any left.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Querying%20Mail%20Messages"></A><FONT SIZE=6>Q</FONT>uerying <FONT SIZE=6>M</FONT>ail <FONT SIZE=6>M</FONT>essages
+</H2>
+<P>
+The Mail Kit takes full advantage of the BeOS attribute and query system.  Each message received is parsed by the mail daemon and important information about it is converted into a defined collection of attributes attached to the file.  This makes it extremely easy to create applications that search for messages meeting specific parameters.  In an example to follow shortly, we'll create a program that lists all unread messages.
+<P>
+Once the mail daemon has received a message and saved it to disk, any application can query the file system to locate messages that meet certain parameters, then read the attributes and message content to present information about that message to the user.
+<P>
+The following attributes are provided by the Mail Kit:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B><TT>Constant</TT></B></TH>
+<TH><B><TT>Attribute Name</TT></B></TH>
+<TH><B><TT>Description</TH>
+<TR>
+<TD>B_MAIL_ATTR_NAME</TT></B></TD>
+<TD>MAIL:name</TD>
+<TD>Name of the mail file.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_STATUS</TT></B></TD>
+<TD>MAIL:status</TD>
+<TD>Message status.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_PRIOIRITY</TT></B></TD>
+<TD>MAIL:priority</TD>
+<TD>"Priority" field value.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_TO</TT></B></TD>
+<TD>MAIL:to</TD>
+<TD>"To" field value.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_CC</TT></B></TD>
+<TD>MAIL:cc</TD>
+<TD>"Cc" field value.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_FROM</TT></B></TD>
+<TD>MAIL:from</TD>
+<TD>"From" field value.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_SUBJECT</TT></B></TD>
+<TD>MAIL:subject</TD>
+<TD>"Subject" field value.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_REPLY</TT></B></TD>
+<TD>MAIL:reply</TD>
+<TD>"Reply-to" field value.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_WHEN</TT></B></TD>
+<TD>MAIL:when</TD>
+<TD>"When" field value.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_FLAGS</TT></B></TD>
+<TD>MAIL:flags</TD>
+<TD>Message flags.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_RECIPIENTS</TT></B></TD>
+<TD>MAIL:recipients</TD>
+<TD>List of message recipients.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_MIME</TT></B></TD>
+<TD>MAIL:mime</TD>
+<TD>The MIME version used.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_HEADER</TT></B></TD>
+<TD>MAIL:header_length</TD>
+<TD>Length of the message header.</TD>
+<TR>
+<TD><B><TT>B_MAIL_ATTR_CONTENT</TT></B></TD>
+<TD>MAIL:content_length</TD>
+<TD>Length of the message content.</TD>
+</TABLE>
+<P>
+<B><TT>B_MAIL_ATTR_NAME</TT></B> is a string that identifies the name of the sender.
+<P>
+<B><TT>B_MAIL_ATTR_STATUS</TT></B> is a string that identifies the status of the message.  Possible values are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Status String</TH>
+<TH>Description</TH>
+<TR>
+<TD>"Error"</TD>
+<TD>An error occurred trying to send the message.</TD>
+<TR>
+<TD>"New"</TD>
+<TD>The message has not been read yet.</TD>
+<TR>
+<TD>"Pending"</TD>
+<TD>The message has not been sent yet.</TD>
+<TR>
+<TD>"Read"</TD>
+<TD>The message has been read.</TD>
+<TR>
+<TD>"Sent"</TD>
+<TD>The message has been sent.</TD>
+</TABLE>
+<P>
+<B><TT>B_MAIL_ATTR_PRIORITY</TT></B> is a string that contains the value of the Priority field in the message.
+<P>
+<B><TT>B_MAIL_ATTR_TO</TT></B>, <B><TT>B_MAIL_ATTR_FROM</TT></B>, and <B><TT>B_MAIL_ATTR_REPLY</TT></B> are strings that contain the primary recipient's e-mail address, the sender's e-mail address, and the sender's reply-to address.
+<P>
+<B><TT>B_MAIL_ATTR_CC</TT></B> contains the addresses to whom the message is carbon copied.
+<P>
+<B><TT>B_MAIL_ATTR_SUBJECT</TT></B> is a string containing the subject of the message.
+<P>
+<B><TT>B_MAIL_ATTR_WHEN</TT></B> is a BeOS time field (<B><TT><A HREF="../The%20Support%20Kit/misc.html#B_TIME_TYPE">B_TIME_TYPE</A></TT></B>) containing the message's "When" field.
+<P>
+<B><TT>B_MAIL_ATTR_FLAGS</TT></B> contains 32-bit integer (int32) flags which can be any combination of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Flag</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MAIL_PENDING</TT></B></TD>
+<TD>Message is waiting to be sent.</TD>
+<TR>
+<TD><B><TT>B_MAIL_SENT</TT></B></TD>
+<TD>Message has been sent.</TD>
+<TR>
+<TD><B><TT>B_MAIL_SAVE</TT></B></TD>
+<TD>Mail will be saved after being sent.</TD>
+</TABLE>
+<P>
+The <B><TT>B_MAIL_ATTR_FLAGS</TT></B> attribute is BeOS-specific.
+<P>
+<B><TT>B_MAIL_ATTR_RECIPIENTS</TT></B> contains a list of all recipients of the message (primary, cc, and bcc), but is only valid for outgoing messages (this attribute doesn't exist on incoming messages).
+<P>
+<B><TT>B_MAIL_ATTR_MIME</TT></B> contains a string that defines the version number of the MIME specification used to transmit any enclosures attached to the file.  This attribute is only present if the file has one or more enclosures.
+<P>
+<B><TT>B_MAIL_ATTR_HEADER</TT></B> and <B><TT>B_MAIL_ATTR_CONTENT</TT></B> contain the lengths, in bytes, of the header and content portions of the message.  They're both <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> type data.
+<P>
+The following attributes are indexed:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>B_MAIL_ATTR_NAME
+<br>
+B_MAIL_ATTR_STATUS
+<br>
+B_MAIL_ATTR_PRIORITY
+<br>
+B_MAIL_ATTR_TO
+<br>
+B_MAIL_ATTR_CC
+<br>
+B_MAIL_ATTR_FROM
+<br>
+B_MAIL_ATTR_SUBJECT
+<br>
+B_MAIL_ATTR_REPLY
+<br>
+B_MAIL_ATTR_WHEN
+<br>
+B_MAIL_ATTR_FLAGS
+<P>
+</TT></B>						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The headers, the contents of the messag,e and the enclosures (in base-64 encoded form) can all be found in the file itself and can be read using a <A HREF="../The%20Storage%20Kit/File.html#BFile">BFile</A> object.  See "The Storage Kit" in the for further information on reading files.
+<P>
+<HR>
+<H3>
+<A NAME="Queries%20and%20Mail%20Messages"></A>Queries and Mail Messages
+</H3>
+<P>
+Now that you know what attributes are available on mail message files, and which attributes are indexed, you can consider all the clever things you can use them for.  Let's look at an example program that, from a Terminal window, lets you see a list of the unread mail you have.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void main(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BQuery query;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BNode node;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BVolume vol;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BVolumeRoster vroster;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char buf[256];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 message_count = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vroster.GetBootVolume(&amp;vol);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query.SetVolume(&amp;vol);</PRE>
+<P>
+The program begins by establishing needed variables, then using a <A HREF="../The%20Storage%20Kit/VolumeRoster.html#BVolumeRoster">BVolumeRoster</A> to set the query's search volume to the boot disk.  This is covered in more detail in the Storage Kit chapter.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (query.SetPredicate("MAIL:status = New") != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Error: can&gt;t set query predicate.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Then the query is configured to search for new mail.  New messages can be identified by the <B><TT>B_MAIL_ATTR_STATUS</TT></B> attribute (called "MAIL:status") having a string value of "New".  If an error occurs, the program prints an error end returns.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (query.Fetch() != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Error: new mail query failed.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The query is told to fetch.  Again, if this fails, an error message is displayed and the program returns.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (query.GetNextRef(&amp;ref) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message_count++;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Increment message counter</PRE>
+<P>
+The loop scanning through the fetched new messages begins by incrementing the counter of new messages received.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (node.SetTo(&amp;ref) != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Error: error scanning new messages.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Then a <A HREF="../Release%20Notes/StorageKit.html#BNode">BNode</A> is set to reference the message file.  If this fails, the program displays an error message and quits.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buf[0] = &gt;0&gt;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// If error, use empty string
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node.ReadAttr(B_MAIL_ATTR_FROM, B_STRING_TYPE, 0, buf, 255);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buf[20] = &gt;0&gt;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Truncate to 20 characters
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%3d From: %-20s", message_count, buf);</PRE>
+<P>
+The buffer we're using the receive the attribute values is initialized to an empty string, then we call BNode's <B><TT><A HREF="../The%20Storage%20Kit/Node.html#ReadAttr()">ReadAttr()</A></TT></B> function to read the <B><TT>B_MAIL_ATTR_FROM</TT></B> attribute into the buffer.  We then truncate the read string to 20 characters for display purposes (to make it fit into the table we're outputting) and print the message number and sender information.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buf[0] = &gt;0&gt;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// If error, use empty string
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node.ReadAttr(B_MAIL_ATTR_SUBJECT, B_STRING_TYPE, 0, buf, 255);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buf[40] = &gt;0&gt;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Truncate to 40 characters
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("   Sub: %sn", buf);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The buffer is reset to an empty string and the <B><TT>B_MAIL_ATTR_SUBJECT</TT></B> attribute is read into it.  This string is truncated to 40 characters, then printed.
+<P>
+This loop continues until no more new messages are found; this is detected when <B><TT><A HREF="../The%20Storage%20Kit/Directory.html#GetNextRef()">GetNextRef()</A></TT></B> returns an error.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (message_count) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%d new messages.n", message_count);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("No new messages.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Finally, the number of new messages is printed.  If there aren't any messages, we very politely print "No new messages." rather than "0 new messages," for a little added panache.
+<P>
+This simple example demonstrates how you can use the attributes provided by the Mail Kit to create mail message reading applications.  The message body and attachments are stored within the file itself, and can be read using the functions described in the <A HREF="../The%20Storage%20Kit/File.html#BFile">BFile</A> section in the Storage Kit chapter of the "Be Developer's Guide."
+<P>
+<HR>
+<H2>
+<A NAME="The%20E-mail%20File%20Type"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>E</FONT>-mail <FONT SIZE=6>F</FONT>ile <FONT SIZE=6>T</FONT>ype
+</H2>
+<P>
+The mail daemon ensures, when it's first launched at system boot time, that the BeOS File Type database includes an entry for e-mail files.  E-mail files have the MIME string "text/x-email", which is represented by the constant <B><TT>B_MAIL_TYPE</TT></B>.
+<P>
+The E-mail entry in the File Type database includes a list of the attributes on which you can search.  You can look up this information using the <A HREF="../Release%20Notes/StorageKit.html#BMimeType">BMimeType</A> class's <B><TT><A HREF="../The%20Storage%20Kit/Node.html#GetAttrInfo()">GetAttrInfo()</A></TT></B> function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMimeType mime;
+&nbsp;&nbsp;&nbsp;BMessage message;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;mime.SetTo(B_MAIL_TYPE);
+&nbsp;&nbsp;&nbsp;mime.GetAttrInfo(&amp;message);</PRE>
+<P>
+After running this code, the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> contains the description of the attributes available on e-mail files.  The message has three useful arrays of items:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message Item</TH>
+<TH>Description</TH>
+<TR>
+<TD>"attr:public_name"</TD>
+<TD>The user-readable name of the attribute.</TD>
+<TR>
+<TD>"attr:name"</TD>
+<TD>The attribute name used for <A HREF="../Release%20Notes/StorageKit.html#BNode">BNode</A> and <B><TT>fs_attr_*</TT></B> calls.</TD>
+<TR>
+<TD>"attr:type"</TD>
+<TD>The type of data the attribute contains.</TD>
+</TABLE>
+<P>
+You can examine the items in each of these arrays in the message to get useful information about the attributes you can reference on the e-mail files.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;printf("Public name: %sn", FindString("attr:public_name", 1));
+&nbsp;&nbsp;&nbsp;printf("Name: %sn", FindString("attr:name", 1));</PRE>
+<P>
+This code will print the public name and the attribute name of the second attribute registered in the File Type database entry for e-mail files.  In the current implementation of the Mail Kit, this would print:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;Public name: Subject
+&nbsp;&nbsp;&nbsp;Name: MAIL:subject</PRE>
+<P>
+The number of (and order of) attributes in the database entry might change in the future&mdash;and that's where the File Type database comes in handy.  If, a year from now, Be adds more attributes to e-mail files, your File Type database-savvy application won't have to be updated to support them.
+<P>
+At this time, the File Type database has attribute information records for each of the following attributes:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>B_MAIL_ATTR_NAME
+<br>
+B_MAIL_ATTR_STATUS
+<br>
+B_MAIL_ATTR_PRIORITY
+<br>
+B_MAIL_ATTR_TO
+<br>
+B_MAIL_ATTR_FROM
+<br>
+B_MAIL_ATTR_SUBJECT
+<br>
+B_MAIL_ATTR_REPLY
+<br>
+B_MAIL_ATTR_WHEN
+<P>
+</TT></B>						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+You can obtain information on these attributes, their formats, and their user-readable names by looping through the arrays in the message until the BMessage:<B><TT>Find...()</TT></B> function returns <B><TT>NULL</TT></B> or <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.
+<P>
+For more information on the <A HREF="../Release%20Notes/StorageKit.html#BMimeType">BMimeType</A> class and the File Type database, see <A HREF="../Release%20Notes/StorageKit.html#BMimeType">BMimeType</A> in The Storage Kit.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Mail Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Mail%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Mail Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

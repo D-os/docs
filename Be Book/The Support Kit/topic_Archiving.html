@@ -1,0 +1,190 @@
+<HTML><HEAD><TITLE>The Support Kit: Archiving</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Archiving"></A>Archiving
+</H1>
+<P>
+The BeOS provides a protocol for <I>archiving</I> and <I>unarchiving</I> objects.  When you archive an object, you record its state into a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> that can be sent to another application, flattened and saved as a file, cached in memory, and so on.  Unarchiving does the opposite:  It takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive and turns it into a functioning object.
+<P>
+The archiving protocol is represented by the <A HREF="Archivable.html#BArchivable">BArchivable</A> class.  Many of the BeOS classes inherit from BArchivable.  If you create your own classes and want them to be archivable, they, too, must inherit (directly or indirectly) from BArchivable.
+<P>
+The sections below tell you <B>(1)</B> how to archive and unarchive an object, and <B>(2)</B> what you have to do to create an archivable class of your own.
+<P>
+<A NAME="38778:%20head2:%20Archiving"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Archiving%20and%20Unarchiving"></A><FONT SIZE=6>A</FONT>rchiving and <FONT SIZE=6>U</FONT>narchiving
+</H2>
+<P>
+To archive a <A HREF="Archivable.html#BArchivable">BArchivable</A> object, you create a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> and pass it to the object's <B><TT><A HREF="Archivable.html#Archive()">Archive()</A></TT></B> function.  You can then send the message to some other application or, as shown below, write out its flattened form to a file so you can resurrect it later:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Archiving and storing a BButton, sans error checks.*/
+&nbsp;&nbsp;&nbsp;BMessage message;
+&nbsp;&nbsp;&nbsp;BButton *button;
+&nbsp;&nbsp;&nbsp;BFile file;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;button->Archive(&amp;message);
+&nbsp;&nbsp;&nbsp;file.SetTo(filename, B_CREATE_FILE | B_WRITE_ONLY); 
+&nbsp;&nbsp;&nbsp;message.Flatten(&amp;file);</PRE>
+<P>
+To unarchive, you find an archived object and pass it to the object's constructor, or, if you don't know the object's class (we'll talk more about that later), you pass it to  <B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A></TT></B>.  The constructor case is simple:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage msg;
+&nbsp;&nbsp;&nbsp;BFile f;
+&nbsp;&nbsp;&nbsp;BButton *button;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;file.SetTo(filename, B_READ_ONLY);
+&nbsp;&nbsp;&nbsp;msg.Unflatten(&amp;f);
+&nbsp;&nbsp;&nbsp;button = new BButton(&amp;msg);</PRE>
+<P>
+Invoking the constructor is fine if you know the class of the object that you're unarchiving.  But consider the case where you're unarchiving an object from a message that you didn't create.  For example, let's say your application displays a view that's imported from a foreign archive (sent from another application, or loaded from an add-on).  To unarchive the "unknown" object, you pass the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive to <B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, and then cast the returned object (a <A HREF="Archivable.html#BArchivable">BArchivable</A> *) to some:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BView *foreignView;
+&nbsp;&nbsp;&nbsp;foreignView = dynamic_cast&lt;BView *>(instantiate_object(&amp;msg));</PRE>
+<P>
+You still don't know the class of the object, and you won't be able to invoke any functions that it defines, but at least 
+<P>
+Each archivable class implements <B><TT><A HREF="Archivable.html#Archive()">Archive()</A></TT></B> to record the object properties (data members, "owned" objects, etc.) that the class defines.  These properties are added as fields to the argument BMessage.  Most implementations look something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t MyClass::Archive(BMessage *archive, bool deep)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>baseClass</I>::Archive(archive, deep);<SUP>1</SUP>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;archive->AddInt32("MyClass::Property1", property1);<SUP>2</SUP>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;archive->AddString("MyClass::Property2", property2);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( deep<SUP>3</SUP> ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage childArchive;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (int32 i; i &lt; CoundChildren(); i++&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( childAt(i)->Archive(&amp;childArchive, deep) == B_OK )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;archive->AddMessage("children", &amp;childArchive);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message->AddString("add_on", "application/x-CodeForThisObject");<SUP>4</SUP>
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+<B><SUP>1 </B></SUP>&nbsp;&nbsp;&nbsp;First, call the inherited version of <B><TT><A HREF="Archivable.html#Archive()">Archive()</A></TT></B>.  This gives all the ancestor classes a shot at recording the properties they define.  If your object doesn't want to include inherited properties, it should invoke BArchivable's version instead:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BArchivable::Archive(archive, deep);</PRE>
+<P>
+<B><SUP>2 </B></SUP>&nbsp;&nbsp;&nbsp;Next, record the properties that are defined by this class.  How the message fields are named and typed are up to the class itself.  It's a good idea to give your fields some sort of prefix to keep them from colliding with the Be-defined fields (whose names are, unfortunately, a bit haphazard).
+<P>
+<B><SUP>3 </B></SUP>&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Archivable.html#Archive()">Archive()</A></TT></B>'s second argument indicates whether the archive should be <I>deep</I> or <I>shallow</I>.  In a deep archive, a class archives any objects that it "owns"&mdash;roughly speaking, these are the objects that the class is responsible for deleting.  The archivable children must also inherit from BArchivable.
+<P>
+<B><SUP>4 </B></SUP>&nbsp;&nbsp;&nbsp;This line records the signature of the library that contains the object's code.  If you want your object to be loaded dynamically by some other application, you should add the library signature under the string field "add_on".  You don't have to supply a library if you don't care about dynamic loading.
+<P>
+If a class doesn't have any data to add to the archive, it doesn't need to implement <B><TT><A HREF="Archivable.html#Archive()">Archive()</A></TT></B>.
+<P>
+<A NAME="14694:%20head2:%20Instantiation"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiability"></A>Instantiability
+</H3>
+<P>
+To be unarchivable, a class must implement a constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive as an argument, and it must implement the static <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B> function.
+<P>
+A typical unarchiving constructor calls the inherited version, and then reconstitutes the properties that were added when the object was archived:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;MyClass::MyClass(BMessage *archive) : <I>baseClass</I>(archive)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 &nbsp;&nbsp;&nbsp;i;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage msg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BArchivable *obj;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;archive->FindInt32("MyClass::Property1", &amp;property1);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;archive->FindString("MyClass::Property2", &amp;property2);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while ( data->FindMessage("children", i++, &amp;msg) == B_OK)<SUP>1</SUP> {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;obj = instantiate_object(&amp;msg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;childList->AddItem(dynamic_cast&lt;ChildClass *>(obj));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+<B><SUP>1 </B></SUP>&nbsp;&nbsp;&nbsp;You don't need to ask if the 
+<P>
+The class must also implement the static <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B> function (declared in BArchivable), which needn't do much more than call the archive-accepting constructor, and return a <A HREF="Archivable.html#BArchivable">BArchivable</A> pointer.   For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BArchivable *TheClass::Instantiate(BMessage *archive)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( validate_instantiation(archive, "TheClass"))
+&nbsp;&nbsp;&nbsp;        return new TheClass(archive);
+&nbsp;&nbsp;&nbsp;    return NULL;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="Functions.html#validate_instantiation()">validate_instantiation()</A></TT></B> function, provided by the Support Kit, is a safety check that makes sure the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object is, in fact, an archive for the named class.  
+<P>
+<HR>
+<H3>
+<A NAME="Unarchiving"></A>Unarchiving
+</H3>
+<P>
+To unarchive a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>, you call the <B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A> </TT></B>function.  When passed a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive, <B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A></TT></B> looks for the first name in the "class" array, finds the <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B> function for that class, and calls it.  Failing that, it picks another name from the "class" array (working up the inheritance hierarchy) and tries again.  
+<P>
+<B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A></TT></B> returns a <A HREF="Archivable.html#BArchivable">BArchivable</A> instance.  You then use <B><TT><A HREF="Functions.html#cast_as()">cast_as()</A></TT></B> to cast the object to a more interesting class.  A typical unarchiving session looks something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* archive is the BMessage that we want to turn into an object. 
+&nbsp;&nbsp;&nbsp; * In this case, we want to turn it into a BView.
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;BArchivable *unarchived = instantiate_object(archive);
+&nbsp;&nbsp;&nbsp;if ( unarchived ) {
+&nbsp;&nbsp;&nbsp;    BView *view = cast_as(unarchived, BView);
+&nbsp;&nbsp;&nbsp;    if ( view ) {
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+<H4>
+<A NAME="Dynamic%20Loading"></A>Dynamic Loading
+</H4>
+<P>
+It's not defined how a host will interact with an unarchived instance of a previously unknown class.  It's up to the parties to define entry points and protocols, just as it is for any other add-on module.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

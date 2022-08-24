@@ -1,0 +1,1087 @@
+<HTML><HEAD><TITLE>The Media Kit: BSoundPlayer</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BSoundPlayer"></A>BSoundPlayer
+</H1>
+<P>
+Derived from:  (none)
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/SoundPlayer.h">be/media/SoundPlayer.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="SoundPlayer.summary.html"><i>Summary</i></A></H6>
+<P>
+The BSoundPlayer class plays sound, either from BSound objects or by directly filling audio buffers with data provided by a hook function you specify.  A single BSoundPlayer can play multiple sounds at a time.
+<P>
+BSoundPlayer takes care of all the nitty-gritty details of instantiating the necessary sound player node and managing the time source.  All you have to do is start up a BSoundPlayer and feed it sounds to play.
+<P>
+For simple audio playback, the sounds are specified using the BSound class.  However, if you need to perform on-the-fly generation or alteration of sounds, you can implement a hook function that will be called for each audio buffer passed through the BSoundPlayer's playback node.
+<P>
+<HR>
+<H2>
+<A NAME="Using%20BSoundPlayer"></A><FONT SIZE=6>U</FONT>sing <FONT SIZE=6>B</FONT><FONT SIZE=6>S</FONT>ound<FONT SIZE=6>P</FONT>layer
+</H2>
+<P>
+Once you've instantiated a BSoundPlayer object, you need to start it up before you can actually play sounds with it.  This instantiates the sound player node, attaches it to an appropriate time source, and makes sure the time source is running.  This is done by calling the <B><TT><A HREF="#Start()">Start()</A></TT></B> function.
+<P>
+When you're done using the <A HREF="#BSoundPlayer">BSoundPlayer</A>, you can delete it if you don't plan to use it again, or, if you want to keep it around for reuse, you can just <B><TT><A HREF="#Stop()">Stop()</A></TT></B> it.  This deletes the sound node and cleans up the sounds.
+<P>
+In general, the process of using BSoundPlayer looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BSoundPlayer player;
+&nbsp;&nbsp;&nbsp;player.Start();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* use the BSoundPlayer here */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;player.Stop();</PRE>
+<P>
+You can find out the current time of the time source to which sounds are being synchronized by calling the <B><TT><A HREF="#CurrentTime()">CurrentTime()</A></TT></B> function.
+<P>
+By default, the audio format used by a BSoundPlayer is <B><TT>BSoundPlayer::B_AUDIO_FLOAT</TT></B>, which is to say that the audio is in floating-point format, where each sample ranges from -1.0 to 1.0.  The Media Kit uses floating-point audio internally, so using floating-point audio whenever you can will improve your application's performance by cutting down on format conversions.  However, if you want to use another format, you may do so by specifying a media_raw_audio_format when you instantiate the BSoundPlayer object.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In the current release of BeOS, all BSounds playing through a single BSoundPlayer must have the same sampling rate.  This restriction may be lifted in the future.  For the time being, just instantiate one BSoundPlayer for each sampling rate you need to support.  In addition, only the <B><TT>BSoundPlayer::B_AUDIO_FLOAT</TT></B> audio format is supported.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Playing%20Sound"></A>Playing Sound
+</H3>
+<P>
+A BSoundPlayer object plays sounds asynchronously, and can play as many sounds as you like.  You start playback of a sound by passing a BSound pointer to <B><TT><A HREF="#StartPlaying()">StartPlaying()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;play_id id = player->StartPlaying(sound);</PRE>
+<P>
+<B><TT><A HREF="#StartPlaying()">StartPlaying()</A></TT></B> returns an ID number you can use to refer to the sound throughout its existence; other BSoundPlayer functions require this ID as an argument.
+<P>
+You can, optionally, specify a time at which to begin playback:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;play_id = player->StartPlaying(sound, 100000);</PRE>
+<P>
+This starts playback at the performance time 100000 microseconds.
+<P>
+You can determine whether or not a sound is still playing by calling <B><TT><A HREF="#IsPlaying()">IsPlaying()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if (player->IsPlaying(id)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* the sound is playing */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+You can stop the sound by calling <B><TT>StopSound()</TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;player->StopSound(id);</PRE>
+<P>
+And the <B><TT><A HREF="#WaitForSound()">WaitForSound()</A></TT></B> function waits until the specified sound is finished playing:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;play_id id = player->StartPlaying(sound);
+&nbsp;&nbsp;&nbsp;player->WaitForSound(id);</PRE>
+<P>
+And you can control the volume as well.  Use the <B><TT><A HREF="#Volume()">Volume()</A></TT></B> function to determine the current volume, and <B><TT><A HREF="#SetVolume()">SetVolume()</A></TT></B> to change the volume.  The volume is a floating-point number, and ranges from 0.0 (silence) to 1.0 (full volume).  Here's a code snippet that halves the current volume:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SetVolume(Volume()/2.0);</PRE>
+<P>
+<H4>
+<A NAME="Example:%20Let's%20Play%20Around"></A>Example: Let's Play Around
+</H4>
+<P>
+Playing sound files using BSoundPlayer is very easy.  Here's a function that will play a specified sound, waiting until the sound is finished playing before it returns:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void playsound(char *path) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BSound *sound;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BSoundPlayer player;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BEntry entry(path, true);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BSoundPlayer::play_id id;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (entry.InitCheck()) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (entry.GetRef(&amp;ref) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sound = new BSound(&amp;ref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (sound->InitCheck() == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;player.Start();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;player.SetVolume(1.0);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id = player.StartPlaying(sound);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sound->ReleaseRef();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;player.WaitForSound(id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+An entry_ref is obtained for the specified sound file, then a BSound object is instantiated given that entry_ref.  A BSoundPlayer object is started, the volume is set to 1.0 (full volume), and then the sound playback is started by calling <B><TT><A HREF="#StartPlaying()">StartPlaying()</A></TT></B>.  The sound's reference count is decremented, and finally BSoundPlayer's <B><TT><A HREF="#WaitForSound()">WaitForSound()</A></TT></B> call is used to wait until playback is complete.
+<P>
+<HR>
+<H3>
+<A NAME="Advanced%20Playback"></A>Advanced Playback
+</H3>
+<P>
+If you have more advanced playback needs&mdash;for example, you need to play sounds that are being generated on-the-fly, or if you need to filter the sound you're playing.
+<P>
+If you specify a play buffer handler function, either when instantiating the BSoundPlayer object or by calling <B><TT><A HREF="#SetCallbacks()">SetCallbacks()</A></TT></B> or <B><TT><A HREF="#SetBufferPlayer()">SetBufferPlayer()</A></TT></B>, that function will be called once for each buffer that passes through the BSoundPlayer's sound playing node.  Your play buffer handler can then fill the buffer with whatever data you wish.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you specify a play buffer function, BSound playback won't work.  If you need to do both, you must use multiple BSoundPlayer objects.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The following code sets up a BSoundPlayer that will play a triangle wave.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct cookie_record {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float value;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float direction;
+&nbsp;&nbsp;&nbsp;} cookie_record;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;cookie_record cookie;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;cookie.value = 0.0;
+&nbsp;&nbsp;&nbsp;cookie.direction = 1.0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;BSoundPlayer player("wave_player", BufferProc, NULL, &amp;cookie);
+&nbsp;&nbsp;&nbsp;player.Start();
+&nbsp;&nbsp;&nbsp;player.SetHasData(true);
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;player.Stop();</PRE>
+<P>
+This code establishes a record, cookie, that contains information the play buffer function will need to track, and creates a BSoundPlayer named "wave_player" that will use a function called <B><TT>BufferProc()</TT></B> to play sound, and uses the <B><TT>cookie</TT></B> we've created.
+<P>
+Then the player is started, and <B><TT><A HREF="#SetHasData()">SetHasData()</A></TT></B> is called to let the sound player node know that there's data to be played.  This will cause the play buffer function to start being called.
+<P>
+Once playback is over, the <B><TT><A HREF="#Stop()">Stop()</A></TT></B> function is called to stop playback.
+<P>
+The <B><TT>BufferProc()</TT></B> function looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void BufferProc(void *theCookie, void *buffer, size_t size,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_raw_audio_format &amp;format) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t i, j;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float *buf = (float *) buffer;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t float_size = size/4;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 channel_count = format.channel_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cookie_record *cookie = (cookie_record *) theCookie;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// We&gt;re going to be cheap and only work for floating-point audio
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (format.format != media_raw_audio_format::B_AUDIO_FLOAT) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Now fill the buffer with sound!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (i=0; i&lt;float_size; i+=channel_count) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (j=0; j&lt;channel_count; j++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buf[i+j] = cookie->value;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((cookie->direction == 1.0) &amp;&amp; (cookie->value >= 1.0)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cookie->direction = -1.0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if ((cookie->direction == -1.0) &amp;&amp; (cookie->value &lt;= -1.0)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cookie->direction = 1.0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cookie->value += cookie->direction*(1.0/64.0);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This example play buffer function generates a triangle wave, ramping the wave up and down from 1.0 to -1.0 and back, over and over again, 1/64th at a time.  The next value to store in the buffer and the direction in which the value is changing are kept in the cookie's fields.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The buffers your play buffer function receives are empty.  Do with them as you please (or do nothing at all).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Function"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unction
+</H2>
+<P>
+<UL>
+<LI><B><TT><A HREF="#HasData()">HasData()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BSoundPlayer()"></A>BSoundPlayer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSoundPlayer(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name = NULL</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*<I><FONT  color=991122 face=HELVETICA>PlayBuffer</I></FONT>)(void *, void *buffer, size_t size, const media_raw_audio_format &amp;<I><FONT  color=991122 face=HELVETICA>format</I></FONT>)<FONT  face=HELVETICA> = NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*<I><FONT  color=991122 face=HELVETICA>Notifier</I></FONT>)(void *, sound_player_notification what, ...)<FONT  face=HELVETICA> = NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>cookie = NULL</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSoundPlayer(</TT></B></FONT>const media_raw_audio_format * <I><FONT  color=991122 face=HELVETICA>format</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*<I><FONT  color=991122 face=HELVETICA>PlayBuffer</I></FONT>)(void *, void * buffer, size_t size, const media_raw_audio_format &amp; format) = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*<I><FONT  color=991122 face=HELVETICA>Notifier</I></FONT>)(void *, sound_player_notification what, ...) = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> = NULL<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSoundPlayer(</TT></B></FONT>const media_node &amp; <I><FONT  color=991122 face=HELVETICA>toNode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_multi_audio_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_input *<I><FONT  color=991122 face=HELVETICA>input</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*<I><FONT  color=991122 face=HELVETICA>PlayBuffer</I></FONT>)(void *, void * buffer, size_t size, const media_raw_audio_format &amp; format) = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*<I><FONT  color=991122 face=HELVETICA>Notifier</I></FONT>)(void *, sound_player_notification what, ...) = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> = NULL<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes the BSoundPlayer object.  The <I><FONT  color=991122 face=HELVETICA>name</I></FONT> argument specifies the name to be assigned to the sound player node (if you specify <B><TT>NULL</TT></B>, a generic name will be assigned).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>PlayBuffer</I></FONT> argument specifies a pointer to a member function that processes data and inserts it into buffers for playback; specify <B><TT>NULL</TT></B> if you want to use the BSoundPlayer for playing BSounds.  The parameters to the <I><FONT  color=991122 face=HELVETICA>PlayBuffer</I></FONT> function are (in order):
+<P>
+<UL>
+<LI>Pointer to the cookie.
+<P>
+<LI>Pointer to the buffer to play.
+<P>
+<LI>Size of the buffer.
+<P>
+<LI>Format of the audio data in the buffer.
+<P>
+</UL>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>Notifier</I></FONT> parameter specifies a pointer to a member function that receives notifications when events of interest occur, such as playback starting or stopping.  Specify <B><TT>NULL</TT></B> to use the default notification handler.  There are three possible notifications:
+<P>
+<UL>
+<LI><B><TT><A HREF="#B_STARTED">B_STARTED</A></TT></B> and <B><TT><A HREF="#B_STOPPED">B_STOPPED</A></TT></B> indicate that the BSoundPlayer was started or stopped.  These receive a pointer to the BSoundPlayer object as an argument.
+<P>
+<LI><B><TT><A HREF="#B_SOUND_DONE">B_SOUND_DONE</A></TT></B> indicates that a sound has finished playing.  In this case, there are two arguments: the first is a play_id indicating which sound finished playing, and the other is a boolean which is <B><TT>true</TT></B> if the sound played at all, and <B><TT>false</TT></B> if the sound never played.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If the callback handlers are members of a class, they must be static members.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> parameter is a pointer that you can use for your own purposes; it's most useful if you're using a custom <I><FONT  color=991122 face=HELVETICA>PlayBuffer</I></FONT> or <I><FONT  color=991122 face=HELVETICA>Notifier</I></FONT>.
+<P>
+The second form of the constructor lets you specify in the <I><FONT  color=991122 face=HELVETICA>format</I></FONT> argument the format of the audio that the BSoundPlayer will perform.  Since BSoundPlayer can only play raw sound formats, this is specified using the <B><TT><A HREF="misc_api.html#media_raw_audio_format">media_raw_audio_format</A></TT></B> structure.
+<P>
+The third form of the constructor lets you specify a node through which the sound should be played, and also uses a media_multi_audio_format to specify the sound's format, instead of the older media_raw_audio_format.
+<P>
+You should call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> before using your BSoundPlayer object; this will let you determine whether or not the object was successfully constructed.  One situation in which <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> might indicate an error is if the user doesn't have a sound card installed.
+<P>
+<HR>
+<H3>
+<A NAME="~BSoundPlayer()"></A>~BSoundPlayer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BSoundPlayer()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Stops playback, if sound is playing, releases references to any BSound objects that are in use by the <A HREF="#BSoundPlayer">BSoundPlayer</A>, and frees all memory used by the BSoundPlayer.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BufferPlayer()"></A>BufferPlayer()
+, 
+<A NAME="SetBufferPlayer()"></A>SetBufferPlayer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BufferPlayerFunc <B><TT><FONT  color=000022 size=+1>BufferPlayer(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetBufferPlayer(</TT></B></FONT>void (*<I><FONT  color=991122 face=HELVETICA>PlayBuffer</I></FONT>)(void *, void *buffer, size_t size, const media_raw_audio_format &amp;<I><FONT  color=991122 face=HELVETICA>format</I></FONT>)<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>BufferPlayer()</TT></B> returns a pointer to the current play buffer function, or <B><TT>NULL</TT></B> if the default player is in use.
+<P>
+<B><TT><A HREF="#SetBufferPlayer()">SetBufferPlayer()</A></TT></B> lets you change the play buffer function.
+<P>
+<HR>
+<H3>
+<A NAME="Cookie()"></A>Cookie()
+, 
+<A NAME="SetCookie()"></A>SetCookie()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>Cookie(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetCookie(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Cookie()</TT></B> returns the current cookie assigned to the BSoundPlayer.
+<P>
+<B><TT><A HREF="#SetCookie()">SetCookie()</A></TT></B> lets you change the cookie assigned to the BSoundPlayer.
+<P>
+<HR>
+<H3>
+<A NAME="CurrentTime()"></A>CurrentTime()
+, 
+<A NAME="PerformanceTime()"></A>PerformanceTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>CurrentTime(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>PerformanceTime(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>CurrentTime()</TT></B> returns the current media time, and <B><TT>PerformanceTime()</TT></B> returns the current performance time of the sound player node being used by the BSoundPlayer.
+<P>
+<B><TT>PerformanceTime()</TT></B> will return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if the BSoundPlayer object hasn't been properly initialized.
+<P>
+<HR>
+<H3>
+<A NAME="EventNotifier()"></A>EventNotifier()
+, 
+<A NAME="SetEventNotifier()"></A>SetEventNotifier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+EventNotifierFunc <B><TT><FONT  color=000022 size=+1>EventNotifier(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetNotifier(</TT></B></FONT>void (*<I><FONT  color=991122 face=HELVETICA>Notifier</I></FONT>)(void *, sound_player_notification what, ...)<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>EventNotifier()</TT></B> returns a pointer to the current event notification handler function, or <B><TT>NULL</TT></B> if the default player is in use.
+<P>
+<B><TT>SetNotifier()</TT></B> lets you change the event notification handler function.
+<P>
+<HR>
+<H3>
+<A NAME="Format()"></A>Format()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+media_raw_audio_format <B><TT><FONT  color=000022 size=+1>Format(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the BSoundPlayer's format.  Since the sound is always a raw sound format, the <B><TT><A HREF="misc_api.html#media_raw_audio_format">media_raw_audio_format</A></TT></B> structure is used.
+<P>
+<HR>
+<H3>
+<A NAME="GetVolumeInfo()"></A>GetVolumeInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetVolumeInfo(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>outParameter</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float *<I><FONT  color=991122 face=HELVETICA>outMinDB</I></FONT>, float *<I><FONT  color=991122 face=HELVETICA>outMaxDB</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns information about the BSoundPlayer's volume control.  Pass pointers to variables to be filled (<B><TT>NULL</TT></B> is not permitted), and on return these values will be set to describe the player as follows:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>outNode</I></FONT> is the node to which the BSoundPlayer's audio output will be directed.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>outParameter</I></FONT> is the parameter ID for the volume control.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>outMinDB</I></FONT> is the minimum volume in decibels.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>outMaxDB</I></FONT> is the maximum volume in decibels.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="HasData()"></A>HasData()
+, 
+<A NAME="SetHasData()"></A>SetHasData()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasData(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetHasData(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>hasData</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>HasData()</TT></B> returns <B><TT>true</TT></B> if there's sound queued for playback, or <B><TT>false</TT></B> otherwise.
+<P>
+<B><TT>SetHasData()</TT></B> specifies whether or not there's sound scheduled for playback.
+<P>
+The purpose of these functions is to optimize the BSoundPlayer; if there's no data queued for playback, the sound player node is told this, which lets it optimize its performance.  If you're using a buffer player function, you must use <B><TT>SetHasData()</TT></B> to indicate that there's data to play:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SetHasData(true);</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the status code resulting from constructing the BSoundPlayer object.  You should call this after constructing the object; if the returned value is anything other than <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>, you shouldn't use the object.
+<P>
+<I><HR>
+<H3>IsPlaying() see <A HREF="#StartPlaying()">StartPlaying()</A></H3>
+<P>
+</I><HR>
+<H3>
+<A NAME="Latency()"></A>Latency()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>Latency(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the BSoundPlayer's latency.
+<P>
+<I><HR>
+<H3>PerformanceTime() see <A HREF="#CurrentTime()">CurrentTime()</A></H3>
+<P>
+<HR>
+<H3>SetCookie() see <A HREF="#Cookie()">Cookie()</A></H3>
+<P>
+<HR>
+<H3>SetBufferPlayer() see <A HREF="#BufferPlayer()">BufferPlayer()</A></H3>
+<P>
+</I><HR>
+<H3>
+<A NAME="SetCallbacks()"></A>SetCallbacks()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetCallbacks(</TT></B></FONT>void (*<I><FONT  color=991122 face=HELVETICA>PlayBuffer</I></FONT>)(void *, void *buffer, size_t size, const media_raw_audio_format &amp;<I><FONT  color=991122 face=HELVETICA>format</I></FONT>)<FONT  face=HELVETICA> = NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*<I><FONT  color=991122 face=HELVETICA>Notifier</I></FONT>)(void *, sound_player_notification what, ...)<FONT  face=HELVETICA> = NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>cookie = NULL</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets the play buffer handler function, the event notification handler function, and the cookie all in one atomic operation.
+<P>
+<I><HR>
+<H3>SetCookie() see <A HREF="#Cookie()">Cookie()</A></H3>
+<P>
+<HR>
+<H3>SetHasData() see <A HREF="#HasData()">HasData()</A></H3>
+<P>
+</I><HR>
+<H3>
+<A NAME="SetInitError()"></A>SetInitError()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetInitError(</TT></B></FONT>status_t <I><FONT  color=991122 face=HELVETICA>inError</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets the status code that will be returned by <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B>.
+<P>
+<I><HR>
+<H3>SetNotifier() see <A HREF="#EventNotifier()">EventNotifier()</A></H3>
+<P>
+</I><HR>
+<H3>
+<A NAME="SetSoundVolume()"></A>SetSoundVolume()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetSoundVolume(</TT></B></FONT>play_id <I><FONT  color=991122 face=HELVETICA>sound</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>volume</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the <I><FONT  color=991122 face=HELVETICA>volume</I></FONT> (from 0.0 to 1.0) of the specified <I><FONT  color=991122 face=HELVETICA>sound</I></FONT>.
+<P>
+<I><HR>
+<H3>SetVolume() see <A HREF="#Volume()">Volume()</A></H3>
+<P>
+<HR>
+<H3>SetVolumeDB() see <A HREF="#VolumeDB()">VolumeDB()</A></H3>
+<P>
+</I><HR>
+<H3>
+<A NAME="Start()"></A>Start()
+, 
+<A NAME="Stop()"></A>Stop()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Start(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Stop(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>block</I></FONT> <FONT  face=HELVETICA>= true</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>flush</I></FONT> <FONT  face=HELVETICA>= true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Start()</TT></B> activates the BSoundPlayer by starting the time source and the sound player node.  The <B><TT><A HREF="#B_STARTED">B_STARTED</A></TT></B> notification is sent to the BSoundPlayer's notification handler.
+<P>
+<B><TT>Stop()</TT></B> deactivates the BSoundPlayer by stopping the player node (if <I><FONT  color=991122 face=HELVETICA>block</I></FONT> is <B><TT>true</TT></B>, the <B><TT>Stop()</TT></B> function blocks until the node is stopped).  If <I><FONT  color=991122 face=HELVETICA>flush</I></FONT> is <B><TT>true</TT></B>, the queued sounds are all deleted from memory.
+<P>
+While the BSoundPlayer is running, the play buffer function (if you've specified one) will be called for each buffer that passes through the BSoundPlayer's playback node.  This hook function can be used to implement code that performs more advanced playback of sound, such as sound that's generated on-the-fly, or is filtered before playback.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The sound playback was started.
+<P>
+<UL>
+<LI>Other errors.  As returned by the sound player's <B><TT><A HREF="MediaRoster.html#StartNode()">StartNode()</A></TT></B> function.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="StartPlaying()"></A>StartPlaying()
+, 
+<A NAME="StopPlaying()"></A>StopPlaying()
+, 
+<A NAME="WaitForSound()"></A>WaitForSound()
+, 
+<A NAME="IsPlaying()"></A>IsPlaying()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+play_id <B><TT><FONT  color=000022 size=+1>StartPlaying(</TT></B></FONT>BSound *<I><FONT  color=991122 face=HELVETICA>sound</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>atTime</I></FONT> <FONT  face=HELVETICA>= 0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+play_id <B><TT><FONT  color=000022 size=+1>StartPlaying(</TT></B></FONT>BSound *<I><FONT  color=991122 face=HELVETICA>sound</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>atTime, </I></FONT>float <I><FONT  color=991122 face=HELVETICA>withVolume</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopPlaying(</TT></B></FONT>play_id <I><FONT  color=991122 face=HELVETICA>id</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>WaitForSound(</TT></B></FONT>play_id <I><FONT  color=991122 face=HELVETICA>id</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsPlaying(</TT></B></FONT>play_id <I><FONT  color=991122 face=HELVETICA>id</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>StartPlaying()</TT></B> schedules the specified BSound to begin playback at the performance time specified by <I><FONT  color=991122 face=HELVETICA>atTime</I></FONT>; if <I><FONT  color=991122 face=HELVETICA>atTime</I></FONT> is 0, the sound begins playing immediately (or as soon as <B><TT><A HREF="#Start()">Start()</A></TT></B> is called, if the BSoundPlayer hasn't been started yet).  The play_id returned by this function is used to identify the sound later.  If it's negative, an error occurred (see the list below for possible values).  The second form of <B><TT>StartPlaying()</TT></B> lets you specify a volume at which the sound should play.
+<P>
+<B><TT>StopPlaying()</TT></B> stops playing the sound specified by the given <I><FONT  color=991122 face=HELVETICA>id</I></FONT>.
+<P>
+<B><TT>WaitForSound()</TT></B> waits until the specified sound stops playing.
+<P>
+<B><TT>IsPlaying()</TT></B> returns <B><TT>true</TT></B> if the specified sound is playing; otherwise, it returns <B><TT>false</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_FORMAT">B_MEDIA_BAD_FORMAT</A></TT></B>.  The audio isn't in a supported format (<B><TT>StartPlaying()</TT></B>).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The specified id doesn't exist (<B><TT>WaitForSound()</TT></B> and <B><TT>IsPlaying()</TT></B>).
+<P>
+</UL>
+<I><P>
+</I><HR>
+<H3>StopPlaying() see <A HREF="#StartPlaying()">StartPlaying()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Volume()"></A>Volume()
+, 
+<A NAME="SetVolume()"></A>SetVolume()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Volume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetVolume(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>newVolume</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Volume()</TT></B> returns the current playback volume.
+<P>
+<B><TT>SetVolume()</TT></B> changes the playback volume.
+<P>
+This volume is the overall volume of all the sounds being played by the BSoundPlayer.  To control the volumes of individual sounds, use the <B><TT><A HREF="#SetSoundVolume()">SetSoundVolume()</A></TT></B> function.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The volume can range from 0.0 to 1.0, where 0.0 is silent and 1.0 is maximum loudness.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If you'd rather handle the volume using decibels instead of the percentage range, you can use the <B><TT><A HREF="#VolumeDB()">VolumeDB()</A></TT></B> and <B><TT><A HREF="#SetVolumeDB()">SetVolumeDB()</A></TT></B> functions.
+<P>
+<B>See also:  <TT><A HREF="#VolumeDB()">VolumeDB()</A></TT></B> and <B><TT><A HREF="#SetVolumeDB()">SetVolumeDB()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="VolumeDB()"></A>VolumeDB()
+, 
+<A NAME="SetVolumeDB()"></A>SetVolumeDB()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>VolumeDB(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetVolumeDV(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>newVolumeDB</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>VolumeDB()</TT></B> returns the current playback volume in decibels.
+<P>
+<B><TT>SetVolumeDB()</TT></B> sets the playback volume, in decibels.
+<P>
+This volume is the overall volume of all the sounds being played by the BSoundPlayer.  To control the volumes of individual sounds, use the <B><TT><A HREF="#SetSoundVolume()">SetSoundVolume()</A></TT></B> function.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The possible range of volumes can be obtained by calling <B><TT><A HREF="#GetVolumeInfo()">GetVolumeInfo()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If you'd rather handle the volume using a percentage range instead of decibels, you can use the <B><TT><A HREF="#Volume()">Volume()</A></TT></B> and <B><TT><A HREF="#SetVolume()">SetVolume()</A></TT></B> functions.
+<P>
+<B>See also:  <TT><A HREF="#Volume()">Volume()</A></TT></B> and <B><TT><A HREF="#SetVolume()">SetVolume()</A>
+<P>
+</TT></B><I><HR>
+<H3>WaitForSound() see <A HREF="#StartPlaying()">StartPlaying()</A></H3>
+<P>
+</I><HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="sound_player_notification"></A>sound_player_notification
+</H3>
+<P>
+Declared in:  &lt;be/media/SoundPlayer.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><TT>
+<A NAME="sound_player_notification"></A>B_STARTED
+</TT></TD>
+<TD>
+<A NAME="sound_player_notification"></A>The 
+<A NAME="sound_player_notification"></A>BSoundPlayer
+<A NAME="sound_player_notification"></A> has been started via the 
+<TT><A NAME="sound_player_notification"></A>Start()
+</TT> function.</TD>
+<TR>
+<TD><TT>
+<A NAME="sound_player_notification"></A>B_STOPPED
+</TT></TD>
+<TD>
+<A NAME="sound_player_notification"></A>The 
+BSoundPlayer's
+<A NAME="sound_player_notification"></A> 
+<TT><A NAME="sound_player_notification"></A>Stop()
+</TT> function has been called.</TD>
+<TR>
+<TD><TT>
+<A NAME="sound_player_notification"></A>B_SOUND_DONE
+</TT></TD>
+<TD>
+<A NAME="sound_player_notification"></A>A sound has finished playing.
+</TD>
+</TABLE>
+<P>
+These constants are passed to event notification handler functions to indicate what sort of interesting event has occurred.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="play_id"></A>play_id
+</H3>
+<P>
+Declared in:  
+<A NAME="play_id"></A>&lt;be/media/SoundPlayer.h>
+<PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
+<A NAME="play_id"></A>typedef int32 play_id;
+</PRE>
+<P>
+Identifies a particular sound that's being played by the BSoundPlayer; <B><TT><A HREF="#StartPlaying()">StartPlaying()</A></TT></B> returns values of this type.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

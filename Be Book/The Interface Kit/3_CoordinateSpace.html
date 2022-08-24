@@ -1,0 +1,245 @@
+<HTML><HEAD><TITLE>The Interface Kit: The Coordinate Space</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Coordinate%20Space"></A>The Coordinate Space
+</H1>
+<P>
+To locate screens, windows, and views, draw in them, and report where the cursor is positioned, it's necessary to have some conventional way of talking about the display surface.  The same conventions are used whether the display device is a monitor that shows images on a screen or a printer that puts them on a page.
+<P>
+<HR>
+<H2>
+<A NAME="Two-Dimensional%20Coordinates"></A><FONT SIZE=6>T</FONT>wo-<FONT SIZE=6>D</FONT>imensional <FONT SIZE=6>C</FONT>oordinates
+</H2>
+<P>
+In Be software, the display surface is described by a two-dimensional coordinate system where <I>y</I>-coordinate values are greater towards the bottom of the display and smaller towards the top, <I>x</I>-coordinate values are greater to the right and smaller to the left: 
+<P>
+<IMG SRC="art/Coords1.GIF" ALIGN="bottom">
+<P>
+All quantities and distances are measured by floating-point values of the type <B><TT>float</TT></B>. 
+<P>
+A single coordinate unit is 1/72 of an inch, roughly equal to a typographical point.  However, all screens are considered to have a resolution of 72 pixels per inch (regardless of the actual dimension), so coordinate units actually count screen pixels.  In other words, one unit is the distance between the centers of adjacent pixels on-screen.
+<P>
+<HR>
+<H3>
+<A NAME="Coordinate%20Systems"></A>Coordinate Systems
+</H3>
+<P>
+Specific coordinate systems are associated with the screen, with windows, and with the views inside windows.  They differ only in where the two axes are located:
+<P>
+<UL>
+<LI>The global or <I>screen coordinate system</I> has its origin, (0.0, 0.0), at the left top corner of the main screen.  It's used for positioning windows on-screen, for arranging multiple screens connected to the same machine, and for comparing coordinate values that weren't originally stated in a common coordinate system.  (Multiple screens are not currently supported.)
+<P>
+<LI>A <I>window coordinate system</I> has its origin at the left top corner of the content area of a window.  It's used principally for positioning views within the window.  Each window has its own coordinate system so that locations within the window can be specified without regard to where the window happens to be on-screen.
+<P>
+<LI>A <I>view coordinate system</I> has its default origin at the left top corner of the view rectangle.  However, scrolling can shift view coordinates and move the origin.  View-specific coordinates are used for all drawing operations and to report the cursor location in most system messages.
+<P>
+</UL>
+<A NAME="12718:%20head3:%20Coordinate%20Data%20Types"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Coordinate%20Data%20Types"></A>Coordinate Data Types
+</H3>
+<P>
+The Interface Kit defines a handful of basic classes for locating points and areas within a coordinate system:
+<P>
+<UL>
+<LI>A <A HREF="Point.html#BPoint">BPoint</A> object is the simplest way to specify a coordinate location.  Each object stores two values&mdash;an <I>x</I>-coordinate and a <I>y</I>-coordinate&mdash;that together locate a specific point, (<I>x</I>,&nbsp;<I>y</I>), within a given coordinate system.
+<P>
+<LI>A <A HREF="Rect.html#BRect">BRect</A> object represents a rectangle; it's the simplest way to designate an area within a coordinate system.  The <A HREF="Rect.html#BRect">BRect</A> class defines a rectangle as a set of four coordinate values&mdash;corresponding to the rectangle's left, top, right, and bottom edges, as shown in this illustration: 
+<P>
+<IMG SRC="art/Coords2.GIF" ALIGN="bottom">
+<P>
+The sides of the rectangle are therefore parallel to the coordinate axes.  The left and right sides delimit the range of <I>x</I>-coordinate values within the rectangle, and the top and bottom sides delimit the range of <I>y</I>-coordinate values.  For example, if a rectangle's left top corner is at (0.8,&nbsp;2.7) and its right bottom corner is at (11.3,&nbsp;49.5), all points having <I>x</I>-coordinates ranging from 0.8 through 11.3 and <I>y</I>coordinates from 2.7 through 49.5 lie inside the rectangle.
+<P>
+If the top of a rectangle is the same as its bottom, or its left the same as its right, the rectangle defines a straight line.  If the top and bottom are the same and also the left and right, it collapses to a single point.  Such rectangles are still valid&mdash;they specify real locations within a coordinate system.  However, if the top is greater than the bottom or the left greater than the right, the rectangle is invalid; it has no meaning.
+<P>
+<LI>A <A HREF="Polygon.html#BPolygon">BPolygon</A> object represents a polygon, a closed figure with an arbitrary number of sides.  The polygon is defined as an ordered set of points.  It encloses the area that would be outlined by connecting the points in order, then connecting the first and last points to close the figure.  Each point is therefore a potential vertex of the polygon.
+<P>
+<LI>A <A HREF="Region.html#BRegion">BRegion</A> object defines a set of points.  A region can be any shape and even include discontinuous areas.  It's equivalent to a set of rectangles.
+<P>
+</UL>
+<A NAME="18099:%20head1:%20Mapping%20Coordinates%20to%20Pixels"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Mapping%20Coordinates%20to%20Pixels"></A><FONT SIZE=6>M</FONT>apping <FONT SIZE=6>C</FONT>oordinates to <FONT SIZE=6>P</FONT>ixels
+</H2>
+<P>
+The device-independent coordinate space described above must be mapped to the pixel grid of a particular display device&mdash;the screen, a printer, or some other piece of hardware that's capable of rendering an image.  For example, to display a rectangle, it's necessary to find the pixel columns that correspond to its right and left sides and the pixel rows that correspond to its top and bottom.
+<P>
+This depends entirely on the resolution of the device.  In essence, each device-independent coordinate value must be translated internally to a device-dependent value&mdash;an integer index to a particular column or row of pixels.  In the coordinate space of the device, one unit equals one pixel.
+<P>
+This translation is easy for the screen, since, as mentioned above, there's a one-to-one correspondence between coordinate units and pixels.  It reduces to rounding floating-point coordinates to integers.  For other devices, however, the translation means first scaling the coordinate value to a device-specific value, then rounding.  For example, the point (12.3,&nbsp;40.8) would translate to (12,&nbsp;41) on the screen, but to (51,&nbsp;170) on a 300 dpi printer.
+<P>
+<HR>
+<H3>
+<A NAME="Screen%20Pixels"></A>Screen Pixels
+</H3>
+<P>
+To map coordinate locations to device-specific pixels, you need to know only two things:
+<P>
+<UL>
+<LI>The resolution of the device
+<P>
+<LI>The location of the coordinate axes relative to pixel boundaries
+<P>
+</UL>
+<P>
+The axes are located in the same place for all devices:  The <I>x</I>-axis runs left to right along the middle of a row of pixels, and the <I>y</I>-axis runs down the middle of a pixel column.  They meet at the very center of a pixel.
+<P>
+Because coordinate units match pixels on the screen, this means that all integral coordinate values (those without a fractional part) fall midway across a screen pixel.  The following illustration shows where various <I>x</I>-coordinate values fall on the <I>x</I>-axis.  The broken lines represent the division of the screen into a pixel grid: 
+<P>
+<IMG SRC="art/Coords3.GIF" ALIGN="bottom">
+<P>
+As this illustration shows, it's possible to have coordinate values that lie on the boundary between two pixels.  The next section describes how these values are mapped to one pixel or the other.
+<P>
+<A NAME="30349:%20head2:%20Picking%20Pixels%20to%20Stroke%20and%20Fill"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Picking%20Pixels%20to%20Stroke%20and%20Fill"></A>Picking Pixels to Stroke and Fill
+</H3>
+<P>
+This section discusses how the various <A HREF="View.html#BView">BView</A> <B><TT>Stroke</TT></B>...<B><TT>()</TT></B> and <B><TT>Fill</TT></B>...<B><TT>()</TT></B> functions pick specific pixels to color.  (Since pixels are small, this is not a topic that you necessarily need to be concerned about, especially as you begin programming for the BeOS.)
+<P>
+Pixels are chosen after the pen size and all coordinate values have been translated to device-specific units.  Device-specific values measure distances by counting pixels; 1 unit equals 1 pixel on the device.
+<P>
+A device-specific value can be derived from a coordinate value using a formula that takes the size of a coordinate unit and the resolution of the device into account.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;<I>device_value</I> = <I>coordinate_value</I> * ( <I>dpi</I> / 72 ) </PRE>
+<P>
+<I>dpi</I> is the resolution of the device in dots (pixels) per inch, 72 is the number of coordinate units in an inch, and <I>device_value</I> is rounded to the closest integer.
+<P>
+To describe where lines and shapes fall on the pixel grid, this section mostly talks about pixel units rather than coordinate units.  The accompanying illustrations magnify the grid so that pixel boundaries are clear.  As a consequence, they can show only very short lines and small shapes.  By blowing up the image, they exaggerate the phenomena they illustrate.
+<P>
+<H4>
+<A NAME="Stroking%20Thin%20Lines"></A>Stroking Thin Lines
+</H4>
+<P>
+The thinnest possible line is drawn when the pen size translates to 1 pixel on the device.  Setting the size to 0.0 coordinate units guarantees a 1-pixel pen on all devices.
+<P>
+A 1-pixel pen follows the path of the line it strokes and makes the line exactly 1 pixel thick at all points.  If the line is perfectly horizontal or vertical, it touches just one row or one column of pixels, as illustrated below.  (The grid of broken lines shows the separation of the display surface into pixels.)  
+<P>
+<IMG SRC="art/Coords4.GIF" ALIGN="bottom">
+<P>
+Only pixels that the line path actually passes through are colored to display the line.  If a path begins or ends on a pixel boundary, as it does for examples&nbsp;(a) and (b) in the illustration, the pixels at the boundary aren't colored unless the path crosses into the pixel.  The pen touches the fewest possible number of pixels.
+<P>
+A line path that doesn't enter any pixels, but lies entirely on the boundaries between pixels, colors the pixel row beneath it or the pixel column to its right, as illustrated by lines (f) and (g).   A path that reduces to a single point lying on the corner of four pixels, as does (h), colors the pixel at its lower right.  (However, currently, it's indeterminate which column or row of adjacent pixels would be used to display vertical and horizontal lines like&nbsp;(f) and&nbsp;(g).  Point&nbsp;(h) would not be visible.)
+<P>
+1-pixel lines that aren't exactly vertical or horizontal touch just one pixel per row or one per column.  If the line is more vertical than horizontal, only one pixel in each row is used to color the line.  If the line is more horizontal than vertical, only one pixel in each column is used.  Some illustrations of slanted 1-pixel thick lines are given below:  
+<P>
+<IMG SRC="art/Coords5.GIF" ALIGN="bottom">
+<P>
+Although a 1-pixel pen touches only pixels that lie on the path it strokes, it won't touch every pixel that the path crosses if that would mean making the line thicker than specified.  When the path cuts though two pixels in a column or row, but only one of those pixels can be colored, the one that contains more of the path (the one that contains the midpoint of the segment cut by the column or row) is chosen.  This is illustrated in the following close-up, which shows where a mostly vertical line crosses one row of pixels: 
+<P>
+<IMG SRC="art/Coords6.GIF" ALIGN="bottom">
+<P>
+However, before a choice is made as to which pixel in a row or column to color, the line path is normalized for the device.  For example, if a line is defined by two endpoints, it's first determined which pixels correspond to those endpoints.  The line path is then treated as if it connected the centers of those pixels.  This may alter which pixels get colored, as is illustrated below.  In this illustration, the solid black line is the line path as originally specified and the broken line is its normalized version: 
+<P>
+<IMG SRC="art/Coords7.GIF" ALIGN="bottom">
+<P>
+This normalization is nothing more than the natural consequence of the rounding that occurs when coordinate values are translated to device-specific pixel values.
+<P>
+<H4>
+<A NAME="Stroking%20Curved%20Lines"></A>Stroking Curved Lines
+</H4>
+<P>
+Although all the diagrams above show straight lines, the principles they illustrate apply equally to curved line paths.  A curved path can be treated as if it were made up of a large number of short straight segments.
+<P>
+<H4>
+<A NAME="Filling%20and%20Stroking%20Rectangles"></A>Filling and Stroking Rectangles
+</H4>
+<P>
+The following illustration shows how some rectangles, represented by the solid black line, would be filled with a solid color. 
+<P>
+<IMG SRC="art/Coords8.GIF" ALIGN="bottom">
+<P>
+A rectangle includes every pixel that it encloses and every pixel that its sides pass through.  However, as rectangle&nbsp;(q) illustrates, it doesn't include pixels that its sides merely touch at the boundary.
+<P>
+If the pixel grid in this illustration represents the screen, rectangle&nbsp;(q) would have left, top, right, and bottom coordinates with fractional values of&nbsp;.5.  Rectangle&nbsp;(n), on the other hand, would have coordinates without any fractional parts.  Nonfractional coordinates lie at the center of screen pixels.
+<P>
+Rectangle&nbsp;(n), in fact, is the normalized version of all four of the illustrated rectangles.  It shows how the sides of the four rectangles would be translated to pixel values.  Note that for a rectangle like (q), with edges that fall on pixel boundaries, normalization means rounding the left and top sides upward and rounding the right and bottom sides downward.  This follows from the principal that the fewest possible number of pixels should be colored.
+<P>
+Although the four rectangles above differ in size and shape, when filled they all cover a 6&nbsp;*&nbsp;4 pixel area.  You can't predict this area from the dimensions of the rectangle.  Because the coordinate space is continuous and <I>x</I> and <I>y</I> values can be located anywhere, rectangles with different dimensions might have the same rendered size, as shown above, and rectangles with the same dimensions might have different rendered sizes, as shown below: 
+<P>
+<IMG SRC="art/Coords9.GIF" ALIGN="bottom">
+<P>
+If a one-pixel pen strokes a rectangular path, it touches only pixels that would be included if the rectangle were filled.  The illustration below shows the same rectangles that were presented above, but strokes them rather than fills them:  
+<P>
+<IMG SRC="art/Coords10.GIF" ALIGN="bottom">
+<P>
+Each of the rectangles still covers a 6&nbsp;*&nbsp;4 pixel area.  Note that even though the path of rectangle&nbsp;(q) lies entirely on pixel boundaries, pixels below it and to its right are not touched by the pen.  The pen touches only pixels that lie within the rectangle.
+<P>
+If a rectangle collapses to a straight line or to a single point, it no longer contains any area.  Stroking or filling such a rectangle is equivalent to stroking the line path with a one-pixel pen, as was discussed in the previous section.
+<P>
+<H4>
+<A NAME="Filling%20and%20Stroking%20Polygons"></A>Filling and Stroking Polygons
+</H4>
+<P>
+The figure below shows a polygon as it would be stroked by a one-pixel pen and as it would be filled:  
+<P>
+<IMG SRC="art/Coords11.GIF" ALIGN="bottom">
+<P>
+The same rules apply when stroking each segment of a polygon as would apply if that segment were an independent line.  Therefore, the pen may not touch every pixel the segment passes through.
+<P>
+When the polygon is filled, no additional pixels around its border are colored.  As is the case for a rectangle, the displayed shape of filled polygon is identical to the shape of the polygon when stroked with a one-pixel pen.  The pen doesn't touch any pixels when stroking the polygon that aren't colored when the polygon is filled.  Conversely, filling doesn't color any pixels at the border of the polygon that aren't touched by a one-pixel pen.
+<P>
+<H4>
+<A NAME="Stroking%20Thick%20Lines"></A>Stroking Thick Lines
+</H4>
+<P>
+A pen that's thicker than one pixel touches the same pixels that a one-pixel pen does, but it adds extra columns and rows adjacent to the line path.  A thick pen tip is, in effect, a linear brush that's held perpendicular to the line path and kept centered on the line.  The illustration below shows two short lines, each five pixels thick:  
+<P>
+<IMG SRC="art/Coords12.GIF" ALIGN="bottom">
+<P>
+The thickness or a vertical or horizontal line can be measured in an exact number of pixels.  When the line is slanted, as it is for (t) above, the stroking algorithm tries to make the line visually approximate the thickness of a vertical or horizontal line.  In this way, lines retain their shape even when rotated.
+<P>
+When a rectangle is stroked with a thick pen, the corners of the rectangle are filled in, as shown in the example below:  
+<P>
+<IMG SRC="art/Coords13.GIF" ALIGN="bottom">
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

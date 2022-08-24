@@ -1,0 +1,195 @@
+<HTML><HEAD><TITLE>Drivers: The area_malloc Module</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20area_malloc%20Module"></A>The area_malloc Module
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/drivers/area_malloc.h">drivers/area_malloc.h</A>
+<P>
+The area_malloc module provides a means for your driver to allocate memory in areas instead of on the heap.  It provides <B><TT><A HREF="#malloc()">malloc()</A></TT></B>, <B><TT><A HREF="#calloc()">calloc()</A></TT></B>, <B><TT><A HREF="#realloc()">realloc()</A></TT></B>, and <B><TT><A HREF="#free()">free()</A></TT></B> functions that work just like their POSIX counterparts, except they require a pool argument as their first input.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions aren't safe to call from interrupt handlers; they may block on semaphores.
+<P>
+</UL>
+<P>
+The area_malloc functions are thread-safe in relation to one another, but not in relation to <B><TT><A HREF="#delete_pool()">delete_pool()</A></TT></B>.  Be sure you don't call <B><TT><A HREF="#delete_pool()">delete_pool()</A></TT></B> on the pool you're using until you know none of the other functions might be called.  <B><TT><A HREF="#create_pool()">create_pool()</A></TT></B> and <B><TT><A HREF="#delete_pool()">delete_pool()</A></TT></B> are safe in relation to each other.
+<P>
+When the last user of the module puts it away, any remaining pools are automatically deleted.
+<P>
+<HR>
+<H2>
+<A NAME="Module%20Functions"></A><FONT SIZE=6>M</FONT>odule <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="create_pool()"></A>create_pool()
+, 
+<A NAME="delete_pool()"></A>delete_pool()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const void *<B><TT><FONT  color=000022 size=+1>create_pool(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>addressSpec</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>lockSpec</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>protection</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>delete_pool(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>poolID</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#create_pool()">create_pool()</A></TT></B> creates a new pool of memory from which to allocate.  The parameters are the same as those used by <B><TT><A HREF="../The%20Kernel%20Kit/Areas.html#create_area()">create_area()</A></TT></B>, so you have complete control over the area's characteristics (except for its name).  Returns an opaque pool idenfityer, or <B><TT>NULL</TT></B> if the creation failed.  The ability to share resources allocated from the pool is determined by the permissions and protections used to create the area.
+<P>
+<B><TT><A HREF="#delete_pool()">delete_pool()</A></TT></B> deletes the pool specified by the opaque <I><FONT  color=991122 face=HELVETICA>poolID</I></FONT> given.  Any pointers returned by the other functions in the module are immediately invalid.  Returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the pool was deleted, otherwise <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Kernel%20Kit/Areas.html#create_area()">create_area()</A></TT></B> in the Kernel Kit.
+<P>
+<HR>
+<H3>
+<A NAME="malloc()"></A>malloc()
+, 
+<A NAME="calloc()"></A>calloc()
+, 
+<A NAME="realloc()"></A>realloc()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>malloc(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>poolID</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>calloc(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>poolID</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>numMembers</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>realloc(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>poolID</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>ptr</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#malloc()">malloc()</A></TT></B> allocates a block of <I><FONT  color=991122 face=HELVETICA>size</I></FONT> bytes and returns a pointer to it.
+<P>
+<B><TT><A HREF="#calloc()">calloc()</A></TT></B> allocates a block that can contain <I><FONT  color=991122 face=HELVETICA>numMembers</I></FONT> items of the specified <I><FONT  color=991122 face=HELVETICA>size</I></FONT> and returns a poiner to it.
+<P>
+<B><TT><A HREF="#realloc()">realloc()</A></TT></B> resizes the memory block pointed to by <I><FONT  color=991122 face=HELVETICA>ptr</I></FONT> to the indicated <I><FONT  color=991122 face=HELVETICA>size</I></FONT>.  Resizing a block can require that the memory be relocated, so this function returns the new pointer.
+<P>
+Each of these operations functions in the pool specified by <I><FONT  color=991122 face=HELVETICA>poolID</I></FONT>.
+<P>
+If there's not enough memory to allocate the requested block, these functions return <B><TT>NULL</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="free()"></A>free()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>free(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>poolID</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>ptr</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Releases the memory block pointed to by <I><FONT  color=991122 face=HELVETICA>ptr</I></FONT> from the pool specified by <I><FONT  color=991122 face=HELVETICA>poolID</I></FONT>.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="B_AREA_MALLOC_MODULE_NAME"></A>B_AREA_MALLOC_MODULE_NAME
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/area_malloc.h>">&lt;drivers/area_malloc.h></A>
+<P>
+The <B><TT>B_AREA_MALLOC_MODULE_NAME</TT></B> constant identifies the area_malloc module; use this constant to open the module.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

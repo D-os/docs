@@ -1,0 +1,778 @@
+<HTML><HEAD><TITLE>The Interface Kit: BPrintJob</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BPrintJob"></A>BPrintJob
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/PrintJob.h">be/interface/PrintJob.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="PrintJob.summary.html"><i>Summary</i></A></H6>
+<P>
+A BPrintJob object runs a printing session.  It negotiates everything after the user's initial request to print&mdash;from engaging the Print Server to calling upon BViews to draw and spooling the results to the printer.  It also handles a secondary and somewhat separate matter related to printing&mdash;configuring the page layout.
+<P>
+<A NAME="10293:%20head2:%20Setting%20Up%20the%20Page%20Layout"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Setting%20Up%20the%20Page%20Layout"></A>Setting Up the Page Layout
+</H3>
+<P>
+Users typically don't decide how a document fits on a page&mdash; the size of the paper, the width of the margins, the orientation of the image, and so on&mdash;each time they print.  These decisions are usually made when setting up the document, perhaps from a Page Layout menu item, rather than Print.
+<P>
+To set up the page parameters for a document, an application should create a BPrintJob object, assign it a name, and call <B><TT><A HREF="#ConfigPage()">ConfigPage()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t MyDocumentManager::SetUpPage()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    BPrintJob job("document");
+&nbsp;&nbsp;&nbsp;    return job.ConfigPage();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#ConfigPage()">ConfigPage()</A></TT></B> has the Print Server interact with the user to set up the page configuration.  Configuration settings are stored in a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object that will be handed to the server when the document is printed.  The <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> is important to the server, but the application doesn't need to look at it directly; functions are provided to access the useful data it contains.  However, you may want to get the object and store it with the document so that the configuration can be reused whenever the document is printed&mdash;and so that the user's previous choices can be the default settings when <B><TT><A HREF="#ConfigPage()">ConfigPage()</A></TT></B> is called again.   This is good behavior for an application to follow, and is highly recommended.
+<P>
+<B><TT><A HREF="#Settings()">Settings()</A></TT></B> returns the page configuration the user set up; <B><TT><A HREF="#SetSettings()">SetSettings()</A></TT></B> initializes the configuration that's presented to the user.  For example:  
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage *setup;
+&nbsp;&nbsp;&nbsp;. . .
+&nbsp;&nbsp;&nbsp;status_t MyDocumentManager::SetUpPage() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t result;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPrintJob job("document&gt;s name");&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (setup) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.SetSettings(new BMessage(*setup));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result = job.ConfigPage();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (result == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setup = job.Settings();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* record the settings for your own use */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;paper_rect = job.PaperRect();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printable_rect = job.PrintableRect();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return result;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+In this example, the <B><TT>setup</TT></B> <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> presumably is flattened and saved with the document whenever the document is saved, and unflattened whenever the document is open and the page settings are needed.
+<P>
+<HR>
+<H3>
+<A NAME="Printing"></A>Printing
+</H3>
+<P>
+To print a document, an application must go through several ordered steps:
+<P>
+<UL>
+<LI>Engaging the Print Server and setting parameters for the job.
+<P>
+<LI>Setting up a spool file to hold image data.
+<P>
+<LI>Asking BViews to draw each page.
+<P>
+<LI>After each page is drawn, putting the data for the page in the spool file.
+<P>
+<LI>Committing the spool file to the Print Server.
+<P>
+</UL>
+<P>
+A BPrintJob object has member functions that assist with each step.
+<P>
+<A NAME="24091:%20head3:%20Setting%20Up%20a%20Print%20Job"></A>
+<P>
+<H4>
+<A NAME="Setting%20Up%20a%20Print%20Job"></A>Setting Up a Print Job
+</H4>
+<P>
+A print job begins when the user requests the application to print something.  In response, the application should create a BPrintJob object, assign the job a name, and call <B><TT><A HREF="#ConfigJob()">ConfigJob()</A></TT></B> to initialize the printing environment.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage *setup;
+&nbsp;&nbsp;&nbsp;. . .
+&nbsp;&nbsp;&nbsp;status_t MyDocumentManager::Print()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    BPrintJob job("document");
+&nbsp;&nbsp;&nbsp;    status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    if ( setup )
+&nbsp;&nbsp;&nbsp;        job.SetSettings(new BMessage(*setup));
+&nbsp;&nbsp;&nbsp;    if ( (err = job.ConfigJob()) == B_OK ) {
+&nbsp;&nbsp;&nbsp;        delete setup;
+&nbsp;&nbsp;&nbsp;        setup = job.Settings();
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+So far, this looks much like the code for configuring the page presented in the previous <a href="#Setting%20Up%20the%20Page%20Layout">"Setting Up the Page Layout"</a> section.  The idea is the same.  <B><TT><A HREF="#ConfigJob()">ConfigJob()</A></TT></B> gets the Print Server ready for a new printing session and has it interact with the user to set up the parameters for the job&mdash;which pages, how many copies, and so on.  It uses the same settings <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> to record the user's choices as <B><TT><A HREF="#ConfigPage()">ConfigPage()</A></TT></B> did, though it records information that's more immediate to the particular printing session.
+<P>
+Again, you may want to store the user's choices with the document so that they can be used to set the initial configuration for the job when the document is next printed.  By calling <B><TT><A HREF="#Settings()">Settings()</A></TT></B>, you can get the job configuration the user set up; <B><TT><A HREF="#SetSettings()">SetSettings()</A></TT></B> initializes the configuration that's presented to the user.
+<P>
+Information about the page layout will be required while printing.  If that information isn't available in the <B><TT><A HREF="#Settings()">Settings()</A></TT></B> <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>, <B><TT><A HREF="#ConfigJob()">ConfigJob()</A></TT></B> will begin, in essence, by calling <B><TT><A HREF="#ConfigPage()">ConfigPage()</A></TT></B> so that the server can ask the user to supply it.
+<P>
+To discover which pages the user wants to print, you can call the <B><TT><A HREF="#FirstPage()">FirstPage()</A></TT></B> and <B><TT><A HREF="#LastPage()">LastPage()</A></TT></B> functions after <B><TT><A HREF="#ConfigJob()">ConfigJob()</A></TT></B> returns:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 pageCount = job.LastPage() - job.FirstPage() + 1;</PRE>
+<P>
+<A NAME="24278:%20head3:%20The%20Spool%20File"></A>
+<P>
+<H4>
+<A NAME="The%20Spool%20File"></A>The Spool File
+</H4>
+<P>
+The next step after configuring the job is to call <B><TT><A HREF="#BeginJob()">BeginJob()</A></TT></B> to set up a spool file and begin the production of pages.  After all the pages are produced, <B><TT><A HREF="#CommitJob()">CommitJob()</A></TT></B> is called to commit them to the printer.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;job.BeginJob();
+&nbsp;&nbsp;&nbsp;/* <I>draw pages here</I> */
+&nbsp;&nbsp;&nbsp;job.CommitJob();</PRE>
+<P>
+<B><TT><A HREF="#BeginJob()">BeginJob()</A></TT></B> and <B><TT><A HREF="#CommitJob()">CommitJob()</A></TT></B> bracket all the drawing that's done during the job.
+<P>
+<A NAME="35150:%20head3:%20Cancellation"></A>
+<P>
+<H4>
+<A NAME="Cancellation"></A>Cancellation
+</H4>
+<P>
+A number of things can happen to derail a print job after it has started&mdash;most significantly, the user can cancel it at any time.  To be sure that the job hasn't been canceled or something else hasn't happened to defeat it, you can call <B><TT><A HREF="#CanContinue()">CanContinue()</A></TT></B> at critical junctures in your code.  This function will tell you whether it's sensible to continue with the job.  In the following example, a while loop is used to loop through all the pages in the document, or until <B><TT><A HREF="#CanContinue()">CanContinue()</A></TT></B> returns false, indicating that the job has been canceled:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;job.BeginJob();
+&nbsp;&nbsp;&nbsp;while (job.CanContinue() &amp;&amp; page &lt;= pageCount) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* <I>draw each page here</I> */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;page++;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;job.CommitJob();</PRE>
+<P>
+<A NAME="37803:%20head3:%20Drawing%20on%20the%20Page"></A>
+<P>
+<H4>
+<A NAME="Drawing%20on%20the%20Page"></A>Drawing on the Page
+</H4>
+<P>
+A page is produced by asking one or more BViews to draw within a rectangle that can be mapped to a sheet of paper (excluding the margins at the edge of the paper).  <B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> requests one <A HREF="View.html#BView">BView</A> to draw some portion of its data and specifies where the data should appear on the page.  You can call <B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> any number of times for a single page to ask any number of BViews to contribute to the page.  After all views have drawn, <B><TT><A HREF="#SpoolPage()">SpoolPage()</A></TT></B> spools the data to the file that will eventually be committed to the printer.  <B><TT><A HREF="#SpoolPage()">SpoolPage()</A></TT></B> is called just once for each page.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;for (int i = job.FirstPage(); job.CanContinue() &amp;&amp; i &lt;= job.LastPage(); i++) {
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;        job.DrawView(someView, viewRect, pointOnPage);
+&nbsp;&nbsp;&nbsp;        job.DrawView(anotherView, anotherRect, differentPoint);
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;        job.SpoolPage();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> calls the BView's <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function.  That function must be prepared to draw either for the screen or on the printed page.  It can test the destination of its output by calling the <A HREF="View.html#BView">BView</A> <B><TT><A HREF="ViewGeneral.html#IsPrinting()">IsPrinting()</A></TT></B> function.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Don't use the <B><TT>BView::Bounds()</TT></B> function to determine the area to render.  Instead, use the update rectangle passed to the <B><TT>BView::Draw()</TT></B> function.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<H4>
+<A NAME="A%20Complete%20Printing%20Function"></A>A Complete Printing Function
+</H4>
+<P>
+This function puts together all the above code snippets and handles the printing of a document (minus the actual drawing and visual status information presented to the user as printing goes on).
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t MyDocumentManager::Print() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t result = B_OK;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPrintJob job("document&gt;s name");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// If we have no setup message, we should call ConfigPage()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// You must use the same instance of the BPrintJob object
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// (you can&gt;t call the previous "PageSetup()" function, since it
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// creates its own BPrintJob object).
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!setup) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result = job.ConfigPage();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (result == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Get the user Settings
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setup = job.Settings();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Use the new settings for your internal use
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;paper_rect = job.PaperRect();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printable_rect = job.PrintableRect();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (result == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Setup the driver with user settings
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.SetSettings(setup);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result = job.ConfigJob();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (result == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// WARNING: here, setup CANNOT be NULL.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (setup == NULL) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// something's wrong, handle the error and bail out
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete setup;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Get the user Settings
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setup = job.Settings();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Use the new settings for your internal use
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// They may have changed since the last time you read it
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;paper_rect = job.PaperRect();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printable_rect = job.PrintableRect();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Now you have to calculate the number of pages
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// (note: page are zero-based)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 firstPage = job.FirstPage();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 lastPage = job.LastPage();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Verify the range is correct
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 0 ... LONG_MAX -> Print all the document
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// n ... LONG_MAX -> Print from page n to the end
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// n ... m -> Print from page n to page m
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (lastPage > your_document_last_page)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;last_page = your_document_last_page;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 nbPages = lastPage - firstPage + 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Verify the range is correct
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (nbPages &lt;= 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Now you can print the page
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.BeginJob();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Print all pages
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool can_continue = job.CanContinue();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (int i=firstPage ; can_continue &amp;&amp; i&lt;=lastPage ; i++) { 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Draw all the needed views
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.DrawView(someView, viewRect, pointOnPage); 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.DrawView(anotherView, anotherRect, differentPoint); 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// If the document have a lot of pages, you can update a BStatusBar, here
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// or else what you want...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update_status_bar(i-firstPage, nbPages);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Spool the page
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.SpoolPage(); 
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Cancel the job if needed.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// You can for exemple verify if the user pressed the ESC key
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// or (SHIFT + &gt;.&gt;)...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (user_has_canceled)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// tell the print_server to cancel the printjob
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.CancelJob();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can_continue = false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Verify that there was no error (disk full for 
+&nbsp;&nbsp;&nbsp;exemple)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;can_continue = job.CanContinue();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Now, you just have to commit the job!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (can_continue)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.CommitJob();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result = B_ERROR;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return result;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<A NAME="26750:%20head3:%20Drawing%20Coordinates"></A>
+<P>
+<H4>
+<A NAME="Drawing%20Coordinates"></A>Drawing Coordinates
+</H4>
+<P>
+When a <A HREF="View.html#BView">BView</A> draws for the printer, it draws within the <I>printable rectangle</I> of a page&mdash;a rectangle that matches the size of a sheet of paper minus the unprinted margin around the paper's edge.  The <B><TT><A HREF="#PaperRect()">PaperRect()</A></TT></B> function returns a rectangle that measures a sheet of paper and <B><TT><A HREF="#PrintableRect()">PrintableRect()</A></TT></B> returns the printable rectangle, as illustrated in this diagram. 
+<P>
+<IMG SRC="art/PrintJob1.GIF" ALIGN="bottom">
+<P>
+Both rectangles are stated in a coordinate system that has its origin at the left top corner of the page.  Thus, the left and top sides of the rectangle returned by <B><TT><A HREF="#PaperRect()">PaperRect()</A></TT></B> are always 0.0.  <B><TT><A HREF="#PrintableRect()">PrintableRect()</A></TT></B> locates the printable rectangle on the paper rectangle.  However, <B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> assumes coordinates that are local to the printable rectangle&mdash;that is, an origin at the left top corner of the printable rectangle rather than the paper rectangle.
+<P>
+The diagram below shows the left top coordinates of the printable rectangle as <B><TT><A HREF="#PrintableRect()">PrintableRect()</A></TT></B> would report them and as <B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> would assume them, given a half-inch margin. 
+<P>
+<IMG SRC="art/PrintJob2.GIF" ALIGN="bottom">
+<P>
+<B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> always draws in the BView's own coordinate system.  Those coordinates are mapped to locations in the printable rectangle as specified by the arguments passed to <B><TT><A HREF="#DrawView()">DrawView()</A></TT></B>.
+<P>
+<B>See also:  <TT>BView::IsPrinting()</TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BPrintJob()"></A>BPrintJob()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPrintJob(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes the BPrintJob object and assigns the job a <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  The Print Server isn't contacted until <B><TT><A HREF="#ConfigPage()">ConfigPage()</A></TT></B> or <B><TT><A HREF="#ConfigJob()">ConfigJob()</A></TT></B> is called.  The spool file isn't created until <B><TT><A HREF="#BeginJob()">BeginJob()</A></TT></B> prepares for the production of pages.
+<P>
+<B>See also:  <TT><A HREF="#ConfigJob()">ConfigJob()</A></TT></B>, <B><TT><A HREF="#BeginJob()">BeginJob()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BPrintJob()"></A>~BPrintJob()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BPrintJob()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees all memory allocated by the object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BeginJob()"></A>BeginJob()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>BeginJob(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Opens a spool file for the job and prepares for the production of a series of pages.  Call this function only once per printing session&mdash;just after initializing the job and just before drawing the first page.
+<P>
+<B>See also:  <TT><A HREF="#CommitJob()">CommitJob()</A></TT></B>, <a href="#The%20Spool%20File">"The Spool File"</a> in the class overview
+<P>
+<HR>
+<H3>
+<A NAME="CancelJob()"></A>CancelJob()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>CancelJob(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Cancels the print job programmatically and gets rid of the spool file.  The job cannot be restarted; you must destroy the BPrintJob object.  Create a new object to renew printing.
+<P>
+<HR>
+<H3>
+<A NAME="CanContinue()"></A>CanContinue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>CanContinue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if there's no impediment to continuing with the print job, and <B><TT>false</TT></B> if the user has canceled the job, the spool file has grown too big, or something else has happened to terminate printing.  It's a good idea to liberally sprinkle <B><TT><A HREF="#CanContinue()">CanContinue()</A></TT></B> queries throughout your printing code to make sure that the work you're about to do won't be wasted.
+<P>
+<B>See also:  </B><a href="#Cancellation">"Cancellation"</a> in the class overview
+<P>
+<HR>
+<H3>
+<A NAME="CommitJob()"></A>CommitJob()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>CommitJob(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Commits all spooled pages to the printer.  This ends the print job; when <B><TT><A HREF="#CommitJob()">CommitJob()</A></TT></B> returns, the BPrintJob object can be deleted.  <B><TT><A HREF="#CommitJob()">CommitJob()</A></TT></B> can be called only once per job.
+<P>
+<B>See also:  <TT><A HREF="#BeginJob()">BeginJob()</A></TT></B>, <a href="#The%20Spool%20File">"The Spool File"</a> in the class overview 
+<P>
+<HR>
+<H3>
+<A NAME="ConfigPage()"></A>ConfigPage()
+, 
+<A NAME="ConfigJob()"></A>ConfigJob()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ConfigPage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ConfigJob(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions contact the Print Server and have the server interact with the user to lay out the document on a page (in the case of <B><TT><A HREF="#ConfigPage()">ConfigPage()</A></TT></B>) or to define a print job (in the case of <B><TT><A HREF="#ConfigJob()">ConfigJob()</A></TT></B>).  The page layout includes such things as the orientation of the image (portrait or landscape), the dimensions of the paper on which the document will be printed, and the size of the margins.  The job definition includes such things as which pages are to be printed and the number of copies.
+<P>
+Both functions record the user's choices in a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object that <B><TT><A HREF="#Settings()">Settings()</A></TT></B> returns.  
+<P>
+If <B><TT><A HREF="#SetSettings()">SetSettings()</A></TT></B> has been called to establish a default configuration for the page layout or the job, these functions will pass it to the Print Server so the server can present it to the user.  Otherwise, the server will choose a default configuration to show the user.
+<P>
+These two functions return <B><TT>status_t</TT></B> error codes, despite having return values that are declared <B><TT>int32</TT></B>.  They return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if they have trouble communicating with the server or if the job can't be established for any reason.  They return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if all goes well.
+<P>
+<B>See also:  <TT><A HREF="#SetSettings()">SetSettings()</A></TT></B>, <a href="#Setting%20Up%20the%20Page%20Layout">"Setting Up the Page Layout"</a> and <a href="#Setting%20Up%20a%20Print%20Job">"Setting Up a Print Job"</a> in the class overview 
+<P>
+<HR>
+<H3>
+<A NAME="DrawView()"></A>DrawView()
+, 
+<A NAME="SpoolPage()"></A>SpoolPage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawView(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SpoolPage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> calls upon a <I><FONT  color=991122 face=HELVETICA>view</I></FONT> to draw the <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> portion of its display at <I><FONT  color=991122 face=HELVETICA>point</I></FONT> on the page.  As a result, the <I><FONT  color=991122 face=HELVETICA>view</I></FONT>'s <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function will be called with <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> passed as the update rectangle.  The rectangle should be stated in the BView's coordinate system.  The <I><FONT  color=991122 face=HELVETICA>point</I></FONT> should be stated in a coordinate system that has the origin at the top left corner of the printable rectangle.  Together the <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> and <I><FONT  color=991122 face=HELVETICA>point</I></FONT> should be fashioned so that the entire rectangle lies within the boundaries of the page's printable area.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>view</I></FONT> must be attached to a window; that is, it must be known to the Application Server.  However, when printing, a <A HREF="View.html#BView">BView</A> can be asked to draw portions of its display that are not visible on-screen.  Its drawing is not limited by the clipping region, its bounds rectangle, or the frame rectangles of ancestor views.
+<P>
+<B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> doesn't look down the view hierarchy; it asks only the named <I><FONT  color=991122 face=HELVETICA>view</I></FONT> to draw, not any of its children.  However, any number of BViews can draw on a page if they are subjects of separate <B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> calls.
+<P>
+After all views have drawn and the page is complete, <B><TT><A HREF="#SpoolPage()">SpoolPage()</A></TT></B> adds it to the spool file.<B><TT><A HREF="#SpoolPage()">SpoolPage()</A> </TT></B> must be called once to terminate each page.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#DrawView()">DrawView()</A></TT></B> will render the entire hierarchy of BViews attached to the specified BView.  However, there's a bug in BeOS 5 and earlier versions of BeOS that cause only the first two levels to render correctly; levels further down render at the top left corner of the page, regardless of their actual position.  This will be fixed in a future release.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="#PrintableRect()">PrintableRect()</A></TT></B>, <B><TT>BView::Draw()</TT></B>, <a href="#Drawing%20on%20the%20Page">"Drawing on the Page"</a> in the class overview 
+<P>
+<HR>
+<H3>
+<A NAME="FirstPage()"></A>FirstPage()
+, 
+<A NAME="LastPage()"></A>LastPage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FirstPage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>LastPage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions return the first and last pages that should be printed as part of the current job.  If the pages are not set (for example, if the current job has been canceled), <B><TT><A HREF="#FirstPage()">FirstPage()</A></TT></B> returns 0 and <B><TT><A HREF="#LastPage()">LastPage()</A></TT></B> returns a very large number (<B><TT>LONG_MAX</TT></B>).
+<P>
+<HR>
+<H3>LastPage()   see <A HREF="#FirstPage()">FirstPage()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="PaperRect()"></A>PaperRect()
+, 
+<A NAME="PrintableRect()"></A>PrintableRect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>PaperRect(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>PrintableRect(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#PaperRect()">PaperRect()</A></TT></B> returns a rectangle that records the presumed size of the paper that the printer will use.  Its left and top sides are at 0.0, so its right and bottom coordinates reflect the size of a sheet of paper.  The size depends on choices made by the user when setting up the page layout.
+<P>
+<B><TT><A HREF="#PrintableRect()">PrintableRect()</A></TT></B> returns a rectangle that encloses the portion of a page where printing can appear.  It's stated in the same coordinate system as the rectangle returned by <B><TT><A HREF="#PaperRect()">PaperRect()</A></TT></B>, but excludes the margins around the edge of the paper.  When drawing on the printed page, the left top corner of this rectangle is taken to be the coordinate origin, (0.0,&nbsp;0.0).
+<P>
+The <a href="#Drawing%20Coordinates">"Drawing Coordinates"</a> section in the class overview illustrates these rectangles and their coordinate systems.
+<P>
+<B>See also:  <TT><A HREF="#DrawView()">DrawView()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="PrinterType()"></A>PrinterType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>PrinterType(</TT></B></FONT>void * = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a code identifying whether the printer is color or black and white.  The argument is currently not used.
+<P>
+The return value will be either <B><TT>B_BW_PRINTER</TT></B> or <B><TT>B_COLOR_PRINTER</TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In the current release of BeOS, this function always returns <B><TT>B_COLOR_PRINTER</TT></B>, since there's no printer driver API for determining the printer type yet.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If an error occurs, this function will return an appropriate error code (for example, if the Print Server isn't running).
+<P>
+<HR>
+<H3>
+<A NAME="SetSettings()"></A>SetSettings()
+, 
+<A NAME="Settings()"></A>Settings()
+, 
+<A NAME="IsSettingsMessageValid()"></A>IsSettingsMessageValid()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSettings(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>configuration</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>Settings(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>IsSettingsMessageValid(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>configuration</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the group of parameters that define how a document should be printed.  The parameters include some that capture the page layout of the document and some that define the current job.  They're recorded in a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object that can be regarded as a black box; the data in the message are interpreted by the Print Server and will be documented where the print driver API is documented.
+<P>
+Instead of looking in the <B><TT><A HREF="#Settings()">Settings()</A></TT></B> <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>, rely on BPrintJob functions to provide specific information about the layout and the print job.  Currently, there are only two functions&mdash;<B><TT><A HREF="#FirstPage()">FirstPage()</A></TT></B> and <B><TT><A HREF="#LastPage()">LastPage()</A></TT></B>, which return the first and last pages that need to be printed.
+<P>
+<B><TT><A HREF="#Settings()">Settings()</A></TT></B> can be called to get the current configuration message, which can then be flattened and stored with the document.  You can retrieve it later and pass it to <B><TT><A HREF="#SetSettings()">SetSettings()</A></TT></B> to set initial configuration values the next time the document is printed, as discussed in the <a href="#Setting%20Up%20the%20Page%20Layout">"Setting Up the Page Layout"</a> and <a href="#Setting%20Up%20a%20Print%20Job">"Setting Up a Print Job"</a> sections of the class overview.
+<P>
+If the message passed to settings doesn't contain all the information needed to properly configure the print job, the printer add-on being used will either determine appropriate default values or present a configuration dialog box.
+<P>
+<B><TT><A HREF="#SetSettings()">SetSettings()</A></TT></B> assumes ownership of the object it's passed.  If your application needs to retain the object, pass a copy to <B><TT><A HREF="#SetSettings()">SetSettings()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;print_job_object.SetSettings(new BMessage(settings_message));</PRE>
+<P>
+On the other hand, <B><TT><A HREF="#Settings()">Settings()</A></TT></B> transfers ownership of the object it returns to the caller; you don't need to make a copy.
+<P>
+<B><TT>IsMessageSettingsValid()</TT></B> returns <B><TT>true</TT></B> if the specified message is a valid settings message; otherwise it returns <B><TT>false</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#ConfigPage()">ConfigPage()</A></TT></B> 
+<P>
+<HR>
+<H3>SpoolPage()   see <A HREF="#DrawView()">DrawView()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

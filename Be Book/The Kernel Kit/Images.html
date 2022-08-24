@@ -1,0 +1,390 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Images</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Images"></A>Images
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/image.h">be/kernel/image.h</A>
+<P>
+Library:  libroot.so
+<P>
+This isn't about graphics.  An <I>image</I> is compiled code, of which there are three types:  app images, library images, and add-on images.  An app image is executable code that can be launched.  A library image is a collection of shared code that you link against when you're  compiling your application.  An add-on image is code that an app can load and run while the app itself is running.  Note that an add-on can also be an app; in other words, you can create an image that can be launched by itself, or that can be loaded into another application.
+<P>
+For more information on creating and using images, see <a href="ImageConcepts.html#Image%20Concepts">"Image Concepts"</a>.
+<P>
+<HR>
+<H2>
+<A NAME="Image%20Functions"></A><FONT SIZE=6>I</FONT>mage <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="get_image_info()"></A>get_image_info()
+, 
+<A NAME="get_next_image_info()"></A>get_next_image_info()
+, 
+<A NAME="image_info"></A>image_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_image_info(</TT></B></FONT>image_id <I><FONT  color=991122 face=HELVETICA>image</I></FONT>, image_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_next_image_info(</TT></B></FONT>team_id <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>*cookie</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+struct {} <B><TT><FONT  color=000022 size=+1>image_info
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions copy, into the <I><FONT  color=991122 face=HELVETICA>info</I></FONT> argument, the <B><TT>image_info</TT></B> structure for a particular image.   The <B><TT>get_image_info()</TT></B> function gets the information for the image identified by <I><FONT  color=991122 face=HELVETICA>image</I></FONT>.
+<P>
+The <B><TT>get_next_image_info()</TT></B> function lets you step through the list of a team's images through iterated calls.  The <I><FONT  color=991122 face=HELVETICA>team</I></FONT> argument identifies the team you want to look at; a <I><FONT  color=991122 face=HELVETICA>team</I></FONT> value of 0 means the team of the calling thread.  The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> argument is a placemark; you set it to 0 on your first call, and let the function do the rest.  The function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> when there are no more images to visit:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Get the image_info for every image in this team. */
+&nbsp;&nbsp;&nbsp;image_info info;
+&nbsp;&nbsp;&nbsp;int32 cookie = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (get_next_image_info(0, &amp;cookie, &amp;info) == B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+The <B><TT>image_info</TT></B> structure is:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;image_id <B><TT>id</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;image_type <B><TT>type</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT>sequence</TT></B>; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT>init_order</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_PFV <B><TT>init_routine</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_PFV <B><TT>term_routine</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev_t <B><TT>device</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t <B><TT>node</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;char <B><TT>name</TT></B>[<FONT  face=HELVETICA>MAXPATHLEN</FONT>]; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;void *<B><TT>text</TT></B>;     
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;void *<B><TT>data</TT></B>;     
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT>text_size</TT></B>;    
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;int32 <B><TT>data_size</TT></B>;   
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT>image_info
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+The fields are:
+<P>
+<UL>
+<LI><B><TT>id</TT></B>.  The image's <B><TT>image_id</TT></B> number.
+<P>
+<LI><B><TT>type</TT></B>.  A constant (listed below) that tells whether this is an app, library, or add-on image.  
+<P>
+<LI><B><TT>sequence</TT></B> and <B><TT>init_order</TT></B>.  These are zero-based ordinal numbers that give the order in which the image was loaded and initialized, compared to all the other images in this team.
+<P>
+<LI><B><TT>init_routine</TT></B> and <B><TT>term_routine</TT></B>.  These are pointers to the functions that are used to intialize and terminate the image (more specifically, the image's main thread).  The <B><TT><A HREF="../The%20Support%20Kit/misc.html#Function%20Pointers">B_PFV</A></TT></B> type is a cover for a pointer to a <B><TT>(void</TT></B>*) function.
+<P>
+<LI><B><TT>device</TT></B>.  The device that the image file lives on.
+<P>
+<LI><B><TT>node</TT></B>.  The node number of the image file.
+<P>
+<LI><B><TT>name</TT></B>.  The full pathname of the file whence sprang the image.
+<P>
+<LI><B><TT>text</TT></B> and <B><TT>text_size</TT></B>.  The address and the size (in bytes) of the image's text segment.
+<P>
+<LI><B><TT>data</TT></B> and <B><TT>data_size</TT></B>.  The address and size of the image's data segment.
+<P>
+</UL>
+<P>
+The self-explanatory <B><TT><A HREF="#image_type">image_type</A></TT></B> constants are:<B>
+<P>
+</B><TABLE BORDER cellpadding=4>
+<TH><B><TT>
+<A NAME="image_type"></A>image_type
+</TT></B> Constants</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_APP_IMAGE"></A>B_APP_IMAGE
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_LIBRARY_IMAGE"></A>B_LIBRARY_IMAGE
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ADD_ON_IMAGE"></A>B_ADD_ON_IMAGE
+</TD>
+</TABLE></TT></B>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The image was found; <I><FONT  color=991122 face=HELVETICA>info</I></FONT> contains valid information.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>image</I></FONT> doesn&gt;t identify an existing image, <I><FONT  color=991122 face=HELVETICA>team</I></FONT> doesn&gt;t identify an existing team, or there are no more images to visit.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_image_symbol()"></A>get_image_symbol()
+, 
+<A NAME="get_nth_image_symbol()"></A>get_nth_image_symbol()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_image_symbol(</TT></B></FONT>image_id <I><FONT  color=991122 face=HELVETICA>image</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *<I><FONT  color=991122 face=HELVETICA>symbol_name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>symbol_type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void **<I><FONT  color=991122 face=HELVETICA>location</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_nth_image_symbol(</TT></B></FONT>image_id <I><FONT  color=991122 face=HELVETICA>image</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>n</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *<I><FONT  color=991122 face=HELVETICA>name,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>name_length</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>*symbol_type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void **<I><FONT  color=991122 face=HELVETICA>location</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>get_image_symbol()</TT></B> returns, in <I><FONT  color=991122 face=HELVETICA>location</I></FONT>, a pointer to the address of the symbol that's identified by the <I><FONT  color=991122 face=HELVETICA>image</I></FONT>, <I><FONT  color=991122 face=HELVETICA>symbol_name</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>symbol_type</I></FONT> arguments.  An example demonstrating the use of this function is given in "<a href="ImageConcepts.html#Symbols">Symbols</a>."   
+<P>
+<B><TT>get_nth_image_symbol()</TT></B> returns information about the <I><FONT  color=991122 face=HELVETICA>n</I></FONT>'th symbol in the given image.  The information is returned in the arguments:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT> is the name of the symbol.  You have to allocate the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> buffer before you pass it in&mdash;the function copies the name into the buffer.  
+<P>
+<LI>You point <I><FONT  color=991122 face=HELVETICA>name_length</I></FONT> to an integer that gives the length of the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> buffer that you're passing in.  The function uses this value to truncate the string that it copies into <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  The function then resets <I><FONT  color=991122 face=HELVETICA>name_length</I></FONT> to the full (untruncated) length of the symbol's name (plus one byte to accommodate a terminating <B><TT>NULL</TT></B>).  To ensure that you've gotten the symbol's full name, you should compare the in-going value of <I><FONT  color=991122 face=HELVETICA>name_length</I></FONT> with the value that the function sets it to.  If the in-going value is less than the full length, you can then re-invoke <B><TT>get_nth_image_symbol()</TT></B> with an adequately lengthened <I><FONT  color=991122 face=HELVETICA>name</I></FONT> buffer, and an increased<I><FONT  color=991122 face=HELVETICA> name_length </I></FONT>value.
+<P>
+Keep in mind that <I><FONT  color=991122 face=HELVETICA>name_length</I></FONT> is reset each time you call <B><TT>get_nth_image_symbol()</TT></B>.  If you're calling the function iteratively (to retrieve all the symbols in an image), you need to reset the <I><FONT  color=991122 face=HELVETICA>name_length</I></FONT> value between calls.
+<P>
+<LI>The function sets <I><FONT  color=991122 face=HELVETICA>symbol_type </I></FONT>to <B><TT>B_SYMBOL_TYPE_DATA</TT></B> if the symbol is a variable, <B><TT>B_SYMBOL_TYPE_TEXT</TT></B> if the symbol is a function, or <B><TT>B_SYMBOL_TYPE_ANY</TT></B> if the executable format doesn't distinguish between the two.  The argument's value going into the function is of no consequence.
+<P>
+<LI>The function sets <I><FONT  color=991122 face=HELVETICA>location</I></FONT> to point to the symbol's address.
+<P>
+</UL>
+<P>
+To retrieve <B><TT>image_id</TT></B> numbers on which these functions can act, use the <B><TT>get_next_image_info()</TT></B> function.  Such numbers are also returned directly when you load an add-on image through the <B><TT><A HREF="#load_add_on()">load_add_on()</A></TT></B> function.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The symbol was found.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_IMAGE_ID">B_BAD_IMAGE_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>image</I></FONT> doesn&gt;t identify an existing image.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>n</I></FONT> is out-of-bounds.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="load_add_on()"></A>load_add_on()
+, 
+<A NAME="unload_add_on()"></A>unload_add_on()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>image_id</TT></B> <B><TT><FONT  color=000022 size=+1>load_add_on(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>pathname</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>unload_add_on(image_id</TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>image</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>load_add_on()</TT></B> loads an add-on image, identified by <I><FONT  color=991122 face=HELVETICA>pathname</I></FONT>, into your application's address space.  
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>pathname</I></FONT> can be absolute or relative; if it's relative, it's reckoned off the base path specified by the <B><TT>ADDON_PATH</TT></B> environment variable.  
+<P>
+<LI>The function returns an <B><TT>image_id</TT></B> (a positive integer) that represents the loaded image.  Image ID numbers are unique across the system.
+<P>
+</UL>
+<P>
+An example that demonstrates the use of<B><TT> load_add_on()</TT></B> is given in "<a href="ImageConcepts.html#Loading%20an%20Add-on%20Image">Loading an Add-on Image</a>."
+<P>
+You can load the same add-on image twice; each time you load the add-on a new, unique <B><TT>image_id</TT></B> is created and returned. 
+<P>
+<B><TT>unload_add_on() </TT></B>removes the add-on image identified by the argument.  The image's symbols are removed, and the memory that they represent is freed.  If the argument doesn't identify a valid image, the function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Otherwise, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<I>Positive </I><B><TT>image_id<I> value </TT></B></I>(load)<I> or </I><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> (unload).  Success.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The image couldn't be loaded (for whatever reason), or <I><FONT  color=991122 face=HELVETICA>image</I></FONT> isn't a valid image ID.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="load_image()"></A>load_image()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+thread_id <B><TT><FONT  color=000022 size=+1>load_image(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>argc,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>const char **<I><FONT  color=991122 face=HELVETICA>argv</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char **<I><FONT  color=991122 face=HELVETICA>env</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Loads an app image into the system (it <I>doesn't</I> load the image into the caller's address space), creates a separate team for the new application, and spawns and returns the ID of the team's main thread.  The image is identified by the pathname given in <I><FONT  color=991122 face=HELVETICA>argv</I></FONT>[0].
+<P>
+The  arguments are passed to the image's <B><TT>main()</TT></B> function (they show up there as the function's similarly named arguments):
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>argc</I></FONT> gives the number of entries that are in the <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> array.
+<P>
+<LI>The first string in the <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> array must be the name of the image file.  You then install any other arguments you want in the array, and terminate the array with a <B><TT>NULL</TT></B> entry.  Note that the value of <I><FONT  color=991122 face=HELVETICA>argc</I></FONT> shouldn't count <I><FONT  color=991122 face=HELVETICA>argv</I></FONT>'s terminating <B><TT>NULL</TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>envp</I></FONT> is an array of environment variables that are also passed to <B><TT>main()</TT></B>.  Typically, you use the global <B><TT>environ</TT></B> pointer:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extern char **environ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;load_image(..., environ);</PRE>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> and <I><FONT  color=991122 face=HELVETICA>envp</I></FONT> arrays are copied into the new thread's address space.  If you allocated either of these arrays, it's safe to free them immediately after <B><TT>load_image()</TT></B> returns.
+<P>
+The thread that's returned by<B><TT> load_image(<A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A></TT></B> is in a suspended state.  To start the thread running, you pass the <B><TT><A HREF="Threads.html#thread_id">thread_id</A></TT></B> to <B><TT><A HREF="Threads.html#resume_thread()">resume_thread()</A></TT></B> or <B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B>.  
+<P>
+An example that demonstrates the use of <B><TT>load_image()</TT></B> is given in "<a href="ImageConcepts.html#Loading%20an%20App%20Image">Loading an App Image</a>."
+<P>
+<b>RETURN CODES</b>
+<P>
+<I><UL>
+<LI>Positive integers</I>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Failure, for whatever reason.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,76 @@
+<HTML><HEAD><TITLE>Screen Saver: Screen Savers</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Screen Saver Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Screen%20Saver%20Master%20Index.html"><FONT face=HELVETICA>Screen Saver Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Screen%20Savers"></A>Screen Savers
+</H1>
+<P>
+A Screen Saver is a module that displays entertaining animations whenever your computer has been idle for too long, thus preventing the dreaded "pixel rot" that afflicts so many monitors.  The Screen Saver system is made up of these parts:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Part</B></TH>
+<TH>What is it?</TH>
+<TR>
+<TD><B>screen_blanker</B></TD>
+<TD>The application that takes over the screen and runs screen saver modules when it's time to save the screen.  It also handles asking for and verifying passwords.  <B>screen_blanker</B> lives in <B>/bin</B>.</TD>
+<TR>
+<TD><B>screen_saver</B></TD>
+<TD>An input server add-on that monitors user activity and starts (or stops) <B>screen_blanker.</B></TD>
+<TR>
+<TD><B>ScreenSaver</B> preferences</TD>
+<TD>The Screen Saver system's preference panel.  It loads screen saver modules so the user can configure and preview them.</TD>
+<TR>
+<TD><A HREF="ScreenSaverClass.html#BScreenSaver">BScreenSaver</A> class</TD>
+<TD><A HREF="ScreenSaverClass.html#BScreenSaver">BScreenSaver</A> provides an interface for developers creating their own screen saver modules.  Classes derived from <A HREF="ScreenSaverClass.html#BScreenSaver">BScreenSaver</A> implement the functions that draw on the screen while it&gt;s being saved. </TD>
+<TR>
+<TD>Screen saver add-ons</TD>
+<TD>A screen saver add-on embodies a single screen saver module.  It contains the (compiled) <A HREF="ScreenSaverClass.html#BScreenSaver">BScreenSaver</A> code that you write, and provides a hook function, <B><TT><A HREF="ScreenSaverAddOn.html#instantiate_screen_saver()">instantiate_screen_saver()</A></TT></B>, that lets the screen saver engine create an instance of your <A HREF="ScreenSaverClass.html#BScreenSaver">BScreenSaver</A> class.  The add-ons are stored in the expected places:  the <B>Screen Savers</B> directory in <B><TT>B_BEOS_ADDONS_DIRECTORY</TT></B> for screen savers that come with BeOS, or <B>Screen Savers</B> in <B><TT>B_USER_ADDONS_DIRECTORY</TT></B> for ones you&gt;ve added.</TD>
+</TABLE>
+<P>
+As a screen saver module developer, you have to provide two things: a <A HREF="ScreenSaverClass.html#BScreenSaver">BScreenSaver</A> subclass, and an implementation of the <B><TT><A HREF="ScreenSaverAddOn.html#instantiate_screen_saver()">instantiate_screen_saver()</A></TT></B> function. These responsibilities are discussed in the next two sections (<a href="ScreenSaverClass.html#BScreenSaver">"BScreenSaver"</a> and <a href="ScreenSaverAddOn.html#Screen%20Saver%20Add-ons">"Screen Saver Add-ons"</a>).
+<P>
+The final two sections take a brief look at the <B>ScreenSaver</B> preference application (<a href="ScreenSaverPref.html#Talking%20to%20ScreenSaver">"Talking to ScreenSaver"</a>), and provide an example of a <A HREF="ScreenSaverClass.html#BScreenSaver">BScreenSaver</A> class (<a href="ScreenSaverExample.html#An%20Example%20Screen%20Saver">"An Example Screen Saver"</a>).
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Screen Saver Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Screen%20Saver%20Master%20Index.html"><FONT face=HELVETICA>Screen Saver Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,125 @@
+<HTML><HEAD><TITLE>Release Notes: The Translation Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Translation%20Kit"></A>The Translation Kit
+</H1>
+<P>
+<HR>
+<H2>
+<A NAME="BTranslationUtils"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>T</FONT>ranslation<FONT SIZE=6>U</FONT>tils
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/translation/TranslationUtils.h">translation/TranslationUtils.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="GetBitmap()"></A>GetBitmap()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>static <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *</TT></B> <B><TT><FONT  color=000022 size=+1>GetBitmap(const entry_ref *</TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, <B><TT><A HREF="../The%20Translation%20Kit/TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> *</TT></B> <I><FONT  color=991122 face=HELVETICA>use</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+New version of <B><TT><A HREF="#GetBitmap()">GetBitmap()</A></TT></B> takes an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> as its initial argument.
+<P>
+<HR>
+<H2>
+<A NAME="Global%20Functions"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/translation/Translator.h">translation/Translator.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="make_nth_translator()"></A>make_nth_translator()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Translation%20Kit/Translator.html#BTranslator">BTranslator</A></TT></B> *<B><TT><FONT  color=000022 size=+1>make_nth_translator</TT></B></FONT>(<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>n</I></FONT>, <B><TT>image_id</TT></B> <I><FONT  color=991122 face=HELVETICA>addon</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, ...)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+You implement this function in your translator add-on to create and return a new <A HREF="../The%20Translation%20Kit/Translator.html#BTranslator">BTranslator</A> object.  A single add-on can create instances from more than one <A HREF="../The%20Translation%20Kit/Translator.html#BTranslator">BTranslator</A> subclass.  You don't have to publicize how many different translators you can create; instead, you simply create and return an instance of a different subclass for each value of the index <I><FONT  color=991122 face=HELVETICA>n</I></FONT> (starting with 0) and return <B><TT>NULL</TT></B> when you run out of subclasses.   
+<P>
+<I><FONT  color=991122 face=HELVETICA>addon</I></FONT> is the image that your addon lives in.  It's provided as a convenience.
+<P>
+<I><FONT  color=991122 face=HELVETICA>flags</I></FONT> is currently unused.
+<P>
+This function replaces the translator add-on API defined in translation/TranslatorAddOn.h.
+<P>
+<HR>
+<H2>
+<A NAME="Translator%20Add-ons"></A><FONT SIZE=6>T</FONT>ranslator <FONT SIZE=6>A</FONT>dd-ons
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/translation/TranslatorAddOn.h">translation/TranslatorAddOn.h</A>
+<P>
+All of the functions and symbols in this file have been deprecated.  To provide a <A HREF="../The%20Translation%20Kit/Translator.html#BTranslator">BTranslator</A> object from an add-on, you implement the make_nth_translator() function, describe immediately above.  Translator add-ons themselves still live in the usual places (in the <B>Translators</B> subdirectory of <B><TT>B_*_ADDONS_DIRECTORY</TT></B>).
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

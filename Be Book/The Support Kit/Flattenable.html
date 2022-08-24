@@ -1,0 +1,185 @@
+<HTML><HEAD><TITLE>The Support Kit: BFlattenable</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BFlattenable"></A>BFlattenable
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/support/Flattenable.h">be/support/Flattenable.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Flattenable.summary.html"><i>Summary</i></A></H6>
+<P>
+The BFlattenable class declares a protocol for objects that can be flattened&mdash;written to an untyped buffer of bytes&mdash;and unflattened from the buffer.  By implementing this protocol, a class gives others the ability to manipulate its objects in a flexible manner.  Currently, only the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> class, through its <B><TT><A HREF="../The%20Application%20Kit/Message.html#AddFlat()">AddFlat()</A></TT></B> and <B><TT><A HREF="../The%20Application%20Kit/Message.html#FindFlat()">FindFlat()</A></TT></B> functions, declares an API that can deal with BFlattenable objects.  The <A HREF="../Release%20Notes/StorageKit.html#BPath">BPath</A> class in the Storage Kit derives from BFlattenable.
+<P>
+As this class merely declares a protocol for other classes to implement, it doesn&gt;t include a constructor or destructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>AllowsTypeCode()   see <A HREF="#TypeCode()">TypeCode()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Flatten()"></A>Flatten()
+, 
+<A NAME="Unflatten()"></A>Unflatten()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Flatten(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, ssize_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const&nbsp;=&nbsp;0
+<P>
+
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Unflatten(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>code</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, ssize_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;=&nbsp;0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Flatten()">Flatten()</A></TT></B> is implemented by derived classes to write the object into the <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  There are <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> bytes of memory available at the <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> address.  If this isn't at least as much memory as the <B><TT><A HREF="#FlattenedSize()">FlattenedSize()</A></TT></B> function says is necessary, <B><TT><A HREF="#Flatten()">Flatten()</A></TT></B> should return an error.  If successful, it should return <B><TT><A HREF="ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<B><TT><A HREF="#Unflatten()">Unflatten()</A></TT></B> is implemented by derived classes to set object values from <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> bytes of data taken from the <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  However, it should read the data only if the type <I><FONT  color=991122 face=HELVETICA>code</I></FONT> it's passed indicates that the data is a type that it supports&mdash;that is, only if its <B><TT><A HREF="#AllowsTypeCode()">AllowsTypeCode()</A></TT></B> function returns <B><TT>true</TT></B> for the <I><FONT  color=991122 face=HELVETICA>code</I></FONT>.  If successful in reconstructing the object from the flattened data, <B><TT><A HREF="#Unflatten()">Unflatten()</A></TT></B> should return <B><TT><A HREF="ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If not, it should return <B><TT><A HREF="ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> or a more descriptive error code.
+<P>
+<HR>
+<H3>
+<A NAME="FlattenedSize()"></A>FlattenedSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual ssize_t <B><TT><FONT  color=000022 size=+1>FlattenedSize(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const&nbsp;=&nbsp;0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to return the amount of memory needed to hold the flattened object.  This is the minimal amount that must be allocated and passed to <B><TT><A HREF="#Flatten()">Flatten()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="IsFixedSize()"></A>IsFixedSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>IsFixedSize(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const&nbsp;=&nbsp;0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to return <B><TT>true</TT></B> if all instances of the class take up the same amount of memory when they're flattened, and <B><TT>false</TT></B> if their flattened sizes can differ.  The sizes will differ, for example, if a variable-length string is part of the flattened data.
+<P>
+<HR>
+<H3>
+<A NAME="TypeCode()"></A>TypeCode()
+, 
+<A NAME="AllowsTypeCode()"></A>AllowsTypeCode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual type_code <B><TT><FONT  color=000022 size=+1>TypeCode(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const&nbsp;=&nbsp;0
+<P>
+
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>AllowsTypeCode(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>code</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#TypeCode()">TypeCode()</A></TT></B> is implemented by derived classes to return the type code that identifies the class type.  The code is used to identify an instance of the class in its flattened state, for example when it's added to a BMessage.
+<P>
+<B><TT>AllowsType()</TT></B> returns <B><TT>true</TT></B> if the <I><FONT  color=991122 face=HELVETICA>code</I></FONT> it&gt;s passed matches the code returned by <B><TT><A HREF="#TypeCode()">TypeCode()</A></TT></B> and <B><TT>false</TT></B> if not.  If can be modified in derived classes to apply a more liberal standard&mdash;to allow more than one type code to identify the object.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Message.html#AddData()">BMessage::AddData()</A></TT></B> 
+<P>
+<HR>
+<H3>Unflatten()   see <A HREF="#Flatten()">Flatten()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

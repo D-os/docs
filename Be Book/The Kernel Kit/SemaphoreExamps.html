@@ -1,0 +1,181 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Semaphore Examples</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Semaphore%20Examples"></A>Semaphore Examples
+</H1>
+<P>
+The following sections provides examples of typical semaphore use.  For the full story on semaphores, see <a href="Semaphores.html#Semaphores">Semaphores</a>.
+<P>
+<A NAME="22148:%20head1:%20Example%201:%20Using%20a%20Semaphore%20as%20a%20Lock"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Semaphore%20Example%201:%20Locking"></A><FONT SIZE=6>S</FONT>emaphore <FONT SIZE=6>E</FONT>xample 1: <FONT SIZE=6>L</FONT>ocking
+</H2>
+<P>
+The most typical use of a semaphore is to protect a chunk of code that can only be executed by one thread at a time.  The semaphore acts as a lock; <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> locks the code, <B><TT><A HREF="Semaphores.html#release_sem()">release_sem()</A></TT></B> releases it.  Semaphores that are used as locks are (almost always) created with a thread count of 1.
+<P>
+As a simple example, let's say you keep track of a maximum value like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* max_val is a global. */
+&nbsp;&nbsp;&nbsp;uint32 max_val = 0;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* bump_max() resets the max value, if necessary. */
+&nbsp;&nbsp;&nbsp;void bump_max(uint32 new_value)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (new_value > max_value)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value = new_value;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+bump_max() isn't thread safe; there's a race condition between the comparison and the assignment.  So we protect it with a semaphore:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;sem_id max_sem;
+&nbsp;&nbsp;&nbsp;uint32 max_val = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;/* Initialize the semaphore during a setup routine. */
+&nbsp;&nbsp;&nbsp;status_t init()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((max_sem = create_sem(1, "max_sem")) &lt; B_NO_ERROR)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;void bump_max(uint32 new_value)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (acquire_sem(max_sem) != B_NO_ERROR)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (new_value > max_value)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value = new_value;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;release_sem();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Semaphore%20Example%202:%20Benaphores"></A><FONT SIZE=6>S</FONT>emaphore <FONT SIZE=6>E</FONT>xample 2: <FONT SIZE=6>B</FONT>enaphores
+</H2>
+<P>
+A "benaphore" is a combination of an atomic variable and a semaphore that can improve locking efficiency.  If you're using a semaphore as shown in the previous example, you should consider using a benaphore instead (if you can).  
+<P>
+Here's the example re-written to use a benaphore:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;sem_id max_sem;
+&nbsp;&nbsp;&nbsp;uint32 max_val = 0;
+&nbsp;&nbsp;&nbsp;int32 ben_val = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;status_t init()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* This time we initialized the semaphore to 0. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((max_sem = create_sem(0, "max_sem")) &lt; B_NO_ERROR)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;void bump_max(uint32 new_value)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 previous = atomic_add(&amp;ben_val, 1);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (previous >= 1) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (acquire_sem(max_sem) != B_NO_ERROR) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;goto get_out;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (new_value > max_value)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value = new_value;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;get_out:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;previous = atomic_add(&amp;ben_val, -1);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (previous > 1) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;release_sem(max_sem);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The point, here, is that <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> is called only if it's known (by checking the previous value of <B><TT>ben_val</TT></B>) that some other thread is in the middle of the critical section.  On the releasing end, the <B><TT><A HREF="Semaphores.html#release_sem()">release_sem()</A></TT></B> is called only if some other thread has since entered the function (and is now blocked in the <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> call).  An important point, here, is that the semaphore is initialized to 0. 
+<P>
+<A NAME="23064:%20head1:%20Example%202:%20Using%20Semaphores%20to%20Impose%20an%20Execution%20Order"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Semaphore%20Example%203:%20Imposing%20an%20Execution%20Order"></A><FONT SIZE=6>S</FONT>emaphore <FONT SIZE=6>E</FONT>xample 3: <FONT SIZE=6>I</FONT>mposing an <FONT SIZE=6>E</FONT>xecution <FONT SIZE=6>O</FONT>rder
+</H2>
+<P>
+Semaphores can also be used to coordinate threads that are performing separate operations, but that need to perform these operations in a particular order.  In the following example, we have a global buffer that's accessed through separate reading and writing functions.  Furthermore, we want writes and reads to alternate, with a write going first.
+<P>
+We can lock the entire buffer with a single semaphore, but to enforce alternation we need two semaphores:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;sem_id write_sem, read_sem;
+&nbsp;&nbsp;&nbsp;char buffer[1024];
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Initialize the semaphores */
+&nbsp;&nbsp;&nbsp;status_t init()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((write_sem = create_sem(1, "write")) &lt; B_NO_ERROR) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((read_sem = create_sem(0, "read")) &lt; B_NO_ERROR) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete_sem(write_sem);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;status_t write_buffer(const char *src)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (acquire_sem(write_sem) != B_NO_ERROR)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;strncpy(buffer, src, 1024);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;release_sem(read_sem);
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;status_t read_buffer(char *dest, size_t len)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (acquire_sem(read_sem) != B_NO_ERROR)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;strncpy(dest, buffer, len);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;release_sem(write_sem);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The initial thread counts ensure that the buffer will be written to before it's read:  If a reader arrives before a writer, the reader will block until the writer releases the <B><TT>read_sem</TT></B> semaphore.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

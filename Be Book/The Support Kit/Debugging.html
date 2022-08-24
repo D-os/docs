@@ -1,0 +1,323 @@
+<HTML><HEAD><TITLE>The Support Kit: Debugging Tools</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Debugging%20Tools"></A>Debugging Tools
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/support/Debug.h">be/support/Debug.h</A>
+<P>
+The Support Kit provides a set of macros that help you debug your application.  These tools let you print information to standard output or to the serial port, and conditionally enter the debugger.
+<P>
+To enable the Support Kit's debugging macros, simply compile your code with the <B><TT>DEBUG</TT></B> preprocessor variable defined.  The debugging facilities also provide a debug flag which you can use to selectively turn debugging on and off in your code.  You therefore have a both compile time and run time methods for enabling debugging.  Note that the <B><TT>DEBUG</TT></B> variable supercedes the runtime debug flag; if it is not defined, debugging will be disabled, irrespective of the state of the debug flag.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Serial debugging is enabled if you hold down the F1 key (Intel) or the Delete key (Macintosh) while booting into BeOS.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="The%20DEBUG%20Preprocessor%20Variable"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>D</FONT><FONT SIZE=6>E</FONT><FONT SIZE=6>B</FONT><FONT SIZE=6>U</FONT><FONT SIZE=6>G</FONT> <FONT SIZE=6>P</FONT>reprocessor <FONT SIZE=6>V</FONT>ariable
+</H2>
+<P>
+You can define the <B><TT>DEBUG</TT></B> preprocessor variable by adding the following line to your <B>makefile</B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;CFLAGS := -DDEBUG</PRE>
+<P>
+There is currently no mechanism for specifying #define's from the MetroWerks IDE.  If you are building with the IDE, you must add the following line to your source files:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#define DEBUG</PRE>
+<P>
+When you're through debugging your application, simply remove the <B><TT>DEBUG</TT></B> definition and the debugging macros will be compiled away&mdash;you don't have to actually go into the code and remove the macros or comment them out.
+<P>
+<HR>
+<H2>
+<A NAME="The%20Debug%20Flag"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>D</FONT>ebug <FONT SIZE=6>F</FONT>lag
+</H2>
+<P>
+The <B><TT><A HREF="#SET_DEBUG_ENABLED()">SET_DEBUG_ENABLED()</A> </TT></B>macro turns the application-wide debug flag on or off.  Debug macros perform their intended functions only if <B><TT>DEBUG</TT></B> is #defined and the debug flag is turned on.  Unlike the <B><TT>DEBUG</TT></B> preprocessor variable, which enables or disables debugging for sections of code, the state of the debug flag follows the flow of program execution; turning the debug flag on before a function call, for example, will cause it to be on inside the function as well.
+<P>
+<B>Note:</B>  The debug flag is on by default.  If you want to (initially, at least) turn it off, you should call <B><TT>SET_DEBUG_ENABLED(<FONT  face=HELVETICA>FALSE)</TT></B></FONT> as one of your first acts in <B><TT>main()</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Macros"></A><FONT SIZE=6>M</FONT>acros
+</H2>
+<P>
+<HR>
+<H3>ASSERT()   see <A HREF="#DEBUGGER()">DEBUGGER()</A></H3>
+<P>
+<HR>
+<H3>ASSERT_WITH_MESSAGE()   see <A HREF="#DEBUGGER()">DEBUGGER()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="DEBUG_ONLY()"></A>DEBUG_ONLY()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>DEBUG_ONLY(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>expression</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This macro blindly executes <I><FONT  color=991122 face=HELVETICA>expression</I></FONT> and is useful when you wish to execute a piece of code only when debugging is enabled.
+<P>
+<HR>
+<H3>
+<A NAME="DEBUGGER()"></A>DEBUGGER()
+, 
+<A NAME="TRESPASS()"></A>TRESPASS()
+, 
+<A NAME="ASSERT()"></A>ASSERT()
+, 
+<A NAME="ASSERT_WITH_MESSAGE()"></A>ASSERT_WITH_MESSAGE()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>DEBUGGER(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>var_args</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>TRESPASS(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>void</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>ASSERT(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>condition</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>ASSERT_WITH_MESSAGE(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>condition</I></FONT><B><TT><FONT  color=000022 size=+1>, </TT></B></FONT><I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These macros cause your program to enter the debugger: <B><TT> DEBUGGER() and TRESPASS()</TT></B> always enter the debugger, while <B><TT>ASSERT()</TT></B> and <B><TT>ASSERT_WITH_MESSAGE()</TT></B> enter only if <I><FONT  color=991122 face=HELVETICA>condition</I></FONT> (which can be any normal C or C++ expression) evaluates to <B><TT>FALSE</TT></B>.
+<P>
+<B><TT>DEBUGGER()</TT></B> takes a <B><TT>printf()</TT></B>-style variable-length argument that must be wrapped inside a second set of parentheses; for example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;DEBUGGER(("What time is it?  %fn", system_time()));</PRE>
+<P>
+The argument is evaluated and printed in the debugger's shell.
+<P>
+<B><TT>TRESPASS()</TT></B> is equivalent to <B><TT>DEBUGGER("Should not be here");.
+<P>
+</TT></B>If <B><TT>ASSERT()</TT></B> enters the debugger, the following message is printed:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;Assert failed: File: <I><FONT  color=991122 face=HELVETICA>filename</I></FONT>, Line: <I><FONT  color=991122 face=HELVETICA>number</I></FONT>. <I><FONT  color=991122 face=HELVETICA>condition</PRE>
+<P>
+</I></FONT>If <B><TT>ASSERT_WITH_MESSAGE()</TT></B> enters the debugger, the following message is printed:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;Assert failed: File: <I><FONT  color=991122 face=HELVETICA>filename</I></FONT>, Line: <I><FONT  color=991122 face=HELVETICA>number</I></FONT>. <I><FONT  color=991122 face=HELVETICA>message</PRE>
+<P>
+</I></FONT>Note that the <I><FONT  color=991122 face=HELVETICA>condition</I></FONT> argument needn't be wrapped in a second set of parentheses.  
+<P>
+<HR>
+<H3>IS_DEBUG_ENABLED()   see <A HREF="#SET_DEBUG_ENABLED()">SET_DEBUG_ENABLED()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="PRINT()"></A>PRINT()
+, 
+<A NAME="SERIAL_PRINT()"></A>SERIAL_PRINT()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>PRINT(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>var_args</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>SERIAL_PRINT(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>var_args</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These macros print the message given by <I><FONT  color=991122 face=HELVETICA>var_args</I></FONT>.  The argument takes the variable argument form of a <B><TT>printf()</TT></B> call and must be wrapped inside a second set of parenthesis; for example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;PRINT(("The time is %fn", system_time()));</PRE>
+<P>
+<B><TT>PRINT()</TT></B> sends the message to standard out; <B><TT>SERIAL_PRINT()</TT></B> to a serial port at a data rate of 19,200 bits per second.  The output is sent to <B>/dev/ports/serial4</B> on BeBoxes, <B>/dev/modem</B> on Macs, and <B>/dev/ports/serial1</B> on Intel machines.
+<P>
+<HR>
+<H3>
+<A NAME="PRINT_OBJECT()"></A>PRINT_OBJECT()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>PRINT_OBJECT(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Prints information about the argument <I><FONT  color=991122 face=HELVETICA>object</I></FONT> (which must be a pointer to a C++ object) by calling the object's <B><TT>PrintToStream()</TT></B> function.  The macro doesn't check to make sure that object actually implements the function, so you should use this macro with care.
+<P>
+Object information is always printed to standard out (there isn't a serial port version of the call).
+<P>
+<HR>
+<H3>SERIAL_PRINT()   see <A HREF="#PRINT()">PRINT()</A></H3>
+<P>
+<HR>
+<H3>SERIAL_TRACE()   see <A HREF="#TRACE()">TRACE()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SET_DEBUG_ENABLED()"></A>SET_DEBUG_ENABLED()
+, 
+<A NAME="IS_DEBUG_ENABLED()"></A>IS_DEBUG_ENABLED()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>SET_DEBUG_ENABLED(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>flag</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>IS_DEBUG_ENABLED(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>void</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>SET_DEBUG_ENABLED()</TT></B> macro sets the state of the run time debug flag:  a <B><TT>TRUE</TT></B> argument turns it on, <B><TT>FALSE</TT></B> turns it off.  When the flag is on, the other debugging macros work; when it's off, they're ignored.  The debug flag is set to <B><TT>TRUE</TT></B> by default.
+<P>
+The debug flag is only meaningful if your code was compiled with the <B><TT>DEBUG </TT></B>preprocessor variable defined.  Without this definition, the debugging macros will always be disabled.
+<P>
+<B><TT>IS_DEBUG_ENABLED()</TT></B> returns the current state of the debug flag.  
+<P>
+<HR>
+<H3>
+<A NAME="TRACE()"></A>TRACE()
+, 
+<A NAME="SERIAL_TRACE()"></A>SERIAL_TRACE()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>TRACE(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>void</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>SERIAL_TRACE(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>void</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These macros print the name of the source code file that contains the currently executing code (in other words, the file that contains the <B><TT>TRACE() </TT></B>call itself), the line number of the code, and the <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#thread_id">thread_id</A></TT></B> of the calling thread.  The information is printed in this form:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;  File: <I>filename</I>, Line: <I>number</I>, Thread: <I>id</PRE>
+<P>
+</I><B><TT>TRACE()</TT></B> sends the message to standard out; <B><TT>SERIAL_TRACE()</TT></B> to a serial port at a data rate of 19,200 bits per second.  The output is sent to <B>/dev/ports/serial4</B> on BeBoxes, <B>/dev/modem</B> on Macs, and <B>/dev/ports/serial1</B> on Intel machines.
+<P>
+<HR>
+<H3>TRESPASS()   see <A HREF="#DEBUGGER()">DEBUGGER()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,196 @@
+<HTML><HEAD><TITLE>The Interface Kit: BShapeIterator</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BShapeIterator"></A>BShapeIterator
+</H1>
+<P>
+Derived from:  (none)
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Shape.h">be/interface/Shape.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="ShapeIterator.summary.html"><i>Summary</i></A></H6>
+<P>
+Applications can create classes derived from BShapeIterator to iterate over the components of a <A HREF="Shape.html#BShape">BShape</A> object.  There are four virtual functions that the application must implement to process the four graphics commands described in the <A HREF="Shape.html#BShape">BShape</A> documentation: <B><TT><A HREF="Shape.html#MoveTo()">MoveTo()</A></TT></B>, <B><TT><A HREF="Shape.html#LineTo()">LineTo()</A></TT></B>, <B><TT><A HREF="Shape.html#BezierTo()">BezierTo()</A></TT></B>, and <B><TT><A HREF="Shape.html#Close()">Close()</A></TT></B>.
+<P>
+These functions can be implemented to do anything they like with the commands (rendering them to the screen comes to mind as one possibility).
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BShapeIterator()"></A>BShapeIterator()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BShapeIterator()">BShapeIterator()</A></TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Constructor.
+<P>
+<HR>
+<H3>
+<A NAME="~BShapeIterator()"></A>~BShapeIterator()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BShapeIterator()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Destructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Iterate()"></A>Iterate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Iterate(</TT></B></FONT><A HREF="Shape.html#BShape">BShape</A> *<I><FONT  color=991122 face=HELVETICA>shape</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Iterate()</TT></B> iterates over each command that comprises the shape, in order, calling the <B><TT>Iterate...()</TT></B> function that corresponds to each command.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI>Other errors.  None are defined at this time, but you should always check for errors returned by this function.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="IterateBezierTo()"></A>IterateBezierTo()
+, 
+<A NAME="IterateClose()"></A>IterateClose()
+, 
+<A NAME="IterateLineTo()"></A>IterateLineTo()
+, 
+<A NAME="IterateMoveTo()"></A>IterateMoveTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>IterateBezierTo(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>bezierCount</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> * <I><FONT  color=991122 face=HELVETICA>bezierPoints</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>IterateClose(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>IterateLineTo(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>lineCount</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> * <I><FONT  color=991122 face=HELVETICA>linePoints</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>IterateMoveTo(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> * <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions are called by <B><TT><A HREF="#Iterate()">Iterate()</A></TT></B> to process the shape commands.  Your BShapeIterator-derived class must implement these four functions.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

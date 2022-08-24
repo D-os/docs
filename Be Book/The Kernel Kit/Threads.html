@@ -1,0 +1,1292 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Threads and Teams</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Threads%20and%20Teams"></A>Threads and Teams
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/OS.h unless otherwise noted">be/kernel/OS.h unless otherwise noted</A>
+<P>
+Library:  libroot.so
+<P>
+A thread is a synchronous process that executes a series of program instructions.  When you launch an application, an initial thread&mdash;the <I>main thread</I>&mdash;is automatically created (or <I>spawned</I>) and told to run.  From the main thread you can spawn and run additional threads; from each of these threads you can spawn and run more threads, and so on.  The collection of threads that are spawned from the main thread&mdash;in other words, the threads that comprise an application&mdash;is called a team.  All the threads in all teams run concurrently and asynchronously with each other.  
+<P>
+For more information on threads and teams, see <a href="ThreadConcepts.html#Thread%20and%20Team%20Concepts">"Thread and Team Concepts"</a>.
+<P>
+<HR>
+<H2>
+<A NAME="Thread%20and%20Team%20Functions"></A><FONT SIZE=6>T</FONT>hread and <FONT SIZE=6>T</FONT>eam <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="estimate_max_scheduling_latency()"></A>estimate_max_scheduling_latency()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/scheduler.h">be/kernel/scheduler.h</A>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>estimate_max_scheduling_latency(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> = -1<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the scheduling latency, in microseconds, of the specified thread.  Specify a <B><TT><A HREF="#thread_id">thread_id</A></TT></B> of -1 to return the scheduling latency of the current thread.
+<P>
+<HR>
+<H3>
+<A NAME="exit_thread()"></A>exit_thread()
+, 
+<A NAME="kill_thread()"></A>kill_thread()
+, 
+<A NAME="kill_team()"></A>kill_team()
+, 
+<A NAME="on_exit_thread()"></A>on_exit_thread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>exit_thread(</TT></B></FONT>status_t <I><FONT  color=991122 face=HELVETICA>return_value</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>kill_thread(t</TT></B></FONT>hread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>kill_team(</TT></B></FONT>team_id <I><FONT  color=991122 face=HELVETICA>team</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>on_exit_thread(</TT></B></FONT>void (*<I><FONT  color=991122 face=HELVETICA>callback</I></FONT>)(void *), void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions command one or more threads to halt execution:
+<P>
+<UL>
+<LI><B><TT><A HREF="#exit_thread()">exit_thread()</A></TT></B> tells the calling thread to exit with a return value as given by the argument.  Declaring the return value is only useful if some other thread is sitting in a <B><TT><A HREF="#wait_for_thread()">wait_for_thread()</A></TT></B> call on this thread.  <B><TT><A HREF="#exit_thread()">exit_thread()</A></TT></B> sends a  signal to the thread (after caching the return value in a known place). 
+<P>
+<LI><B><TT><A HREF="#kill_thread()">kill_thread()</A></TT></B> kills the thread given by the argument.  The value that the thread will return to <B><TT><A HREF="#wait_for_thread()">wait_for_thread()</A></TT></B> is undefined and can't be relied upon.  <B><TT><A HREF="#kill_thread()">kill_thread()</A></TT></B> is the same as sending a <B><TT>SIGKILLTHR</TT></B> signal to the thread.
+<P>
+<LI><B><TT><A HREF="#kill_team()">kill_team()</A> </TT></B>kills all the threads within the given team.  Again, the threads' return values are random.  <B><TT><A HREF="#kill_team()">kill_team()</A></TT></B> is the same as sending a <B><TT>SIGKILL</TT></B> signal to any thread in the team.  Each of the threads in the team is then handed a <B><TT>SIGKILLTHR</TT></B> signal.
+<P>
+<LI><B><TT><A HREF="#on_exit_thread()">on_exit_thread()</A></TT></B> sets up the specified <I><FONT  color=991122 face=HELVETICA>callback</I></FONT> to be executed when the calling thread exits.  The callback will receive the pointer <I><FONT  color=991122 face=HELVETICA>data</I></FONT> as an input argument.
+<P>
+</UL>
+<P>
+Exiting a thread is a fairly safe thing to do&mdash;since a thread can only exit itself, it's assumed that the thread knows what it's doing.  Killing some other thread or an entire team is a bit more drastic since the death certificate(s) will be delivered at an indeterminate time.  In addition, killing a thread can leak memory since resources that were allocated by the thread may not be freed.  Killing an entire team, on the other hand, won't leak since the system reclaims all resources when the team dies.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>Keep in mind that threads die automatically (and their resources are reclaimed) if they're allowed to exit naturally.</B>  You should only need to kill a thread if something has gone screwy.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The thread or team was successfully killed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> value.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TEAM_ID">B_BAD_TEAM_ID</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>team</I></FONT> value.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Returned by <B><TT><A HREF="#on_exit_thread()">on_exit_thread()</A></TT></B> if there's no memory to construct the internal callback record.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="find_thread()"></A>find_thread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+thread_id <B><TT><FONT  color=000022 size=+1>find_thread(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Finds and returns the thread with the given name.  A <I><FONT  color=991122 face=HELVETICA>name</I></FONT> argument of <B><TT>NULL</TT></B> returns the calling thread.  
+<P>
+A thread's name is assigned when the thread is spawned.  The name can be changed thereafter through the <B><TT><A HREF="#rename_thread()">rename_thread()</A> </TT></B>function.  Keep in mind that thread names needn't be unique:  If two (or more) threads boast the same name, a <B><TT><A HREF="#find_thread()">find_thread()</A></TT></B> call on that name returns the first so-named thread that it finds.  There's no way to iterate through identically-named threads.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>name</I></FONT> doesn't identify a valid thread.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_team_info()"></A>get_team_info()
+, 
+<A NAME="get_next_team_info()"></A>get_next_team_info()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_team_info(<A HREF="#team_id">team_id</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, <B><TT><A HREF="#team_info">team_info</A></TT></B> *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_next_team_info(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, <B><TT><A HREF="#team_info">team_info</A></TT></B> *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The functions copy, into the <I><FONT  color=991122 face=HELVETICA>info</I></FONT> argument, the <B><TT><A HREF="#team_info">team_info</A></TT></B> structure for a particular team.  The <B><TT><A HREF="#get_team_info()">get_team_info()</A></TT></B> function retrieves information for the team identified by <I><FONT  color=991122 face=HELVETICA>team</I></FONT>.  For information about the kernel, use <B><TT><A HREF="#B_SYSTEM_TEAM">B_SYSTEM_TEAM</A></TT></B> as the <I><FONT  color=991122 face=HELVETICA>team</I></FONT> argument.
+<P>
+The <B><TT><A HREF="#get_next_team_info()">get_next_team_info()</A></TT></B> version lets you step through the list of all teams.  The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> argument is a placemark; you set it to 0 on your first call, and let the function do the rest.  The function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> when there are no more areas to visit:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Get the team_info for every team. */
+&nbsp;&nbsp;&nbsp;team_info info;
+&nbsp;&nbsp;&nbsp;int32 cookie = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (get_next_team_info(0, &amp;cookie, &amp;info) == B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+See <B><TT><A HREF="#team_info">team_info</A></TT></B> for a description of that structure.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The desired team information was found.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TEAM_ID">B_BAD_TEAM_ID</A></TT></B>.   <I><FONT  color=991122 face=HELVETICA>team</I></FONT> doesn&gt;t identify an existing team, or there are no more areas to visit.
+<P>
+</UL>
+<A NAME="14698:%20funcName:%20get_thread_info(),%20get_nth_thread_info()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="get_thread_info()"></A>get_thread_info()
+, 
+<A NAME="get_next_thread_info()"></A>get_next_thread_info()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_thread_info(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT>, thread_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> get_next_thread_info(</TT></B></FONT>team_id <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *cookie, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thread_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions copy, into the <I><FONT  color=991122 face=HELVETICA>info</I></FONT> argument, the <B><TT><A HREF="#thread_info">thread_info</A></TT></B> structure for a particular thread:  
+<P>
+The <B><TT><A HREF="#get_thread_info()">get_thread_info()</A></TT></B> function gets the information for the thread identified by <I><FONT  color=991122 face=HELVETICA>thread</I></FONT>.
+<P>
+The <B><TT><A HREF="#get_next_thread_info()">get_next_thread_info()</A></TT></B> function lets you step through the list of a team's threads through iterated calls.  The <I><FONT  color=991122 face=HELVETICA>team</I></FONT> argument identifies the team you want to look at; a <I><FONT  color=991122 face=HELVETICA>team</I></FONT> value of 0 means the team of the calling thread.  The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> argument is a placemark; you set it to 0 on your first call, and let the function do the rest.  The function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> when there are no more threads to visit:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Get the thread_info for every thread in this team. */
+&nbsp;&nbsp;&nbsp;thread_info info;
+&nbsp;&nbsp;&nbsp;int32 cookie = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (get_next_thread_info(0, &amp;cookie, &amp;info) == B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+The value of the <B><TT>priority</TT></B> field describes the thread's "urgency"; the higher the value, the more urgent the thread.  The more urgent the thread, the more attention it gets from the CPU.  Expected priority values fall between 0 and 120.  See  "<a href="ThreadConcepts.html#Thread%20Priorities">Thread Priorities</a>" for the full story.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Thread info is provided primarily as a debugging aid.  None of the values that you find in a <B><TT><A HREF="#thread_info">thread_info</A></TT></B> structure are guaranteed to be valid&mdash;the thread's state, for example, will almost certainly have changed by the time <B><TT><A HREF="#get_thread_info()">get_thread_info()</A></TT></B> returns. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The thread was found; <I><FONT  color=991122 face=HELVETICA>info</I></FONT> contains valid information.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> doesn't identify an existing thread, <I><FONT  color=991122 face=HELVETICA>team</I></FONT> doesn't identify an existing team, or there are no more threads to visit.
+<P>
+</UL>
+<P>
+<HR>
+<H3>has_data()  see <A HREF="#send_data()">send_data()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="rename_thread()"></A>rename_thread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>rename_thread(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT><B><TT><FONT  color=000022 size=+1>,</TT></B></FONT> const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Changes the name of the given thread to <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  The name can be no longer than <B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A> </TT></B>(32 characters).  
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The thread was successfully named.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> argument isn't a valid <B><TT><A HREF="#thread_id">thread_id</A></TT></B> number.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="resume_thread()"></A>resume_thread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>resume_thread(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Tells a new or suspended thread to begin executing instructions.  If the thread has just been spawned, it enters and executes the thread function declared in <B><TT><A HREF="#spawn_thread()">spawn_thread()</A></TT></B>.  If the thread was previously suspended (through <B><TT><A HREF="#suspend_thread()">suspend_thread()</A></TT></B>), it continues from where it was suspended.
+<P>
+You can't use this function to wake up a sleeping thread, or to unblock a thread that's waiting to acquire a semaphore or waiting in a<B><TT> <A HREF="#receive_data()">receive_data()</A></TT></B> call.  However, you can unblock any of these threads by suspending and <I>then</I> resuming.  Blocked threads that are resumed return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>.
+<P>
+<B><TT><A HREF="#resume_thread()">resume_thread()</A></TT></B> is the same as sending a <B><TT>SIGCONT</TT></B> signal to the thread.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The thread was successfully resumed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> argument isn't a valid <B><TT><A HREF="#thread_id">thread_id</A></TT></B> number.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_STATE">B_BAD_THREAD_STATE</A></TT></B>.  The thread isn't suspended.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="receive_data()"></A>receive_data()
+</H3>
+<P>
+Retrieves a message from the thread's message cache.  The message will have been placed there through a previous <B><TT><A HREF="#send_data()">send_data()</A></TT></B> function call.  If the cache is empty, <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> blocks until one shows up&mdash;it never returns empty-handed.
+<P>
+The <B><TT><A HREF="#thread_id">thread_id</A> </TT></B>of the thread that called <B><TT><A HREF="#send_data()">send_data()</A></TT></B> is returned by reference in the <I><FONT  color=991122 face=HELVETICA>sender</I></FONT> argument.  Note that there's no guarantee that the sender will still be alive by the time you get its ID.  Also, the value of <I><FONT  color=991122 face=HELVETICA>sender</I></FONT> going into the function is ignored&mdash;you can't ask for a message from a particular sender. 
+<P>
+The <B><TT><A HREF="#send_data()">send_data()</A> </TT></B>function copies two pieces of data into a thread's message cache:  
+<P>
+<UL>
+<LI>A single four-byte code that's delivered as <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B>'s return value,
+<P>
+<LI>and an arbitrarily long data buffer that's copied into <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B>'s <I><FONT  color=991122 face=HELVETICA>buffer </I></FONT>argument (you must allocate and free <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> yourself).  The <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT> argument tells the function how many bytes of data to copy.  If you don't need the data buffer&mdash;if the code value returned directly by the function is sufficient&mdash;you set <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> to <B><TT>NULL</TT></B> and <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT> to 0.
+<P>
+</UL>
+<P>
+Unfortunately, there's no way to tell how much data is in the cache before you call <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B>:
+<P>
+<UL>
+<LI>If there's more data than <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> can accommodate, the unaccommodated portion is discarded&mdash;a second <B><TT><A HREF="#receive_data()">receive_data()</A> </TT></B>call will not read the rest of the message.  
+<P>
+<LI>Conversely, if <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> asks for more data than was sent, the function returns with the excess portion of <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>  unmodified&mdash;<B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> doesn't wait for another <B><TT><A HREF="#send_data()">send_data()</A></TT></B> call to provide more data with which to fill up the buffer. 
+<P>
+</UL>
+<P>
+Each<B><TT> receive_data() </TT></B>corresponds to exactly one <B><TT><A HREF="#send_data()">send_data()</A></TT></B>.  Lacking a previous invocation of its mate, <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> will block until <B><TT><A HREF="#send_data()">send_data()</A></TT></B> is called.  If you don't want to block, you should call <B><TT><A HREF="#has_data()">has_data()</A></TT></B> before calling <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> (and proceed to <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> only if <B><TT><A HREF="#has_data()">has_data()</A></TT></B> returns <B><TT>true</TT></B>).
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI>If successful, the function returns the message's four-byte code.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>.  A blocked <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> call was interrupted by a signal.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="send_data()"></A>send_data()
+, 
+<A NAME="receive_data()"></A>receive_data()
+, 
+<A NAME="has_data()"></A>has_data()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>send_data(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>code</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>receive_data(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>*sender</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>has_data(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Every thread has a one-message-deep message cache associated with it.  These functions access that cache.  
+<P>
+<B><TT><A HREF="#send_data()">send_data()</A></TT></B> copies a message into <I><FONT  color=991122 face=HELVETICA>thread</I></FONT>'s message cache.  The target thread retrieves the message (and empties the cache) by calling <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B>.  
+<P>
+There are two parts to the message:
+<P>
+<UL>
+<LI>A single four-byte <I><FONT  color=991122 face=HELVETICA>code</I></FONT> passed as an argument to <B><TT><A HREF="#send_data()">send_data()</A></TT></B> and returned directly by <B><TT>retrieve_data()</TT></B>.
+<P>
+<LI>A <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> of data that's <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT> bytes long (<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> can be <B><TT>NULL</TT></B>, in which case <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT> should be 0).  The data is copied into the target thread's cache, and then copied into <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B>'s <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> (which must be allocated).  The calling threads retain responsibility for freeing their buffers.
+<P>
+</UL>
+<P>
+In addition to returning the <I><FONT  color=991122 face=HELVETICA>code</I></FONT> directly, and copying the message data into its <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> argument, <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> sets <I><FONT  color=991122 face=HELVETICA>sender</I></FONT> to the id of the thread that sent the message.
+<P>
+<B><TT><A HREF="#send_data()">send_data()</A></TT></B> blocks if there's an unread message in the target thread's cache; otherwise it returns immediately (i.e. it doesn't wait for the target to call <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B>).  Analogously, <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> blocks until there's a message to retrieve.
+<P>
+In the following example, the main thread spawns a thread, sends it a message, and then tells the thread to run: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;main()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thread_id other_thread;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 code = 63;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *buf = "Hello";
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;other_thread = spawn_thread(thread_func, ...);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;send_data(other_thread, code, (void *)buf, strlen(buf));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;resume_thread(other_thread);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+To retrieve the message, the target thread calls <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 thread_func(void *data)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thread_id sender;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 code;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char buf[512];
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;code = receive_data(&amp;sender, (void *)buf, sizeof(buf));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Keep in mind that the message data is <I>copied</I> into the buffer; you must allocate adequate storage for the data.  If the buffer isn't big enough to accommodate all the datain the message, the left-over portion is thrown away.  Note, however, that there isn't any way for a thread to determine how much data has been copied into its message cache. 
+<P>
+<B><TT><A HREF="#has_data()">has_data()</A></TT></B> returns <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> has a message in its message cache.  Ostensibly, you use this function before calling <B><TT><A HREF="#send_data()">send_data()</A> </TT></B>or <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> to avoid blocking:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if (!has_data(target_thread)) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = send_data(target_thread, ...);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* or */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (has_data(find_thread(NULL))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;code = receive_data(...);</PRE>
+<P>
+This works for <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B>, but notice that there's a race condition between the <B><TT><A HREF="#has_data()">has_data()</A></TT></B> and <B><TT><A HREF="#send_data()">send_data()</A></TT></B> calls.  Another thread could send a message to the target in the interim.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#send_data()">send_data()</A></TT></B> returns:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The data was successfuly sent.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B>. <I><FONT  color=991122 face=HELVETICA> thread</I></FONT> doesn't identify a valid thread.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  The target couldn't allocate enough memory for its copy of <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>.  The function blocked, but a signal unblocked it.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="set_thread_priority()"></A>set_thread_priority()
+, 
+<A NAME="suggest_thread_priority()"></A>suggest_thread_priority()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_thread_priority(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>new_priority</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/scheduler.h">be/kernel/scheduler.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>suggest_thread_priority(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>what</I></FONT> = <FONT  face=HELVETICA>B_DEFAULT_MEDIA_PRIORITY</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>period</I></FONT> = 0,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>jitter</I></FONT> = 0,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>length</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#set_thread_priority()">set_thread_priority()</A></TT></B> resets the given thread's priority to <I><FONT  color=991122 face=HELVETICA>new_priority</I></FONT>.  The priority is expected to be between 0 and 120.  See "Thread Priorities" for a description of the priority scheme, and "Thread Priority Values" for a list of pre-defined priority constants.
+<P>
+<B><TT><A HREF="#suggest_thread_priority()">suggest_thread_priority()</A></TT></B> takes information about a thread and returns a suggested priority that you can pass to <B><TT><A HREF="#set_thread_priority()">set_thread_priority()</A></TT></B> (or, more likely, to <B><TT><A HREF="#spawn_thread()">spawn_thread()</A></TT></B>).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>what</I></FONT> value is a bit mask that indicates the type of activities the thread will be used for.  The possible values are listed in Suggested Thread Priorities.
+<P>
+<I><FONT  color=991122 face=HELVETICA>period</I></FONT> is the number of times per second the thread needs to be run (specify 0 if it needs to run continuously).  <I><FONT  color=991122 face=HELVETICA>jitter</I></FONT> is an estimate, in microseconds, of how much the period can vary as long as the average stays at <I><FONT  color=991122 face=HELVETICA>period</I></FONT> times per second.
+<P>
+<I><FONT  color=991122 face=HELVETICA>length</I></FONT> is an approximation of the amount of time, in microseconds, the thread will typically run per invocation (i.e., the amount of time that will pass between the moment it receives a message, through processing it, until it's again waiting for another message).
+<P>
+For example, if you're spawning a thread to handle video refresh for a computer game, and you want the display to update 30 times per second, you might use code similar to the following:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 priority;
+&nbsp;&nbsp;&nbsp;priority = suggest_thread_priority(B_LIVE_3D_RENDERING, 30, 1000, 150);
+&nbsp;&nbsp;&nbsp;th = spawn_thread(func, "render_thread", priority, NULL)</PRE>
+<P>
+This spawns the rendering thread with a priority appropriate for a thread for live 3D rendering which wants to be run 30 times per second, with a variation of only 1000 microseconds.  Each invocation of the thread's code is estimated to take 150 microseconds.  Obviously the <I><FONT  color=991122 face=HELVETICA>jitter</I></FONT> and <I><FONT  color=991122 face=HELVETICA>length</I></FONT> values would have to be tuned to the particular application.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#set_thread_priority()">set_thread_priority()</A></TT></B> returns...
+<P>
+<UL>
+<LI><I>Positive integers.</I>  If the function is successful, the previous priority is returned.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> doesn't identify a valid thread.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="snooze()"></A>snooze()
+, 
+<A NAME="snooze_until()"></A>snooze_until()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>snooze(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>microseconds</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>snooze_until(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>microseconds</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>timebase</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#snooze()">snooze()</A></TT></B> blocks the calling thread for the given number of microseconds.  
+<P>
+<B><TT><A HREF="#snooze_until()">snooze_until()</A></TT></B> blocks until an absolute time measured in the given timebase.  Currently, the only allowed value for timebase is <B><TT><A HREF="#B_SYSTEM_TIMEBASE">B_SYSTEM_TIMEBASE</A></TT></B>, which measures time against the system clock (as reported by <B><TT><A HREF="SysTime.html#system_time()">system_time()</A></TT></B>).
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The thread went to sleep and is now awake.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>.  The thread received a signal while it was sleeping.
+<P>
+</UL>
+<P>
+<HR>
+<H3>snooze_until()  see  <A HREF="#snooze()">snooze()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="spawn_thread()"></A>spawn_thread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+thread_id <B><TT><FONT  color=000022 size=+1>spawn_thread(</TT></B></FONT>thread_func <I><FONT  color=991122 face=HELVETICA>func</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>priority</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new thread and returns its <B><TT><A HREF="#thread_id">thread_id</A></TT></B> identifier (a positive integer).  The arguments are:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>func</I></FONT> is a pointer to a thread function.  This is the function that the thread will execute when it's told to run.  See "<a href="ThreadConcepts.html#The%20Thread%20Function">The Thread Function</a>" for details.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT> is the name that you wish to give the thread.  It can be, at most, <B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A></TT></B> (32) characters long.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>priority</I></FONT> is the CPU priority level of the thread.  This value should be between 0 and 120; he higher the priority, the more attention the thread gets.  See 
+<P>
+<HR>
+<H1>
+<A NAME="Thread%20Priorities"></A>Thread Priorities
+</H1>
+<P>
+ for adescription of the priorities, and 
+<P>
+<HR>
+<H1>
+<A NAME="Thread%20Priority%20Values"></A>Thread Priority Values
+</H1>
+<P>
+ for a list of priority constants.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>data</I></FONT> is forwarded as the argument to the thread function.  
+<P>
+</UL>
+<P>
+A newly spawned thread is in a suspended state (<B><TT><A HREF="#B_THREAD_SUSPENDED">B_THREAD_SUSPENDED</A></TT></B>).  To tell the thread to run, you pass its <B><TT><A HREF="#thread_id">thread_id</A></TT></B> to the <B><TT><A HREF="#resume_thread()">resume_thread()</A></TT></B> function.  The thread will continue to run until the thread function exits, or until the thread is explicitly killed (through a signal or a call to <B><TT><A HREF="#exit_thread()">exit_thread()</A></TT></B>,  <B><TT><A HREF="#kill_thread()">kill_thread()</A></TT></B>, or <B><TT><A HREF="#kill_team()">kill_team()</A></TT></B>).
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_THREADS">B_NO_MORE_THREADS</A></TT></B>.  all <B><TT><A HREF="#thread_id">thread_id</A></TT></B> numbers are currently in use.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to allocate the resources for another thread.
+<P>
+</UL>
+<P>
+<HR>
+<H3>suggest_thread_priority()  see <A HREF="#set_thread_priority()">set_thread_priority()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="suspend_thread()"></A>suspend_thread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>suspend_thread(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Halts the execution of the given thread, but doesn't kill the thread entirely.  The thread remains suspended (<B><TT><A HREF="#suspend_thread()">suspend_thread()</A></TT></B> blocks) until it's told to run through the <B><TT><A HREF="#resume_thread()">resume_thread()</A></TT></B> function.  Nothing prevents you from suspending your own thread, i.e.:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;suspend_thread(find_thread(NULL));</PRE>
+<P>
+Of course, this is only smart if you have some other thread that will resume you later.
+<P>
+You can suspend any thread, regardless of its current state.  But be careful:  If the thread is blocked on a semaphore (for example), the subsequent <B><TT><A HREF="#resume_thread()">resume_thread()</A></TT></B> call will "hop over" the semaphore acquisition.
+<P>
+Suspensions don't nest.  A single <B><TT><A HREF="#resume_thread()">resume_thread()</A></TT></B> unsuspends a thread regardless of the number of <B><TT><A HREF="#suspend_thread()">suspend_thread()</A></TT></B> calls it has received.
+<P>
+<B><TT><A HREF="#suspend_thread()">suspend_thread()</A></TT></B> is the same as sending a <B><TT>SIGSTOP</TT></B> signal to the thread.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The thread is now suspended.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> isn't a valid <B><TT><A HREF="#thread_id">thread_id</A></TT></B> number.
+<P>
+</UL>
+<A NAME="29911:%20funcName:%20wait_for_thread()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="wait_for_thread()"></A>wait_for_thread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>wait_for_thread(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT>, status_t <I><FONT  color=991122 face=HELVETICA>*exit_value</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function causes the calling thread to wait until <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> (the "target thread") has died.  If <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> is suspended (or freshly spawned), <B><TT><A HREF="#wait_for_thread()">wait_for_thread()</A></TT></B> will resume it.
+<P>
+When the target thread is dead, the value that was returned by its thread function (or imposed by <B><TT><A HREF="#exit_thread()">exit_thread()</A></TT></B>) is returned in <I><FONT  color=991122 face=HELVETICA>exit_value</I></FONT>.  If the target thread was killed (by <B><TT><A HREF="#kill_thread()">kill_thread()</A></TT></B> or<B><TT> <A HREF="#kill_team()">kill_team()</A></TT></B>), or if the thread function doesn't return a value, the value returned in <I><FONT  color=991122 face=HELVETICA>exit_value</I></FONT> will be unreliable.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>You must pass a valid pointer as the second argument to wait_for_thread().</B>  You mustn't pass <B><TT>NULL</TT></B> even if you're not interested in the return value.  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The target is now dead.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>thread</I></FONT> isn't a valid <B><TT><A HREF="#thread_id">thread_id</A></TT></B> number.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>.  The target was killed by a signal.  This includes <B><TT><A HREF="#kill_thread()">kill_thread()</A></TT></B>, <B><TT><A HREF="#kill_team()">kill_team()</A></TT></B>, and <B><TT><A HREF="#exit_thread()">exit_thread()</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Thread%20and%20Team%20Structures%20and%20Types"></A><FONT SIZE=6>T</FONT>hread and <FONT SIZE=6>T</FONT>eam <FONT SIZE=6>S</FONT>tructures and <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="team_id"></A>team_id
+, 
+<A NAME="thread_id"></A>thread_id
+</H3>
+<P>
+typedef int32 <B><TT>
+<A NAME="team_id"></A>team_id
+</TT></B>;
+<P>
+typedef int32 <B><TT>
+<A NAME="thread_id"></A>thread_id
+</TT></B>;
+<P>
+These id numbers uniquely identify teams and threads, respecitvely.
+<P>
+<HR>
+<H3>
+<A NAME="team_info"></A>team_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id team;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 thread_count;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 image_count;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 area_count;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#thread_id">thread_id</A></TT></B> debugger_nub_thread;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>port_id</TT></B> debugger_nub_port;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 argc;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char args[64];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uid_t uid;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gid_t gid;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>team_info</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT><A HREF="#team_info">team_info</A></TT></B> structure returns information about a team.  To retrieve one of these structures, use <B><TT><A HREF="#get_team_info()">get_team_info()</A></TT></B> or <B><TT><A HREF="#get_next_team_info()">get_next_team_info()</A></TT></B>.
+<P>
+The first field is obvious; the next three reasonably so:  They give the number of threads that have been spawned, images that have been loaded, and areas that have been created or cloned within this team.  
+<P>
+The debugger fields are used by the, uhm, the...debugger?
+<P>
+The <B><TT>argc</TT></B> field is the number of command line arguments that were used to launch the team; <B><TT>args</TT></B> is a copy of the first 64 characters from the command line invocation.  If this team is an application that was launched through the user interface (by double-clicking, or by accepting a dropped icon), then <B><TT>argc</TT></B> is 1 and <B><TT>args</TT></B> is the name of the application's executable file.
+<P>
+<B><TT>uid</TT></B> and <B><TT>gid</TT></B> identify the user and group that "owns" the team.  You can use these values to play permission games.
+<P>
+<HR>
+<H3>
+<A NAME="thread_func"></A>thread_func
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef int32 (*<B><TT><FONT  color=000022 size=+1>thread_func</TT></B></FONT>)(void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>);
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#thread_func">thread_func</A></TT></B> is the prototype for a thread's <I>thread function</I>.  You specify a thread function by passing a <B><TT><A HREF="#thread_func">thread_func</A></TT></B> as the first argument to <B><TT><A HREF="#spawn_thread()">spawn_thread()</A></TT></B>; the last argument to<B><TT> spawn_thread()</TT></B> is forwarded as the thread function's <I><FONT  color=991122 face=HELVETICA>data</I></FONT> argument.  When the thread function exits, the spawned thread is automatically killed.  To retrieve a <B><TT><A HREF="#thread_func">thread_func</A></TT></B>'s return value, some other thread must be waiting in a <B><TT><A HREF="#wait_for_thread()">wait_for_thread()</A></TT></B> call.  
+<P>
+Note that<B><TT> <A HREF="#spawn_thread()">spawn_thread()</A></TT></B> <I>doesn't </I>copy the data that <I><FONT  color=991122 face=HELVETICA>data</I></FONT> points to.  It simply passes the pointer through literally.  Never pass a pointer that's allocated locally (on the stack).  
+<P>
+<HR>
+<H3>
+<A NAME="thread_info"></A>thread_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#thread_id">thread_id</A></TT></B> thread;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#team_id">team_id</A></TT></B> team;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char<B><TT> </TT></B>name[<B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A></TT></B>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#thread_state">thread_state</A></TT></B> state;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Semaphores.html#sem_id">sem_id</A></TT></B> sem;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 priority;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B> user_time;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B> kernel_time;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *stack_base;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *stack_end;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>thread_info
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The thread_info structure contains information about a thread.  To retrieve one of these structure, use <B><TT><A HREF="#get_thread_info()">get_thread_info()</A></TT></B> or <B><TT><A HREF="#get_next_thread_info()">get_next_thread_info()</A></TT></B>.
+<P>
+The <B><TT>thread</TT></B>, <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#team">team</A></TT></B>, and <B><TT>name</TT></B> fields contain the indicated information.  
+<P>
+<B><TT>state</TT></B> describes what the thread is currently doing (see <B><TT><A HREF="#thread_state">thread_state</A></TT></B> for the list of states).  If the thread is waiting to acquire a semaphore, <B><TT>sem</TT></B> is that semaphore.
+<P>
+<B><TT>priority</TT></B> is a value that indicates the level of attention the thread gets (see Thread Priority).
+<P>
+<B><TT>user_time</TT></B> and <B><TT>kernel_time</TT></B> are the amounts of time, in microseconds, the thread has spent executing user code and the amount of time the kernel has run on the thread's behalf, respectively.
+<P>
+<B><TT>stack_base</TT></B> and <B><TT>stack_end</TT></B> are pointers to the first byte and last bytes in the thread's execution stack.  Currently, the stack size is fixed at around 256k.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The two stack pointers are currently inverted such that <B><TT>stack_base</TT></B> is <I>less</I> than<B><TT> stack_end</TT></B>.  (In a stack-grows-down world, the base should be greater than the end.)  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Thread%20and%20Team%20Constants"></A><FONT SIZE=6>T</FONT>hread and <FONT SIZE=6>T</FONT>eam <FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="B_SYSTEM_TEAM"></A>B_SYSTEM_TEAM
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+#define <B><TT><A HREF="#B_SYSTEM_TEAM">B_SYSTEM_TEAM</A></TT></B> ...
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Use this constant as the first argument to <B><TT><A HREF="#get_team_info()">get_team_info()</A></TT></B> to get team information about the kernel).
+<P>
+<HR>
+<H3>
+<A NAME="B_SYSTEM_TIMEBASE"></A>B_SYSTEM_TIMEBASE
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+#define <B><TT><A HREF="#B_SYSTEM_TIMEBASE">B_SYSTEM_TIMEBASE</A></TT></B> ...
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The system timebase constant is used as a basis for time measurement in the <B><TT><A HREF="#snooze_until()">snooze_until()</A></TT></B> function.  (Currently, it's the only timebase available.)
+<P>
+<HR>
+<H3>
+<A NAME="be_task_flags"></A>be_task_flags
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/scheduler.h">be/kernel/scheduler.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+enum <B><TT><FONT  color=000022 size=+1>be_task_flags</TT></B></FONT> { <B><TT><FONT  color=000022 size=+1>B_DEFAULT_MEDIA_PRIORITY</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_OFFLINE_PROCESSING</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B><TT><FONT  color=000022 size=+1>B_STATUS_RENDERING</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_USER_INPUT_HANDLING
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>B_LIVE_VIDEO_MANIPULATION
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_DEFAULT_MEDIA_PRIORITY"></A>B_DEFAULT_MEDIA_PRIORITY
+</TT></B></TD>
+<TD>The thread isn't doing anything specialized.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OFFLINE_PROCESSING"></A>B_OFFLINE_PROCESSING
+</TT></B></TD>
+<TD>The thread is doing non-real-time computations.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_STATUS_RENDERING"></A>B_STATUS_RENDERING
+</TT></B></TD>
+<TD>The thread is rendering a status or preview display.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_USER_INPUT_HANDLING"></A>B_USER_INPUT_HANDLING
+</TT></B></TD>
+<TD>The thread is handling user input.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LIVE_VIDEO_MANIPULATIO"></A>B_LIVE_VIDEO_MANIPULATIO
+N</TT></B></TD>
+<TD>The thread is processing live video  (filtering, compression, decompression, etc.).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_VIDEO_PLAYBACK"></A>B_VIDEO_PLAYBACK
+</TT></B></TD>
+<TD>The thread is playing back video from a hardware device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_VIDEO_RECORDING"></A>B_VIDEO_RECORDING
+</TT></B></TD>
+<TD>The thread is recording video from a hardware device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LIVE_AUDIO_MANIPULATIO"></A>B_LIVE_AUDIO_MANIPULATIO
+N</TT></B></TD>
+<TD>The thread is doing real-time manipulation of live audio data (filtering, compression, decompression, etc.).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_AUDIO_PLAYBACK"></A>B_AUDIO_PLAYBACK
+</TT></B></TD>
+<TD>The thread is playing back audio from a hardware device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_AUDIO_RECORDING"></A>B_AUDIO_RECORDING
+</TT></B></TD>
+<TD>The thread is recording audio from a hardware device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LIVE_3D_RENDERING"></A>B_LIVE_3D_RENDERING
+</TT></B></TD>
+<TD>The thread is performing live 3D rendering.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NUMBER_CRUNCHING"></A>B_NUMBER_CRUNCHING
+</TT></B></TD>
+<TD>The thread is doing data processing.</TD>
+</TABLE>
+<P>
+These constants describe what the thread is designed to do.  You use these constants when asking for a suggested priority (see <B><TT><A HREF="#suggest_thread_priority()">suggest_thread_priority()</A></TT></B>).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+These constants may not be used as actual thread priority values&mdash;do not pass one of these values as the <I><FONT  color=991122 face=HELVETICA>priority</I></FONT> argument to <B><TT><A HREF="#spawn_thread()">spawn_thread()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Thread%20Priority%20Values"></A>Thread Priority Values
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Time-Sharing Priority</B></TH>
+<TH>Value</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_LOW_PRIORITY%20"></A>B_LOW_PRIORITY 
+</TT></B></TD>
+<TD>5</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NORMAL_PRIORITY"></A>B_NORMAL_PRIORITY
+</TT></B></TD>
+<TD>10</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DISPLAY_PRIORITY"></A>B_DISPLAY_PRIORITY
+</TT></B></TD>
+<TD>15</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URGENT_DISPLAY_PRIORIT"></A>B_URGENT_DISPLAY_PRIORIT
+Y</TT></B></TD>
+<TD>20</TD>
+</TABLE>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Real-Time Priority</TH>
+<TH>Value</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_REAL_TIME_DISPLAY_PRIORITY"></A>B_REAL_TIME_DISPLAY_PRIORITY
+</TT></B></TD>
+<TD><B><TT>100</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_URGENT_PRIORITY"></A>B_URGENT_PRIORITY
+</TT></B></TD>
+<TD><B><TT>110</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_REAL_TIME_PRIORITY"></A>B_REAL_TIME_PRIORITY
+</TT></B></TD>
+<TD><B><TT>120</TD>
+</TABLE></TT></B>
+<P>
+The thread priority values are used to set the "urgency" of a thread.  Although you can reset a thread's priority through <B><TT><A HREF="#set_thread_priority()">set_thread_priority()</A></TT></B>, the priority is initially&mdash;and almost always permanently&mdash;set in <B><TT><A HREF="#spawn_thread()">spawn_thread()</A></TT></B>.  As shown here, there are two types of 
+<P>
+<HR>
+<H3>
+<A NAME="thread_state"></A>thread_state
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+enum { ... } <B><TT><FONT  color=000022 size=+1>thread_state
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>State</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_THREAD_RUNNING"></A>B_THREAD_RUNNING
+</TT></B></TD>
+<TD>The thread is currently receiving attention from a CPU.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_THREAD_READY"></A>B_THREAD_READY
+</TT></B></TD>
+<TD>The thread is waiting for its turn to receive attention.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_THREAD_SUSPENDED"></A>B_THREAD_SUSPENDED
+</TT></B></TD>
+<TD>The thread has been suspended or is freshly-spawned and is waiting to start.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_THREAD_WAITING"></A>B_THREAD_WAITING
+</TT></B></TD>
+<TD>The thread is waiting to acquire a semaphore.  The <B><TT>sem</TT></B> field of the thread's <B><TT><A HREF="#thread_info">thread_info</A></TT></B> structure will tell you which semaphore.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_THREAD_RECEIVING"></A>B_THREAD_RECEIVING
+</TT></B></TD>
+<TD>The thread is sitting in a <B><TT><A HREF="#receive_data()">receive_data()</A></TT></B> function call.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_THREAD_ASLEEP"></A>B_THREAD_ASLEEP
+</TT></B></TD>
+<TD>The thread is sitting in a <B><TT><A HREF="#snooze()">snooze()</A></TT></B> call.</TD>
+</TABLE>
+<P>
+A thread's state tells you what the thread is currently doing.  To get the state, look in the <B><TT>state</TT></B> field of the <B><TT><A HREF="#thread_info">thread_info</A></TT></B> structure (retrieved through <B><TT><A HREF="#get_thread_info()">get_thread_info()</A></TT></B>).
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

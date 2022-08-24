@@ -1,0 +1,761 @@
+<HTML><HEAD><TITLE>The Media Kit: BMediaTheme</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMediaTheme"></A>BMediaTheme
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaTheme.h">be/media/MediaTheme.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="MediaTheme.summary.html"><i>Summary</i></A></H6>
+<P>
+A BMediaTheme is an object that, given a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A>, can create a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> containing all the controls needed to configure the <A HREF="Controllable.html#BControllable">BControllable</A> node represented by the BParameterWeb.  You can then add the returned <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> to a window so the user can configure the node to their liking.
+<P>
+The resulting <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> contains not only the controls for configuring the parameters available in the node, but also indicates the data flow path through the node.
+<P>
+The BeOS includes the standard theme, which provides the system default look to media controls, as seen in the Audio and Video preference applications beginning with Release 4.
+<P>
+If you want to change the look of media controls within the BeOS, you can write your own BMediaTheme and install it as the default system theme by calling <B><TT><A HREF="#SetPreferredTheme()">SetPreferredTheme()</A></TT></B>.  If you want to write a new theme and provide the ability for the user to enable it as the new system theme, you'll need to write an application that calls <B><TT><A HREF="#SetPreferredTheme()">SetPreferredTheme()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<LI><B><TT><A HREF="#BackgroundBitmapFor()">BackgroundBitmapFor()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#BackgroundColorFor()">BackgroundColorFor()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#ForegroundColorFor()">ForegroundColorFor()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#MakeControlFor()">MakeControlFor()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#MakeViewFor()">MakeViewFor()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMediaTheme()"></A>BMediaTheme()
+</H3>
+<P>
+<I>protected:
+<P>
+</I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaTheme(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,|
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>info</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const entry_ref *<I><FONT  color=991122 face=HELVETICA>addOn</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>themeID</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The BMediaTheme constructor initializes the theme so it can be used by the system or by an application.  The user-readable theme name is passed as the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> argument, and some longer description of the theme in <I><FONT  color=991122 face=HELVETICA>info</I></FONT>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>name</I></FONT> and <I><FONT  color=991122 face=HELVETICA>info</I></FONT> strings are copied; you can dispose of the original strings if you wish.  Both strings should be human-readable, as they may be presented to the user in a user interface for selecting a theme to be used.
+<P>
+If the theme lives in an add-on on disk, specify the entry_ref of the add-on file in <I><FONT  color=991122 face=HELVETICA>addOn</I></FONT> and the ID assigned to the theme by its add-on in <I><FONT  color=991122 face=HELVETICA>themeID</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="~BMediaTheme()"></A>~BMediaTheme()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual </I><B><TT><FONT  color=000022 size=+1>~BMediaTheme()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Disposes of memory used by the theme.  If you create a theme, be sure the destructor frees any memory allocated by the theme.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BackgroundBitmapFor()"></A>BackgroundBitmapFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<B><TT><FONT  color=000022 size=+1>BackgroundBitmapFor(</TT></B></FONT>bg_kind <I><FONT  color=991122 face=HELVETICA>backgroundKind</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> that should be used as the background for the specified type of user interface object.  Possible values for <I><FONT  color=991122 face=HELVETICA>backgroundKind</I></FONT> are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_GENERAL_BG"></A>B_GENERAL_BG
+</TT></B></TD>
+<TD>Used when nothing else is applicable.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SETTINGS_BG"></A>B_SETTINGS_BG
+</TT></B></TD>
+<TD>Used for panels or windows full of controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PRESENTATION_BG"></A>B_PRESENTATION_BG
+</TT></B></TD>
+<TD>Used for windows that present actual media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EDIT_BG"></A>B_EDIT_BG
+</TT></B></TD>
+<TD>Used for windows that edit media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_BG"></A>B_CONTROL_BG
+</TT></B></TD>
+<TD>Used for drawing controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HILITE_BG"></A>B_HILITE_BG
+</TT></B></TD>
+<TD>Used when highlighting information, such as selected media data.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="BackgroundColorFor()"></A>BackgroundColorFor()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual rgb_color </I><B><TT><FONT  color=000022 size=+1>BackgroundColorFor(</TT></B></FONT>bg_kind <I><FONT  color=991122 face=HELVETICA>backgroundKind</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the rgb_color that should be used as the background for the specified type of user interface object.  Possible values for <I><FONT  color=991122 face=HELVETICA>backgroundKind</I></FONT> are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_GENERAL_BG"></A>B_GENERAL_BG
+</TT></B></TD>
+<TD>Used when nothing else is applicable.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SETTINGS_BG"></A>B_SETTINGS_BG
+</TT></B></TD>
+<TD>Used for panels or windows full of controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PRESENTATION_BG"></A>B_PRESENTATION_BG
+</TT></B></TD>
+<TD>Used for windows that present actual media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EDIT_BG"></A>B_EDIT_BG
+</TT></B></TD>
+<TD>Used for windows that edit media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_BG"></A>B_CONTROL_BG
+</TT></B></TD>
+<TD>Used for drawing controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HILITE_BG"></A>B_HILITE_BG
+</TT></B></TD>
+<TD>Used when highlighting information, such as selected media data.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="ForegroundColorFor()"></A>ForegroundColorFor()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual rgb_color </I><B><TT><FONT  color=000022 size=+1>ForegroundColorFor(</TT></B></FONT>bg_kind <I><FONT  color=991122 face=HELVETICA>foregroundKind</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the rgb_color that should be used as the foreground for the specified type of user interface object.  Possible values for <I><FONT  color=991122 face=HELVETICA>foregroundKind</I></FONT> are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_GENERAL_FG"></A>B_GENERAL_FG
+</TT></B></TD>
+<TD>Used when nothing else is applicable.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SETTINGS_FG"></A>B_SETTINGS_FG
+</TT></B></TD>
+<TD>Used for panels or windows full of controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PRESENTATION_FG"></A>B_PRESENTATION_FG
+</TT></B></TD>
+<TD>Used for windows that present actual media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EDIT_FG"></A>B_EDIT_FG
+</TT></B></TD>
+<TD>Used for windows that edit media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_FG"></A>B_CONTROL_FG
+</TT></B></TD>
+<TD>Used for drawing controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HILITE_FG"></A>B_HILITE_FG
+</TT></B></TD>
+<TD>Used when highlighting information, such as selected media data.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="GetRef()"></A>GetRef()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool </I><B><TT><FONT  color=000022 size=+1>GetRef(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>outRef</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets <I><FONT  color=991122 face=HELVETICA>outRef</I></FONT> to be a reference to the add-on file from which the theme was loaded and returns <B><TT>true</TT></B>.  If the theme wasn't loaded froman add-on, this function returns <B><TT>false</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="ID()"></A>ID()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 </I><B><TT><FONT  color=000022 size=+1>ID(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the theme's ID, as assigned by the add-on in which the theme resides.  The ID is unique only within that add-on.
+<P>
+If the theme isn't in an add-on, 0 is returned.
+<P>
+<HR>
+<H3>
+<A NAME="Info()"></A>Info()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *</I><B><TT><FONT  color=000022 size=+1>Info(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the user-readable long description of the theme, as specified when the theme was created.
+<P>
+<HR>
+<H3>
+<A NAME="MakeControlFor()"></A>MakeControlFor()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="../The%20Interface%20Kit/Control.html#BControl">BControl</A> *</I><B><TT><FONT  color=000022 size=+1>MakeControlFor(</TT></B></FONT><A HREF="Parameter.html#BParameter">BParameter</A> *<I><FONT  color=991122 face=HELVETICA>parameter</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+If you create your own theme, your implementation of this function should return an appropriate <A HREF="../The%20Interface%20Kit/Control.html#BControl">BControl</A> to operate on the specified BParameter.
+<P>
+Applications that want to use the theme to create the controls, but handle their layout themselves, can call this function for each parameter in the web, rather than rely upon <B><TT><A HREF="#ViewFor()">ViewFor()</A></TT></B>.  However, if an application uses <B><TT>MakeControlFor()</TT></B> to create individual controls rather than letting <B><TT><A HREF="#ViewFor()">ViewFor()</A></TT></B> set up the entire view, the application assumes responsibility for setting the control's value in response to value change messages.
+<P>
+If you want the control to send a specific message when invoked, you should call <B><TT>BControl::SetMessage()</TT></B> on it.
+<P>
+<HR>
+<H3>
+<A NAME="MakeFallbackViewFor()"></A>MakeFallbackViewFor()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Interface%20Kit/Control.html#BControl">BControl</A> *</I><B><TT><FONT  color=000022 size=+1>MakeFallbackViewFor(</TT></B></FONT><A HREF="Parameter.html#BParameter">BParameter</A> *<I><FONT  color=991122 face=HELVETICA>control</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If you're implementing your own theme, and for whatever reason you want a <A HREF="Parameter.html#BParameter">BParameter</A> to use the standard system theme's <A HREF="../The%20Interface%20Kit/Control.html#BControl">BControl</A>, call <B><TT>MakeFallbackViewFor()</TT></B> to obtain that BControl.
+<P>
+This can be used if your theme is only intended to augment certain controls, or if you receive a <A HREF="Parameter.html#BParameter">BParameter</A> you don't know anything about.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Your <B><TT><A HREF="#MakeControlFor()">MakeControlFor()</A></TT></B> implementation should always call <B><TT>MakeFallbackViewFor()</TT></B> if it's asked to create a <A HREF="../The%20Interface%20Kit/Control.html#BControl">BControl</A> for a <A HREF="Parameter.html#BParameter">BParameter</A> it doesn't understand.  This way, all BParameters will get some form of user interface, even if your theme doesn't specifically know how to handle some of them.  This will let your theme remain compatible with future versions of the BeOS.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="MakeViewFor()"></A>MakeViewFor()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> *</I><B><TT><FONT  color=000022 size=+1>MakeViewFor(</TT></B></FONT><A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> *<I><FONT  color=991122 face=HELVETICA>web</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>hintRect</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Given the specified <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> and <I><FONT  color=991122 face=HELVETICA>hintRect</I></FONT>, your implementation of this function should construct a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> that contains the BControls for manipulating the BParameters in the <I><FONT  color=991122 face=HELVETICA>web</I></FONT>.  The <I><FONT  color=991122 face=HELVETICA>hintRect</I></FONT> is an area the caller thinks is appropriate for you to fill with your BView; your theme should try to stay within that rectangle if possible.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>web</I></FONT> returned by this function belongs to the theme; applications shouldn't delete it (a properly-written theme will automatically dispose of the <I><FONT  color=991122 face=HELVETICA>web</I></FONT> when the view is closed).
+<P>
+This function is called by <B><TT><A HREF="#ViewFor()">ViewFor()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="PreferredTheme()"></A>PreferredTheme()
+, 
+<A NAME="SetPreferredTheme()"></A>SetPreferredTheme()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static BMediaTheme *</I><B><TT><FONT  color=000022 size=+1>PreferredTheme(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+static status_t *<B><TT><FONT  color=000022 size=+1>SetPreferredTheme(</TT></B></FONT>BMediaTheme *<I><FONT  color=991122 face=HELVETICA>newPreferredTheme</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>PreferredTheme()</TT></B> returns the current preferred theme; <B><TT>SetPreferredTheme()</TT></B> changes the preferred theme to the theme specified by <I><FONT  color=991122 face=HELVETICA>newPreferredTheme</I></FONT>.
+<P>
+The preferred theme is the theme that will be used for creating node controlling user interfaces if no specific theme is requested when the interface is created.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The preferred theme was changed without error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  Access to the settings file denied.
+<P>
+<LI>Other errors.  Directory and file I/O errors may occur while updating the settings file.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#ViewFor()">ViewFor()</A></TT></B>, <B><TT><A HREF="#MakeViewFor()">MakeViewFor()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="Name()"></A>Name()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *</I><B><TT><FONT  color=000022 size=+1>Name(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the user-readable name of the theme, as specified when the theme was created.
+<P>
+<HR>
+<H3>SetPreferredTheme() see <A HREF="#PreferredTheme()">PreferredTheme()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ViewFor()"></A>ViewFor()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> *</I><B><TT><FONT  color=000022 size=+1>ViewFor(</TT></B></FONT><A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> *<I><FONT  color=991122 face=HELVETICA>web</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>hintRect</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaTheme *<I><FONT  color=991122 face=HELVETICA>usingTheme</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> <I><FONT  color=991122 face=HELVETICA>web</I></FONT>, typically returned by <B><TT>BMediaRoster::GetControlWeb()</TT></B>, this function creates a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> suitable for adding to a <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> to allow the user to configure the node the web describes, including a diagram indicating the data flow path through the node, and controls to let the user configure each control point.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function is the public interface for creating a view for configuring a node (the <B><TT><A HREF="#MakeViewFor()">MakeViewFor()</A></TT></B> function is the hook you override if you're implementing your own theme).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The returned view is created using the theme specified by <I><FONT  color=991122 face=HELVETICA>usingTheme</I></FONT>; if this argument is <B><TT>NULL</TT></B>, the preferred theme is used.  The <I><FONT  color=991122 face=HELVETICA>hintRect</I></FONT> parameter specifies the rectangle the view should try to occupy, and is passed to <B><TT><A HREF="#MakeViewFor()">MakeViewFor()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Global%20C%20Functions"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="get_nth_theme()"></A>get_nth_theme()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t </I><B><TT><FONT  color=000022 size=+1>get_nth_theme(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>n</I></FONT>, const char **<I><FONT  color=991122 face=HELVETICA>outName</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char **<I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>outID</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is called after the theme add-on is loaded, to determine what themes are available in the add-on.  It's called repeatedly, with successively-higher values of <I><FONT  color=991122 face=HELVETICA>n</I></FONT>, until it returns an error.
+<P>
+Your add-on's implementation of this function should set <I><FONT  color=991122 face=HELVETICA>outName</I></FONT> to point to the <I><FONT  color=991122 face=HELVETICA>n</I></FONT>th theme's name, <I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT> to point to information describing the <I><FONT  color=991122 face=HELVETICA>n</I></FONT>th theme, and <I><FONT  color=991122 face=HELVETICA>outID</I></FONT> should be set to the <I><FONT  color=991122 face=HELVETICA>n</I></FONT>th theme's ID number, which used internally by your add-on to distinguish among the themes it supports.
+<P>
+<HR>
+<H3>
+<A NAME="make_theme()"></A>make_theme()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BMediaTheme *</I><B><TT><FONT  color=000022 size=+1>make_theme(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>themeID</I></FONT>, image_id <I><FONT  color=991122 face=HELVETICA>imageID</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If you're writing a theme to be loaded from an add-on file, you must implement <B><TT>make_theme()</TT></B> to create a BMediaTheme for the specified <I><FONT  color=991122 face=HELVETICA>themeID</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>imageID</I></FONT> is the image_id of the add-on in which the theme is located.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Background%20Color%20and%20Bitmap%20Kinds"></A>Background Color and Bitmap Kinds
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_GENERAL_BG"></A>B_GENERAL_BG
+</TT></B></TD>
+<TD>Used when nothing else is applicable.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SETTINGS_BG"></A>B_SETTINGS_BG
+</TT></B></TD>
+<TD>Used for panels or windows full of controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PRESENTATION_BG"></A>B_PRESENTATION_BG
+</TT></B></TD>
+<TD>Used for windows that present actual media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EDIT_BG"></A>B_EDIT_BG
+</TT></B></TD>
+<TD>Used for windows that edit media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_BG"></A>B_CONTROL_BG
+</TT></B></TD>
+<TD>Used for drawing controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HILITE_BG"></A>B_HILITE_BG
+</TT></B></TD>
+<TD>Used when highlighting information, such as selected media data.</TD>
+</TABLE>
+<P>
+These constants identify parts of the user interface that a theme can customize the appearance of by altering the color or bitmap that's used in the background for various user interface elements.  They're used when calling <B><TT><A HREF="#BackgroundBitmapFor()">BackgroundBitmapFor()</A> </TT></B>and <B><TT><A HREF="#BackgroundColorFor()">BackgroundColorFor()</A></TT></B>.
+<P>
+For example, the <B><TT><A HREF="#B_PRESENTATION_BG">B_PRESENTATION_BG</A></TT></B> color and/or bitmap would be used as the background of a window in which an oscilloscope display shows the waveform of a sound wave being played back, and a window used for editing the waveform would have its' background in the color specified by <B><TT><A HREF="#B_EDIT_BG">B_EDIT_BG</A></TT></B> (or using the bitmap specified by <B><TT><A HREF="#B_EDIT_BG">B_EDIT_BG</A></TT></B>, if one exists), except for the part of the wave that's selected by the user, which would have the background color or bitmap specified by <B><TT><A HREF="#B_HILITE_BG">B_HILITE_BG</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Foreground%20Color%20Kinds"></A>Foreground Color Kinds
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_GENERAL_FG"></A>B_GENERAL_FG
+</TT></B></TD>
+<TD>Used when nothing else is applicable.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SETTINGS_FG"></A>B_SETTINGS_FG
+</TT></B></TD>
+<TD>Used for panels or windows full of controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PRESENTATION_FG"></A>B_PRESENTATION_FG
+</TT></B></TD>
+<TD>Used for windows that present actual media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EDIT_FG"></A>B_EDIT_FG
+</TT></B></TD>
+<TD>Used for windows that edit media content.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_FG"></A>B_CONTROL_FG
+</TT></B></TD>
+<TD>Used for drawing controls.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HILITE_FG"></A>B_HILITE_FG
+</TT></B></TD>
+<TD>Used when highlighting information, such as selected media data.</TD>
+</TABLE>
+<P>
+The foreground color kinds are used when calling <B><TT><A HREF="#ForegroundColorFor()">ForegroundColorFor()</A></TT></B> to obtain the color to use when drawing the foreground portions of various interface elements.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,433 @@
+<HTML><HEAD><TITLE>The Media Kit: BBuffer</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BBuffer"></A>BBuffer
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/Buffer.h">be/media/Buffer.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="Buffer.summary.html"><i>Summary</i></A></H6>
+<P>
+A BBuffer references a chunk of shared memory where media data can be passed between applications and nodes.  The control header for these buffers is passed through the use of a safer IPC mechanism, but the actual data these headers represent typically require a high data rate, and for the sake of maximizing performance, shared memory is the method by which the buffers are managed.
+<P>
+BBuffers originate at some <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A>, which has a <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> that acts as a source of BBuffers (see <B><TT><A HREF="BufferConsumer.html#SetOutputBuffersFor()">BBufferConsumer::SetOutputBuffersFor()</A></TT></B>).  BBuffers are sent through all participating nodes, possibly being sent down a long chain&mdash;much like a bucket brigade&mdash;until finally the node arrives at a node that chooses not to pass along the BBuffer any further, at which the buffer's <B><TT><A HREF="#Recycle()">Recycle()</A></TT></B> function is called to return the buffer to the BBufferGroup's store, where it gets reused by another batch of data.
+<P>
+An application or custom node can set up BBuffers that reference a specific area of memory, such as a low-level driver buffer, a <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A>, or a BDirectWindow's area of a frame buffer.  This ability can provide for great optimization by avoiding unnecessary copy operations.
+<P>
+The <A HREF="SmallBuffer.html#BSmallBuffer">BSmallBuffer</A> class, derived from <A HREF="#BBuffer">BBuffer</A>, is used for very small buffers; they don't go in BBufferGroups, and get handled specially to optimize performance.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+BBuffer should never be subclassed, since they're mostly owned and managed by the Media Server.  Even if you create your own <A HREF="#BBuffer">BBuffer</A>, once you've called <B><TT><A HREF="BufferConsumer.html#SetOutputBuffersFor()">BBufferConsumer::SetOutputBuffersFor()</A></TT></B>, the "same" buffer received back by your <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> may actually be another instance of the BBuffer class.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+The BBuffer constructor and destructor are private; use the appropriate functions in the <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> class to create and destroy BBuffers.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AudioHeader()"></A>AudioHeader()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+media_audio_header *<B><TT><FONT  color=000022 size=+1>AudioHeader(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to an audio buffer's header; this is just an alias for:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&amp;BBuffer::Header()->u.raw_audio;</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="CloneInfo()"></A>CloneInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+buffer_clone_info <B><TT><FONT  color=000022 size=+1>CloneInfo(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a buffer_clone_info structure describing a buffer.  This information is primarily for debugging purposes; don't use this buffer_clone_info structure to add a buffer to a buffer group, because it'll just alias an existing buffer.
+<P>
+<HR>
+<H3>
+<A NAME="Data()"></A>Data()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>Data(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>Data()</TT></B> function returns a pointer to the first byte of the buffer, or <B><TT>NULL</TT></B> if the buffer somehow couldn't be properly initialized (in which case the buffer can't be used).
+<P>
+<HR>
+<H3>
+<A NAME="Flags()"></A>Flags()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>Flags(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the buffer's flags.  The flags let you specify options for the buffer.  For example, you might create a <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> in which some buffers are intended for odd video fields (<B><TT>B_F1_BUFFER</TT></B>), and other buffers are intended for even video fields (<B><TT>B_F2_BUFFER</TT></B>), thereby letting you handle interlaced video much more easily by having each buffer know where the video should be displayed.
+<P>
+<HR>
+<H3>
+<A NAME="Header()"></A>Header()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+media_header *<B><TT><FONT  color=000022 size=+1>Header(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the buffer's header.  This header describes the media data contained therein.  The result is only valid for a buffer received from either <B><TT><A HREF="BufferGroup.html#RequestBuffer()">BBufferGroup::RequestBuffer()</A></TT></B> or <B><TT><A HREF="BufferConsumer.html#BufferReceived()">BBufferConsumer::BufferReceived()</A></TT></B>.
+<P>
+If you put data into a buffer, you should call <B><TT>Header()</TT></B> to obtain a pointer to the buffer's header, then fill out the media_header structure with information describing the buffer's contents.
+<P>
+<HR>
+<H3>
+<A NAME="ID()"></A>ID()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+media_buffer_id <B><TT><FONT  color=000022 size=+1>ID(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If the buffer has been successfully registered with the Media Server, and is available for use by other clients, <B><TT>ID()</TT></B> returns a positive buffer ID.  Otherwise, a negative number is returned.
+<P>
+<HR>
+<H3>
+<A NAME="Recycle()"></A>Recycle()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Recycle(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends the buffer back to the <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> that owns it so the buffer can be reused.  You can only call <B><TT>Recycle()</TT></B> on a buffer that you received from either the <B><TT><A HREF="BufferGroup.html#RequestBuffer()">BBufferGroup::RequestBuffer()</A></TT></B> call or the <B><TT><A HREF="BufferConsumer.html#BufferReceived()">BBufferConsumer::BufferReceived()</A></TT></B> call.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Don't call both <B><TT>BroadcastBuffer()</TT></B> and <B><TT>Recycle()</TT></B> on the same buffer.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="SizeAvailable()"></A>SizeAvailable()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+size_t <B><TT><FONT  color=000022 size=+1>SizeAvailable(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the size, in bytes, of the buffer.  The actual number of bytes used might be less than this value, and is stored in the buffer's header, which can be obtained by calling the <B><TT><A HREF="#Header()">Header()</A></TT></B> function.
+<P>
+<HR>
+<H3>
+<A NAME="SizeUsed()"></A>SizeUsed()
+, 
+<A NAME="SetSizeUsed()"></A>SetSizeUsed()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+size_t <B><TT><FONT  color=000022 size=+1>SizeUsed(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSizeUsed(</TT></B></FONT>ssize_t <I><FONT  color=991122 face=HELVETICA>sizeUsed</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SizeUsed()</TT></B> returns the number of bytes in the buffer that are currently in use.
+<P>
+<B><TT>SetSizeUsed()</TT></B> sets this value.  This should be called after writing data into the buffer in order to indicate the size of the written data.
+<P>
+<HR>
+<H3>
+<A NAME="Type()"></A>Type()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+media_type <B><TT><FONT  color=000022 size=+1>Type(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the media type of the data contained within the buffer, as specified by the <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> from which the buffer originated.  This value is only valid if you received the buffer from either the <B><TT><A HREF="BufferGroup.html#RequestBuffer()">BBufferGroup::RequestBuffer()</A></TT></B> call or the <B><TT><A HREF="BufferConsumer.html#BufferReceived()">BBufferConsumer::BufferReceived()</A></TT></B> call.
+<P>
+<HR>
+<H3>
+<A NAME="VideoHeader()"></A>VideoHeader()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+media_video_header *<B><TT><FONT  color=000022 size=+1>VideoHeader(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to a video buffer's header; this is just an alias for:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&amp;BBuffer::Header()->u.raw_video;</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Flags"></A>Flags
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/Buffer.h">be/media/Buffer.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_F1_BUFFER</TT></B></TD>
+<TD>Buffer is for odd fields.</TD>
+<TR>
+<TD><B><TT>B_F2_BUFFER</TT></B></TD>
+<TD>Buffer is for even fields.</TD>
+<TR>
+<TD><B><TT>B_SMALL_BUFFER</TT></B></TD>
+<TD>The buffer is a small buffer.</TD>
+</TABLE>
+<P>
+These flags can be assigned to a buffer; the current possible values let you specify whether the buffer should be used for even video fields or odd video fields; if <B><TT>B_SMALL_BUFFER</TT></B> is set, the buffer is a BSmallBuffer.
+<P>
+<HR>
+<H2>
+<A NAME="Structures"></A><FONT SIZE=6>S</FONT>tructures
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="buffer_clone_info"></A>buffer_clone_info
+</H3>
+<P>
+Declared in:  &lt;be/media/Buffer.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct buffer_clone_info {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer_clone_info();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~buffer_clone_info();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_buffer_id buffer;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id area;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t offset;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t size;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 flags;
+&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_reserved_[4];
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+Describes where in memory a BBuffer resides (in terms of the memory area and offset into the area at which the buffer is located, and the size of the buffer), as well as the buffer's flags.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,371 @@
+<HTML><HEAD><TITLE>The Game Kit: BStreamingGameSound</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BStreamingGameSound"></A>BStreamingGameSound
+</H1>
+<P>
+Derived from:  <A HREF="GameSound.html#BGameSound">BGameSound</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/game/StreamingGameSound.h">be/game/StreamingGameSound.h</A>
+<P>
+Library:  libgame.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="StreamingGameSound.summary.html"><i>Summary</i></A></H6>
+<P>
+The BStreamingGameSound class provides the ability to stream audio data.  A hook function is called whenever a buffer needs to be filled with audio data.  This hook function is set by calling <B><TT><A HREF="#SetStreamHook()">SetStreamHook()</A></TT></B>.
+<P>
+Using this class requires special magic powers; unless you're directly in contact with Be about it, don't use it.  You'll regret it later.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BStreamingGameSound()"></A>BStreamingGameSound()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BStreamingGameSound(</TT></B></FONT>size_t <I><FONT  color=991122 face=HELVETICA>inBufferFrameCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const gs_audio_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>inBufferCount</I></FONT> = <FONT  face=HELVETICA>2</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGameSoundDevice *<I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BStreamingGameSound(</TT></B></FONT>BGameSoundDevice <I><FONT  color=991122 face=HELVETICA>device</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Prepares the object to play streamed audio.  <I><FONT  color=991122 face=HELVETICA>inBufferFrameCount</I></FONT> specifies the number of frames each audio buffer should be able to hold.  <I><FONT  color=991122 face=HELVETICA>format</I></FONT> indicates the audio format that will be streamed.  <I><FONT  color=991122 face=HELVETICA>inBufferCount</I></FONT> specifies the number of buffers to use, and, as always, <I><FONT  color=991122 face=HELVETICA>device</I></FONT> is the sound device to use for playback.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <I><FONT  color=991122 face=HELVETICA>device</I></FONT> must always be <B><TT>NULL</TT></B> to indicate that the default playback device should be used.<B><TT>
+<P>
+</TT></B></UL>
+<P>
+By default, two audio buffers are used.
+<P>
+<HR>
+<H3>
+<A NAME="~BStreamingGameSound"></A>~BStreamingGameSound
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BStreamingGameSound()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Stops playing the sound.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="FillBuffer()"></A>FillBuffer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>FillBuffer(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>inBuffer</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>byteCount</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Fills the buffer specified by inBuffer with byteCount bytes of audio data.
+<P>
+In the BStreamingGameSound implemenation, this function calls the stream hook, if one exists.
+<P>
+<B>See also:  <TT><A HREF="#SetStreamHook()">SetStreamHook()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a status_t indicating whether or not the object was successfully instantiated.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The sound was successfully initialized.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Unable to create a sound player.
+<P>
+<LI>Other errors.  The sound player may return errors.
+<P>
+</UL>
+<P>
+<B>See also:  </B>the BStreamingGameSound constructor
+<P>
+<HR>
+<H3>
+<A NAME="Lock()"></A>Lock()
+, 
+<A NAME="Unlock()"></A>Unlock()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Lock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Unlock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Lock()</TT></B> locks the BStreamingGameSound to prevent unpleasant collisions in the land of multithreadedness; it returns <B><TT>true</TT></B> if it was able to lock the object, otherwise <B><TT>false</TT></B> is returned.  <B><TT>Unlock()</TT></B> releases the lock.
+<P>
+<HR>
+<H3>
+<A NAME="SetAttributes()"></A>SetAttributes()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetAttributes(</TT></B></FONT>gs_attribute *<I><FONT  color=991122 face=HELVETICA>inAttributes</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>inAttributeCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetAttributes()</TT></B> is implemented to disallow the <B><TT><A HREF="gameAPI.html#B_GS_LOOPING">B_GS_LOOPING</A></TT></B> attribute, since streamed sounds can't loop.
+<P>
+<B>See also:  <TT><A HREF="GameSound.html#SetAttributes()">BGameSound::SetAttributes()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="SetParameters()"></A>SetParameters()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetParameters(</TT></B></FONT>size_t <I><FONT  color=991122 face=HELVETICA>inBufferFrameCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const gs_audio_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>inBufferCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Changes the BStreamingGameSound object's parameters.  This lets you change the buffer size, audio format, and number of buffers after the object has been instantiated.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Couldn't change the parameters.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetStreamHook()"></A>SetStreamHook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetStreamHook(</TT></B></FONT>void (*hook)(void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>inBuffer</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>byteCount</I></FONT>, BStreamingGameSound *<I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>),
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Specfies the hook function to be called to fill buffers with audio data.  <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> indicates the cookie pointer that will be passed to the hook function.
+<P>
+The inputs to the hook function are:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>cookie
+<br>
+</I></FONT>A user-defined value.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>inBuffer
+<br>
+</I></FONT>A pointer to the buffer to be filled with audio data.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>byteCount
+<br>
+</I></FONT>The size of the buffer in bytes.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>object
+<br>
+</I></FONT>A pointer to the BStreamingGameSound object.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+B_OK.  The hook function was set without error.
+<P>
+<HR>
+<H3>Unlock() see <A HREF="#Lock()">Lock()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

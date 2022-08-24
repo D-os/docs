@@ -1,0 +1,1002 @@
+<HTML><A NAME="41753:%20head1:%20Graphics%20State%20Functions"></A>
+<HEAD><TITLE>The Interface Kit: BView Graphics State Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BView%20Graphics%20State%20Functions"></A>BView Graphics State Functions
+</H1>
+<P>
+<H6><A HREF="View Graphics State Functions.summary.html"><i>Summary</i></A></H6>
+<P>
+These functions alter or retrieve information on the graphics state (the set of internal variables controlling aspects of drawing) of a <A HREF="View.html#BView">BView</A> instance. To make it easier to find the functions of interest, the graphics state functions have been divided into the following subcategories:
+<P>
+<LI><a href="#General%20and%20Miscellaneous">General and Miscellaneous</a>
+<P>
+<LI><a href="#Pen%20Functions">Pen Functions</a>
+<P>
+<LI><a href="#Color">Color</a>
+<P>
+<LI><a href="#Drawing%20Modes">Drawing Modes</a>
+<P>
+<LI><a href="#Text%20Functions">Text Functions</a>
+<P>
+<LI><a href="#Clipping%20Functions">Clipping Functions</a>
+<P>
+</UL>
+<A NAME="39788:%20head2:%20General%20and%20Miscellaneous"></A>
+<P>
+<HR>
+<H2>
+<A NAME="General%20and%20Miscellaneous"></A><FONT SIZE=6>G</FONT>eneral and <FONT SIZE=6>M</FONT>iscellaneous
+</H2>
+<P>
+<HR>
+<H3>LineCapMode()   see <A HREF="#SetLineMode()">SetLineMode()</A></H3>
+<P>
+<HR>
+<H3>LineJoinMode()   see <A HREF="#SetLineMode()">SetLineMode()</A></H3>
+<P>
+<HR>
+<H3>LineMiterLimit()   see <A HREF="#SetLineMode()">SetLineMode()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="PushState()"></A>PushState()
+, 
+<A NAME="PopState()"></A>PopState()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>PushState(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>PopState(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Saves and restores the state from the state stack.  A state consists of the following: local and global origins, local and global scales, drawing mode, line cap and join modes, miter limit, pen size and location, foreground and background color, stipple pattern, local and global clipping regions, and the font context.  When a state is saved to the stack, a new state context is created, with a local scale of zero, a local origin at (0,0), and no clipping region.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If the <A HREF="View.html#BView">BView</A> isn't attached to a window, these functions will crash the application.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="SetLineMode()"></A>SetLineMode()
+, 
+<A NAME="LineJoinMode()"></A>LineJoinMode()
+, 
+<A NAME="LineCapMode()"></A>LineCapMode()
+, 
+<A NAME="LineMiterLimit()"></A>LineMiterLimit()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetLineMode(</TT></B></FONT>cap_mode <I><FONT  color=991122 face=HELVETICA>lineCap</I></FONT>, join_mode <I><FONT  color=991122 face=HELVETICA>lineJoin</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <I><FONT  color=991122 face=HELVETICA>miterLimit</I></FONT> = <FONT  face=HELVETICA>B_DEFAULT_MITER_LIMIT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+cap_mode <B><TT><FONT  color=000022 size=+1>LineCapMode(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+join_mode <B><TT><FONT  color=000022 size=+1>LineJoinMode(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>LineMiterLimit(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These methods implement support for PostScript-style line cap and join modes.  The cap mode determines the shape of the endpoints of stroked paths, while the join mode determines the shape of the corners of the paths (i.e. where two lines meet).
+<P>
+The following values of cap_mode are defined:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_ROUND_C"></A>B_ROUND_C
+AP</TT></B></TD>
+<TD>A semicircle is drawn around the endpoint.  Its diameter is equal to the width of the line.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BUTT_CAP"></A>B_BUTT_CAP
+</TT></B></TD>
+<TD>The line is squared off and does not extend beyond the endpoint.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SQUARE_C"></A>B_SQUARE_C
+AP</TT></B></TD>
+<TD>The line is squared off, extending past the endpoint for a distance equal to half the width of the line.</TD>
+</TABLE>
+<P>
+Additionally, the following values of join_mode are defined:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_ROUND_JOI"></A>B_ROUND_JOI
+N</TT></B></TD>
+<TD>Acts identically to <B><TT>B_ROUND_CAP</TT></B>, except applied to joins.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MITER_JOIN"></A>B_MITER_JOIN
+</TT></B></TD>
+<TD>The lines are extended until they touch.  If they meet at an angle greater than 2*arcsin(1/<I><FONT  color=991122 face=HELVETICA>miterLimit</I></FONT>), a bevel join is used instead.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BEVEL_JOIN"></A>B_BEVEL_JOIN
+</TT></B></TD>
+<TD>Butt end caps are used at the common endpoint and the empty area between the caps is filled with a triangle.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BUTT_JOIN"></A>B_BUTT_JOIN
+</TT></B></TD>
+<TD>Acts identically to <B><TT><A HREF="#B_BUTT_CAP">B_BUTT_CAP</A></TT></B>, except applied to joins.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SQUARE_JO"></A>B_SQUARE_JO
+IN</TT></B></TD>
+<TD>Acts identically to <B><TT>B_SQUARE_CAP</TT></B>, except applied to joins.</TD>
+</TABLE>
+<P>
+<B><TT>SetLineMode()</TT></B> sets the line and join modes and the miter limit while <B><TT>LineCapMode()</TT></B>, <B><TT>LineJoinMode()</TT></B>, and <B><TT>LineMiterLimit()</TT></B> return them.  The line mode affects all of the Stroke... methods except for Arc, Ellipse, and RoundRect.
+<P>
+<HR>
+<H3>
+<A NAME="SetScale()"></A>SetScale()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetScale(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>ratio</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Scales the coordinate system the view uses for drawing.  The default scale is 1.0; smaller <I><FONT  color=991122 face=HELVETICA>ratio</I></FONT> values reduce the size of the drawing coordinate system; larger numbers magnify the system.  For example, a ratio of 0.5 makes a subsequent drawing twice as small and moves the drawing closer to the origin, and 2.0 makes it twice as big and moves it away, as shown below.
+<P>
+<IMG SRC="art/ViewSetScale.GIF" ALIGN="bottom">
+<P>
+<B>The scaling ratio only affects subsequent drawing operations!</B>  Changing the scale doesn't affect the graphics already displayed in the view, the view's frame rectangle and clipping region, the placement and size of subviews, translation of mouse coordinates to and from view space, and so forth.
+<P>
+Multiple <B><TT><A HREF="#SetScale()">SetScale()</A></TT></B> calls don't compound within the same graphics state, but they do compound across pushed states:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;aview->SetScale(0.5);
+&nbsp;&nbsp;&nbsp;aview->SetScale(0.5);
+&nbsp;&nbsp;&nbsp;/* aview's scaling is 0.5. */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;bview->SetScale(0.5);
+&nbsp;&nbsp;&nbsp;bview->PushState();
+&nbsp;&nbsp;&nbsp;bview->SetScale(0.5);
+&nbsp;&nbsp;&nbsp;/* view's scaling is 0.25. */</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <A HREF="View.html#BView">BView</A> must be attached to a window before you call this function.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<A NAME="28366:%20head2:%20Pen%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Pen%20Functions"></A><FONT SIZE=6>P</FONT>en <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="MovePenBy()"></A>MovePenBy()
+, 
+<A NAME="MovePenTo()"></A>MovePenTo()
+, 
+<A NAME="PenLocation()"></A>PenLocation()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>MovePenBy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>MovePenTo(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>MovePenTo(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>PenLocation(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions move the pen (without drawing a line) and report the current pen location.
+<P>
+<B><TT><A HREF="#MovePenBy()">MovePenBy()</A></TT></B> moves the pen <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT> coordinate units to the right and <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT> units downward.  If <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT> or <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT> are negative, the pen moves in the opposite direction.  <B><TT><A HREF="#MovePenTo()">MovePenTo()</A></TT></B> moves the pen to <I><FONT  color=991122 face=HELVETICA>point</I></FONT>&mdash;or to (<I><FONT  color=991122 face=HELVETICA>x</I></FONT>, <I><FONT  color=991122 face=HELVETICA>y</I></FONT>)&mdash;in the BView's coordinate system.
+<P>
+Some drawing functions also move the pen&mdash;to the end of whatever they draw.  In particular, this is true of <B><TT><A HREF="ViewDrawing.html#StrokeLine()">StrokeLine()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B>, and <B><TT><A HREF="ViewDrawing.html#DrawChar()">DrawChar()</A></TT></B>.  Functions that stroke a closed shape (such as <B><TT><A HREF="ViewDrawing.html#StrokeEllipse()">StrokeEllipse()</A></TT></B>) don't move the pen.
+<P>
+The pen location is a parameter of the BView's graphics environment, which is maintained by both the Application Server and the BView.  If the <A HREF="View.html#BView">BView</A> doesn't belong to a window, <B><TT><A HREF="#MovePenTo()">MovePenTo()</A></TT></B> and <B><TT><A HREF="#MovePenBy()">MovePenBy()</A></TT></B> cache the location, so that later, when the <A HREF="View.html#BView">BView</A> becomes attached to a window, it can be handed to the server to become the operable pen location for the BView.  If the <A HREF="View.html#BView">BView</A> belongs to a window, these functions alter both the server parameter and the client-side cache.
+<P>
+<B><TT><A HREF="#PenLocation()">PenLocation()</A></TT></B> returns the point where the pen is currently positioned in the BView's coordinate system.  Because of the cache, this shouldn't entail contacting the server.  The default pen position is&nbsp;(0.0,&nbsp;0.0).
+<P>
+<B>See also:  <TT><A HREF="#SetPenSize()">SetPenSize()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetPenSize()"></A>SetPenSize()
+, 
+<A NAME="PenSize()"></A>PenSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetPenSize(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>PenSize(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetPenSize()">SetPenSize()</A></TT></B> sets the size of the BView's pen&mdash;the graphics parameter that determines the thickness of stroked lines&mdash;and <B><TT><A HREF="#PenSize()">PenSize()</A></TT></B> returns the current pen size.  The pen size is stated in coordinate units, but is translated to a device-specific number of pixels for each output device.
+<P>
+The pen tip can be thought of as a brush that's centered on the line path and held perpendicular to it.  If the brush is broader than one pixel, it paints roughly the same number of pixels on both sides of the path.
+<P>
+The default pen size is 1.0 coordinate unit.  It can be set to any nonnegative value, including 0.0.  If set to 0.0, the size is translated to one pixel for all devices.  This guarantees that it will always draw the thinnest possible line no matter what the resolution of the device.
+<P>
+Thus, lines drawn with pen sizes of 1.0 and 0.0 will look alike on the screen (one pixel thick), but the line drawn with a pen size of 1.0 will be 1/72 of an inch thick when printed, however many printer pixels that takes, while the line drawn with a 0.0 pen size will be just one pixel thick.
+<P>
+The pen size is a parameter of the BView's graphics environment maintained by the Application Server and cached by the BView.  If the <A HREF="View.html#BView">BView</A> isn't attached to a window, <B><TT><A HREF="#SetPenSize()">SetPenSize()</A></TT></B> records the <I><FONT  color=991122 face=HELVETICA>size</I></FONT> so that later, when the <A HREF="View.html#BView">BView</A> is added to a window and becomes known to the server, the cached value can automatically be established as the operable pen size for the BView.  If the <A HREF="View.html#BView">BView</A> belongs to a window, this function changes both the server and the cache.
+<P>
+<B>See also:  </B>"The Pen" in the "Drawing" section of this chapter, <B><TT><A HREF="ViewDrawing.html#StrokeArc()">StrokeArc()</A></TT></B>, <B><TT><A HREF="#MovePenBy()">MovePenBy()</A></TT></B> 
+<P>
+<A NAME="27694:%20head2:%20Color"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Color"></A><FONT SIZE=6>C</FONT>olor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="SetHighColor()"></A>SetHighColor()
+, 
+<A NAME="HighColor()"></A>HighColor()
+, 
+<A NAME="SetLowColor()"></A>SetLowColor()
+, 
+<A NAME="LowColor()"></A>LowColor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetHighColor(</TT></B></FONT>rgb_color <I><FONT  color=991122 face=HELVETICA>color</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+inline void <B><TT><FONT  color=000022 size=+1>SetHighColor(</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>red</I></FONT>, uchar <I><FONT  color=991122 face=HELVETICA>green</I></FONT>, uchar <I><FONT  color=991122 face=HELVETICA>blue</I></FONT>, uchar <I><FONT  color=991122 face=HELVETICA>alpha</I></FONT> = 255<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+rgb_color <B><TT><FONT  color=000022 size=+1>HighColor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetLowColor(</TT></B></FONT>rgb_color <I><FONT  color=991122 face=HELVETICA>color</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+inline void <B><TT><FONT  color=000022 size=+1>SetLowColor(</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>red</I></FONT>, uchar <I><FONT  color=991122 face=HELVETICA>green</I></FONT>, uchar <I><FONT  color=991122 face=HELVETICA>blue</I></FONT>, uchar <I><FONT  color=991122 face=HELVETICA>alpha</I></FONT> = 255<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+rgb_color <B><TT><FONT  color=000022 size=+1>LowColor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the current high and low colors of the BView.  These colors combine to form a pattern that's passed as an argument to the <B><TT>Stroke</TT></B>...<B><TT>()</TT></B> and <B><TT>Fill</TT></B>...<B><TT>()</TT></B> drawing functions.  The <B><TT><A HREF="misc.html#Pattern%20Constants">B_SOLID_HIGH</A></TT></B> pattern is the high color alone, and <B><TT><A HREF="misc.html#Pattern%20Constants">B_SOLID_LOW</A></TT></B> is the low color alone.
+<P>
+The default high color is black&mdash;<I><FONT  color=991122 face=HELVETICA>red</I></FONT>, <I><FONT  color=991122 face=HELVETICA>green</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>blue</I></FONT> values all equal to 0.  The default low color is white&mdash;<I><FONT  color=991122 face=HELVETICA>red</I></FONT>, <I><FONT  color=991122 face=HELVETICA>green</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>blue</I></FONT> values all equal to 255.  
+<P>
+The inline versions of <B><TT><A HREF="#SetHighColor()">SetHighColor()</A></TT></B> and <B><TT><A HREF="#SetLowColor()">SetLowColor()</A></TT></B> take separate arguments for the <I><FONT  color=991122 face=HELVETICA>red</I></FONT>, <I><FONT  color=991122 face=HELVETICA>blue</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>green</I></FONT> color components; they work by creating an <B><TT><A HREF="misc.html#rgb_color">rgb_color</A></TT></B> data structure and passing it to the corresponding function that's declared <B><TT>virtual</TT></B>.  Therefore, if you want to override either function, you should override the virtual version.  (However, due to the peculiarities of C++, overriding any version of an overloaded function hides all versions of the function.  For continued access to the nonvirtual version without explicitly specifying the "BView::" prefix, simply copy the inline code from <B>interface/View.h</B> into the derived class.)
+<P>
+The high and low colors are parameters of the BView's graphics environment, which is kept in the BView's shadow counterpart in the Application Server and cached in the BView.  If the <A HREF="View.html#BView">BView</A> isn't attached to a window, <B><TT><A HREF="#SetHighColor()">SetHighColor()</A></TT></B> and <B><TT><A HREF="#SetLowColor()">SetLowColor()</A></TT></B> cache the <I><FONT  color=991122 face=HELVETICA>color</I></FONT> value so that later, when the <A HREF="View.html#BView">BView</A> is placed in a window and becomes known to the server, the cached value can automatically be registered as the current high or low color for the view.  If the <A HREF="View.html#BView">BView</A> belongs to a window, these functions alter both the client-side and the server-side values.
+<P>
+<B><TT><A HREF="#HighColor()">HighColor()</A></TT></B> and <B><TT><A HREF="#LowColor()">LowColor()</A></TT></B> return the BView's current high and low colors.  Because of the cache, this shouldn't entail contacting the Application Server.
+<P>
+<B>See also:  </B>"Patterns" in the "Drawing" section of this chapter, <B><TT><A HREF="#SetViewColor()">SetViewColor()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetViewColor()"></A>SetViewColor()
+, 
+<A NAME="ViewColor()"></A>ViewColor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetViewColor(</TT></B></FONT>rgb_color <I><FONT  color=991122 face=HELVETICA>color</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+inline void <B><TT><FONT  color=000022 size=+1>SetViewColor(</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>red</I></FONT>, uchar <I><FONT  color=991122 face=HELVETICA>green</I></FONT>, uchar <I><FONT  color=991122 face=HELVETICA>blue</I></FONT>, uchar&nbsp;<I><FONT  color=991122 face=HELVETICA>alpha</I></FONT>&nbsp;=&nbsp;255<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+rgb_color <B><TT><FONT  color=000022 size=+1>ViewColor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the view's background color.  This is the color that's displayed when a view is erased during an update, or when the view is resized to expose new areas.  The default view color is white (255,255,255).  If you don't want the view to be erased in an update, set the view color to <B><TT>B_TRANSPARENT_COLOR</TT></B>.   (Despite the name this doesn't actually make the view transparent.) 
+<P>
+The inline version of <B><TT><A HREF="#SetViewColor()">SetViewColor()</A></TT></B> calls the virtual version.  Thus, overriding the virtual version affects both versions.  However, due to the peculiarities of C++, overriding any version of an overloaded function hides all versions of the function.  To fix this, simply copy the inline code from <B>View.h</B> into your subclass.
+<P>
+<B><TT><A HREF="#ViewColor()">ViewColor()</A></TT></B> returns the current background color.
+<P>
+<B>See also:  </B>"The View Color" in the "Drawing" section of this chapter, <B><TT><A HREF="#SetHighColor()">SetHighColor()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#SetViewBitmap()">SetViewBitmap()</A>
+<P>
+</TT></B><A NAME="25362:%20head2:%20Drawing%20Modes"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Drawing%20Modes"></A><FONT SIZE=6>D</FONT>rawing <FONT SIZE=6>M</FONT>odes
+</H2>
+<P>
+<HR>
+<H3>DrawingMode()   see <A HREF="#SetDrawingMode()">SetDrawingMode()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetBlendingMode()"></A>SetBlendingMode()
+, 
+<A NAME="GetBlendingMode()"></A>GetBlendingMode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetBlendingMode(</TT></B></FONT>source_alpha <I><FONT  color=991122 face=HELVETICA>alphaSrcMode</I></FONT><B><TT><FONT  color=000022 size=+1>, </TT></B></FONT>alpha_function <I><FONT  color=991122 face=HELVETICA>alphaFncMode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>GetBlendingMode(</TT></B></FONT>source_alpha *<I><FONT  color=991122 face=HELVETICA>alphaSrcMode</I></FONT><B><TT><FONT  color=000022 size=+1>, </TT></B></FONT>alpha_function <I><FONT  color=991122 face=HELVETICA>*alphaFncMode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These two functions set and retrieve the graphics state variables which control the details of alpha transparency drawing. These variables will have an effect on drawing in the view only if the drawing mode has been set to <B><TT>B_OP_ALPHA</TT></B> by <B><TT><A HREF="#SetDrawingMode()">SetDrawingMode()</A></TT></B>.
+<P>
+<I><FONT  color=991122 face=HELVETICA>alphaSrcMode</I></FONT> is one of the following two constants, with associated meanings:
+<P>
+<UL>
+<LI><B><TT>B_CONSTANT_ALPHA</TT></B> : Use the alpha channel of the current high color as the transparency value for whatever is being drawn.
+<P>
+<LI><B><TT>B_PIXEL_ALPHA</TT></B> : When drawing a bitmap, use the alpha value associated with each pixel as the transparency value for that pixel. This can be used to obtain some interesting variable transparency effects.
+<P>
+</UL>
+<P>
+<I><FONT  color=991122 face=HELVETICA>alphaFncMode</I></FONT> is one of the following two constants, with associated meanings:
+<P>
+<UL>
+<LI><B><TT>B_ALPHA_OVERLAY</TT></B> : The "normal" mode, used when drawing a transparent image or shape over an opaque background.
+<P>
+<LI><B><TT>B_ALPHA_COMPOSITE</TT></B> : Used when blending two or more transparent images together offscreen, to produce a new transparent image that will later be drawn onscreen using the <B><TT>B_ALPHA_OVERLAY</TT></B> setting.
+<P>
+</UL>
+<P>
+You can find a full tutorial on alpha drawing at the top level of The Interface Kit documentation.
+<P>
+<HR>
+<H3>
+<A NAME="SetDrawingMode()"></A>SetDrawingMode()
+, 
+<A NAME="DrawingMode()"></A>DrawingMode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetDrawingMode(</TT></B></FONT>drawing_mode <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+drawing_mode <B><TT><FONT  color=000022 size=+1>DrawingMode(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the BView's drawing mode, which can be any of the following eleven constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_OP_MIN">B_OP_MIN</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_OP_MAX">B_OP_MAX</A></TT></B> </TD>
+<TR>
+<TD><B><TT>B_OP_ERASE</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_OP_ADD">B_OP_ADD</A></TT></B> </TD>
+<TR>
+<TD><B><TT>B_OP_INVERT</TT></B></TD>
+<TD><B><TT>B_OP_SUBTRACT</TT></B> </TD>
+<TR>
+<TD><B><TT>B_OP_SELECT</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_OP_BLEND">B_OP_BLEND</A></TT></B> </TD>
+<TR>
+<TD>B_OP_ALPHA</TD>
+<TD></TD>
+</TABLE>
+<P>
+The drawing mode is an element of the BView's graphics environment, which both the Application Server and the <A HREF="View.html#BView">BView</A> keep track of.  If the <A HREF="View.html#BView">BView</A> isn't attached to a window, <B><TT><A HREF="#SetDrawingMode()">SetDrawingMode()</A></TT></B> caches the <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>.  When the <A HREF="View.html#BView">BView</A> is placed in a window and becomes known to the server, the cached value is automatically set as the current drawing mode.  If the <A HREF="View.html#BView">BView</A> belongs to a window, <B><TT><A HREF="#SetDrawingMode()">SetDrawingMode()</A></TT></B> makes the change in both the server and the cache.
+<P>
+<B><TT><A HREF="#DrawingMode()">DrawingMode()</A></TT></B> returns the current mode.  Because of the cache, this generally doesn't entail a trip to the server.
+<P>
+The default drawing mode is <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B>.  It and the other modes are explained under "Drawing Modes" in the "Drawing" section of this chapter.
+<P>
+<A NAME="11907:%20head2:%20Text%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Text%20Functions"></A><FONT SIZE=6>T</FONT>ext <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+The functions below relate specifically to using text in <A HREF="View.html#BView">BView</A> objects.
+<P>
+<HR>
+<H3>
+<A NAME="ForceFontAliasing()"></A>ForceFontAliasing()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ForceFontAliasing(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>enable</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#ForceFontAliasing()">ForceFontAliasing()</A></TT></B> is used in conjunction with printing. When called with a value of <B><TT>true</TT></B>, if causes subsequent printing to be done <I>without</I> antialiasing printed characters. This is normally what is desired with high-resolution printers, to guarantee that the edges of printed characters appear sharp. Calling <B><TT><A HREF="#ForceFontAliasing()">ForceFontAliasing()</A></TT></B> with an argument of <B><TT>false</TT></B> turns antialiasing back on, which may be desirable with lower-resolution printers.
+<P>
+Note that <B><TT><A HREF="#ForceFontAliasing()">ForceFontAliasing()</A></TT></B> does not affect characters or strings drawn to the screen.
+<P>
+<B>See also:  </B>The <B><TT><A HREF="PrintJob.html#BPrintJob">BPrintJob</A></TT></B> class.
+<P>
+<HR>
+<H3>GetFont()   see <A HREF="#SetFont()">SetFont()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetFontHeight()"></A>GetFontHeight()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetFontHeight(</TT></B></FONT>font_height *<I><FONT  color=991122 face=HELVETICA>fontHeight</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Gets the height of the BView's font.  This function provides the same information as BFont's <B><TT><A HREF="Font.html#GetHeight()">GetHeight()</A></TT></B>.  The following code
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;font_height height;
+&nbsp;&nbsp;&nbsp;myView->GetFontHeight(&amp;height);</PRE>
+<P>
+is equivalent to:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;font_height height;
+&nbsp;&nbsp;&nbsp;BFont font;
+&nbsp;&nbsp;&nbsp;myView->GetFont(&amp;font);
+&nbsp;&nbsp;&nbsp;font.GetHeight(&amp;height);</PRE>
+<P>
+See the <A HREF="Font.html#BFont">BFont</A> class for more information.
+<P>
+<B>See also:  <TT><A HREF="Font.html#GetHeight()">BFont::GetHeight()</A></TT></B> 
+<P>
+<HR>
+<H3>GetStringWidths()   see <A HREF="#StringWidth()">StringWidth()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetFont()"></A>SetFont()
+, 
+<A NAME="GetFont()"></A>GetFont()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetFont(</TT></B></FONT>const&nbsp;<A HREF="Font.html#BFont">BFont</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>font</I></FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>properties</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FONT_ALL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetFont(</TT></B></FONT><A HREF="Font.html#BFont">BFont</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>font</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetFont()">SetFont()</A></TT></B> sets the BView's current font so that it matches the specified <I><FONT  color=991122 face=HELVETICA>properties</I></FONT> of the <I><FONT  color=991122 face=HELVETICA>font</I></FONT> <A HREF="Font.html#BFont">BFont</A> object.  The <I><FONT  color=991122 face=HELVETICA>properties</I></FONT> mask is formed by combining the following constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_FONT_FAMILY_AND_STYLE</TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_FONT_SPACING">B_FONT_SPACING</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_FONT_SIZE">B_FONT_SIZE</A></TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_FONT_ENCODING">B_FONT_ENCODING</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_FONT_SHEAR">B_FONT_SHEAR</A></TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_FONT_FACE">B_FONT_FACE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_FONT_ROTATION">B_FONT_ROTATION</A></TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_FONT_FLAGS">B_FONT_FLAGS</A></TT></B> </TD>
+</TABLE>
+<P>
+Each constant corresponds to a settable property of the <A HREF="Font.html#BFont">BFont</A> object.  The default mask, <B><TT><A HREF="misc.html#B_FONT_ALL">B_FONT_ALL</A></TT></B>, is a shorthand for all the properties (including any that might be added in future releases).  If the mask is 0, <B><TT><A HREF="#SetFont()">SetFont()</A></TT></B> won't set the BView's font.
+<P>
+<B><TT><A HREF="#GetFont()">GetFont()</A></TT></B> copies the BView's current font to the <A HREF="Font.html#BFont">BFont</A> object passed as an argument.  Modifying this copy doesn't modify the BView's font; it takes an explicit <B><TT><A HREF="#SetFont()">SetFont()</A></TT></B> call to affect the BView.
+<P>
+For example, this code changes the size of a BView's font and turns antialiasing off:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BFont font;
+&nbsp;&nbsp;&nbsp;myView->GetFont(&amp;font);
+&nbsp;&nbsp;&nbsp;font.SetSize(67.0);
+&nbsp;&nbsp;&nbsp;font.SetFlags(B_DISABLE_ANTIALIASING);
+&nbsp;&nbsp;&nbsp;myView->SetFont(&amp;font, B_FONT_SIZE | B_FONT_FLAGS);</PRE>
+<P>
+Since the <A HREF="Font.html#BFont">BFont</A> object that this example code alters is a copy of the BView's current font, it's not strictly necessary to name the properties that are different when calling <B><TT><A HREF="#SetFont()">SetFont()</A></TT></B>.  However, it's more efficient and better practice to do so.
+<P>
+The font is part of the BView's graphic environment.  Like other elements in the environment, it can be set whether or not the <A HREF="View.html#BView">BView</A> is attached to the window.  Graphics parameters are kept by the Application Server and also cached by the <A HREF="View.html#BView">BView</A> object.
+<P>
+<B>See also:  </B>the <A HREF="Font.html#BFont">BFont</A> class, <B><TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetFontSize()"></A>SetFontSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetFontSize(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>points</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the size of the BView's font to <I><FONT  color=991122 face=HELVETICA>points</I></FONT>.  This function is a shorthand for a <B><TT><A HREF="#SetFont()">SetFont()</A></TT></B> call that just alters the font size.  For example, this line of code
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myView->SetFontSize(12.5);</PRE>
+<P>
+does the same thing as:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BFont font;
+&nbsp;&nbsp;&nbsp;font.SetSize(12.5);
+&nbsp;&nbsp;&nbsp;myView->SetFont(&amp;font, B_FONT_SIZE);</PRE>
+<P>
+<B>See also:  </B>the <A HREF="Font.html#BFont">BFont</A> class, <B><TT><A HREF="#SetFont()">SetFont()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="StringWidth()"></A>StringWidth()
+, 
+<A NAME="GetStringWidths()"></A>GetStringWidths()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>StringWidth(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>StringWidth(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetStringWidths(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>stringArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>lengthArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numStrings</I></FONT>, float&nbsp;<I><FONT  color=991122 face=HELVETICA>widthArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions measure how much room is required to draw a <I><FONT  color=991122 face=HELVETICA>string</I></FONT>, or a group of strings, in the BView's current font.  They're equivalent to the identically named set of functions defined in the <A HREF="Font.html#BFont">BFont</A> class, except that they assume the BView's font.  For example, this line of code
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;float width;
+&nbsp;&nbsp;&nbsp;width = myView->StringWidth("Be"B_UTF8_REGISTERED);</PRE>
+<P>
+produces the same result as:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;float width;
+&nbsp;&nbsp;&nbsp;BFont font;
+&nbsp;&nbsp;&nbsp;myView->GetFont(&amp;font);
+&nbsp;&nbsp;&nbsp;width = font.StringWidth("Be"B_UTF8_REGISTERED);</PRE>
+<P>
+See the <A HREF="Font.html#BFont">BFont</A> class for details.
+<P>
+<B>See also:  <TT><A HREF="Font.html#StringWidth()">BFont::StringWidth()</A></TT></B>, <B><TT><A HREF="Font.html#GetEscapements()">BFont::GetEscapements()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="TruncateString()"></A>TruncateString()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>TruncateString(</TT></B></FONT><A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>inOutString</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>width</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Truncates the <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> <I><FONT  color=991122 face=HELVETICA>inOutString</I></FONT> to be no wider than <I><FONT  color=991122 face=HELVETICA>width</I></FONT> pixels.  The <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> flags control how the string is truncated.
+<P>
+<B><TABLE BORDER cellpadding=4>
+<TD><TT>B_TRUNCATE_BEGINNING</TT></B></TD>
+<TD>Cut from the beginning of the string until it fits within the specified width.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_TRUNCATE_MIDDLE">B_TRUNCATE_MIDDLE</A></TT></B></TD>
+<TD>Cut from the middle of the string.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_TRUNCATE_END">B_TRUNCATE_END</A></TT></B></TD>
+<TD>Cut from the end of the string.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_TRUNCATE_SMART">B_TRUNCATE_SMART</A></TT></B></TD>
+<TD>Cut anywhere, but do so intelligently, so that all the strings remain different after being cut.  For example, if a set of similar path names are passed in the <I><FONT  color=991122 face=HELVETICA>inputStringArray</I></FONT>, this mode would attempt to cut from the identical parts of the path names and preserve the parts that are different.  This mode also pays attention to word boundaries, separators, punctuation, and the like.  However, it's not implemented for the current release.</TD>
+</TABLE>
+<P>
+<A NAME="12951:%20head1:%20BView%20Clipping%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Clipping%20Functions"></A><FONT SIZE=6>C</FONT>lipping <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="ClipToPicture()"></A>ClipToPicture()
+, 
+<A NAME="ClipToInversePicture()"></A>ClipToInversePicture()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ClipToPicture(</TT></B></FONT><A HREF="Picture.html#BPicture">BPicture</A> <I><FONT  color=991122 face=HELVETICA>*picture</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>where </I></FONT>= B_ORIGIN, bool <I><FONT  color=991122 face=HELVETICA>sync </I></FONT>= true<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ClipToInversePicture(</TT></B></FONT><A HREF="Picture.html#BPicture">BPicture</A> <I><FONT  color=991122 face=HELVETICA>*picture</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>where </I></FONT>= B_ORIGIN, bool <I><FONT  color=991122 face=HELVETICA>sync </I></FONT>= true<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P></b>
+Modifies the view's clipping region by intersecting the current clipping region with the pixels drawn by <I><FONT  color=991122 face=HELVETICA>picture</I></FONT> (in the case of <B><TT>ClipToPicture</TT></B>) or with everything outside the pixels drawn by <I><FONT  color=991122 face=HELVETICA>picture</I></FONT> (in the case of <B><TT>ClipToInversePicture</TT></B>), to produce the new clipping region. 
+<P>
+Note that <B><TT><A HREF="Picture.html#BPicture">BPicture</A></TT></B> instances are, by their nature, resolution independent; when the <B><TT>ClipToPicture</TT></B> or <B><TT>ClipToInversePicture</TT></B> command is invoked, <I><FONT  color=991122 face=HELVETICA>picture</I></FONT> is effectively drawn at the same resolution as the invoking view, and the bitmap produced by that action is used to modify the clipping region. You may think of <I><FONT  color=991122 face=HELVETICA>picture</I></FONT> as executing its drawing instructions on a surface that starts out as completely transparent; at the end of the process, each pixel on the drawing surface will either be either completely transparent, or will be at least somewhat opaque. The pixels which are at least somewhat opaque are those which were "drawn" by <I><FONT  color=991122 face=HELVETICA>picture</I></FONT>.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> is false, the functions will execute asynchronously; normally they execute synchronously (i.e. wait for the drawing actions to be completed by the Application Server.)
+<P>
+<B>See also:  <TT><A HREF="Picture.html#BPicture">BPicture</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#BeginPicture()">BeginPicture()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="ConstrainClippingRegion()"></A>ConstrainClippingRegion()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ConstrainClippingRegion(</TT></B></FONT><A HREF="Region.html#BRegion">BRegion</A> *<I><FONT  color=991122 face=HELVETICA>region</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Restricts the drawing that the <A HREF="View.html#BView">BView</A> can do to <I><FONT  color=991122 face=HELVETICA>region</I></FONT>.
+<P>
+The Application Server keeps track of a clipping region for each <A HREF="View.html#BView">BView</A> that's attached to a window.  It clips all drawing the <A HREF="View.html#BView">BView</A> does to that region; the <A HREF="View.html#BView">BView</A> can't draw outside of it.
+<P>
+By default, the clipping region contains only the visible area of the view and, during an update, only the area that actually needs to be drawn.  By passing a <I><FONT  color=991122 face=HELVETICA>region</I></FONT> to this function, an application can further restrict the clipping region.  When calculating the clipping region, the server intersects it with the <I><FONT  color=991122 face=HELVETICA>region</I></FONT> provided.  The <A HREF="View.html#BView">BView</A> can draw only in areas common to the <I><FONT  color=991122 face=HELVETICA>region</I></FONT> passed and the clipping region as the server would otherwise calculate it.  The region passed can't expand the clipping region beyond what it otherwise would be.
+<P>
+The clipping region is additionally affected by any items on the state stack.  If any saved states contain clipping regions, then the actual clipping region used by the Application Server is the intersection of the local clipping region (as set by this method) and the regions stored on the state stack.
+<P>
+If called during an update, <B><TT><A HREF="#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B> restricts the clipping region only for the duration of the update.
+<P>
+Calls to <B><TT><A HREF="#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B> are not additive; each <I><FONT  color=991122 face=HELVETICA>region</I></FONT> that's passed replaces the one that was passed in the previous call.  Passing a <B><TT>NULL</TT></B> pointer removes the previous region without replacing it.  The function works only for BViews that are attached to a window.
+<P>
+<B>See also:  <TT><A HREF="#GetClippingRegion()">GetClippingRegion()</A></TT></B>, <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetClippingRegion()"></A>GetClippingRegion()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetClippingRegion(</TT></B></FONT><A HREF="Region.html#BRegion">BRegion</A> *<I><FONT  color=991122 face=HELVETICA>region</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Modifies the <A HREF="Region.html#BRegion">BRegion</A> object passed as an argument so that it describes the current local clipping region of the <A HREF="View.html#BView">BView</A>, the region where the <A HREF="View.html#BView">BView</A> is allowed to draw.  It's most efficient to allocate temporary BRegions on the stack:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BRegion clipper;
+&nbsp;&nbsp;&nbsp;GetClippingRegion(&amp;clipper);
+&nbsp;&nbsp;&nbsp;. . .</PRE>
+<P>
+Ordinarily, the clipping region is the same as the visible region of the view, the part of the view currently visible on-screen.  The visible region is equal to the view's bounds rectangle minus:
+<P>
+<UL>
+<LI>The frame rectangles of its children,
+<P>
+<LI>Any areas that are clipped because the view doesn't lie wholly within the frame rectangles of all its ancestors in the view hierarchy, and
+<P>
+<LI>Any areas that are obscured by other windows or that lie in a part of the window that's off-screen.
+<P>
+</UL>
+<P>
+The clipping region can be smaller than the visible region if the program restricted it by calling <B><TT><A HREF="#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B>.  It will exclude any area that doesn't intersect with the region passed to <B><TT><A HREF="#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B>.
+<P>
+The clipping region is additionally modified by any items on the state stack.  If any saved states contain clipping regions, then the actual clipping region used by the Application Server is the intersection of the local clipping region (as set by <B><TT><A HREF="#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B>) and the regions stored on the state stack.
+<P>
+While the <A HREF="View.html#BView">BView</A> is being updated, the clipping region contains just those parts of the view that need to be redrawn.  This may be smaller than the visible region, or the region restricted by <B><TT><A HREF="#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B>, if:
+<P>
+<UL>
+<LI>The update occurs during scrolling.  The clipping region will exclude any of the view's visible contents that the Application Server is able to shift to their new location and redraw automatically.
+<P>
+<LI>The view rectangle has grown (because, for example, the user resized the window larger) and the update is needed only to draw the new parts of the view.
+<P>
+<LI>The update was caused by <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B> and the rectangle passed to <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B> didn't cover all of the visible region.
+<P>
+<LI>The update was necessary because <B><TT><A HREF="ViewDrawing.html#CopyBits()">CopyBits()</A></TT></B> couldn't fill all of a destination rectangle.
+<P>
+</UL>
+<P>
+If, while updating is ongoing, you call the view's parent's <B><TT>GetClippingRegion() </TT></B>function, the resulting region indicates only the area of that view that requries updating, and so forth.  In other words, this change in behavior (from returning the true clipping region to returning the update region) is recursive up the view hierarchy.
+<P>
+This function works only if the <A HREF="View.html#BView">BView</A> is attached to a window.  Unattached BViews can't draw and therefore have no clipping region.
+<P>
+<B>See also:  <TT><A HREF="#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B>, <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B> 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,131 @@
+<HTML><HEAD><TITLE>Tracker: Tracker Add-on Protocol</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Tracker Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Tracker%20Master%20Index.html"><FONT face=HELVETICA>Tracker Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Tracker%20Add-on%20Protocol"></A>Tracker Add-on Protocol
+</H1>
+<P>
+The Tracker provides a convenient shortcut mechanism through the use of add-ons.  A user can access a special add-ons menu by right clicking in the Tracker.  The Tracker interacts with an add-on through the <B><TT>process_refs()</TT></B> function  described below.
+<P>
+Tracker add-ons should be placed in <B>/boot/home/config/add-ons/Tracker</B>.  A shortcut key can be associated with the add-on by appending a dash followed by the shortcut key to the filename of the add-on.
+<P>
+<HR>
+<H3>
+<A NAME="process_refs()"></A>process_refs()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;be/add-ons/tracker/TrackerAddOn.h>">&lt;be/add-ons/tracker/TrackerAddOn.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>process_refs(</TT></B></FONT>entry_ref <I><FONT  color=991122 face=HELVETICA>dir_ref</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>msg</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>reserved</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The Tracker calls this function when the user invokes the add-on.  The current directory is found in <I><FONT  color=991122 face=HELVETICA>dir_ref</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>msg</I></FONT> is a standard <B><TT><A HREF="../Messages/GeneralMessages.html#B_REFS_RECEIVED">B_REFS_RECEIVED</A></TT></B> <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> with the "<I><FONT  color=991122 face=HELVETICA>refs</I></FONT>" array containing the <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B>s of the files selected by the user.  The third argument is currently unused.
+<P>
+<B><TT>process_refs()</TT></B> runs in a separate thread within the Tracker's team, so if your add-on crashes, the Tracker goes too.
+<P>
+A simple Tracker Add-On follows.  It simply takes the contents of the arguments to <B><TT>process_refs()</TT></B> and outputs them in a window.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#include &lt;Application.h>
+&nbsp;&nbsp;&nbsp;#include &lt;InterfaceKit.h>
+&nbsp;&nbsp;&nbsp;#include &lt;StorageKit.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;#include &lt;stdio.h>
+&nbsp;&nbsp;&nbsp;#include &lt;string.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;#include &lt;be/add-ons/tracker/TrackerAddon.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;void process_refs(entry_ref dir_ref, BMessage *msg, void *)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BWindow *window = new BWindow(BRect(100,100,300,300),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Sample Tracker Add-on", B_TITLED_WINDOW, 0);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTextView *view = new BTextView(BRect(0,0,200,200), "view",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BRect(0,0,200,200), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_FULL_UPDATE_ON_RESIZE);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BEntry entry(&amp;dir_ref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry.GetPath(&amp;path);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->Insert("Current Directory: ");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->Insert(path.Path());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->Insert("n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int refs;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref file_ref;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (refs=0;msg->FindRef("refs", refs, &amp;file_ref) == B_NO_ERROR;refs++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (refs == 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->Insert("Selected files:n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry.SetTo(&amp;file_ref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry.GetPath(&amp;path);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->Insert(path.Path());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->Insert("n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (refs == 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->Insert("No files selected.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->MakeEditable(false);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window->AddChild(view);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window->Show();
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;main()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new BApplication("application/x-sample-tracker-add-on");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(new BAlert("", "Sample Tracker Add-on", "swell"))->Go();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete be_app;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Tracker Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Tracker%20Master%20Index.html"><FONT face=HELVETICA>Tracker Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

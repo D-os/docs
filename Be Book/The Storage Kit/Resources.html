@@ -1,0 +1,765 @@
+<HTML><HEAD><TITLE>The Storage Kit: BResources</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BResources"></A>BResources
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/Resources.h">be/storage/Resources.h</A>
+<P>
+Library:  libbe.so
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>You may not want to be here...</B>The BResources class was designed for a specific purpose:  To provide a means to bundle application "resources" (icons, in particular) within the application executable itself.  If you want to add new resources to your own application (resources that you want to have "stick" to the executable), then you've come to the right place.  But you shouldn't use BResources to add data to a regular data file&mdash;use attributes instead.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<H6><A HREF="Resources.summary.html"><i>Summary</i></A></H6>
+<P>
+The data that a file contains is either "flat," or it's "structured."  To read a flat file, you simply open it (through a <A HREF="File.html#BFile">BFile</A> object) and start <B><TT><A HREF="File.html#Read()">Read()</A></TT></B>'ing.  Structured data requires that you understand the structure.  Typically, an application understands the structure either because it's a well-known format, or because the application itself wrote the file in the first place.
+<P>
+The BResources class defines a simple design for storing structured data.  The structure is a series of "resources," where each resource is key/value pair.   A single "resource file" can hold an unlimited number of resources; a single resource within a resource file can contain an unlimited amount of data.  
+<P>
+Resources are sort of like attributes in that they store chunks of data that are looked up through the use of a key.   But note these differences:
+<P>
+<UL>
+<LI>Resources are stored in the file itself, such that if you copy the file, you copy the resources, as well. 
+<P>
+<LI>Resources can't be queried.
+<P>
+<LI>Only plain files can have resources.  (In other words, directories and symbolic links can't have resources.)
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Initializing%20a%20BResources%20Object"></A>Initializing a BResources Object
+</H3>
+<P>
+The BResources class provides the means for reading and writing a file's resources, but it doesn't let you access the file directly.  Instead, you must initialize the BResources object by passing it a valid <A HREF="File.html#BFile">BFile</A> object, either in the constructor or the <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function.  Note the following:
+<P>
+<UL>
+<LI>The <A HREF="File.html#BFile">BFile</A> that you pass in is copied by the BResources object.  Thus, initializing a BResources object opens a new file descriptor into the file.  You can delete the "original" <A HREF="File.html#BFile">BFile</A> immediately after you use it to initialize the BResources object.
+<P>
+<LI>Care must be taken to avoid writing to a <A HREF="File.html#BFile">BFile</A> that other applications have open for reading.  BResources can't enforce this rule, but if you're not careful to abide by it, problems can (and will) occur.  Likewise, multiple applications mustn't open the same file for writing at the same time.
+<P>
+<LI>If you want to write resources, the <A HREF="File.html#BFile">BFile</A> must <I>not</I> be locked when you pass it in.  The BResources needs to be able to lock its copy of your object.
+<P>
+<LI>The <A HREF="File.html#BFile">BFile</A> <I>must</I> be open for reading (at least).
+<P>
+<LI>Unfortunately, BResources lacks an <B><TT>InitCheck()</TT></B> function.  If you want to check initialization errors, you should always initialize through <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>, rather than through the constructor. 
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="Identifying%20and%20Creating%20Resource%20Files"></A>Identifying and Creating Resource Files
+</H4>
+<P>
+You can't use just any old file as a BResources initializer:  The file must be an actual resource file.  Simply initializing a BResources object with an existing non-resource file will <I>not</I> transform the file into a resource file&mdash;unless you tell the initializer to clobber the existing file.  
+<P>
+For example, this initialization fails:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* "fido" exists, but isn&gt;t a resource file. */
+&nbsp;&nbsp;&nbsp;BFile file("/boot/home/fido", B_READ_WRITE);
+&nbsp;&nbsp;&nbsp;BResources res;
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if ((err = res.SetTo(&amp;file)) != B_OK) 
+&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+And this one succeeds...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* The second arg to SetTo() is the "clobber?" flag. */
+&nbsp;&nbsp;&nbsp;if ((err = res.SetTo(&amp;file, true)) != B_OK) 
+&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+...but at a price:  <B>fido</B>'s existing data is destroyed (truncated to 0 bytes), and a new "resource header" is written to the file.  Having gained a resource header,  <B>fido</B> can thereafter be used to initialize a BResources object.
+<P>
+Clobber-setting a resource file is possible, but, as mentioned at the top of this class description, you'll probably never create resource files directly yourself
+<P>
+So where do resource files come from if you don't create them yourself?  Step right up...
+<P>
+<H4>
+<A NAME="Executables%20as%20Resource%20Files"></A>Executables as Resource Files
+</H4>
+<P>
+The only files that are naturally resource-ful are application executables.  For example, here we initialize a BResources object with the <B>IconWorld</B> executable:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;BFile file;
+&nbsp;&nbsp;&nbsp;BResources res;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;find_directory(B_APPS_DIRECTORY, &amp;path);
+&nbsp;&nbsp;&nbsp;path.Append("IconWorld");
+&nbsp;&nbsp;&nbsp;file.SetTo(&amp;path, B_READ_ONLY);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (res.SetTo(&amp;file) != B_OK) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+The BResources object is now primed to look at <B>IconWorld</B>'s resources.  But be aware that an application's "app-like" resources (its icons, signature, app flags) should be accessed through the <A HREF="NodeInfo.html#BAppFileInfo">BAppFileInfo</A> class.  
+<P>
+<HR>
+<H3>
+<A NAME="Resource%20Data"></A>Resource Data
+</H3>
+<P>
+After you've initialized your BResources object, you use the <I>Fiddle<B><TT>Resource()</TT></B></I> functions to examine and manipulate the file's resources:
+<P>
+<H4>
+<A NAME="Generative%20Functions"></A>Generative Functions
+</H4>
+<P>
+<UL>
+<LI><B><TT><A HREF="#AddResource()">AddResource()</A></TT></B> adds a new resource to the file.
+<P>
+<LI><B><TT><A HREF="#RemoveResource()">RemoveResource()</A></TT></B> removes an existing resource from the file.
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="Data%20Function"></A>Data Function
+</H4>
+<P>
+<UL>
+<LI><B><TT><A HREF="#LoadResource()">LoadResource()</A></TT></B> loads a resource from disk and returns a pointer to it.
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="Info%20Functions"></A>Info Functions
+</H4>
+<P>
+<UL>
+<LI><B><TT><A HREF="#HasResource()">HasResource()</A></TT></B> tells you if the file contains a specified resource.
+<P>
+<LI><B><TT><A HREF="#GetResourceInfo()">GetResourceInfo()</A></TT></B> returns information about a resource.
+<P>
+</UL>
+<P>
+As mentioned earlier, the <A HREF="File.html#BFile">BFile</A> that you use to initialize a BResources object must be open for reading.  If you also want to modify the resources (by adding, removing, or writing) the <A HREF="File.html#BFile">BFile</A> must also be open for writing.
+<P>
+<A NAME="42133:%20head3:%20Identifying%20a%20Resource%20within%20a%20Resource%20File"></A>
+<P>
+<H4>
+<A NAME="Identifying%20a%20Resource%20within%20a%20Resource%20File"></A>Identifying a Resource within a Resource File
+</H4>
+<P>
+A single resource within a resource file is tagged with a data type, an ID, and a name:
+<P>
+<UL>
+<LI>The data type is one of the <B><TT><A HREF="../The%20Support%20Kit/misc.html#type_code">type_code</A></TT></B> types (<B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>, and so on) that characterize different types of data.  The data type that you assign to a resource doesn't restrict the type of data that the resource can contain, it simply serves as a way to label the type of data that you're putting into the resource so you'll know how to cast it when you retrieve it.
+<P>
+<LI>The ID is an arbitrary integer that you invent yourself.  It need only be meaningful to the application that uses the resource file.  
+<P>
+<LI>The name is optional, but can be useful:  You can look up a resource by its name, if it has one.
+<P>
+</UL>
+<P>
+Taken singly, none of these tags needs to be unique:  Any number of resources (within the same file) can have the same data type, ID, or name.  It's the <I>combination</I> of the data type constant and the ID that uniquely identifies a resource within a file.  The name, on the other hand, is more of a convenience; it never needs to be unique when combined with the data type or with the ID.
+<P>
+Some functions also provide the option to use a pointer to a resource's data to identify the resource; once a resource has been loaded into memory by calling <B><TT><A HREF="#LoadResource()">LoadResource()</A></TT></B>, you can use the resulting pointer to identify it.
+<P>
+<H4>
+<A NAME="Data%20Format"></A>Data Format
+</H4>
+<P>
+All resource data is assumed to be "raw":  If you want to store a <B><TT>NULL</TT></B>-terminated string in a resource, for example, you have to write the <B><TT>NULL</TT></B> as part of the string data, or the application that reads the resource from the resource must apply the <B><TT>NULL</TT></B> itself.  Put more generally, the data in a resource doesn't assume any particular structure or format, it's simply a vector of bytes.
+<P>
+<H4>
+<A NAME="Data%20Ownership"></A>Data Ownership
+</H4>
+<P>
+Resource data that you retrieve from a BResources object belongs to the BResources object.  You mustn't <B><TT><A HREF="../Drivers/area_malloc.html#free()">free()</A></TT></B> these pointers.
+<P>
+Individual changes that you make to the resource file are cached in memory until you call the <B><TT><A HREF="#Sync()">Sync()</A></TT></B> function.  Other applications won't see the changes until then.
+<P>
+<HR>
+<H3>
+<A NAME="Reading%20and%20Writing%20a%20Resource%20File%20as%20a%20Plain%20File"></A>Reading and Writing a Resource File as a Plain File
+</H3>
+<P>
+Just because a file is a resource file, that doesn't mean that you're prevented from reading and writing it as a plain file (through the <A HREF="File.html#BFile">BFile</A> object).  For example, it's possible to create a resource file, add some resources to it, and then use a <A HREF="File.html#BFile">BFile</A> object to seek to the end of the file and write some flat data.  But you have to keep track of the "data map" yourself&mdash;if you go back and add more resources to the file (or extend the size of the existing ones), your flat data will be overwritten:  The BResources object doesn't preserve non-resource data that lives in the file that it's operating on.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BResources()"></A>BResources()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BResources(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BResources(</TT></B></FONT><A HREF="File.html#BFile">BFile</A> *<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>clobber = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BResources object.  You can initialize the object by passing a pointer to a valid BFile; without the argument, the object won't refer to a file until <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> is called.  
+<P>
+If <I><FONT  color=991122 face=HELVETICA>clobber</I></FONT> is true, the file that's referred to by <A HREF="File.html#BFile">BFile</A> is truncated (it's data is erased), and a new resource file header is written to the file.  If <I><FONT  color=991122 face=HELVETICA>clobber</I></FONT> is false and the file doesn't otherwise doesn't have a resource header, the initialization fails.
+<P>
+BResources copies the <A HREF="File.html#BFile">BFile</A> argument; after the constructor returns, you can, for example, delete the <A HREF="File.html#BFile">BFile</A> that you passed in.
+<P>
+<HR>
+<H3>
+<A NAME="~BResources()"></A>~BResources()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BResources()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Destroys the BResources object. 
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddResource()"></A>AddResource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddResource(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>id,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>length</I></FONT><B><TT><FONT  color=000022 size=+1>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1> = NULL</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds a new resource to the file.  For this function to have an effect, the file must be open for writing.  The arguments are:
+<P>
+<UL>
+<LI><I>type</I> is one of the <B><TT><A HREF="../The%20Support%20Kit/misc.html#type_code">type_code</A></TT></B> constants defined in <B>be/support/TypeConstants.h</B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>id</I></FONT> is the ID number that you want to assign to the resource.  The value of the ID has no meaning other than that which your application gives it; the only restriction on the ID is that the combination of it and the data type constant must be unique across all resources in this resource file.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>data</I></FONT> is a pointer to the data that you want the resource to hold.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>length</I></FONT> is the length of the <I><FONT  color=991122 face=HELVETICA>data</I></FONT> buffer, in bytes.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT> is optional, and needn't be unique.  Or even interesting.
+<P>
+</UL>
+<P>
+Ownership of the <I><FONT  color=991122 face=HELVETICA>data</I></FONT> pointer isn't assigned to the BResources object by this function; after <B><TT><A HREF="#AddResource()">AddResource()</A></TT></B> returns, your application can free or otherwise manipulate the buffer that <I><FONT  color=991122 face=HELVETICA>data</I></FONT> points to without affecting the data that was written to the file.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The resource was successfully added.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  The is open read-only.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  The file's resource map doesn't exist or is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The data pointer is <B><TT>NULL</TT></B>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to add the resource to the file.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="File()"></A>File()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const <A HREF="File.html#BFile">BFile</A> &amp;<B><TT><FONT  color=000022 size=+1>File(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="File.html#BFile">BFile</A> the BResource object references.
+<P>
+<HR>
+<H3>
+<A NAME="GetResourceInfo()"></A>GetResourceInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>GetResourceInfo(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>byIndex</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code *<I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>idFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char **<I><FONT  color=991122 face=HELVETICA>nameFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t *<I><FONT  color=991122 face=HELVETICA>lengthFound</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>GetResourceInfo(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>byType</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>andIndex</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>idFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char **<I><FONT  color=991122 face=HELVETICA>nameFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t *<I><FONT  color=991122 face=HELVETICA>lengthFound</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>GetResourceInfo(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>byType</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>andId</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char **<I><FONT  color=991122 face=HELVETICA>nameFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t *<I><FONT  color=991122 face=HELVETICA>lengthFound</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>GetResourceInfo(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>byType</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>andName</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>idFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t *<I><FONT  color=991122 face=HELVETICA>lengthFound</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>GetResourceInfo(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>byPointer
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>type_code *<I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>idFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t *<I><FONT  color=991122 face=HELVETICA>lengthFound
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>const char **<I><FONT  color=991122 face=HELVETICA>nameFound</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions return information about a specific resource, as identified by the first one or two arguments:
+<P>
+<UL>
+<LI>The first version (<I><FONT  color=991122 face=HELVETICA>byIndex</I></FONT>) searches for the <I><FONT  color=991122 face=HELVETICA>byIndex</I></FONT>'th resource in the file.
+<P>
+<LI>The second (<I><FONT  color=991122 face=HELVETICA>byType</I></FONT>/<I><FONT  color=991122 face=HELVETICA>andIndex</I></FONT>) searches for the <I><FONT  color=991122 face=HELVETICA>byIndex</I></FONT>'th resource that has the given type.
+<P>
+<LI>The third (<I><FONT  color=991122 face=HELVETICA>byType</I></FONT>/<I><FONT  color=991122 face=HELVETICA>andId</I></FONT>) looks for the resource with the unique combination of type and ID.
+<P>
+<LI>The fourth (<I><FONT  color=991122 face=HELVETICA>byType</I></FONT>/<I><FONT  color=991122 face=HELVETICA>andName</I></FONT>) looks for the first resource that has the given type and name.
+<P>
+<LI>The last (<I><FONT  color=991122 face=HELVETICA>byPointer</I></FONT>) returns information about the resource whose data is pointed to by <I><FONT  color=991122 face=HELVETICA>byPointer</I></FONT>.  This can be used to trace a resource that's already been loaded with <B><TT><A HREF="#LoadResource()">LoadResource()</A></TT></B> back to its information.
+<P>
+</UL>
+<P>
+The other arguments return the other statistics about the resource (if found).  
+<P>
+The pointer that's returned in<I><FONT  color=991122 face=HELVETICA> *foundName</I></FONT> belongs to the BResources.  Don't free it.
+<P>
+The functions return <B><TT>true</TT></B> if a resource was found, and <B><TT>false</TT></B> otherwise.   
+<P>
+<HR>
+<H3>
+<A NAME="HasResource()"></A>HasResource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasResource(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasResource(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the resource file contains a resource as identified by the arguments, otherwise it returns <B><TT>false</TT></B>.
+<P>
+Keep in mind that there may be more than one resource in the file with the same <I><FONT  color=991122 face=HELVETICA>name</I></FONT> and <I><FONT  color=991122 face=HELVETICA>type</I></FONT> combination.  The <I><FONT  color=991122 face=HELVETICA>type</I></FONT> and <I><FONT  color=991122 face=HELVETICA>id</I></FONT> combo, on the other hand, is unique.   See "<a href="#Identifying%20a%20Resource%20within%20a%20Resource%20File">Identifying a Resource within a Resource File</a>."
+<P>
+<HR>
+<H3>
+<A NAME="LoadResource()"></A>LoadResource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const void *<B><TT><FONT  color=000022 size=+1>LoadResource(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>outSize</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+const void *<B><TT><FONT  color=000022 size=+1>LoadResource(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>outSize</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Loads the specified resource into memory.  The resource can be identified by either type code and ID or by type code and name.  See "<a href="#Identifying%20a%20Resource%20within%20a%20Resource%20File">Identifying a Resource within a Resource File</a>."
+<P>
+The returned pointer belongs to the resource file; it's valid until the resource gets changed.  If an error occurs while trying to load the resource, <B><TT>NULL</TT></B> is returned.
+<P>
+<HR>
+<H3>
+<A NAME="MergeFrom()"></A>MergeFrom()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>MergeFrom(</TT></B></FONT><A HREF="File.html#BFile">BFile</A> *<I><FONT  color=991122 face=HELVETICA>fromFile</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Copies all the resource from the file specified by <I><FONT  color=991122 face=HELVETICA>fromFile</I></FONT> into the file targeted by the BResources object.  The original file isn't changed.  You can do this to a file that's opened read-only, but the changes won't have any effect.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The resources were copied without error.
+<P>
+<UL>
+<LI><B><TT>B_BAD_FILE</TT></B>.  The resource map is empty.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file error occurred, or the resource map is nonexistent.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_IO_ERROR">B_IO_ERROR</A></TT></B>.  An error occurred while writing the data.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Something else went wrong.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="PreloadResourceType()"></A>PreloadResourceType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>PreloadResourceType(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If you know you're going to need to access all resources of a particular <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, you can preload them all into memory in one shot using this function.  If you specify a <I><FONT  color=991122 face=HELVETICA>type</I></FONT> of 0, all resources of all types are preloaded.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The resources were preloaded without error.
+<P>
+<UL>
+<LI><B><TT>B_BAD_FILE</TT></B>.  The resource map is empty.
+<P>
+<LI>Other values.  The returned value is the negative of the number of errors that occurred while preloading resources; for example, if five errors occurred, the result is -5.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="RemoveResource()"></A>RemoveResource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveResource(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveResource(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>resource</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Removes the resource identified by the arguments.  See "<a href="#Identifying%20a%20Resource%20within%20a%20Resource%20File">Identifying a Resource within a Resource File</a>."
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The resource was removed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  The file's resource map doesn't exist.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  The file is opened read-only.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Couldn't find the specified resource, or an error occurred trying to remove it (first form of <B><TT>RemoveResource()</TT></B>).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Couldn't find the specified resource, the pointer doesn't indicate a valid resource, or an error occurred while removing the resource (second form).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT><A HREF="File.html#BFile">BFile</A> *<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>clobber = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Unlocks and closes the object's previous <A HREF="File.html#BFile">BFile</A>, and re-initializes it to refer to a copy of the argument.  If the new <A HREF="File.html#BFile">BFile</A> is open for writing, the BResources' copy of the <A HREF="File.html#BFile">BFile</A> is locked.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>clobber</I></FONT> is <B><TT>true</TT></B>, the file that's referred to by <A HREF="File.html#BFile">BFile</A> is truncated (it's data is erased), and a new resource file header is written to the file.  If <I><FONT  color=991122 face=HELVETICA>clobber</I></FONT> is <B><TT>false</TT></B> and the file doesn't otherwise doesn't have a resource header, the initialization fails.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The resource was removed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The argument <A HREF="File.html#BFile">BFile</A> is invalid (uninitialized).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The BResources couldn't be initialized (for whatever reason).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Sync()"></A>Sync()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Sync(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Updates all changed resources on disk.  This actually rewrites the <I>entire</I> resource file, so be aware of this when designing your code.  This is a very good reason not to use BResources for anything other than permanent, nonchanging application data, and only developer tools should write to resource files.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The resources were updated without error.
+<P>
+<UL>
+<LI><B><TT>B_BAD_FILE</TT></B>.  The resource map is empty.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  The file is opened read-only.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file error occurred.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_IO_ERROR">B_IO_ERROR</A></TT></B>.  An error occurred while writing the data.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="WriteTo()"></A>WriteTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>WriteTo(</TT></B></FONT><A HREF="File.html#BFile">BFile</A> *<I><FONT  color=991122 face=HELVETICA>newFile</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Writes all the file's resources into a new file.  After this function returns, the BResources object is targeted on the new BFile; all future operations will be done in the new file.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The resources were written without error.
+<P>
+<UL>
+<LI>Other errors.  File errors indicating problems copying the data.
+<P>
+<LI>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

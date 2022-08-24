@@ -1,0 +1,406 @@
+<HTML><HEAD><TITLE>The Interface Kit: BScrollView</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BScrollView"></A>BScrollView
+</H1>
+<P>
+Derived from:  public <A HREF="View.html#BView">BView</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/ScrollView.h">be/interface/ScrollView.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="ScrollView.summary.html"><i>Summary</i></A></H6>
+<P>
+A BScrollView object is a container for some other view (the <I>target view</I>).   The BScrollView creates and positions scroll bars around the target view, and makes itself the parent of the scroll bars and the target view.  When the user moves the scroll bars, the target view scrolls.  
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BScrollView()"></A>BScrollView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BScrollView(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>target</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FOLLOW_LEFT</FONT>&nbsp;|&nbsp;<FONT  face=HELVETICA>B_FOLLOW_TOP</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;0,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT> = <FONT  face=HELVETICA>false</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>vertical</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;border_style&nbsp;<I><FONT  color=991122 face=HELVETICA>border</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FANCY_BORDER</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BScrollView(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a BScrollView that has <I><FONT  color=991122 face=HELVETICA>target</I></FONT> as its target view.  If <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT> is <B><TT>true</TT></B>, a horizontal scroll bar is added to the bottom of the target view.  If <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT> is <B><TT>true</TT></B>, a vertical scroll bar is added to the target's right side.  The BScrollView's frame is manufactured for you to contain the target view, the scroll bars, and the optional border; the location of the target view doesn't change.  The scroll bar "thickness" constants, defined in <B><TT>ScrollBar.h</TT></B>, will help you compute the size of the frame:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>
+</UL>
+<B><TT>B_V_SCROLL_BAR_WIDTH</TT></B></TD>
+<TD>The width of a vertical scroll bar.</TD>
+<TR>
+<TD><B><TT>B_H_SCROLL_BAR_HEIGHT</TT></B> </TD>
+<TD>The height of a horizontal scroll bar.</TD>
+</TABLE>
+<P>
+The target and the scroll bars are added as (sibling) children of the scroll view, and the target's <B><TT><A HREF="ListView.html#TargetedByScrollView()">TargetedByScrollView()</A></TT></B> function is called.  The target must not already be the child of some other view. 
+<P>
+The <I><FONT  color=991122 face=HELVETICA>border</I></FONT> argument can be one of three values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_PLAIN_BORDER">B_PLAIN_BORDER</A></TT></B></TD>
+<TD>Draw a border consisting of just a simple line around the target view and scroll bars.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_FANCY_BORDER">B_FANCY_BORDER</A></TT></B></TD>
+<TD>Draw a fancier border that looks like a 3D groove inset into the surface of the view.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_NO_BORDER">B_NO_BORDER</A></TT></B></TD>
+<TD>Don't draw a border.</TD>
+</TABLE>
+<P>
+If the resize mode of the target view is <B><TT>B_FOLLOW_ALL_SIDES</TT></B>, it and the scroll bars will be automatically resized to fill the scroll view whenever the scroll view is resized.
+<P>
+The scroll bars created by the BScrollView have an initial range of 0 to 1000.  Use the <B><TT><A HREF="#ScrollBar()">ScrollBar()</A></TT></B> function to retrieve the scroll bars and reset their ranges.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> arguments are identical to those declared in the <A HREF="View.html#BView">BView</A> class and are passed to the <A HREF="View.html#BView">BView</A> constructor.  If a border is requested, <B><TT><A HREF="ViewGeneral.html#B_WILL_DRAW">B_WILL_DRAW</A></TT></B> is automatically added to the <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> mask.  The other two arguments are passed to the <A HREF="View.html#BView">BView</A> class unchanged.
+<P>
+<B>See also:  </B>the <A HREF="View.html#BView">BView</A> constructor, <B><TT>BView::TargetedByScrollView()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BScrollView()"></A>~BScrollView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BScrollView()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Does nothing.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BScrollView object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the message doesn't contain data for an archived BScrollView object, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B>, which will archive the target view and scroll bars if the <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> flag is <B><TT>true</TT></B>.  This function then adds the BScrollView's border style to the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Resizes scroll bars belonging to BScrollViews that occupy the right bottom corner of a document window (<B><TT><A HREF="Window.html#B_DOCUMENT_WINDOW">B_DOCUMENT_WINDOW</A></TT></B>) so that room is left for the resize knob.  This function assumes that vertical scroll bars are <B><TT>B_V_SCOLL_BAR_WIDTH</TT></B> units wide and horizontal scroll bars are <B><TT>B_H_SCROLL_BAR_HEIGHT</TT></B> units high.  It doesn't check to make sure the window is actually resizable.
+<P>
+This function also sets the default high color to a medium shade of gray.
+<P>
+<B>See also:  <TT>BView::AttachedToWindow()</TT></B> 
+<P>
+<HR>
+<H3>Border()   see <A HREF="#SetBorder()">SetBorder()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the border around the target view and scroll views, provided a border was requested when the BScrollView was constructed.
+<P>
+<B>See also:  </B>the BScrollView constructor, <B><TT>BView::Draw()</TT></B> 
+<P>
+<HR>
+<H3>IsBorderHighlighted()   see <A HREF="#SetBorderHighlighted()">SetBorderHighlighted()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ScrollBar()"></A>ScrollBar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> *<B><TT><FONT  color=000022 size=+1>ScrollBar(</TT></B></FONT>orientation <I><FONT  color=991122 face=HELVETICA>posture</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the horizontal scroll bar if <I><FONT  color=991122 face=HELVETICA>posture</I></FONT> is <B><TT>B_HORIZONTAL</TT></B> and the vertical scroll bar if <I><FONT  color=991122 face=HELVETICA>posture</I></FONT> is <B><TT><A HREF="misc.html#B_VERTICAL">B_VERTICAL</A></TT></B>.  If the BScrollView doesn't contain a scroll bar with the requested orientation, this function returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  </B>the <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> class
+<P>
+<HR>
+<H3>
+<A NAME="SetBorder()"></A>SetBorder()
+, 
+<A NAME="Border()"></A>Border()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetBorder(</TT></B></FONT>border_style <I><FONT  color=991122 face=HELVETICA>border</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+border_style <B><TT><FONT  color=000022 size=+1>Border(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the style of the BScrollView's border, which may be <B><TT><A HREF="misc.html#B_PLAIN_BORDER">B_PLAIN_BORDER</A></TT></B>, <B><TT><A HREF="misc.html#B_FANCY_BORDER">B_FANCY_BORDER</A></TT></B>, or <B><TT><A HREF="misc.html#B_NO_BORDER">B_NO_BORDER</A></TT></B>.  The border is originally set by the constructor.  The three constants and the border's effect on the BScrollView are discussed there.
+<P>
+<B>See also:  </B>the BScrollView constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetBorderHighlighted()"></A>SetBorderHighlighted()
+, 
+<A NAME="IsBorderHighlighted()"></A>IsBorderHighlighted()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetBorderHighlighted(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>highlighted</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsBorderHighlighted(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetBorderHighlighted()">SetBorderHighlighted()</A></TT></B> highlights the border of the BScrollView when the <I><FONT  color=991122 face=HELVETICA>highlighted</I></FONT> flag is <B><TT>true</TT></B>, and removes the highlighting when the flag is <B><TT>false</TT></B>.  This function works by calling <B><TT><A HREF="#Draw()">Draw()</A></TT></B>.  However, it works only for a border in the <B><TT><A HREF="misc.html#B_FANCY_BORDER">B_FANCY_BORDER</A></TT></B> style.  If successful, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Otherwise, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<B><TT><A HREF="#IsBorderHighlighted()">IsBorderHighlighted()</A></TT></B> returns whether the border is currently highlighted.  The return value is always <B><TT>false</TT></B> for a BScrollView that doesn't have a border or has only a "plain" one.
+<P>
+Highlighting a BScrollView's border shows that the target view is the current focus view for the window.  Typically, the target view calls <B><TT><A HREF="#SetBorderHighlighted()">SetBorderHighlighted()</A></TT></B> from its <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> function when the focus changes.  (The target knows that it's inside a BScrollView because of the <B><TT><A HREF="ListView.html#TargetedByScrollView()">TargetedByScrollView()</A></TT></B> notification it received.)
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_style"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Border type.</TD>
+</TABLE>
+<P>
+The following views are added to the "_views" field (deep copy only):
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Name</B></TH>
+<TH>Level</TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B><I><FONT  color=991122 face=HELVETICA>target</I></FONT></TD>
+<TD>0</TD>
+<TD>Target view for the object.</TD>
+<TR>
+<TD>"_VSB_"</TD>
+<TD>0</TD>
+<TD>Vertical BScrollBar.</TD>
+<TR>
+<TD>"_HSB_"</TD>
+<TD>0</TD>
+<TD>Horizontal BScrollBar.</TD>
+</TABLE>
+<P>
+Some of these fields may not be present if the setting they represent isn't used, or is the default value.  For example, if the border type is <B><TT>B_FANCY_BORDER</TT></B>, the "_style" field won't be found in the archive.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

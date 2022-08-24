@@ -1,0 +1,730 @@
+<HTML><HEAD><TITLE>The Midi Kit: BSynth</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BSynth"></A>BSynth
+</H1>
+<P>
+Derived from:  (none)
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/midi/Synth.h">be/midi/Synth.h</A>
+<P>
+Library:  libmidi.so
+<P>
+<H6><A HREF="Synth.summary.html"><i>Summary</i></A></H6>
+<P>
+The BeOS includes a 16-channel General MIDI software synthsizer designed by HeadSpace Inc.  The BSynth class is the interface to the synthesizer itself.   Any application that wants to use the synthesizer must include a BSynth object; however, most applications won't need to create the object directly:  The <A HREF="MidiSynth.html#BMidiSynth">BMidiSynth</A>, <A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A>, and <A HREF="Samples.html#BSamples">BSamples</A> classes create a BSynth object for you.  Furthermore, since BSynth doesn't inherit from <A HREF="Midi.html#BMidi">BMidi</A>, it doesn't have any API for actually playing MIDI data.  To play MIDI data, you need an instance of <A HREF="MidiSynth.html#BMidiSynth">BMidiSynth</A> or BMidiSynthFile.
+<P>
+An application can have only one BSynth object at a time.  The object is represented globally (within your app) as <B><TT>be_synth</TT></B>.  The classes that create a BSynth for you (BMidiSynth and so on) won't clobber an existing <B><TT>be_synth</TT></B>, but the BSynth constructor will.  
+<P>
+When it's created, the <B><TT>be_synth</TT></B> object tries to find an instrument definition (or "synth") file.  This is a file that contains the data (samples and instructions) for creating General MIDI instruments.  The BeOS provides two such files (both designed by HeadSpace, and both stored in <B><TT>B_SYNTH_DIRECTORY</TT></B>):
+<P>
+<UL>
+<LI><B><TT>B_BIG_SYNTH_FILE (/boot/beos/etc/synth/big_synth.sy)</TT></B> contains 16-bit, 22 kHz data.  It takes about 5 Megs of memory when fully loaded.
+<P>
+<LI><B><TT>B_LITTLE_SYNTH_FILE (/boot/beos/etc/synth/little_synth.sy)</TT></B> is 8-bit, 11 kHz data.  It's a quarter the size of the big synth, but lacks the big file's fidelity. 
+<P>
+</UL>
+<P>
+The instrument data is read from the file as it's needed.  To "pre-load" the entire synth file, use the <B><TT><A HREF="MidiSynth.html#EnableInput()">BMidiSynth::EnableInput()</A></TT></B> function. 
+<P>
+<HR>
+<H2>
+<A NAME="BSynth%20and%20the%20Audio%20Server"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>S</FONT>ynth and the <FONT SIZE=6>A</FONT>udio <FONT SIZE=6>S</FONT>erver
+</H2>
+<P>
+The synthesizer produces sound by taking over the Audio Server's DAC stream.  It resets the size and number of buffers in the stream, sets the sampling rate, and adds a BSubscriber to the front of the stream.  If you want to mix sound files into the MIDI synthesis, you should use the <A HREF="Samples.html#BSamples">BSamples</A> object rather than add your own DAC stream subscribers.  However, if you really want to add your own sample-generating subscribers, <I>don't</I> add them to the front of the DAC stream after the <B><TT>be_synth</TT></B> subscriber has been added&mdash;your subscriber's samples will be clobbered.   
+<P>
+The interaction between the synthesizer and the Media Kit will be cleaned up in a subsequent release.
+<P>
+The DAC stream's previous settings are restored when <B><TT>be_synth</TT></B> is destroyed.
+<P>
+<HR>
+<H2>
+<A NAME="Synthesis%20Capacity"></A><FONT SIZE=6>S</FONT>ynthesis <FONT SIZE=6>C</FONT>apacity
+</H2>
+<P>
+The synthesizer can generate up to 32 voices at a time, where a "voice" is either an individual (synthesized) note, or a stream of samples from a <A HREF="Samples.html#BSamples">BSamples</A> object.  By default, it apportions 28 voice "slots" for synthesis and 4 for samples.  You can change the settings through the <B><TT><A HREF="#SetVoiceLimits()">SetVoiceLimits()</A></TT></B> function.
+<P>
+If you ask for more voices than there are voice slots (for example, if you ask for a 29'th note when there are already 28 singing), the synthesizer will try to kill an old note in order to make room for the new note.
+<P>
+There's no guarantee that the synthesizer and DAC stream will have enough time to generate and process everything you ask for, even if you're running below the 32 voice limit.  On a lightly loaded, reasonably fast machine, you shouldn't hear any glitches, but a heavy MIDI command stream (for example) could bog it down. 
+<P>
+<HR>
+<H2>
+<A NAME="Recording%20a%20Performance"></A><FONT SIZE=6>R</FONT>ecording a <FONT SIZE=6>P</FONT>erformance
+</H2>
+<P>
+There's no API for automatically writing the synthesizer's output to a file.  To record a synthesizer performance you have to create your own BSubscriber, add it to the DAC stream (downstream of the synthesizer), and write out the samples that it receives.  (See the Media Kit for more information.)
+<P>
+In some cases, the act of recording can be enough of a CPU drag that the synthesizer falls behind realtime (actually, it's the synthesizer's BSubscriber that's getting behind).  It may not sound great while you're monitoring the recording, but the data that's written to the file probably won't be affected&mdash;the glitches won't be written to the file. 
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BSynth()"></A>BSynth()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSynth(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSynth(</TT></B></FONT>synth_mode mode<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates and initiailzes a new BSynth object and sets <B><TT>be_synth</TT></B> to point to it.  The BSynth that <B><TT>be_synth</TT></B> currently points to (if any) is deleted.  You can only construct one BSynth object per application.  Every application that wants to use the synthesizer must have its own BSynth&mdash;you can't "share" another application's <B><TT>be_synth</TT></B> object.  The constructors for the other synthesis classes (BMidiSynth, <A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A>, and BSamples) create a BSynth for you if one doesn't already exist.
+<P>
+The default constructor sets the following synthesis parameters, shown here with the functions that you can use to reset the values&mdash;and that you should refer to for further explanation:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Parameter</TH>
+<TH>Value</TH>
+<TH>Function</TH>
+<TR>
+<TD>Output sampling rate</TD>
+<TD>22 kHz</TD>
+<TD><B><TT><A HREF="#SetSamplingRate()">SetSamplingRate()</A></TD>
+<TR>
+<TD></TT></B>Sample interpolation</TD>
+<TD><B><TT>B_LINEAR_INTERPOLATION</TT></B></TD>
+<TD><B><TT><A HREF="#SetInterpolation()">SetInterpolation()</A></TD>
+<TR>
+<TD></TT></B>Max synth voices</TD>
+<TD>28</TD>
+<TD><B><TT><A HREF="#SetVoiceLimits()">SetVoiceLimits()</A></TD>
+<TR>
+<TD></TT></B>Max sample voices</TD>
+<TD>4</TD>
+<TD><B><TT><A HREF="#SetVoiceLimits()">SetVoiceLimits()</A></TD>
+<TR>
+<TD></TT></B>Limiter threshhold</TD>
+<TD>7</TD>
+<TD><B><TT><A HREF="#SetVoiceLimits()">SetVoiceLimits()</A></TD>
+<TR>
+<TD></TT></B>Reverb enabled</TD>
+<TD><B><TT>true</TT></B></TD>
+<TD><B><TT><A HREF="#EnableReverb()">EnableReverb()</A></TD>
+<TR>
+<TD></TT></B>Reverb</TD>
+<TD><B><TT>B_REVERB_BALLROOM</TT></B></TD>
+<TD><B><TT><A HREF="#SetReverb()">SetReverb()</A></TD>
+<TR>
+<TD></TT></B>Synth mode</TD>
+<TD>B_SYNTH_NONE</TD>
+<TD>LoadSynthData()</TD>
+</TABLE>
+<P>
+You must call <B><TT><A HREF="#LoadSynthData()">LoadSynthData()</A></TT></B> after calling the default constructor to set the synth mode.
+<P>
+The <B><TT>synth_mode</TT></B> constructor sets the synthesis parameters (as above) and then sets the synth mode to the argument, one of <B><TT>B_BIG_SYNTH</TT></B>, <B><TT>B_LITTLE_SYNTH</TT></B>, or <B><TT>B_SAMPLES_ONLY</TT></B>.  See <B><TT><A HREF="#LoadSynthData()">LoadSynthData()</A></TT></B> for <B><TT>synth_mode</TT></B> definitions.
+<P>
+<HR>
+<H3>
+<A NAME="~BSynth()"></A>~BSynth()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BSynth()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The destructor stops the synthesizer if it's currently playing anything, frees all synthesis-related storage that the BSynth object allocated, and sets <B><TT>be_synth</TT></B> to point to <B><TT>NULL</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="CountClients()"></A>CountClients()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountClients(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of synthesis objects (BMidiSynth and BMidiSynthFile) that are actively feeding data to the synthesizer.  Note that this count does <I>not</I> include <A HREF="Samples.html#BSamples">BSamples</A> objects.
+<P>
+<HR>
+<H3>
+<A NAME="EnableReverb()"></A>EnableReverb()
+, 
+<A NAME="IsReverbEnabled()"></A>IsReverbEnabled()
+, 
+<A NAME="SetReverb()"></A>SetReverb()
+, 
+<A NAME="Reverb()"></A>Reverb()
+, 
+<A NAME="reverb_mode"></A>reverb_mode
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>EnableReverb(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>reverb_enabled</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsReverbEnabled(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetReverb(</TT></B></FONT>reverb_mode <I><FONT  color=991122 face=HELVETICA>reverb</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+reverb_mode <B><TT><FONT  color=000022 size=+1>Reverb(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+typedef enum { <B><TT><FONT  color=000022 size=+1>B_REVERB_NONE</TT></B></FONT>, <B><TT><FONT  color=000022 size=+1>B_REVERB_CLOSET</TT></B></FONT>, <B><TT><FONT  color=000022 size=+1>B_REVERB_GARAGE</TT></B></FONT>, <B><TT><FONT  color=000022 size=+1>B_REVERB_BALLROOM</TT></B></FONT>, <B><TT><FONT  color=000022 size=+1>B_REVERB_CAVERN</TT></B></FONT>, <B><TT><FONT  color=000022 size=+1>B_REVERB_DUNGEON</TT></B></FONT> } <B><TT><FONT  color=000022 size=+1>reverb_mode
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>EnableReverb()</TT></B> turns on and off <B><TT>be_synth</TT></B>'s reverberator.   <B><TT>IsReverbEnabled()</TT></B> returns the current reverberator-enabled state.  Reverb is enabled by default.
+<P>
+<B><TT><A HREF="#SetReverb()">SetReverb()</A></TT></B> sets the reverberator's strength.  The constants, shown above, are listed in order of increasing "wetness."  <B><TT>Reverb()</TT></B> returns the current setting.  Setting the reverb mode <I>doesn't</I> enable the reverberator.  
+<P>
+To turn off the reverberator, do this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;<B><TT>EnableReverb(false); /* Good *.</PRE>
+<P>
+</TT></B>...rather than:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;<B><TT>SetReverb(B_REVERB_NONE)</TT></B>; /* Bad */</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#EnableReverb()">EnableReverb()</A></TT></B> returns...
+<P>
+<UL>
+<LI>B_OK.  The reverberator was successfully enabled/disabled.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to setup the reverberator.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetAudio()"></A>GetAudio()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>GetAudio(</TT></B></FONT>int16 *<I><FONT  color=991122 face=HELVETICA>left</I></FONT>, int16 *<I><FONT  color=991122 face=HELVETICA>right</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>sampleCount</I></FONT>) const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns, in <I><FONT  color=991122 face=HELVETICA>left</I></FONT> and <I><FONT  color=991122 face=HELVETICA>right</I></FONT>, the last <I><FONT  color=991122 face=HELVETICA>sampleCount</I></FONT>'th sample frames (split into left and right channels) generated by the synthesizer.  Storage for the samples must be allocated by the caller.  The function may return fewer samples than requested.  The function returns the number of samples that were written into (each of) <I><FONT  color=991122 face=HELVETICA>left</I></FONT> and <I><FONT  color=991122 face=HELVETICA>right</I></FONT>.
+<P>
+This function is designed to feed waveform displays (and the like); it isn't intended to be used as a "sound spigot" that you can pipe to a file (for example).
+<P>
+<HR>
+<H3>Interpolation()  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+<HR>
+<H3>interpolation_mode  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+<HR>
+<H3>IsLoaded()  see <A HREF="#LoadSynthData()">LoadSynthData()</A></H3>
+<P>
+<HR>
+<H3>IsReverbEnabled()  see <A HREF="#EnableReverb()">EnableReverb()</A></H3>
+<P>
+<HR>
+<H3>LimiterThreshhold()  see <A HREF="#SetVoiceLimits()">SetVoiceLimits()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="LoadSynthData()"></A>LoadSynthData()
+, 
+<A NAME="Unload()"></A>Unload()
+, 
+<A NAME="SynthMode()"></A>SynthMode()
+, 
+<A NAME="IsLoaded()"></A>IsLoaded()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>LoadSynthData(</TT></B></FONT>synth_mode <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>LoadSynthData(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>instrument_file</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void<B><TT><FONT  color=000022 size=+1> </TT></B></FONT><B><TT><FONT  color=000022 size=+1>Unload(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+synth_mode <B><TT><FONT  color=000022 size=+1>SynthMode(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsLoaded(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>LoadSynthData(</TT></B>) tells <B><TT>be_synth</TT></B> which synth file to use (and unloads the one currently in use, if any).  The first version lets you specify the synth file through a synth_mode constant:
+<P>
+<UL>
+<LI><B><TT>B_BIG_SYNTH</TT></B>.  Use the big synth file.
+<P>
+<LI><B><TT>B_LITTLE_SYNTH</TT></B>.  Use the little synth file.
+<P>
+<LI><B><TT>B_SAMPLES_ONLY</TT></B>.  Don't use a synth file, but prepare the object so it can play sampled sounds.  You only use this mode if you're only going to use the <A HREF="Samples.html#BSamples">BSamples</A> object (in other words, if you're not using <A HREF="MidiSynth.html#BMidiSynth">BMidiSynth</A> or BMidiSynthFile). 
+<P>
+</UL>
+<P>
+If the synthesizer is initialized with a synth file, it will automatically know how to play BSample data.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <B><TT>B_SAMPLES_ONLY</TT></B> doesn't work.  You must use one of the other two constants (<B><TT>B_BIG_SYNTH</TT></B> or <B><TT>B_LITTLE_SYNTH</TT></B>). 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The second version lets you set the synth file as an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B>, thus providing the opportunity to specify a custom synth file.  Unfortunately, the synth file format isn't currently public, so you can't create your own synth files (yet).
+<P>
+LoadSynthData() doesn't actually read the instrument definitions from the synth file&mdash;in other words, it doesn't really "load" anything.  The instruments are loaded as needed during a performance (as specified by a BMidiSynth[File] object).  To force instruments to be read, use BMidiSynth's <B><TT><A HREF="MidiSynth.html#EnableInput()">EnableInput()</A></TT></B> or <B><TT><A HREF="MidiSynth.html#LoadInstrument()">LoadInstrument()</A></TT></B> function.
+<P>
+<B><TT>Unload()</TT></B> stops the synthesizer (if it's currently playing), forgets the instrument file that was used to initialize the synthesizer, and steps out of the audio output mechanism.  After you call <B><TT><A HREF="#Unload()">Unload()</A></TT></B>, the <B><TT>be_synth</TT></B> object is good for nothing until LoadSynthData() is called (whether directly or through a constructor).
+<P>
+<B><TT><A HREF="#SynthMode()">SynthMode()</A></TT></B> returns <B><TT>be_synth</TT></B>'s current synth mode, one of the three modes listed above or <B><TT>B_NO_SYNTH</TT></B> if the mode hasn't been set.  
+<P>
+<B><TT>IsLoaded()</TT></B> returns <B><TT>true</TT></B> if <B><TT>be_synth</TT></B> has been initialized and is ready to go.  Otherwise, it returns <B><TT>false</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT>LoadSynthData()</TT></B> returns...
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  <B><TT>be_synth</TT></B> was successfully initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid argument.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to initialize the synthesizer.
+<P>
+<LI><I>POSIX errors</I>.  The synth file wasn't found or couldn't be opened.
+<P>
+</UL>
+<P>
+<HR>
+<H3>MaxSampleVoices()  see <A HREF="#SetVoiceLimits()">SetVoiceLimits()</A></H3>
+<P>
+<HR>
+<H3>MaxSynthVoices()  see <A HREF="#SetVoiceLimits()">SetVoiceLimits()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Pause()"></A>Pause()
+, 
+<A NAME="Resume()"></A>Resume()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void<B><TT><FONT  color=000022 size=+1> Pause(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void<B><TT><FONT  color=000022 size=+1> Resume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Pause()</TT></B> tells the synthesizer to stop producing sound.  It doesn't suspend non-synthesis <A HREF="Midi.html#BMidi">BMidi</A> objects&mdash;in other words, <B><TT>Pause()</TT></B> doesn't suspend <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> or <A HREF="MidiStore.html#BMidiStore">BMidiStore</A> objects.
+<P>
+<B><TT>Resume()</TT></B> tells the synthesizer to resume producing sound.  <A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A> objects continue reading from where they were paused; <A HREF="Samples.html#BSamples">BSamples</A> objects start playing from the beginning of their sample data (they <I>don't</I> continue from where they were paused).
+<P>
+<HR>
+<H3>Reverb()  see <A HREF="#EnableReverb()">EnableReverb()</A></H3>
+<P>
+<HR>
+<H3>reverb_mode  see <A HREF="#EnableReverb()">EnableReverb()</A></H3>
+<P>
+<HR>
+<H3>SampleVolume()  see <A HREF="#SetSynthVolume()">SetSynthVolume()</A></H3>
+<P>
+<HR>
+<H3>SamplingRate()  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetControllerHook()"></A>SetControllerHook()
+, 
+<A NAME="synth_controller_hook"></A>synth_controller_hook
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetControllerHook(</TT></B></FONT>int16 <I><FONT  color=991122 face=HELVETICA>controller</I></FONT>, synth_controller_hook <I><FONT  color=991122 face=HELVETICA>controlHook</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+typedef void (*<B><TT><FONT  color=000022 size=+1>synth_controller_hook</TT></B></FONT>)<B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>int16 <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, int16&nbsp;<I><FONT  color=991122 face=HELVETICA>controller</I></FONT>, int16&nbsp;<I><FONT  color=991122 face=HELVETICA>value</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Registers a hook function (<I><FONT  color=991122 face=HELVETICA>controlHook</I></FONT>) that's invoked whenver a MIDI control message is applied to <I><FONT  color=991122 face=HELVETICA>controller</I></FONT>.  The hook function is invoked just after the control message is processed by the synthesizer.  The function is passed the channel, controller number, and controller value as taken from the control message.  
+<P>
+<HR>
+<H3>SetInterpolation()  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+<HR>
+<H3>EnableReverb()  </H3>
+<P>
+<HR>
+<H3>SetSampleVolume()  see <A HREF="#SetSynthVolume()">SetSynthVolume()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetSamplingRate()"></A>SetSamplingRate()
+, 
+<A NAME="SamplingRate()"></A>SamplingRate()
+, 
+<A NAME="SetInterpolation()"></A>SetInterpolation()
+, 
+<A NAME="Interpolation()"></A>Interpolation()
+, 
+<A NAME="interpolation_mode"></A>interpolation_mode
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetSamplingRate(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>rate</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>SamplingRate(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetInterpolation(</TT></B></FONT>interpolation_mode <I><FONT  color=991122 face=HELVETICA>interp</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+interpolation_mode <B><TT><FONT  color=000022 size=+1>Interpolation(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+typedef enum  { <B><TT><FONT  color=000022 size=+1>B_DROP_SAMPLE</TT></B></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_2_POINT_INTERPOLATION</TT></B></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_LINEAR_INTERPOLATION</TT></B></FONT> } <B><TT><FONT  color=000022 size=+1>interpolation_mode
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetSamplingRate()</TT></B> sets the frequency at which <B><TT>be_synth</TT></B> produces data, in frames (of audio data) per second.  Acceptable rates are 44100, 22050, and 11025; <I><FONT  color=991122 face=HELVETICA>rate</I></FONT> is rounded to the nearest acceptable value.  The default is 22050.
+<P>
+<B><TT><A HREF="#SamplingRate()">SamplingRate()</A></TT></B> returns the sampling rate as previously set by <B><TT>SetSamplingRate()</TT></B>.  
+<P>
+<B><TT>be_synth</TT></B>'s sampling rate is independent of the DAC stream's sampling rate. For example, while the default <B><TT>be_synth</TT></B> rate is 22050, the default DAC stream rate is 44100.  If the two rates don't match, <B><TT>be_synth</TT></B>'s BSubscriber object "interpolates" the be_synth data before dumping it into the DAC stream.  There are three interpolation schemes, which you set through <B><TT>SetInterpolation()</TT></B>:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_DROP_SAMPLE</TT></B></TD>
+<TD>Samples are repeated or dropped.  It sounds cheap because it <I>is</I> cheap.</TD>
+<TR>
+<TD><B><TT>B_2_POINT_INTERPOLATION</TT></B></TD>
+<TD>Linear interpolation between adjacent samples.  Much better quality, and more expensive, than drop-sample. </TD>
+<TR>
+<TD><B><TT>B_LINEAR_INTERPOLATION</TT></B></TD>
+<TD>"Wide" linear interpolation.  The best quality, but the most expensive.</TD>
+</TABLE>
+<P>
+<B><TT>Interpolation()</TT></B> returns the current interpolation mode setting.  The default is <B><TT>B_LINEAR_INTERPOLATION</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+SetSamplingRate() and SetInterpolation() return...
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The function was successful.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid argument.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetSynthVolume()"></A>SetSynthVolume()
+, 
+<A NAME="SetSampleVolume()"></A>SetSampleVolume()
+, 
+<A NAME="SynthVolume()"></A>SynthVolume()
+, 
+<A NAME="SampleVolume()"></A>SampleVolume()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSynthVolume(</TT></B></FONT>double&nbsp;<I><FONT  color=991122 face=HELVETICA>scale</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSampleVolume(</TT></B></FONT>double&nbsp;<I><FONT  color=991122 face=HELVETICA>scale</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+double<B><TT><FONT  color=000022 size=+1> SynthVolume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+double<B><TT><FONT  color=000022 size=+1> SampleVolume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions get and set the master volume scalars for MIDI synthesis and <A HREF="Samples.html#BSamples">BSamples</A> playback.  The scalar is linear:  A <I><FONT  color=991122 face=HELVETICA>scale</I></FONT> of 1.0 (the default) has no affect; a scale of 2.0 multiplies the output by 2.0, and so on.  The <I><FONT  color=991122 face=HELVETICA>scale</I></FONT> value must be at least 0.0 (no gain).
+<P>
+<HR>
+<H3>
+<A NAME="SetVoiceLimits()"></A>SetVoiceLimits()
+, 
+<A NAME="MaxSynthVoices()"></A>MaxSynthVoices()
+, 
+<A NAME="MaxSampleVoices()"></A>MaxSampleVoices()
+, 
+<A NAME="LimiterThreshhold()"></A>LimiterThreshhold()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetVoiceLimits(</TT></B></FONT>int16&nbsp;<I><FONT  color=991122 face=HELVETICA>maxSynthVoices</I></FONT>, int16&nbsp;<I><FONT  color=991122 face=HELVETICA>maxSampleVoices</I></FONT>, int16&nbsp;<I><FONT  color=991122 face=HELVETICA>limiter Threshhold</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int16<B><TT><FONT  color=000022 size=+1> MaxSynthVoices(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int16<B><TT><FONT  color=000022 size=+1> MaxSampleVoices(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int16<B><TT><FONT  color=000022 size=+1> LimiterThreshhold(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The synthesizer can generate as many as 32 "voices" simultaneously, where a voice is a MIDI note or a stream of BSamples.  The first two arguments tell the synthesizer to set aside some number of voice slots for MIDI synthesis and for samples, respectively; combined, the two arguments mustn't exceed 32.  If you ask for too many voices during a performance, the synthesizer will (try to) kill old voices first.  By default, the voices are allocated 28 for MIDI synthesis and 4 for samples.
+<P>
+You use the <I><FONT  color=991122 face=HELVETICA>limiterThreshhold</I></FONT> to estimate the typical voice density (number of simultaneous voices) for a performance.  It must be at least 1; the default is 7.  The synthesizer uses the value as an amplitude scalar:
+<P>
+<UL>
+<LI>When the voice density during a performance is less than (or equal to) the threshhold (<I>n</I>), the dynamic range is "divided" into <I>n</I> parts, where each voice gets one part.
+<P>
+<LI>When the voice density (<I>m</I>) exceeds the threshhold, the dynamic range is divided into <I>m</I> parts.
+<P>
+</UL>
+<P>
+If you set the value too high (if there are typically fewer simultaneous voices than you estimated) the signal-to-noise ratio will suffer&mdash;you'll be dividing the dynamic range into too many (small) parts.  If you set it too low and the voice density changes a lot, the balance between voices may become hard to predict and control.  A change to the <I><FONT  color=991122 face=HELVETICA>limiterTreshhold</I></FONT> doesn't affect notes/samples that are currently being produced. 
+<P>
+The other three functions return the values that you passed to <B><TT>SetVoiceLimits()</TT></B>.  Note that these functions don't actually consult the synthsizer&mdash;if you pass illegal values to <B><TT>SetVoiceLimits()</TT></B>, the querying functions will return those values without complaint.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT>SetVoiceLimits()</TT></B> returns...
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The limits were successfully set.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Bad argument value; the previous settings are left unchanged.
+<P>
+</UL>
+<P>
+<HR>
+<H3>synth_controller_hook  see <A HREF="#SetControllerHook()">SetControllerHook()</A></H3>
+<P>
+<HR>
+<H3>SynthMode()  see <A HREF="#LoadSynthData()">LoadSynthData()</A></H3>
+<P>
+<HR>
+<H3>SynthVolume()  see <A HREF="#SetSynthVolume()">SetSynthVolume()</A></H3>
+<P>
+<HR>
+<H3>Unload()  see <A HREF="#LoadSynthData()">LoadSynthData()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

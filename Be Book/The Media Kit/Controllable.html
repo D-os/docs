@@ -1,0 +1,507 @@
+<HTML><HEAD><TITLE>The Media Kit: BControllable</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BControllable"></A>BControllable
+</H1>
+<P>
+Derived from:  virtual <A HREF="MediaNode.html#BMediaNode">BMediaNode</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/Controllable.h">be/media/Controllable.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="Controllable.summary.html"><i>Summary</i></A></H6>
+<P>
+A node whose behavior can be controlled by the user should be derived from <A HREF="#BControllable">BControllable</A>, as well as from whatever other interface classes the node might be derived from.  Deriving from BControllable lets the node publish information about the parameters that can be adjusted and how they relate to each other.
+<P>
+A client application can use the published information to build a user interface for the node or pass the information through to a system routine that will build the interface.
+<P>
+A node can also have the ability to start its own control panel under outside control, which can take advantage of special knowledge of the node.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<LI><B><TT><A HREF="#GetParameterValue()">GetParameterValue()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#HandleMessage()">HandleMessage()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#SetParameterValue()">SetParameterValue()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#StartControlPanel()">StartControlPanel()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor"></A><FONT SIZE=6>C</FONT>onstructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BControllable()"></A>BControllable()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BControllable()">BControllable()</A></TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The BControllable constructor.  You should override this in your derived class to create a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> object, configure it to describe the available parameters, and call <B><TT><A HREF="#BControllable::SetParameterWeb()">BControllable::SetParameterWeb()</A></TT></B> with that object before returning.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>ApplyParameterData() see <A HREF="#MakeParameterData()">MakeParameterData()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="BroadcastChangedParameter()"></A>BroadcastChangedParameter()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>BroadcastChangedParameter</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>parameterID</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+When the configuration of a specific parameter changes, you should call this function with the ID of the changed parameter so that clients know that they need to check with the node to determine the parameter's new configuration.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The configuration of a parameter changes only when the range of possible values for the parameter changes.  For example, if the parameter's value is a CD track number, the configuration would change (thus requiring a call to <B><TT>BroadcastChangedParameter()</TT></B>) if the user put in a different CD with a different number of tracks on it.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+B_OK.  No errors.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Application%20Kit/Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B> errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="BroadcastNewParameterValue()"></A>BroadcastNewParameterValue()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>BroadcastNewParameterValue</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>when</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>newValue</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>valueSize</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Call this function when a parameter value change takes effect and you want people that are interested in knowing about the change to stay in sync with you.  Unlike <B><TT><A HREF="#BroadcastChangedParameter()">BroadcastChangedParameter()</A></TT></B>, this function actually passes along the new value of the parameter.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>when</I></FONT> argument indicates the performance time at which the change took effect.  The <I><FONT  color=991122 face=HELVETICA>id</I></FONT> indicates the parameter ID of the parameter whose value changed.  <I><FONT  color=991122 face=HELVETICA>newValue</I></FONT> is a pointer to the parameter's data, and <I><FONT  color=991122 face=HELVETICA>valueSize</I></FONT> defines the size of that data.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI>Other errors.  An error occurred communicating with the Media Server, or with a node in the roster.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetParameterValue()"></A>GetParameterValue()
+, 
+<A NAME="SetParameterValue()"></A>SetParameterValue()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetParameterValue</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>parameterID</I></FONT>, bigtime_t *<I><FONT  color=991122 face=HELVETICA>lastChangeTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>value</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>ioSize</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetParameterValue</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>parameterID</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>changeTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *<I><FONT  color=991122 face=HELVETICA>value</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+You should implement  <B><TT>GetParameterValue()</TT></B> to store the value of the parameter with the specified <I><FONT  color=991122 face=HELVETICA>parameterID</I></FONT> in the memory pointed to by <I><FONT  color=991122 face=HELVETICA>value</I></FONT>.  The size_t value pointed to by <I><FONT  color=991122 face=HELVETICA>ioSize</I></FONT> specifies the size of the value buffer; prior to returning, your implementation of <B><TT>GetParameterValue()</TT></B> should change <I><FONT  color=991122 face=HELVETICA>ioSize</I></FONT> to the actual size of the returned data.
+<P>
+Also, you should set <I><FONT  color=991122 face=HELVETICA>lastChangeTime</I></FONT> to the time at which the control's value most recently changed.
+<P>
+<B><TT>GetParameterValue()</TT></B> should return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> when done, or an appropriate error code if something goes wrong.
+<P>
+Likewise, you should implement <B><TT>SetParameterValue()</TT></B> to change the value of the parameter; the <I><FONT  color=991122 face=HELVETICA>changeTime</I></FONT> argument is the performance time at which the change should occur; in other words, you may need to queue the request so it can be handled at the requested time.  <I><FONT  color=991122 face=HELVETICA>value</I></FONT> points to the value to which the parameter should be set, and <I><FONT  color=991122 face=HELVETICA>size</I></FONT> is the number of bytes of data in the <I><FONT  color=991122 face=HELVETICA>value</I></FONT>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+It's possible that a single parameter may have several channels of values, if that parameter is a multi-channel parameter.  For example, if the parameter is a two-channel slider (such as a stereo gain control, where the left and right channels are controlled individually within a single parameter), the <I><FONT  color=991122 face=HELVETICA>value</I></FONT> argument would point to an array of two floats, and size would be 8 (sizeof(float) * 2).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="HandleMessage()"></A>HandleMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>HandleMessage(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+When your node's service loop receives a <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, in addition to passing it to <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> and other superclasses of your node, you should also pass it to <B><TT><A HREF="#BControllable::HandleMessage()">BControllable::HandleMessage()</A></TT></B>.  You should start at the most-derived class' implementation of <B><TT>HandleMessage()</TT></B> and work your way upward until <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> is returned.
+<P>
+If it's a message intended for the BControllable interface, it'll be dispatched and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> will be returned; otherwise, <B><TT>HandleMessage()</TT></B> will return an error so you know to try something else.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Message received */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if ((BControllable::HandleMessage(message, data, size) != B_OK) &amp;&amp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(BMediaNode::HandleMessage(message, data, size) != B_OK)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaNode::HandleBadMessage(message, data, size);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+In this example, the BControllable implementation of <B><TT>HandleMessage()</TT></B> gets the first crack at handling the request.  If it doesn't know what to do with the message, it's forwarded to BMediaNode's implementation.  If the message still isn't handled, it's then sent to <B><TT><A HREF="MediaNode.html#HandleBadMessage()">BMediaNode::HandleBadMessage()</A></TT></B> to be dealt with.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The message was dispatched.
+<P>
+<UL>
+<LI>Other errors, as appropriate.  Each <I><FONT  color=991122 face=HELVETICA>message</I></FONT> code may respond with various error codes.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="MediaNode.html#HandleMessage()">BMediaNode::HandleMessage()</A></TT></B>, &nbsp;<a href="Intro.html#About%20Multiple%20Virtual%20Inheritance%20on%20page21">"About Multiple Virtual Inheritance" on page21</a>
+<P>
+<HR>
+<H3>
+<A NAME="LockParameterWeb()"></A>LockParameterWeb()
+, 
+<A NAME="UnlockParameterWeb()"></A>UnlockParameterWeb()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>LockParameterWeb</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>UnlockParameterWeb</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+LockParameterWeb() locks the web to prevent access to it while you're working on it, and UnlockParameterWeb() releases it when you're done.  You should surround your accesses to the web with these calls:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;LockParameterWeb();
+&nbsp;&nbsp;&nbsp;Web()->MakeGroup("EqualizerControls");
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;UnlockParameterWeb();</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="MakeParameterData()"></A>MakeParameterData()
+, 
+<A NAME="ApplyParameterData()"></A>ApplyParameterData()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>MakeParameterData</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>const int32 *<I><FONT  color=991122 face=HELVETICA>parameterList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>numParameters</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>ioSize</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ApplyParameterData</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>value</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>MakeParameterData()</TT></B> utility function takes a list of parameter IDs from <I><FONT  color=991122 face=HELVETICA>parameterList</I></FONT> and calls <B><TT><A HREF="#GetParameterValue()">GetParameterValue()</A></TT></B> for each of them, storing the values in the specified <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> until the size specified in <I><FONT  color=991122 face=HELVETICA>ioSize</I></FONT> is filled, or all the parameters are read.  The number of bytes of the buffer used will be returned in <I><FONT  color=991122 face=HELVETICA>ioSize</I></FONT>.
+<P>
+If your BControllable is also a <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> that accepts <B><TT>B_MEDIA_PARAMETERS</TT></B> type data on some input, call <B><TT>ApplyParameterData()</TT></B> with <I><FONT  color=991122 face=HELVETICA>value</I></FONT> set to the result of <B><TT><A HREF="Buffer.html#Data()">BBuffer::Data()</A></TT></B> and <I><FONT  color=991122 face=HELVETICA>size</I></FONT> set to <B><TT>BBuffer::Size()</TT></B>.  This function will then parse the parameter change requests in the buffer and dispatch them to your <B><TT><A HREF="#SetParameterValue()">SetParameterValue()</A></TT></B> function to fulfill the requests.
+<P>
+This lets your node support easy automation of parameter information.  Even more benefit can be obtained by also deriving from <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A>, and providing an output for the <B><TT>B_MEDIA_PARAMETERS</TT></B> data format, so that changes can be recorded as they occur.  This provides a mechanism for automating the parameters by recording a user's changes to them, then playing back the changes later.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No errors.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  The output <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> is too small.
+<P>
+</UL>
+<I><P>
+</I><HR>
+<H3>SetParameterValue() see <A HREF="#GetParameterValue()">GetParameterValue()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetParameterWeb()"></A>SetParameterWeb()
+, 
+<A NAME="Web()"></A>Web()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetParameterWeb</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT><A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> *<I><FONT  color=991122 face=HELVETICA>web</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> *<B><TT><FONT  color=000022 size=+1>Web</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Your constructor should create a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> object and call <B><TT>SetParameterWeb()</TT></B> with it as an argument.  This will describe to the outside world what parameters are available and how they relate to each other; in other words, this describes your internal signal path, and how it can be manipulated.
+<P>
+If the web argument isn't <B><TT>NULL</TT></B>, and is different from the previously-established web for the BControllable node, a <B><TT><A HREF="messages.html#B_MEDIA_WEB_CHANGED">B_MEDIA_WEB_CHANGED</A></TT></B> message is sent to everyone watching for media notifications.  See <B><TT><A HREF="MediaRoster.html#StartWatching()">StartWatching()</A></TT></B> on &nbsp; for more information.
+<P>
+<B><TT>SetParameterWeb()</TT></B> will return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the web was set without errors; otherwise an error code will be returned.
+<P>
+The <B><TT>Web()</TT></B> function returns the <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> assigned to the BControllable.
+<P>
+<HR>
+<H3>
+<A NAME="StartControlPanel()"></A>StartControlPanel()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>StartControlPanel</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT><A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> *<I><FONT  color=991122 face=HELVETICA>outMessenger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook function is called whenever a client application wants the node to present its own control panel user interface (so that the user can configure the node).
+<P>
+On return, <I><FONT  color=991122 face=HELVETICA>outMessenger</I></FONT> is a <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> that you can use to communicate with teh control panel.
+<P>
+Because the add-on lives in the Media Server, and a problem in the user interface could bring down the entire system, it's recommended that the control panel run as its own team.  This can be done easily by writing your node as both a Media Server add-on (by exporting <B><TT><A HREF="MediaAddOn.html#make_media_addon()">make_media_addon()</A></TT></B>) and an application (by implementing <B><TT>main()</TT></B> and including <B>start_dyn.o</B> among the link libraries).  Be sure you have the multi-launch application flags set on your add-on, or this won't work right.
+<P>
+Then your <B><TT>StartControlPanel()</TT></B> implementation can simply launch the add-on as an application, and if the user double-clicks the add-on, they'll be presented with the control panel.  In addition, the user benefits by only having to install a single file for your add-on to work properly.
+<P>
+The first argv argument to your <B><TT>main()</TT></B> function will be a string of the format "node=%d" with the node ID in question as "%d".
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The above implementation suggestion (providing your control panel by launching the add-on as an application) is the default behavior of <B><TT>StartControlPanel()</TT></B>, so if that's how you implement your <A HREF="#BControllable">BControllable</A>, you don't have to override <B><TT>StartControlPanel()</TT></B> at all.  In this case, the returned BMessenger is for the control panel application, and not for a particular <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> or <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> therein.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No errors occurred.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Node wasn't loaded from an add-on.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  An error occurred locating the image from which the node was loaded, or the add-on can't be launched as an application.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LAUNCH_FAILED">B_LAUNCH_FAILED</A></TT></B>.  The control panel couldn't be launched for some other reason, such as insufficient memory.
+<P>
+</UL>
+<I><P>
+</I><HR>
+<H3>UnlockParameterWeb() see <A HREF="#LockParameterWeb()">LockParameterWeb()</A></H3>
+<P>
+<HR>
+<H3>Web() see <A HREF="#SetParameterWeb()">SetParameterWeb()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

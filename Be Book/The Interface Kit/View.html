@@ -1,0 +1,365 @@
+<HTML><HEAD><TITLE>The Interface Kit: BView</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BView"></A>BView
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/View.h">be/interface/View.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="View.summary.html"><i>Summary</i></A></H6>
+<P>
+BView is a huge class.  This document provides an introduction to <A HREF="#BView">BView</A>, and provides scripting and archival information.  For information about a specific member function, click on the function name below:
+<P>
+<LI>Constructor and destructor: <B><TT><A HREF="ViewGeneral.html#BView()">BView()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#~BView()">~BView()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewDrawing.html#AddLine()">AddLine()</A></TT></B>, <B><TT><A HREF="MenuField.html#AllAttached()">AllAttached()</A></TT></B>, <B><TT><A HREF="ViewHooks.html#AllDetached()">AllDetached()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#AppendToPicture()">AppendToPicture()</A></TT></B>, <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewDrawing.html#BeginLineArray()">BeginLineArray()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#BeginPicture()">BeginPicture()</A></TT></B>, <B><TT><A HREF="Bitmap.html#Bounds()">Bounds()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewDrawing.html#ClearViewBitmap()">ClearViewBitmap()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#ClearViewOverlay()">ClearViewOverlay()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#ClipToPicture()">ClipToPicture()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#ClipToInversePicture()">ClipToInversePicture()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#ConvertFromParent()">ConvertFromParent()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#ConvertFromScreen()">ConvertFromScreen()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#ConvertToParent()">ConvertToParent()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#ConvertToScreen()">ConvertToScreen()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#CopyBits()">CopyBits()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="Dragger.html#DetachedFromWindow()">DetachedFromWindow()</A></TT></B>, <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B>, <B><TT><A HREF="ViewHooks.html#DrawAfterChildren()">DrawAfterChildren()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#DrawBitmap()">DrawBitmap()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#DrawBitmapAsync()">DrawBitmapAsync()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#DrawChar()">DrawChar()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#DrawingMode()">DrawingMode()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#DrawPicture()">DrawPicture()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#DrawPictureAsync()">DrawPictureAsync()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewDrawing.html#EndLineArray()">EndLineArray()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#EndPicture()">EndPicture()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewDrawing.html#FillArc()">FillArc()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillBezier()">FillBezier()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillEllipse()">FillEllipse()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillPolygon()">FillPolygon()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillRect()">FillRect()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillRegion()">FillRegion()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillRoundRect()">FillRoundRect()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillShape()">FillShape()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillTriangle()">FillTriangle()</A></TT></B>, <B><TT><A HREF="Font.html#Flags()">Flags()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#Flush()">Flush()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#ForceFontAliasing()">ForceFontAliasing()</A></TT></B>, <B><TT><A HREF="MenuItem.html#Frame()">Frame()</A></TT></B>, <B><TT><A HREF="Window.html#FrameMoved()">FrameMoved()</A></TT></B>, <B><TT><A HREF="Box.html#FrameResized()">FrameResized()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewGraphicsState.html#GetClippingRegion()">GetClippingRegion()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#GetFont()">GetFont()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#GetFontHeight()">GetFontHeight()</A></TT></B>, <B><TT><A HREF="RadioButton.html#GetPreferredSize()">GetPreferredSize()</A></TT></B>, <B><TT><A HREF="Font.html#GetStringWidths()">GetStringWidths()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="Menu.html#Hide()">Hide()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#HighColor()">HighColor()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#InvertRect()">InvertRect()</A></TT></B>, <B><TT><A HREF="Tab.html#IsFocus()">IsFocus()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#IsHidden()">IsHidden()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#IsPrinting()">IsPrinting()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B>, <B><TT><A HREF="ViewHooks.html#KeyUp()">KeyUp()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewGeneral.html#LeftTop()">LeftTop()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#LineCapMode()">LineCapMode()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#LineJoinMode()">LineJoinMode()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#LineMiterLimit()">LineMiterLimit()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#LowColor()">LowColor()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B>, <B><TT><A HREF="TextView.html#MouseMoved()">MouseMoved()</A></TT></B>, <B><TT><A HREF="ViewHooks.html#MouseUp()">MouseUp()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#MovePenBy()">MovePenBy()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#MovePenTo()">MovePenTo()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="ViewGeneral.html#Origin()">Origin()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewGraphicsState.html#PenLocation()">PenLocation()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#PenSize()">PenSize()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#PopState()">PopState()</A></TT></B>, <B><TT><A HREF="TextView.html#Pulse()">Pulse()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#PushState()">PushState()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewGeneral.html#ResizeBy()">ResizeBy()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#ResizeTo()">ResizeTo()</A></TT></B>, <B><TT><A HREF="TextControl.html#ResizeToPreferred()">ResizeToPreferred()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#ResizingMode()">ResizingMode()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewGraphicsState.html#SetDrawingMode()">SetDrawingMode()</A></TT></B>, <B><TT><A HREF="Font.html#SetFlags()">SetFlags()</A></TT></B>, <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetFontSize()">SetFontSize()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetHighColor()">SetHighColor()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetLowColor()">SetLowColor()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetViewColor()">SetViewColor()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetLineMode()">SetLineMode()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#SetOrigin()">SetOrigin()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#SetResizingMode()">SetResizingMode()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetScale()">SetScale()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#SetViewBitmap()">SetViewBitmap()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#SetViewCursor()">SetViewCursor()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#SetViewOverlay()">SetViewOverlay()</A></TT></B>, <B><TT><A HREF="Menu.html#Show()">Show()</A></TT></B>, <B><TT><A HREF="Font.html#StringWidth()">StringWidth()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeArc()">StrokeArc()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeBezier()">StrokeBezier()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeEllipse()">StrokeEllipse()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokePolygon()">StrokePolygon()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeRect()">StrokeRect()</A></TT></B>, <B><TT>StrokeRegion()</TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeRoundRect()">StrokeRoundRect()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeTriangle()">StrokeTriangle()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#Sync()">Sync()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ListView.html#TargetedByScrollView()">TargetedByScrollView()</A></TT></B>, <B><TT><A HREF="Font.html#TruncateString()">TruncateString()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewGraphicsState.html#ViewColor()">ViewColor()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="ViewGeneral.html#Window()">Window()</A></TT></B>, <B><TT><A HREF="MenuField.html#WindowActivated()">WindowActivated()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Introduction"></A><FONT SIZE=6>I</FONT>ntroduction
+</H2>
+<P>
+<A NAME="32132:%20head1:%20Overview"></A>
+BView objects are the agents for drawing and message handling within windows.  Each object sets up and takes responsibility for a particular <I>view</I>, a rectangular area that's associated with at most one window at a time.  The object draws within the view rectangle and responds to reports of events elicited by the images drawn.
+<P>
+Classes derived from BView implement the actual functions that draw and handle messages; BView merely provides the framework.  For example, a <A HREF="TextView.html#BTextView">BTextView</A> object draws and edits text in response to the user's activity on the keyboard and mouse.  A <A HREF="Button.html#BButton">BButton</A> draws the image of a button on-screen and responds when the button is clicked.  <A HREF="TextView.html#BTextView">BTextView</A> and <A HREF="Button.html#BButton">BButton</A> inherit from the BView class&mdash;as do most classes in the Interface Kit.
+<P>
+<HR>
+<H3>
+<A NAME="Views%20and%20Windows"></A>Views and Windows
+</H3>
+<P>
+For a BView to do its work, you must attach it to a window.  The views in a window are arranged in a hierarchy&mdash;there can be views within views&mdash;with those that are most directly responsible for drawing and message handling located at the terminal branches of the hierarchy and those that contain and organize other views situated closer to its trunk and root.  A BView begins life unattached.  You can add it to a hierarchy by calling the <B><TT><A HREF="Bitmap.html#AddChild()">AddChild()</A></TT></B> function of the <A HREF="Window.html#BWindow">BWindow</A> or of another BView.
+<P>
+Within the hierarchy, a BView object plays two roles:
+<P>
+<UL>
+<LI>It's a <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> for messages delivered to the window thread.  BViews implement the functions that respond to the most common system messages&mdash;including those that report keyboard and mouse events.  They can also be targeted to handle application-defined messages that affect what they view displays.
+<P>
+<LI>It's an agent for drawing.  Adding a BView to a window gives it an independent graphics environment.  A BView draws on the initiative of the <A HREF="Window.html#BWindow">BWindow</A> and the Application Server, whenever they determine that the appearance of any part of the view rectangle needs to be "updated."  It also draws on its own initiative in response to events.
+<P>
+</UL>
+<P>
+The relationship of BViews to BWindows and the framework for drawing and responding to the user were discussed in the opening sections of this chapter.  The concepts and terminology presented there are assumed in this class description.
+<P>
+BViews can also be called upon to create bitmap images.  See the <A HREF="Bitmap.html#BBitmap">BBitmap</A> class for details.
+<P>
+<A NAME="35244:%20head2:%20Locking%20the%20Window"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Locking%20the%20Window"></A>Locking the Window
+</H3>
+<P>
+If a BView is attached to a window, any operation that affects the view might also affect the window and the BView's shadow counterpart in the Application Server.  For this reason, any code that calls a BView function should first lock the window&mdash;so that one thread can't modify essential data structures while another thread is using them.  A window can be locked by only one thread at a time.
+<P>
+Locking is accomplished through the <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> <B><TT><A HREF="Bitmap.html#Lock()">Lock()</A></TT></B> and <B><TT><A HREF="Bitmap.html#Unlock()">Unlock()</A></TT></B> functions inherited by BWindow:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if ( Window()->Lock() ) {
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;    Window()->Unlock();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Before they do anything else, almost all BView functions check to be sure the caller has the window locked.  If the window isn't properly locked, they print warning messages and fail.
+<P>
+Of course, a BView function can require the window to be locked only if the view has a window to lock; the requirement can't be enforced if the BView isn't attached to a window.  However, as discussed in "Views and the Server" in the "Drawing" section of this chapter, some BView functions don't work at all unless the view is attached&mdash;in which case the window must be locked.
+<P>
+Whenever the system calls a BView function to notify it of something&mdash;whenever it calls <B><TT><A HREF="MenuField.html#WindowActivated()">WindowActivated()</A></TT></B>, <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B>, <B><TT><A HREF="ColorControl.html#MessageReceived()">MessageReceived()</A></TT></B> or another hook function&mdash;it first locks the window thread.  The application doesn't have to explicitly lock the window when responding to an update, an interface message, or some other notification; the window is already locked.
+<P>
+<HR>
+<H3>
+<A NAME="Focus"></A>Focus
+</H3>
+<P>
+To facilitate keyboard navigation of views, BView provides integral support for the concept of <B>focus</B>.  Only one view in a window can have the focus at any given time, and the view that has the focus is the one whose <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> function is called to process keyboard events.
+<P>
+From the user's point-of-view, the tab key rotates the focus from one view to the next through the navigation group, cycling back to the first view if the tab key is pressed while the last targetable view in the group has the focus.  The shift-tab keyboard combination cycles the focus backward.  Holding down the control key while cycling groups causes the focus to jump from one navigation group to the next.
+<P>
+When a view has the focus, some sort of indicator should be drawn to inform the user that the view is the focus.  Typically, this involves drawing a line under a label in teh view, or possibly drawing a box around the view or some portion of it.  The global <B><TT><A HREF="functions.html#keyboard_navigation_color()">keyboard_navigation_color()</A></TT></B> function should be used to obtain the color used to draw the focus indicator.
+<P>
+The view's <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> function is called to specify whether or not the control has the focus; it's called with an argument of <B><TT>true</TT></B> if the control has the focus, and <B><TT>false</TT></B> if it's not the focus; <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> calls the previously-focused view's <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> function to inform that view that it's not the focus anymore.  You can augment <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> is a subclass if you need to take notice when the view becomes the focus (or loses the focus).  For example, you may need to draw or erase the keyboard navigation indicator.
+<P>
+Focus is used extensively by controls.  For further information, see "Introduction to Controls."
+<P>
+<HR>
+<H3>
+<A NAME="Derived%20Classes"></A>Derived Classes
+</H3>
+<P>
+When it comes time for a BView to draw, its <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> virtual function is called automatically.  When it needs to respond to an event, a virtual function named after the kind of event is called&mdash;<B><TT><A HREF="TextView.html#MouseMoved()">MouseMoved()</A></TT></B>, <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B>, and so on.  Classes derived from BView implement these hook functions to do the particular kind of drawing and message handling characteristic of the derived class.
+<P>
+<UL>
+<LI>Some classes derived from BView implement control devices&mdash;buttons, dials, selection lists, check boxes, and so on&mdash;that translate user actions on the keyboard and mouse into more explicit instructions for the application.  In the Interface Kit, <A HREF="Menu.html#BMenu">BMenu</A>, <A HREF="ListView.html#BListView">BListView</A>, <A HREF="Button.html#BButton">BButton</A>, <A HREF="CheckBox.html#BCheckBox">BCheckBox</A>, and <A HREF="RadioButton.html#BRadioButton">BRadioButton</A> are examples of control devices.
+<P>
+<LI>Other BViews visually organize the display&mdash;for example, a view that draws a border around and arranges other views, or one that splits a window into two or more resizable panels.  The <A HREF="Box.html#BBox">BBox</A>, <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A>, and <A HREF="ScrollView.html#BScrollView">BScrollView</A> classes fall into this category.
+<P>
+<LI>Some BViews implement highly organized displays the user can manipulate, such as a game board or a scientific simulation.
+<P>
+<LI>Perhaps the most important BViews are those that permit the user to create, organize, and edit data.  These views display the current selection and are the focus of most user actions.  They carry out the main work of an application.  <A HREF="TextView.html#BTextView">BTextView</A> is the only Interface Kit example of such a view.
+<P>
+</UL>
+<P>
+Almost all the BView classes defined in the Interface Kit fall into the first two of these groups.  Control devices and organizational views can serve a variety of different kinds of applications, and therefore can be implemented in a kit that's common to all applications.
+<P>
+However, the BViews that will be central to most applications fall into the last two groups.  Of particular importance are the BViews that manage editable data.  Unfortunately, these are not views that can be easily implemented in a common kit.  Just as most applications devise their own data formats, most applications will need to define their own data-handling views.
+<P>
+Nevertheless, the BView class structures and simplifies the task of developing application-specific objects that draw in windows and interact with the user.  It takes care of the lower-level details and manages the view's relationship to the window and other views in the hierarchy.  You should make yourself familiar with this class before implementing your own application-specific BViews.
+<P>
+<HR>
+<H2>
+<A NAME="Scripting%20Support"></A><FONT SIZE=6>S</FONT>cripting <FONT SIZE=6>S</FONT>upport
+</H2>
+<P>
+The BView class implements the two suites "suite/vnd.Be-view" and "suite/vnd.Be-container-view."  "suite/vnd.Be-container-view" is only implemented if the view contains a shelf; the suite consists of the single property "Shelf."
+<P>
+<HR>
+<H3>
+<A NAME="The%20Frame%20Property"></A>The Frame Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the view's frame rectangle.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the view's frame rectangle.</TD>
+</TABLE>
+<P>
+The "Frame" property represents the frame rectangle of the view.  The frame is passed as a <A HREF="Rect.html#BRect">BRect</A> (<B><TT>B_RECT_TYPE</TT></B>).
+<P>
+<HR>
+<H3>
+<A NAME="The%20Hidden%20Property"></A>The Hidden Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns <B><TT>true</TT></B> if the view is hidden; <B><TT>false</TT></B> otherwise.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Hides or shows the view.</TD>
+</TABLE>
+<P>
+The "Hidden" property determines the visibility of the view.  The messages are equivalent to manipulating the view with the <B><TT><A HREF="ViewGeneral.html#IsHidden()">IsHidden()</A></TT></B>, <B><TT><A HREF="Menu.html#Hide()">Hide()</A></TT></B>, and <B><TT><A HREF="Menu.html#Show()">Show()</A></TT></B>.  Note that this differs slightly from BWindow's "Hidden" property, where multiple hides or shows are not nested.
+<P>
+The "Hidden" property determines the visibility of the view.  The messages are equivalent to manipulating the view with the <B><TT><A HREF="ViewGeneral.html#IsHidden()">IsHidden()</A></TT></B>, <B><TT><A HREF="Menu.html#Hide()">Hide()</A></TT></B>, and <B><TT><A HREF="Menu.html#Show()">Show()</A></TT></B> methods with one caveat: nested <B><TT><A HREF="Menu.html#Hide()">Hide()</A></TT></B> and <B><TT><A HREF="Menu.html#Show()">Show()</A></TT></B> calls are disabled so that multiple scripting Hide commands may be undone with a single Show.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Shelf%20Property"></A>The Shelf Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD>any</TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Directs the scripting message to the shelf.</TD>
+</TABLE>
+<P>
+The "Shelf" property pops the current specifier off the specifier stack and then passes the scripting message to the shelf.  If no shelf is present, an error is returned.
+<P>
+<HR>
+<H3>
+<A NAME="The%20View%20Property"></A>The View Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/topic_Scripting.html#B_COUNT_PROPERTIES">B_COUNT_PROPERTIES</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the number of of child views.</TD>
+<TR>
+<TD>any</TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_INDEX_SPECIFIER">B_INDEX_SPECIFIER</A>,
+<br>
+</TT></B>B_REVERSE_INDEX_SPECIFIER,
+<br>
+B_NAME_SPECIFIER</TD>
+<TD>Directs the scripting message to the specified view.</TD>
+</TABLE>
+<P>
+The "View" property represents the child views of the current view.  For all messages except <B><TT>B_COUNT_PROPERTIES</TT></B>, the current specifier is popped off the specifier stack before the scripting message is passed to the target view.  Views can be specified either by index (as found by <B><TT><A HREF="Bitmap.html#ChildAt()">ChildAt()</A></TT></B>), or name (as found by <B><TT><A HREF="Bitmap.html#FindView()">FindView()</A></TT></B>).
+<P>
+<B><HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+</B>The <B><TT><A HREF="MenuField.html#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_frame"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RECT_TYPE">B_RECT_TYPE</A></TT></B></TD>
+<TD>The view's frame rectangle.</TD>
+<TR>
+<TD>"_resize_mode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Resizing mode.</TD>
+<TR>
+<TD>"_flags"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>View flags.</TD>
+<TR>
+<TD>"_fname" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Font family and style.</TD>
+<TR>
+<TD>"_fflt" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Font size, shear, and rotation (-1 if default).</TD>
+<TR>
+<TD>"_color" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>High, low, and view colors.</TD>
+<TR>
+<TD>"_evmask" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Event mask and options.</TD>
+<TR>
+<TD>"_dbuf"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Double buffering flag.</TD>
+<TR>
+<TD>"_origin"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>Origin.</TD>
+<TR>
+<TD>"_psize"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Pen size.</TD>
+<TR>
+<TD>"_ploc"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>Pen location.</TD>
+<TR>
+<TD>"_lmcapjoin" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT16_TYPE">B_INT16_TYPE</A></TT></B></TD>
+<TD>Line cap mode and join mode.</TD>
+<TR>
+<TD>"_lmmiter"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Line mode miter value.</TD>
+<TR>
+<TD>"_blend" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT16_TYPE">B_INT16_TYPE</A></TT></B></TD>
+<TD>Blending alpha and mode.</TD>
+<TR>
+<TD>"_dmod"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Drawing mode.</TD>
+<TR>
+<TD>"_views"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>Archived child views (deep copy only).</TD>
+</TABLE>
+<P>
+Some of these fields may not be present if the setting they represent isn't used, or is the default value.  For example, if the font's family and style were not changed, the "_fname" field won't be found in the archive.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

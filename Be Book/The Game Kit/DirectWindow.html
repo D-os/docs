@@ -1,0 +1,842 @@
+<HTML><HEAD><TITLE>The Game Kit: BDirectWindow</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BDirectWindow"></A>BDirectWindow
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kit/game/DirectWindow.h">be/kit/game/DirectWindow.h</A>
+<P>
+Library:  libgame.so
+<P>
+<H6><A HREF="DirectWindow.summary.html"><i>Summary</i></A></H6>
+<P>
+The BDirectWindow class gives your code direct access to the graphics frame buffer on the video card.  Unlike <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A>, BDirectWindow can be used in both full-screen and window modes&mdash;you can create a BDirectWindow that looks just like a normal window, but lets your code draw into it by directly accessing the frame buffer.
+<P>
+In addition, BDirectWindow lets you switch between full-screen exclusive mode and windowed modes without breaking down and rebuilding the object.  A simple call to the <B><TT><A HREF="#SetFullScreen()">SetFullScreen()</A></TT></B> function does the job.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you want your direct window to be full-screen but don't want exclusive mode, just resize the window to fill the entire screen; since full-screen exclusive mode (as set by calling <B><TT><A HREF="#SetFullScreen()">SetFullScreen()</A></TT></B>) won't let other windows draw in front of your direct window, you can't have menus in a full-screen exclusive mode direct window.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Another difference between BDirectWindow and <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A> is that BDirectWindow lets you access all the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> functions; you can literally treat your BDirectWindow just like another window.  There are two caveats:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Don't draw into the direct window from its own thread; you should spawn another thread for drawing into the direct window, and use the <B><TT>DirectConnected()</TT></B> function to synchronize the interaction between BDirectWindow and your drawing thread.  Also, if you choose to use <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> or <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> API inside a <A HREF="#BDirectWindow">BDirectWindow</A>, be sure you don't block the <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> function.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Not all video cards support window mode; use the <B><TT><A HREF="#SupportsWindowMode()">SupportsWindowMode()</A></TT></B> function if you need to know whether or not window mode is available.
+<P>
+<A NAME="Getting%20Connected%20(and%20Staying%20That%20Way)"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Getting%20Connected%20(and%20Staying%20That%20Way)"></A>Getting Connected (and Staying That Way)
+</H3>
+<P>
+The key to the BDirectWindow class is the <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> function, which your code must implement.  This function is called whenever a change that your drawing code may need to be aware of occurs.
+<P>
+When your <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> function is called, it's passed a pointer to a <B><TT><A HREF="#direct_buffer_info">direct_buffer_info</A></TT></B> structure, as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;direct_buffer_state&nbsp;&nbsp;&nbsp;buffer_state;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;direct_driver_state&nbsp;&nbsp;&nbsp;driver_state;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*bits;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*pci_bits;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bytes_per_row;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bits_per_pixel;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color_space&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pixel_format;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer_layout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;layout;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer_orientation&nbsp;&nbsp;&nbsp;orientation;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_reserved[9];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_dd_type_;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_dd_token_;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clip_list_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clipping_rect&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window_bounds;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clipping_rect&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clip_bounds;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clipping_rect&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clip_list[1];
+&nbsp;&nbsp;&nbsp;} direct_buffer_info;</PRE>
+<P>
+<B><TT><A NAME="buffer_state"></A>buffer_state
+</TT></B> indicates what change is occurring in the direct buffer access privileges.  It can have one of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>Constant</TD>
+<TD>Description</TD>
+<TR>
+<TD><B><TT>B_DIRECT_START</TT></B></TD>
+<TD>Your BDirectWindow has just received direct screen access to the part of the screen described by the <B><TT><A HREF="#direct_buffer_info">direct_buffer_info</A></TT></B> structure.</TD>
+<TR>
+<TD><B><TT>B_DIRECT_STOP</TT></B></TD>
+<TD>Your direct screen access privileges have been suspended.  None of the other fields in the <B><TT><A HREF="#direct_buffer_info">direct_buffer_info</A></TT></B> structure are valid.</TD>
+<TR>
+<TD><B><TT>B_DIRECT_MODIFY</TT></B></TD>
+<TD>A change has occurred to the direct screen access buffer; your drawing code needs to take whatever action is necessary to adjust to the new state.</TD>
+</TABLE>
+<P>
+You will always receive a <B><TT>B_DIRECT_START</TT></B> notification when your BDirectWindow is first connected to the screen, followed by any number of <B><TT>B_DIRECT_MODIFY</TT></B> notifications (it's possible you won't receive any at all).  When you return from <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> after handling <B><TT>B_DIRECT_START</TT></B> or <B><TT>B_DIRECT_MODIFY</TT></B>, your application guarantees to the application server that your code will abide by the frame buffer configuration specified by the <B><TT>
+<A NAME="direct_buffer_info"></A>direct_buffer_info
+</TT></B> structure until another <B><TT>B_DIRECT_MODIFY</TT></B> notification is received (or <B><TT>B_DIRECT_STOP</TT></B> occurs).
+<P>
+You'll receive a <B><TT>B_DIRECT_STOP</TT></B> notification when the window is closed, hidden, or if moved, or if a resolution or color depth change occurs.  Once your <B><TT><A HREF="#DirectConnected()">DirectConnected()</A> </TT></B>function returns from handling this notification, you guarantee to the application server that your code won't touch the frame buffer anymore.
+<P>
+For any of these notifications, your <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> function shouldn't return until you can guarantee to the application server that your code will abide by the frame buffer configuration it received.
+<P>
+You can get further information about what changed by testing against other flags in the <B><TT>
+<A NAME="buffer_state"></A>buffer_state
+</TT></B> field:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>Constant</TD>
+<TD>Description</TD>
+<TR>
+<TD><B><TT>B_BUFFER_MOVED</TT></B></TD>
+<TD>The content of your window has been moved, either by a call to <B><TT><A HREF="../The%20Interface%20Kit/Shape.html#MoveTo()">MoveTo()</A></TT></B> or <B><TT><A HREF="../The%20Interface%20Kit/Window.html#MoveBy()">MoveBy()</A></TT></B> or by the user manually dragging the window.  The contents of the window are always moved relative to the top-left corner of the window.</TD>
+<TR>
+<TD><B><TT>B_BUFFER_RESET</TT></B></TD>
+<TD>The entire direct access buffer has been reset.  This can happen if the user changes the depth or resolution of the screen, or if the window had previously been hidden and has been made visible again.</TD>
+<TR>
+<TD><B><TT>B_BUFFER_RESIZED</TT></B></TD>
+<TD>The content area of your window has been resized.</TD>
+<TR>
+<TD><B><TT>B_CLIPPING_MODIFIED</TT></B></TD>
+<TD>The visible region of the content area of your window changed.  This doesn't imply anything about the position of the window or the size of the content area of the window&mdash;it simply means that the part of the window that's visible has changed shape.</TD>
+</TABLE>
+<P>
+The <B><TT>
+<A NAME="driver_state"></A>driver_state
+</TT></B> field indicates changes in the state of the graphics card on which your direct window is displayed.  There are two possible values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>Constant</TD>
+<TD>Description</TD>
+<TR>
+<TD><B><TT>B_MODE_CHANGED</TT></B></TD>
+<TD>The resolution or depth of the graphics card has changed.</TD>
+<TR>
+<TD><B><TT>B_DRIVER_CHANGED</TT></B></TD>
+<TD>The window was moved onto another monitor.</TD>
+</TABLE>
+<P>
+The <B><TT>
+<A NAME="bits"></A>bits
+</TT></B> field is a pointer to the frame buffer in your own team's memory space.
+<P>
+The <B><TT>
+<A NAME="pci_bits"></A>pci_bits
+</TT></B> field is a pointer to the frame buffer in the PCI memory space; this value is typically needed to control DMA.
+<P>
+<B><TT><A NAME="bytes_per_row"></A>bytes_per_row
+</TT></B> is the number of bytes used to represent a single row of pixels in the frame buffer.
+<P>
+<B><TT><A NAME="bits_per_pixel"></A>bits_per_pixel
+</TT></B> is the number of bits actually used to store a single pixel, including reserved, unused, or alpha channel bits.  This value is usually a multiple of eight.
+<P>
+<B><TT><A NAME="pixel_format"></A>pixel_format
+</TT></B> is the format used to encode a pixel, as defined in the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#color_space">color_space</A></TT></B> type in &lt;<B>GraphicsDefs.h</B>>.
+<P>
+The <B><TT>
+<A NAME="layout"></A>layout
+</TT></B>, <B><TT>
+<A NAME="orientation"></A>orientation
+</TT></B>, <B><TT>
+<A NAME="_reserved"></A>_reserved
+</TT></B>, <B><TT>
+<A NAME="_dd_type_"></A>_dd_type_
+</TT></B>, and <B><TT>
+<A NAME="_dd_token_"></A>_dd_token_
+</TT></B> fields are all reserved for future use and must not be used.
+<P>
+<B><TT><A NAME="window_bounds"></A>window_bounds
+</TT></B> is a rectangle that defines the full content area of the window, in screen coordinates.  You can convert these coordinates into frame buffer addresses using the values in the <B><TT>
+<A NAME="bits"></A>bits
+</TT></B>, <B><TT>
+<A NAME="bytes_per_row"></A>bytes_per_row
+</TT></B>, and <B><TT>
+<A NAME="bits_per_pixel"></A>bits_per_pixel
+</TT></B> fields.  The <B><TT>clipping_rect</TT></B> structure is:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;left;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;top;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;right;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bottom;
+&nbsp;&nbsp;&nbsp;} clipping_rect;</PRE>
+<P>
+Note that, as always, these edges are inclusive; for example, if <FONT  face=HELVETICA>left</FONT> is 5 and <FONT  face=HELVETICA>top</FONT> is 3, the pixel at (5,3) is included in the rectangle's contents.
+<P>
+<B><TT><A NAME="clip_bounds"></A>clip_bounds
+</TT></B> is the bounding rectangle of the visible part of the content area of the window, in screen coordinates.  This rectangle is the smallest rectangle that contains all the rectangles in the <B><TT>
+<A NAME="clip_list"></A>clip_list
+</TT></B>, described below.
+<P>
+<B><TT><A NAME="clip_list_count"></A>clip_list_count
+</TT></B> is the number of rectangles in the <B><TT>
+<A NAME="clip_list"></A>clip_list
+</TT></B>.  The <B><TT>
+<A NAME="clip_list"></A>clip_list
+</TT></B> is a list of rectangles that together define the visible region of the content area of the window, in screen coordinates
+<P>
+The data in the <B><TT><A HREF="#direct_buffer_info">direct_buffer_info</A></TT></B> structure is only valid until <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> returns, so if you need to reference any of the information later, you should make a copy of the fields you need.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If your <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> implementation doesn't handle a request within three seconds, the Application Server will intentionally crash your application under the assumption that it's deadlocked.  Be sure to handle requests as quickly as possible.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<A NAME="Window%20Mode%20vs.%20Full%20Screen%20Mode"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Window%20Mode%20vs.%20Full%20Screen%20Mode"></A>Window Mode vs. Full Screen Mode
+</H3>
+<P>
+There are some differences in how BDirectWindow behaves depending on whether it's in window mode or full-screen exclusive mode.
+<P>
+In window mode, the BDirectWindow behaves almost exactly like a <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A>&mdash;so much so that you can use a BDirectWindow in any situation you'd normally use a BWindow.  The <B><TT>window_bounds</TT></B> rectangles are the same size and shape as the window itself, as you'd expect.  If exclusive window mode is available (<B><TT><A HREF="#SupportsWindowMode()">SupportsWindowMode()</A></TT></B> returns true), <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> will be called as described above, thereby providing the means to directly access the frame buffer.  If the graphics card doesn't support exclusive access to the frame buffer while in window mode, <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> will never be called, and you can only use <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> and <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> APIs to work in the window.
+<P>
+In full-screen exclusive mode, the <B><TT>window_bounds</TT></B> are actually the size and shape of the entire screen, even if the screen isn't the same size as the direct window you created.  You have to handle the difference yourself.
+<P>
+Full-screen exclusive mode also guarantees that your window will always be the focus, always be in front, and will always stay full-screen (the application server will resize the window for you if the screen resolution changes).  Since no other windows can come in front of a full-screen exclusive direct window, any Interface Kit objects that use a window to display their contents won't work; this includes any type of menu.
+<P>
+If you want your BDirectWindow to be full-screen, but still compatible with menus or other windows, create it as a non-exclusive window, then use the following code:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BScreen screen(this);
+&nbsp;&nbsp;&nbsp;MoveTo(0,0);
+&nbsp;&nbsp;&nbsp;ResizeTo(screen.width, screen.height);</PRE>
+<P>
+This will make the non-exclusive direct window fill the entire screen.  Keep in mind that in this case, other windows may appear in front of yours, and if the screen resolution changes, you will have to resize the window yourself if you want to continue to fill the entire screen.
+<P>
+<A NAME="Using%20a%20Direct%20Window"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Using%20a%20Direct%20Window"></A>Using a Direct Window
+</H3>
+<P>
+Let's put together a simple class, derived from <A HREF="#BDirectWindow">BDirectWindow</A>, that demonstrates the basics of drawing into a direct window.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;class DirectSample : public BDirectWindow {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DirectSample(BRect frame);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~DirectSample();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;virtual bool&nbsp;&nbsp;&nbsp;QuitRequested();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;virtual void&nbsp;&nbsp;&nbsp;DirectConnected(direct_buffer_info *info);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*fBits;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fRowBytes;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color_space&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fFormat;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clipping_rect&nbsp;&nbsp;&nbsp;fBounds;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fNumClipRects;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clipping_rect&nbsp;&nbsp;&nbsp;*fClipList;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fDirty;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// needs refresh?
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fConnected;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fConnectionDisabled;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BLocker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*locker;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thread_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fDrawThreadID;
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+The DirectSample class implements a constructor as well as the <B><TT><A HREF="../The%20Application%20Kit/Application.html#QuitRequested()">QuitRequested()</A></TT></B> and <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> functions.
+<P>
+Some variables are added to the class for cacheing information about the frame buffer.
+<P>
+<UL>
+<LI><B><TT>fBits</TT></B> will contain a pointer to the frame buffer's bitmap.
+<P>
+<LI><B><TT>fRowBytes</TT></B> will contain the number of bytes per row of screen data.
+<P>
+<LI><B><TT>fFormat</TT></B> will contain the pixel format (such as <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_CMAP8">B_CMAP8</A></TT></B> for 8-bit indexed color graphics mode).  Our sample program will only work in this mode.
+<P>
+<LI><B><TT>fBounds</TT></B> will contain the bounds rectangle for the window.
+<P>
+<LI><B><TT>fNumClipRects</TT></B> will contain the number of rectangles in the clip rectangle list.
+<P>
+<LI><B><TT>fClipList</TT></B> is the actual list of clip rectangles, and will be allocated on-the-fly as needed.
+<P>
+<LI><B><TT>fDirty</TT></B> will be <B><TT>true</TT></B> if the window needs to be redrawn.
+<P>
+<LI><B><TT>fConnected</TT></B> is <B><TT>true</TT></B> if the window is connected to the frame buffer.
+<P>
+<LI><B><TT>fConnectionDisabled</TT></B> is <B><TT>true</TT></B> if the window is in the process of being closed.
+<P>
+<LI><B><TT>locker</TT></B> is a <A HREF="../The%20Support%20Kit/Locker.html#BLocker">BLocker</A> that will be used to ensure mutual exclusion when the frame buffer or buffer information data we've cached is being manipulated.
+<P>
+<LI><B><TT>fDrawThreadID</TT></B> contains the <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#thread_id">thread_id</A></TT></B> of the drawing thread, which is responsible for drawing the contents of the window.
+<P>
+</UL>
+<P>
+The specifics of what these variables are and why the information contained in them is maintained will be discussed when we get to the <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> and <B><TT>DrawingThread()</TT></B> functions.
+<P>
+The constructor for the DirectSample class looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;DirectSample::DirectSample(BRect frame)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: BDirectWindow(frame, "DirectWindow Sample",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_TITLED_WINDOW,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_NOT_RESIZABLE|B_NOT_ZOOMABLE) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fConnected = false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fConnectionDisabled = false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;locker = new BLocker();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fClipList = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fNumClipRects = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AddChild(new SampleView(Bounds()));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!SupportsWindowMode()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetFullScreen(true);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fDirty = true;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fDrawThreadID = spawn_thread(DrawingThread, "drawing_thread",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_NORMAL_PRIORITY, (void *) this);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;resume_thread(fDrawThreadID);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This code establishes the direct window by deferring to BDirectWindow.  Then the <B><TT>fConnected</TT></B> and <B><TT>fConnectionDisabled</TT></B> flags are initialized to indicate that the window isn't connected yet, but the connection isn't in the process of being torn down by the DirectSample destructor.  The <B><TT>locker</TT></B> is created, and the clip rectangle list is initialized to a <B><TT>NULL</TT></B> pointer, with a count of 0.
+<P>
+Then it adds a child view that occupies the entire window.  The primary purpose of this view in this sample is to set the view color to <B><TT><A HREF="../The%20Interface%20Kit/misc.html#Transparency%20Constants">B_TRANSPARENT_32_BIT</A></TT></B>, to prevent the application server from erasing the window with a default color.
+<P>
+If the video card doesn't support window mode, we call <B><TT><A HREF="#SetFullScreen()">SetFullScreen()</A></TT></B> to switch the direct window into full-screen exclusive mode.  This guarantees that you'll get connected with direct screen access (in a window if possible, otherwise in full-screen exclusive mode).  If you don't use <B><TT><A HREF="#SetFullScreen()">SetFullScreen()</A></TT></B>, and window mode isn't supported, <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> will never be called, and you won't have direct screen access.
+<P>
+Then the <B><TT>fDirty</TT></B> flag is set to true, which indicates that the window needs to be updated, and the drawing thread is started; the drawing thread will handle all actual drawing into the window.  The argument passed to the drawing thread is a pointer to the DirectSample window itself.  You should always use a separate thread for drawing into a BDirectWindow.
+<P>
+Finally, <B><TT><A HREF="WindowScreen.html#Show()">Show()</A></TT></B> is called to make the direct window visible.
+<P>
+The destructor needs to make sure there's no chance someone will try to draw while the window is being destructed:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;DirectSample::~DirectSample() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 result;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fConnectionDisabled = true;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Connection is dying
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hide();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sync();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;wait_for_thread(fDrawThreadID, &amp;result);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free(fClipList);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete locker;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The first thing the destructor does is set the <B><TT>fConnectionDisabled</TT></B> flag to <B><TT>true</TT></B>, which indicates that the window is in the process of being destroyed, and that future calls to <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> or the drawing thread should be ignored.  The window is then hidden by calling <B><TT><A HREF="WindowScreen.html#Hide()">Hide()</A></TT></B>.  Finally, <B><TT><A HREF="../The%20Interface%20Kit/ViewDrawing.html#Sync()">Sync()</A></TT></B> is called to block until the window is actually hidden.
+<P>
+<B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B> waits until the drawing thread terminates.  The drawing thread (as we'll see shortly) is designed to terminate when the <B><TT>fConnectionDisabled</TT></B> flag is <B><TT>true</TT></B>.
+<P>
+Then the clip rectangle list is freed and the locker deleted.
+<P>
+The <B><TT><A HREF="../The%20Application%20Kit/Application.html#QuitRequested()">QuitRequested()</A></TT></B> function is implemented as usual.
+<P>
+The <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> function is called whenever a change occurs that affects how your code should access the frame buffer:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void DirectSample::DirectConnected(direct_buffer_info *info) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!fConnected &amp;&amp; fConnectionDisabled) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;locker->Lock();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch(info->buffer_state &amp; B_DIRECT_MODE_MASK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case B_DIRECT_START:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fConnected = true;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case B_DIRECT_MODIFY:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Get clipping information
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (fClipList) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free(fClipList);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fClipList = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fNumClipRects = info->clip_list_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fClipList = (clipping_rect *)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;malloc(fNumClipRects*sizeof(clipping_rect));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (fClipList) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memcpy(fClipList, info->clip_list,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fNumClipRects*sizeof(clipping_rect));&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fBits = (uint8 *) info->bits;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fRowBytes = info->bytes_per_row;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fFormat = info->pixel_format;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fBounds = info->window_bounds;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fDirty = true;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case B_DIRECT_STOP:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fConnected = false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;locker->Unlock();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> begins by checking the <B><TT>fConnected</TT></B> and <B><TT>fConnectionDisabled</TT></B> flags; the code in <B><TT><A HREF="#DirectConnected()">DirectConnected()</A> </TT></B>is only run if the connection is opened (<B><TT>fConnected</TT></B> is <B><TT>true</TT></B>) or if we want to start it again (<B><TT>fConnectionDisabled</TT></B> is <B><TT>false</TT></B>).  This arrangement prevents the <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> function from trying to reconnect if the destructor has  started running.   Otherwise, the locker is locked, to prevent <B><TT><A HREF="#DirectConnected()">DirectConnected()</A> </TT></B>and the drawing thread from colliding.
+<P>
+If the buffer state is <B><TT>B_DIRECT_START</TT></B>, the <B><TT>fConnected</TT></B> flag is set to <B><TT>true</TT></B>.  This keeps track of the fact that the application server has given permission to draw directly into the region of the frame buffer controlled by the direct window.
+<P>
+If the buffer state is <B><TT>B_DIRECT_START</TT></B> or <B><TT>B_DIRECT_MODIFY</TT></B> (in which case the <B><TT><A HREF="#direct_buffer_info">direct_buffer_info</A></TT></B> structure describes changes to the frame buffer), any previously-existing clip rectangle list is deleted, then we cache the information that interests us and set the <B><TT>fDirty</TT></B> flag to <B><TT>true</TT></B> (to indicate that the display needs to be redrawn to reflect the changed graphics settings).
+<P>
+The clip list is also cached by saving the number of rectangles in the list in the <B><TT>fNumClipRects</TT></B> field and by making a copy of the clip list into a newly <B><TT><A HREF="../Drivers/area_malloc.html#malloc()">malloc()</A></TT></B>d block of memory.
+<P>
+If the state is <B><TT>B_DIRECT_STOP</TT></B>, the <B><TT>fConnected</TT></B> flag is set to <B><TT>false</TT></B>, to indicate that we shouldn't draw into the frame buffer anymore.
+<P>
+Finally, the locker is unlocked, which lets the drawing thread start running again.
+<P>
+Now let's have a look at <B><TT>DrawingThread()</TT></B>; this function serves as the drawing thread, and is a global function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 DrawingThread(void *data) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DirectSample *w;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w = (DirectSample *) data;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (!w->fConnectionDisabled) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w->locker->Lock();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (w->fConnected) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (w->fFormat == B_CMAP8 &amp;&amp; w->fDirty) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 y;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 width;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 height;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 adder;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8 *p;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clipping_rect *clip;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 i;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adder = w->fRowBytes;&nbsp;&nbsp;&nbsp;// Stash locally for this pass
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (i=0; i&lt;w->fNumClipRects; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clip = &amp;(w->fClipList[i]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width = (clip->right - clip->left)+1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height = (clip->bottom - clip->top)+1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p = w->fBits+(clip->top*w->fRowBytes)+clip->left;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (y &lt; height) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memset(p, 0x00, width);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p+=adder;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w->fDirty = false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w->locker->Unlock();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Use BWindow or BView APIs here if you want
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;snooze(16000);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT>DrawingThread()</TT></B> starts by casting the argument, <I><FONT  color=991122 face=HELVETICA>data</I></FONT>, into a pointer to the DirectSample window into which it will be drawing.
+<P>
+The while loop that follows will continue to run as long as the <B><TT>fConnectionDisabled</TT></B> flag is <B><TT>true</TT></B>&mdash;in other words, it will keep looping as long as the connection is enabled.
+<P>
+The drawing loop itself begins by locking the locker to ensure that <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> doesn't change anything while we're working, then checking to be sure the connection is opened (<B><TT>fConnected</TT></B> is <B><TT>true</TT></B>).  If the connection is open, we verify that format of the window is still 8-bit color and that the display needs to be updated.  If the display needs updating and the pixel format is still <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_CMAP8">B_CMAP8</A></TT></B>, the drawing code begins.
+<P>
+The <B><TT>fRowBytes</TT></B> field of the DirectSample window is cached in a local variable called <B><TT>adder</TT></B>.  Then each rectangle in the clip list is drawn, one at a time, using a for loop.
+<P>
+A pointer to the clip rectangle to be drawn is stored in <B><TT>clip</TT></B>, and the <B><TT>width</TT></B> and <B><TT>height</TT></B> of the rectangle are computed.  Then <B><TT>p</TT></B> is set to be a pointer to the first pixel in the frame buffer that's contained by the clip rectangle.  Since 8-bit color pixels each occupy exactly one byte of video memory, this pixel's address can be computed by taking the base <B><TT>fBits</TT></B> pointer, adding the number of bytes per row times the number of rows between the top of the screen and the first row in the clip rectangle, then adding the number of bytes between the left edge of the screen and the left edge of the clip rectangle, as seen in the line:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;p = w->fBits+(clip->top*w->fRowBytes)+clip->left;</PRE>
+<P>
+Then a while loop is used to iterate over each line in the clip rectangle, by ranging the variable <B><TT>y</TT></B> from <B><TT>0</TT></B> to the <B><TT>height</TT></B> of the clip rectangle.  <B><TT>memset()</TT></B> is used to clear the row to black, which is represented by the byte value 0x00.  <B><TT>y</TT></B> is incremented by one for each pass through the loop, to count the rows being drawn for each iteration, and the pointer  <B><TT>p</TT></B> is incremented by  <B><TT>adder</TT></B> to move down to the beginning of the next row in the clip rectangle.
+<P>
+Once each clip rectangle has been drawn, the for loop exits, and the <B><TT>fDirty</TT></B> flag is set to false to indicate that the screen is up-to-date.  Once that's done, the locker is unlocked, which lets <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> do its thing if it's called.  To avoid using an unreasonable amount of processing time, <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#snooze()">snooze()</A></TT></B> is called to give up CPU time to other threads.
+<P>
+If you want to use calls to <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> or <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> API in your drawing thread, you should do so just after unlocking the window.
+<P>
+When the thread terminates (which will only happen when the connection is disabled), the drawing thread returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+This drawing function is designed to draw nothing unless it's necessary; <B><TT><A HREF="#DirectConnected()">DirectConnected()</A> </TT></B>will set the <B><TT>fDirty</TT></B> flag when something happens to cause the screen to need a refresh, and other code elsewhere in the application could also set the fDirty flag to indicate that the screen should be redrawn.
+<P>
+Since we're taking over drawing the contents of the window, we need to tell the application server not to draw anything.  This is done by adding the following line to the constructor for the SampleView:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SetViewColor(B_TRANSPARENT_32_BIT);</PRE>
+<P>
+This is very important: if you don't remember to do this, you'll have all kinds of synchronization problems when the application server and your drawing code try to draw into the window at the same time.
+<P>
+Note that this sample code doesn't really do anything useful (if all you want to do is have a black window moving around, don't use BDirectWindow&mdash;use a regular <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A>, throw a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> into it, and use <B><TT><A HREF="../The%20Interface%20Kit/ViewGraphicsState.html#SetViewColor()">SetViewColor()</A></TT></B> to make the view black; it'll be faster and more efficient because it will use hardware graphics acceleration if it's available).  However, it serves as a simple example of how to establish a connection to let your own drawing code directly access the screen.  Just replace the code inside the drawing loop with something more useful (like a nifty real-time animation).
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#DirectConnected()">DirectConnected()</A>
+<P>
+</TT></B>The <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> hook function is called when the connection to the screen has been made, a change has occurred to the size or format of the frame buffer, a change has occurred to the position, size, or shape of the visible part of the content area of the window, or the connection to the screen is terminated.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BDirectWindow()"></A>BDirectWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectWindow(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>title</I></FONT>, window_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>workspace</I></FONT> = <FONT  face=HELVETICA>B_CURRENT_WORKSPACE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectWindow(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>title</I></FONT>, window_look <I><FONT  color=991122 face=HELVETICA>look</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window_feel <I><FONT  color=991122 face=HELVETICA>feel</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>workspace</I></FONT> = <FONT  face=HELVETICA>B_CURRENT_WORKSPACE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates and returns a new BDirectWindow object.  This is functionally equivalent to the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> constructor, except the resulting BDirectWindow supports direct window operations.
+<P>
+You will probably want to set up a flag to keep track of whether or not the direct window's connection to the screen is viable.  In the constructor, you should set this flag (let's call it <B><TT>
+<A NAME="fConnectionDisabled"></A>fConnectionDisabled
+</TT></B>) to <B><TT>false</TT></B>, which indicates to both <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> and your drawing thread that the window is not in the process of being deconstructed.  The destructor would then set this flag to <B><TT>true</TT></B> before terminating the connection to avoid the unlikely possibility of the connection trying to restart while the BDirectWindow is being dismantled.
+<P>
+You'll also need other flags or semaphores (or benaphores) to manage the interaction between the BDirectWindow and your drawing thread.
+<P>
+See the sample code in &nbsp;<a href="#Using%20a%20Direct%20Window%20on%20page9">"Using a Direct Window" on page9</a> for an example.
+<P>
+<HR>
+<H3>
+<A NAME="~BDirectWindow()"></A>~BDirectWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BDirectWindow()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees all memory the BDirectWindow object allocated for itself.  You should never <B><TT>delete</TT></B> a BDirectWindow object; call its <B><TT><A HREF="WindowScreen.html#Quit()">Quit()</A></TT></B> or <B><TT><A HREF="../The%20Device%20Kit/Joystick.html#Close()">Close()</A></TT></B> function instead.
+<P>
+Your BDirectWindow destructor should begin by setting the <B><TT>
+<A NAME="fConnectionDisabled"></A>fConnectionDisabled
+</TT></B> flag to <B><TT>true</TT></B>, to prevent <B><TT><A HREF="#DirectConnected()">DirectConnected()</A> </TT></B>from attempting to reconnect to the direct window while it's being deconstructed.
+<P>
+Then you should call <B><TT><A HREF="WindowScreen.html#Hide()">Hide()</A> </TT></B>and <B><TT><A HREF="../The%20Interface%20Kit/ViewDrawing.html#Sync()">Sync()</A></TT></B> to force the direct window to disconnect direct access:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;MyDirectWindow::~BDirectWindow {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fConnectionDisabled = true;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hide();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sync();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* complete usual destruction here */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="DirectConnected()"></A>DirectConnected()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>DirectConnected(</TT></B></FONT>direct_buffer_info *<I><FONT  color=991122 face=HELVETICA>info</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook function is the core of BDirectWindow.  Your application should override this function to learn about the state of the graphics display onto which you're drawing, as well as to be informed of any changes that occur.
+<P>
+This function is also called to suspend and resume your direct access privileges.
+<P>
+Your code in this function should be as short as possible, because what your <B><TT>DirectConnected()</TT></B> function does can affect the performance of the entire system.  <B><TT>DirectConnected() </TT></B>should only handle the immediate task of dealing with changes in the direct drawing context, and shouldn't normally do any actual drawing&mdash;that's what your drawing thread is for.
+<P>
+If you have drawing that absolutely has to be done before you can safely return control to the application server (see the note below), you may do so, but your code should do the absolute minimum drawing necessary and leave everything else to the drawing thread.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>DirectConnected() </TT></B>should only return when it can guarantee to the application server that the request specified by <I><FONT  color=991122 face=HELVETICA>info</I></FONT> will be strictly obeyed.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The structure pointed to by <I><FONT  color=991122 face=HELVETICA>info</I></FONT> goes away after <B><TT>DirectConnected() </TT></B>returns, so you should cache the information that interests you.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If your <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> implementation doesn't handle a request within three seconds, the Application Server will intentionally crash your application under the assumption that it's deadlocked.  Be sure to handle requests as quickly as possible.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+See &nbsp;<a href="#Getting%20Connected%20(and%20Staying%20That%20Way)%20on%20page5">"Getting Connected (and Staying That Way)" on page5</a> for more information about the <B><TT><A HREF="#direct_buffer_info">direct_buffer_info</A></TT></B> structure.
+<P>
+<HR>
+<H3>
+<A NAME="GetClippingRegion()"></A>GetClippingRegion()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>GetClippingRegion(</TT></B></FONT><A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> *<I><FONT  color=991122 face=HELVETICA>region</I></FONT>, <A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>origin</I></FONT> = <FONT  face=HELVETICA>NULL<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A></TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets the specified <I><FONT  color=991122 face=HELVETICA>region</I></FONT> to match the current clipping region of the direct window.  If <I><FONT  color=991122 face=HELVETICA>origin</I></FONT> is specified, each point in the region is offset by the <I><FONT  color=991122 face=HELVETICA>origin</I></FONT>, resulting in a <A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> that's localized to your application's vision of where in space the origin is (relative to the origin of the screen's frame buffer).
+<P>
+Although the <B><TT><A HREF="#direct_buffer_info">direct_buffer_info</A></TT></B> structure contains the clipping region of a direct window, it's not in standard <A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> form.  This function is provided so you can obtain a standard <A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> if you need one.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <B><TT>GetClippingRegion()</TT></B> function can only be called from the <B><TT>DirectConnected()</TT></B> function; calling it from outside <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> will return invalid results.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If you need to cache the clipping region of your window and need a <A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> for clipping purposes, you could use the following code inside your <B><TT><A HREF="#DirectConnected()">DirectConnected()</A> </TT></B>function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BRegion rgn;
+&nbsp;&nbsp;&nbsp;GetClippingRegion(&amp;rgn);</PRE>
+<P>
+This serves a double purpose: it obtains the clipping region in <A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> form, and it returns a copy of the region that you can maintain locally.  However, it may be more efficient to copy the clipping region by hand, since the clipping rectangle list used by BDirectWindow uses integer numbers, while <A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> uses floating-point.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The clipping region was successfully returned.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  An error occurred while trying to obtain the clipping region.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="IsFullScreen()"></A>IsFullScreen()
+, 
+<A NAME="SetFullScreen()"></A>SetFullScreen()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>IsFullScreen(</TT></B></FONT>void<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A></TT></B> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetFullScreen(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>enable</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>IsFullScreen()</TT></B> returns <B><TT>true</TT></B> if the direct window is in full-screen exclusive mode, or <B><TT>false</TT></B> if it's in window mode.
+<P>
+The value returned by <B><TT>IsFullScreen() </TT></B>is indeterminate if a call to <B><TT>SetFullScreen()</TT></B> is in progress&mdash;if this is the case, you shouldn't rely on the resulting value.  Instead, it would be safer to maintain a state setting of your own and use that value.
+<P>
+<B><TT>SetFullScreen()</TT></B> enables full-screen exclusive mode if the <I><FONT  color=991122 face=HELVETICA>enable</I></FONT> flag is <B><TT>true</TT></B>.  To switch to window mode, pass <B><TT>false</TT></B>.  The <B><TT><A HREF="#SupportsWindowMode()">SupportsWindowMode()</A></TT></B> function can be used to determine whether or not the video card is capable of supporting window mode.  See &nbsp;<a href="#Window%20Mode%20vs.%20Full%20Screen%20Mode%20on%20page8">"Window Mode vs. Full Screen Mode" on page8</a> for a detailed explanation of the differences between these modes.
+<P>
+When your window is in full screen mode, it will always have the focus, and no other window can come in front of it.
+<P>
+<B><TT>SetFullScreen()</TT></B> can return any of the following result codes.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The mode was successfully changed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  An error occurred while trying to switch between full screen and window modes (for example, another window may already be in full-screen exclusive mode in the same workspace).
+<P>
+</UL>
+<P>
+<HR>
+<H3>SetFullScreen() see <A HREF="#IsFullScreen()">IsFullScreen()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SupportsWindowMode()"></A>SupportsWindowMode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static bool<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>SupportsWindowMode(</TT></B></FONT>screen_id <I><FONT  color=991122 face=HELVETICA>id</I></FONT> = <FONT  face=HELVETICA>B_MAIN_SCREEN_ID<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the specified screen supports window mode; if you require the ability to directly access the frame buffer of a window (rather than occupying the whole screen), you should call this function to be sure that the graphics hardware in the computer running your application supports it.  Because this is a static function, you don't have to construct a BDirectWindow object to call it:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if (BDirectWindow::SupportsWindowMode()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* do stuff here */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+In particular, window mode requires a graphics card with DMA support and a hardware cursor; older video cards may not be capable of supporting window mode.
+<P>
+If window mode isn't supported, but you still select window mode, <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> will never be called (so you'll never be authorized for direct frame buffer access).
+<P>
+Even if window mode isn't supported, you can still use BDirectWindow objects for full-screen direct access to the frame buffer, but it's recommended that you avoid direct video DMA or the use of parallel drawing threads that use both direct frame buffer access and <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> calls (because it's likely that such a graphics card won't handle the parallel access and freeze the PCI bus&mdash;and that would be bad).
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

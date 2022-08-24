@@ -1,0 +1,648 @@
+<HTML><HEAD><TITLE>The Support Kit: Functions and Macros</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Functions%20and%20Macros"></A>Functions and Macros
+</H1>
+<P>
+Library:  libbe.so
+<P>
+This section lists the Support Kit's general-purpose functions and macros.
+<P>
+<HR>
+<H3>add_system_beep_event()   see <A HREF="#beep()">beep()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="atomic_add()"></A>atomic_add()
+, 
+<A NAME="atomic_and()"></A>atomic_and()
+, 
+<A NAME="atomic_or()"></A>atomic_or()
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT>atomic_add(v</TT></B>int32 *<I><FONT  color=991122 face=HELVETICA>atomicVariable</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>addValue</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+<TR><TD>
+int32 <B><TT>atomic_and(v</TT></B>int32 *<I><FONT  color=991122 face=HELVETICA>atomicVariable</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>andValue</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+<TR><TD>
+int32 <B><TT>atomic_or(v</TT></B>int32 *<I><FONT  color=991122 face=HELVETICA>atomicVariable</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>orValue</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions perform the named operations (addition, bitwise <I>AND</I>, or bitwise <I>OR</I>) on the 32-bit value found in <I><FONT  color=991122 face=HELVETICA>atomicVariable</I></FONT>, thus:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;*atomicVariable += addValue
+&nbsp;&nbsp;&nbsp;*atomicVariable &amp;= andValue
+&nbsp;&nbsp;&nbsp;*atomicVariable |= orValue</PRE>
+<P>
+Each function returns the previous value of the <B><TT>vint32</TT></B> variable that <I><FONT  color=991122 face=HELVETICA>atomicVariable</I></FONT> points to (in other words, they each return the value that was in *<I><FONT  color=991122 face=HELVETICA>atomicVariable</I></FONT> before the operation was performed).
+<P>
+These functions are guaranteed to be <I>atomic</I>: if two threads attempt to access the same atomic variable at the same time (through these functions), one of the two threads will be made to wait until the other thread has completed the operation and updated the <I><FONT  color=991122 face=HELVETICA>atomicVariable</I></FONT> value.  
+<P>
+<HR>
+<H3>
+<A NAME="beep()"></A>beep()
+, 
+<A NAME="system_beep()"></A>system_beep()
+, 
+<A NAME="add_system_beep_event()"></A>add_system_beep_event()
+</H3>
+<P>
+Declared in:  be/support/Beep.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>beep(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>system_beep(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>eventName</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>add_system_beep_event(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>eventName</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = <FONT  face=HELVETICA>_BEEP_FLAGS</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#beep()">beep()</A></TT></B> produces the basic system beep.  This function engages the Media Server, but doesn't wait for the sound to play.  If it can't contact the server to play the beep, it returns <B><TT><A HREF="ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  If  it can make contact but can't get a satisfactory reply back from the server, it returns <B><TT><A HREF="ErrorCodes.html#B_BAD_REPLY">B_BAD_REPLY</A></TT></B>.  Otherwise, it returns <B><TT><A HREF="ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<B><TT><A HREF="#system_beep()">system_beep()</A></TT></B> plays the system beep configured for the event specified by the given <I><FONT  color=991122 face=HELVETICA>eventName</I></FONT>.
+<P>
+Applications can add new system beep events by calling <B><TT><A HREF="#add_system_beep_event()">add_system_beep_event()</A></TT></B>, passing the name to assign the event; the flags argument is currently unused and should be zero.  Once this has been done, the user can use the Sounds preference application to configure a sound for the event.
+<P>
+<B>See also:  <TT><A HREF="../The%20Media%20Kit/functions.html#play_sound()">play_sound()</A></TT></B> in the Media Kit 
+<P>
+<HR>
+<H3>cast_as()   see <A HREF="#class_name()">class_name()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="class_name()"></A>class_name()
+, 
+<A NAME="is_instance_of()"></A>is_instance_of()
+, 
+<A NAME="is_kind_of()"></A>is_kind_of()
+, 
+<A NAME="cast_as()"></A>cast_as()
+</H3>
+<P>
+Declared in:  be/support/ClassInfo.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>class_name(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>is_instance_of(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>object</I></FONT>, <I><FONT  color=991122 face=HELVETICA>class</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>is_kind_of(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>object</I></FONT>, <I><FONT  color=991122 face=HELVETICA>class</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<I><FONT  color=991122 face=HELVETICA>class</I></FONT> *<B><TT><FONT  color=000022 size=+1>cast_as(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>object</I></FONT>, <I><FONT  color=991122 face=HELVETICA>class</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These macros deliver information about an object's type, including the name of its class and its standing in the class hierarchy.  In each case, the <I><FONT  color=991122 face=HELVETICA>object</I></FONT> argument is a pointer to an object; it can be an object of any type (it doesn't have to descend from any particular class).  The <I><FONT  color=991122 face=HELVETICA>class</I></FONT> argument is a class name&mdash;<I>not</I> a string such as "BApplication", but the type name itself (literally <B><TT><A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A></TT></B>).
+<P>
+<B><TT><A HREF="#class_name()">class_name()</A></TT></B> returns a pointer to the name of <I><FONT  color=991122 face=HELVETICA>object</I></FONT>'s class.
+<P>
+<B><TT><A HREF="#is_instance_of()">is_instance_of()</A></TT></B> returns <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>object</I></FONT> is an instance of <I><FONT  color=991122 face=HELVETICA>class</I></FONT>, and <B><TT>false</TT></B> otherwise.
+<P>
+<B><TT><A HREF="#is_kind_of()">is_kind_of()</A></TT></B> returns <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>object</I></FONT> is an instance of <I><FONT  color=991122 face=HELVETICA>class</I></FONT> or an instance of any class that inherits from <I><FONT  color=991122 face=HELVETICA>class</I></FONT>, and <B><TT>false</TT></B> if not.
+<P>
+<B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> returns a pointer to <I><FONT  color=991122 face=HELVETICA>object</I></FONT> cast as a pointer to an object of <I><FONT  color=991122 face=HELVETICA>class</I></FONT>, but only if <I><FONT  color=991122 face=HELVETICA>object</I></FONT> is a kind of <I><FONT  color=991122 face=HELVETICA>class</I></FONT>.  If not, <I><FONT  color=991122 face=HELVETICA>object</I></FONT> cannot be safely cast as a pointer to <I><FONT  color=991122 face=HELVETICA>class</I></FONT>, so <B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+For example, given this slice of the inheritance hierarchy from the Interface Kit,  
+<P>
+<IMG SRC="art/Functions1.gif" ALIGN="bottom">
+<P>
+and code like this that creates an instance of the <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> class,
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BButton *anObject = new BPictureButton(...);</PRE>
+<P>
+the first three macros would work as follows:
+<P>
+<UL>
+<LI>The <B><TT><A HREF="#class_name()">class_name()</A></TT></B> macro would return a pointer to the string "BPictureButton":
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *s = class_name(anObject);</PRE>
+<P>
+<UL>
+<LI>The <B><TT><A HREF="#is_instance_of()">is_instance_of()</A></TT></B> macro would return <B><TT>true</TT></B> only if the <I><FONT  color=991122 face=HELVETICA>class</I></FONT> passed to it is BPictureButton.  In the following example, it would return <B><TT>false</TT></B>, and the message would not be printed.  Even though <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> inherits from <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A>, the object is an instance of the <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> class, not BView:  
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( is_instance_of(anObject, BView) )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    printf("The object is an instance of BView.n");</PRE>
+<P>
+<UL>
+<LI>The <B><TT><A HREF="#is_kind_of()">is_kind_of()</A></TT></B> macro would return <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>class</I></FONT> is <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> or any class that <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> inherits from.  In the following example, it would return <B><TT>true</TT></B> and the message would be printed.  A <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> is a kind of BView:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( is_kind_of(anObject, BView) )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    printf("The object is a kind of BView.n");</PRE>
+<P>
+Note that class names are not passed as strings, but <B><TT><A HREF="#class_name()">class_name()</A></TT></B> returns the name as a string.
+<P>
+The <B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> macro is most useful when you want to treat a generic object as an instance of a more specific class.  Suppose, for example, that the <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> mentioned above becomes the focus view for a window and you retrieve it by calling the BWindow's <B><TT><A HREF="../The%20Interface%20Kit/Window.html#CurrentFocus()">CurrentFocus()</A></TT></B> function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BView *focus = myWindow->CurrentFocus();</PRE>
+<P>
+Since the focus view might be any type of view, <B><TT><A HREF="../The%20Interface%20Kit/Window.html#CurrentFocus()">CurrentFocus()</A></TT></B> returns a pointer to an object of the base <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> class.  Unless you know otherwise, you cannot treat the object as anything more specific than a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> instance.  However, you can ask the object if it's a kind of <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> and, if it is, cast it to the <A HREF="../The%20Interface%20Kit/PictureButton.html#BPictureButton">BPictureButton</A> type:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if ( is_kind_of(focus, BPictureButton) ) {
+&nbsp;&nbsp;&nbsp;    BPictureButton *picbutton = (BPictureButton *)focus);
+&nbsp;&nbsp;&nbsp;    if ( picbutton->Behavior() == B_TWO_STATE_BUTTON )
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> macro does the same thing, but more efficiently. It casts the object to the target class if it is safe to do so&mdash;if the <I><FONT  color=991122 face=HELVETICA>object</I></FONT> is an instance of a class that inherits from the target <I><FONT  color=991122 face=HELVETICA>class</I></FONT> or an instance of the target <I><FONT  color=991122 face=HELVETICA>class</I></FONT> itself&mdash;and returns <B><TT>NULL</TT></B> if not.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPictureButton *picbutton = cast_as(focus, BPictureButton);
+&nbsp;&nbsp;&nbsp;if ( picbutton ) {
+&nbsp;&nbsp;&nbsp;    if ( picbutton->Behavior() == B_TWO_STATE_BUTTON )
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> is often used in place of the cast operator to assure code safety even where an expected result is anticipated and there's no need for an intermediate variable (like <I>focus</I>):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPictureButton *picbutton = 
+&nbsp;&nbsp;&nbsp;             cast_as(myWindow->CurrentFocus(), BPictureButton);
+&nbsp;&nbsp;&nbsp;if ( picbutton ) {
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> and <B><TT><A HREF="#is_kind_of()">is_kind_of()</A></TT></B> macros work alike; they're both based on the C++ <B><TT>dynamic_cast</TT></B> operator and they reflect its behavior.  To describe that behavior more precisely, let's adopt the following shorthand terms for an object's type:
+<P>
+<UL>
+<LI>The <I>real type</I> of an object is its type on construction.   For example, if you construct an instance of the <A HREF="../The%20Interface%20Kit/Button.html#BButton">BButton</A> class, as shown above, <A HREF="../The%20Interface%20Kit/Button.html#BButton">BButton</A> is its real type.
+<P>
+<LI>The <I>declared type</I> of an object is the class label it currently bears.  For example, <B><TT><A HREF="../The%20Interface%20Kit/Window.html#CurrentFocus()">CurrentFocus()</A></TT></B> returns an object whose declared class is BView.
+<P>
+</UL>
+<P>
+Either of these types can be compared to a <I>target type</I>, the type you want to cast the object to or test it against.  The target type is the <I><FONT  color=991122 face=HELVETICA>class</I></FONT> argument passed to the macros.
+<P>
+In the best of all possible worlds, you'd want to ignore the declared type of an object and compare only the real type to the target type.  However, the <B><TT>dynamic_cast</TT></B> operator&mdash;and by extension <B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> and <B><TT><A HREF="#is_kind_of()">is_kind_of()</A></TT></B>&mdash;considers the real type only if it has to.  It first compares the object's declared type to the target type.  It assumes that the declared type is accurate (that the object is truly the kind of object it's represented to be) and it summarily handles the obvious cases:  If the target type is the same as the declared type or if it's a class that the declared type inherits from, the operation will succeed.  Consequently, <B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> will cast the object to the target type and <B><TT><A HREF="#is_kind_of()">is_kind_of()</A></TT></B> will return <B><TT>true</TT></B>, regardless of the object's real type.  In other words, if the target class is above or at the same level as the declared class in the inheritance hierarchy, the real class is ignored.
+<P>
+However, if the declared type doesn't match or derive from the target type, <B><TT>dynamic_cast</TT></B> and the macros look at the real type:  If the target class is identical to the real type, or if it's a class that the real type derives from, the operation succeeds.  If not, it fails.
+<P>
+Therefore, the <B><TT><A HREF="#is_kind_of()">is_kind_of()</A></TT></B> and <B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> macros will produce reliable results as long as objects are not arbitrarily cast to types that may not be accurate.  For example, you should not cast an object to a target type and then attempt to use <B><TT><A HREF="#is_kind_of()">is_kind_of()</A></TT></B> to determine if the cast was correct.  This code is unreliable:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPictureButton *picbutton = 
+&nbsp;&nbsp;&nbsp;                    (BPictureButton *)myWindow->CurrentFocus();
+&nbsp;&nbsp;&nbsp;if ( is_kind_of(picbutton, BPictureButton) ) {
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+In this example, <B><TT><A HREF="#is_kind_of()">is_kind_of()</A></TT></B> will always return <B><TT>true</TT></B>, no matter what the class of the current focus view.  The general rule is that the declared type of an object must <I>always</I> be accurate; an object should be typed only to its own class or to a class that it inherits from.  The macros cannot rescue you from an inaccurate cast.
+<P>
+<HR>
+<H3>
+<A NAME="convert_to_utf8()"></A>convert_to_utf8()
+, 
+<A NAME="convert_from_utf8()"></A>convert_from_utf8()
+</H3>
+<P>
+Declared in:  be/support/UTF8.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>convert_to_utf8(</TT></B></FONT>uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>sourceEncoding</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>sourceLength</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>destinationLength</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>state</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <I><FONT  color=991122 face=HELVETICA>substitute</I></FONT> = <FONT  face=HELVETICA>B_SUBSTITUTE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>convert_from_utf8(</TT></B></FONT>uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>destinationEncoding</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>sourceLength</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>destinationLength</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>state</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <I><FONT  color=991122 face=HELVETICA>substitute</I></FONT> = <FONT  face=HELVETICA>B_SUBSTITUTE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions convert text to and from the Unicode UTF-8 encoding that's standard for the Be operating system and is assumed in most contexts.  UTF-8 is described under "Character Encoding" in "Responding to the User" section of <B>The Interface Kit</B> chapter.
+<P>
+<B><TT><A HREF="#convert_to_utf8()">convert_to_utf8()</A></TT></B> permits you to take text that's encoded according to another standard and convert it to UTF-8 for the BeOS.   <B><TT><A HREF="#convert_from_utf8()">convert_from_utf8()</A></TT></B> lets you convert text from UTF-8 to other encodings for other venues (for example, to the encodings commonly used for displaying text on the World Wide Web).
+<P>
+The first argument passed to these functions names the other encoding&mdash;the source encoding for <B><TT><A HREF="#convert_to_utf8()">convert_to_utf8()</A></TT></B> and the destination encoding for <B><TT><A HREF="#convert_from_utf8()">convert_from_utf8()</A></TT></B>.  It can be any of the<B><TT> </TT></B>following constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_ISO1_CONVERSION">B_ISO1_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO2_CONVERSION">B_ISO2_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO3_CONVERSION">B_ISO3_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO4_CONVERSION">B_ISO4_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO5_CONVERSION">B_ISO5_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO6_CONVERSION">B_ISO6_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO7_CONVERSION">B_ISO7_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO8_CONVERSION">B_ISO8_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO9_CONVERSION">B_ISO9_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_ISO10_CONVERSION">B_ISO10_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_MAC_ROMAN_CONVERSION">B_MAC_ROMAN_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_SJIS_CONVERSION">B_SJIS_CONVERSION</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_EUC_CONVERSION">B_EUC_CONVERSION</A></TD>
+<TR>
+<TD>B_JIS_CONVERSION</TD>
+<TR>
+<TD>B_MS_WINDOWS_CONVERSION</TD>
+<TR>
+<TD>B_UNICODE_CONVERSION</TD>
+<TR>
+<TD>B_KOI8R_CONVERSION</TD>
+<TR>
+<TD>B_MS_WINDOWS_1251_CONVERSION</TD>
+<TR>
+<TD>B_MS_DOS_866_CONVERSION</TD>
+</TABLE></TT></B>
+<P>
+Most of these constants designate encoding schemes that are supported by the <A HREF="../The%20Interface%20Kit/Font.html#BFont">BFont</A> class in the Interface Kit and its <B><TT><A HREF="../The%20Interface%20Kit/Font.html#SetEncoding()">SetEncoding()</A></TT></B> function.  They parallel the constants that are passed to that function.  For example, <B><TT><A HREF="misc.html#B_ISO1_CONVERSION">B_ISO1_CONVERSION</A></TT></B> (for these functions) and <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_ISO_8859_1">B_ISO_8859_1</A></TT></B> (for <B><TT><A HREF="../The%20Interface%20Kit/Font.html#SetEncoding()">SetEncoding()</A></TT></B>) both designate the extended ASCII encoding defined in part one of ISO 8859 (Latin 1).  Similarly, <B><TT><A HREF="misc.html#B_ISO2_CONVERSION">B_ISO2_CONVERSION</A></TT></B> matches <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_ISO_8859_2">B_ISO_8859_2</A></TT></B>, <B><TT><A HREF="misc.html#B_ISO3_CONVERSION">B_ISO3_CONVERSION</A></TT></B> matches <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_ISO_8859_3">B_ISO_8859_3</A></TT></B>, and so on.  <B><TT><A HREF="misc.html#B_MAC_ROMAN_CONVERSION">B_MAC_ROMAN_CONVERSION</A></TT></B> matches <B><TT>B_MACINTOSH_ROMAN</TT></B>.  (<B><TT><A HREF="misc.html#B_ISO10_CONVERSION">B_ISO10_CONVERSION</A></TT></B> is not implemented for this release.)
+<P>
+<B><TT><A HREF="misc.html#B_SJIS_CONVERSION">B_SJIS_CONVERSION</A></TT></B> stands for the Shift-JIS (Japanese Industrial Standard) encoding of Japanese and <B><TT><A HREF="misc.html#B_EUC_CONVERSION">B_EUC_CONVERSION</A></TT></B> stands for the EUC (Extended UNIX Code) encoding of Japanese in packed format.
+<P>
+Both functions convert up to <I><FONT  color=991122 face=HELVETICA>sourceLength</I></FONT> bytes of text from the <I><FONT  color=991122 face=HELVETICA>source</I></FONT> buffer.  They write up to <I><FONT  color=991122 face=HELVETICA>destinationLength</I></FONT> bytes of converted text into the <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> buffer.  The amount of text that they actually convert is therefore constrained both by the amount of source text (<I><FONT  color=991122 face=HELVETICA>sourceLength</I></FONT>) and the capacity of the output buffer (<I><FONT  color=991122 face=HELVETICA>destinationLength</I></FONT>).  Neither function stops at a null terminator ('0') when reading the input buffer nor adds one to the text in the output buffer; they depend only on <I><FONT  color=991122 face=HELVETICA>sourceLength</I></FONT> and <I><FONT  color=991122 face=HELVETICA>destinationLength</I></FONT> for guidance.
+<P>
+When finished, these functions modify the variable that <I><FONT  color=991122 face=HELVETICA>sourceLength</I></FONT> refers to so that it reports the number of bytes of source text actually converted.  They also modify the variable that <I><FONT  color=991122 face=HELVETICA>destinationLength</I></FONT> refers to so that it reports the number of bytes actually written to the destination buffer.  Neither function will stop in the middle of a multibyte source character; they're guaranteed to convert only full characters.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>state</I></FONT> argument serves as a cookie that lets you use multiple calls to these functions to convert a batch of text (if, for example, the text is stored in multiple buffers).  Pass 0 for the first buffer, and pass the value returned in <I><FONT  color=991122 face=HELVETICA>state</I></FONT> to the next call  to  continue processing the same text; this will cause the conversion to continue where it left off.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* buffer is a pointer to a small source buffer */
+&nbsp;&nbsp;&nbsp;/* destBuffer is a pointer to a small destination buffer */
+&nbsp;&nbsp;&nbsp;/* destBufferLen is the size of the destination buffer in bytes */
+&nbsp;&nbsp;&nbsp;int32 state = 0;
+&nbsp;&nbsp;&nbsp;int32 bufferLen;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while ((bufferLen = GetNextBuffer(file, buffer))) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;convert_to_utf8(buffer, &amp;bufferLen, destBuffer, &amp;destBufferLen, &amp;state);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* do stuff with the buffer in destBuffer, which has the converted text */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+In this example, text is fetched using a call to a function called <B><TT>GetNextBuffer(),</TT></B>whose implementation depends on the application's needs.  Each buffer is converted, and the converted text is stored in <B><TT>destBuffer</TT></B>, which can then be used by the application.
+<P>
+If either function encounters a character in the source that the destination format doesn't allow, it puts the character specified by the <I><FONT  color=991122 face=HELVETICA>substitute</I></FONT> argument (or a question mark ('?') if <I><FONT  color=991122 face=HELVETICA>substitute</I></FONT> isn't specified) in its place in the output text.  This is much more likely to occur when converting from UTF-8 than when converting to it, since Unicode represents a very large number of characters.
+<P>
+If successful in converting at least one source character, both functions return <B><TT><A HREF="ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If unsuccessful, for example, if they don't recognize the source or destination encoding, they return <B><TT><A HREF="ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  If there's an error, you should not trust any of the output arguments.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions are found in the <B>libtextencoding.so</B> library.  If you use them, be sure to include this library file.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="../The%20Interface%20Kit/Font.html#SetEncoding()">BFont::SetEncoding()</A></TT></B>, "Character Encoding" in the "Responding to the User" section of the <B>The Interface Kit</B> chapter
+<P>
+<HR>
+<H3>
+<A NAME="find_instantiation_func()"></A>find_instantiation_func()
+</H3>
+<P>
+Declared in:  be/support/Archivable.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+instantiation_func <B><TT><FONT  color=000022 size=+1>find_instantiation_func(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>className</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+instantiation_func <B><TT><FONT  color=000022 size=+1>find_instantiation_func(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B> function that can create instances of the <I><FONT  color=991122 face=HELVETICA>className</I></FONT> class, or <B><TT>NULL</TT></B> if the function can't be found.  If passed a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, <B><TT><A HREF="#find_instantiation_func()">find_instantiation_func()</A></TT></B> gets the name of the class from a <B><TT><A HREF="misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B> field called "class" in the BMessage.
+<P>
+The <B><TT><A HREF="misc.html#instantiation_func">instantiation_func</A></TT></B> type is defined as follows:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Archivable.html#BArchivable">BArchivable</A> *(*<B><TT><A HREF="misc.html#instantiation_func">instantiation_func</A></TT></B>) <B><TT>(</TT></B><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A></TT></B> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+In other words, the function has the same syntax as the <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B> function declared in the BArachivable class and replicated in derived classes (with class-specific return values).
+<P>
+The function that's returned can be called like any C function; you don't need the class name or another object of the class.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;instantiation_func func;
+&nbsp;&nbsp;&nbsp;if ( func = find_instantiation_func(arhiveMessage) ) {
+&nbsp;&nbsp;&nbsp;    BArchivable *object = func(archiveMessage);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#instantiate_object()">instantiate_object()</A></TT></B> will do this work for you.
+<P>
+<B>See also:  <TT><A HREF="Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="#instantiate_object()">instantiate_object()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="instantiate_object()"></A>instantiate_object()
+</H3>
+<P>
+Declared in:  be/support/Archivable.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>instantiate_object(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates and returns a new instance of an archived object, or returns <B><TT>NULL</TT></B> if the object can't be constructed.  The object is created by calling the <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B> function of...
+<P>
+<B>1. </B>&nbsp;&nbsp;&nbsp;...the class that was last added to the "class" field (an array of class names) of the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> BMessage.  This will be the "most derived" class in the array. 
+<P>
+<B>2. </B>&nbsp;&nbsp;&nbsp;If the named class isn't recognized by the app (or doesn't define <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B>), the function tries to load the add-on that's identified (by signature) in <I>archive</I>'s "add_on" field.  This add-on should contain the code for the class. 
+<P>
+<B>3. </B>&nbsp;&nbsp;&nbsp;If the add-on method doesn't work, <B><TT><A HREF="#instantiate_object()">instantiate_object()</A></TT></B> tries the next class in the  "class" array, and so works its way up the class hierarchy.
+<P>
+<B>4. </B>&nbsp;&nbsp;&nbsp;If the appropriate class is never found, the function returns <B><TT>NULL</TT></B>.
+<P>
+When successful, <B><TT><A HREF="#instantiate_object()">instantiate_object()</A></TT></B> returns the object that <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B> created, but typed to the base <A HREF="Archivable.html#BArchivable">BArchivable</A> class.  The <B><TT><A HREF="#cast_as()">cast_as()</A></TT></B> macro can type it to a the proper class.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BArchivable *base = instantiate_object(archive);
+&nbsp;&nbsp;&nbsp;if ( base ) {
+&nbsp;&nbsp;&nbsp;    TheClass *object = cast_as(base, TheClass);
+&nbsp;&nbsp;&nbsp;    if ( object ) {
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B>See also:  </B>the <A HREF="Archivable.html#BArchivable">BArchivable</A> class, <B><TT><A HREF="#find_instantiation_func()">find_instantiation_func()</A></TT></B> 
+<P>
+<HR>
+<H3>is_instance_of()   see <A HREF="#class_name()">class_name()</A></H3>
+<P>
+<HR>
+<H3>is_kind_of()   see <A HREF="#class_name()">class_name()</A></H3>
+<P>
+<HR>
+<H3>is_type_swapped()   see <A HREF="#swap_data()">swap_data()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="swap_data()"></A>swap_data()
+, 
+<A NAME="is_type_swapped()"></A>is_type_swapped()
+</H3>
+<P>
+Declared in:  be/support/ByteSwap.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>swap_data(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, swap_action <I><FONT  color=991122 face=HELVETICA>action</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>is_type_swapped(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>swap_data</TT></B> is a general byte swapping function, converting <I><FONT  color=991122 face=HELVETICA>data</I></FONT> of type <I><FONT  color=991122 face=HELVETICA>type</I></FONT> and converting its endianness according to <I><FONT  color=991122 face=HELVETICA>action</I></FONT> (defined in <a href="misc.html#Byte%20Swapping%20Constants">"Byte Swapping Constants"</a>).  The <I><FONT  color=991122 face=HELVETICA>length</I></FONT> field can be used to specify an array of items to be converted.  For example, you can convert an array of BMessengers from little endian to the host endianness:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessenger messengers[10];
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;swap_data(B_MESSENGER_TYPE, messengers, 10*sizeof(BMessengers)
+&nbsp;&nbsp;&nbsp;          B_SWAP_LENDIAN_TO_HOST);</PRE>
+<P>
+The function can swap most data types with type constants defined in <B>&lt;be/support/TypeConstants.h></B>.  It returns <B><TT>B_OK</TT></B> on success and <B><TT>B_BAD_VALUE</TT></B> on failure.
+<P>
+<B><TT>is_type_swapped</TT></B> takes a type code and determines whether or not it has been swapped.  This only works for types defined in <B>&lt;be/support/TypeConstants.h></B>.  It returns <B><TT>true</TT></B> if the type code is in the host's native endianness and <B><TT>false</TT></B> otherwise.
+<P>
+<B>See also:  </B><a href="misc.html#Byte%20Swapping%20Constants">"Byte Swapping Constants"</a>
+<P>
+<HR>
+<H3>
+<A NAME="min()"></A>min()
+, 
+<A NAME="max()"></A>max()
+, 
+<A NAME="min_c()"></A>min_c()
+, 
+<A NAME="max_c()"></A>max_c()
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>min(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>a</I></FONT>, <I><FONT  color=991122 face=HELVETICA>b</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>min_c(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>a</I></FONT>, <I><FONT  color=991122 face=HELVETICA>b</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>max(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>a</I></FONT>, <I><FONT  color=991122 face=HELVETICA>b</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>max_c(</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>a</I></FONT>, <I><FONT  color=991122 face=HELVETICA>b</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These macros compare two integers or floating-point numbers.  <B><TT><A HREF="#min()">min()</A></TT></B> and <B><TT><A HREF="#min_c()">min_c()</A></TT></B> return the lesser of the two (or <I><FONT  color=991122 face=HELVETICA>b</I></FONT> if they're equal); <B><TT><A HREF="#max()">max()</A></TT></B> and <B><TT><A HREF="#max_c()">max_c()</A></TT></B> return the greater of the two (or <I><FONT  color=991122 face=HELVETICA>a</I></FONT> if they're equal).  <B><TT><A HREF="#min()">min()</A></TT></B> and <B><TT><A HREF="#max()">max()</A></TT></B> can only be used in straight C programs.  <B><TT><A HREF="#min_c()">min_c()</A></TT></B> and <B><TT><A HREF="#max_c()">max_c()</A></TT></B> are defined for C <I>and</I> C++.
+<P>
+<HR>
+<H3>system_beep()   see <A HREF="#beep()">beep()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="validate_instantiation()"></A>validate_instantiation()
+</H3>
+<P>
+Declared in:  be/support/Archivable.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>validate_instantiation(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>className</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> contains data for an object belonging to the <I><FONT  color=991122 face=HELVETICA>className</I></FONT> class, and <B><TT>false</TT></B> if not.  The determination is made by looking for the class name in a "class" array in the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  If the class name appears anywhere in the array, this function returns <B><TT>true</TT></B>.  If not, it returns <B><TT>false</TT></B>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

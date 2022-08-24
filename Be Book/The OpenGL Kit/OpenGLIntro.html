@@ -1,0 +1,87 @@
+<HTML><HEAD><TITLE>The OpenGL Kit: The OpenGL Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The OpenGL Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20OpenGL%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The OpenGL Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20OpenGL%20Kit"></A>The OpenGL Kit
+</H1>
+<P>
+The OpenGL Kit provides an interface between your BeOS application and the OpenGL graphics library, which is provided with BeOS.  The one class in the OpenGL Kit, <A HREF="GLView.html#BGLView">BGLView</A>, lets you display graphics rendered using OpenGL on a computer running the BeOS.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Before Release 4.5, the OpenGL Kit also had a BGLScreen class.  BGLScreen functionality has been subsumed by BGLView.  Old BGLScreen code will still run, but new OpenGL Kit code must use <A HREF="GLView.html#BGLView">BGLView</A> objects only.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The <A HREF="GLView.html#BGLView">BGLView</A> class is used to create a view within a window that contains OpenGL-rendered data.  Derived from <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A>, it adds functions for locking and unlocking the OpenGL context associated with the view, as well as for copying pixel data into and out of the graphics buffer, and swapping the front and back buffers.
+<P>
+If you want to use OpenGL graphics in a <A HREF="../The%20Game%20Kit/DirectWindow.html#BDirectWindow">BDirectWindow</A>, create your <A HREF="../The%20Game%20Kit/DirectWindow.html#BDirectWindow">BDirectWindow</A> and attach a <A HREF="GLView.html#BGLView">BGLView</A> to it.
+<P>
+<HR>
+<H3>
+<A NAME="OpenGL%20On%20BeOS"></A>OpenGL On BeOS
+</H3>
+<P>
+BeOS has included an OpenGL implementation since the first Preview Release for PowerPC processors.  This implementation of OpenGL is complete, and GLU is supported as well.  The optional  AUX and GLUT libraries, however, aren't supported at this time.
+<P>
+Also, the current implementation of OpenGL on BeOS supports only 32-bit graphic buffers.  Your <A HREF="GLView.html#BGLView">BGLView</A> or BGLScreen can be in any graphics mode you want, but the graphics buffer offscreen is always 32-bit.
+<P>
+Complete descriptions of the features and use of OpenGL are beyond the scope of this book; however, you can get full documentation of OpenGL as well as sample code at the OpenGL web site at http://www.opengl.org.
+<P>
+There are also some sample OpenGL programs that have already been ported to BeOS available for download on the Be web site; visit http://www.be.com/developers/topics/opengl.html.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The OpenGL Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20OpenGL%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The OpenGL Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

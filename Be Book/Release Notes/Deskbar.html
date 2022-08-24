@@ -1,0 +1,127 @@
+<HTML><HEAD><TITLE>Release Notes: Deskbar</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Deskbar"></A>Deskbar
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/be_apps/Deskbar/Deskbar.h">be/be_apps/Deskbar/Deskbar.h</A>
+<P>
+There's a new system for adding items to <B>Deskbar</B>'s shelf.  Instead of using "live" <A HREF="InterfaceKit.html#BView">BView</A> objects, you create an add-on that implements the <B>Deskbar</B> item-instantiation function, and then pass a pointer to the add-on to <B><TT><A HREF="../Deskbar/Deskbar.html#AddItem()">BDeskbar::AddItem()</A></TT></B>.
+<P>
+An advantage of the add-on system is that <B>Deskbar</B> items are now persistent across boots.  
+<P>
+<HR>
+<H3>
+<A NAME="instantiate_deskbar_item()"></A>instantiate_deskbar_item()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="InterfaceKit.html#BView">BView</A> *</TT></B><B><TT><FONT  color=000022 size=+1>instantiate_deskbar_item(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+In Beta 1, this function is called <B><TT>instantiate_deskbar_addon()</TT></B>.  The name will be changed in the next Beta.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+This is the deskbar-item instantiation function that you implement in an add-on.  The function should return a <A HREF="InterfaceKit.html#BView">BView</A> object that knows how to describe itself in an archive.  The add-on that contains this function doesn't have to live in a particular directory.  
+<P>
+<A NAME="17075:%20funcName:%20AddItem()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="AddItem()"></A>AddItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>AddItem(entry_ref *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>addon</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>*id</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>AddItem(<A HREF="InterfaceKit.html#BView">BView</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>view</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>*id</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT><I><FONT  color=008844 face=HELVETICA>deprecated
+<P>
+</I></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#AddItem()">AddItem()</A></TT></B> puts a new item on the <B>Deskbar</B>'s shelf.  To create the new item, <B>Deskbar</B> loads <I><FONT  color=991122 face=HELVETICA>addon</I></FONT> and calls the <B><TT><A HREF="#instantiate_deskbar_item()">instantiate_deskbar_item()</A></TT></B> function that should be implemented therein.  The <I><FONT  color=991122 face=HELVETICA>id</I></FONT> argument, if supplied, is set to the unique id number that <B>Deskbar</B> generates for the new item.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

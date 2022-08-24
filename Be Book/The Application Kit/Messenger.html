@@ -1,0 +1,507 @@
+<HTML><HEAD><TITLE>The Application Kit: BMessenger</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMessenger"></A>BMessenger
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Messenger.h">be/app/Messenger.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Stack or constructor
+<P>
+<H6><A HREF="Messenger.summary.html"><i>Summary</i></A></H6>
+<P>
+A BMessenger represents and sends messages to a <I>message target</I>, where the target is a <A HREF="Looper.html#BLooper">BLooper</A> and, optionally, a specific <A HREF="Handler.html#BHandler">BHandler</A> within that looper.  The target can live in the same application as the BMessenger (a <I>local target</I>), or it can live in some other application (a <I>remote target</I>).
+<P>
+BMessenger's most significant function is <B><TT><A HREF="#SendMessage()">SendMessage()</A></TT></B>, which sends its argument <A HREF="Message.html#BMessage">BMessage</A> to the target.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+For a local target, <B><TT><A HREF="#SendMessage()">SendMessage()</A></TT></B> is roughly equivalent, in terms of efficiency, to posting a message directly to the BMessenger's target (i.e <B><TT>BLooper::PostMessage()</TT></B>).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The global <B><TT><A HREF="Application.html#be_app_messenger">be_app_messenger</A></TT></B> BMessenger pointer, which targets <B><TT><A HREF="Application.html#be_app">be_app</A></TT></B>'s main message loop, is automatically initialized for you when you create your <A HREF="Application.html#BApplication">BApplication</A> object.  You can use it wherever BMessengers are called for.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMessenger()"></A>BMessenger()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessenger(</TT></B></FONT>const&nbsp;<A HREF="Handler.html#BHandler">BHandler</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>handler</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;<A HREF="Looper.html#BLooper">BLooper</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>looper</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t&nbsp;*<I><FONT  color=991122 face=HELVETICA>error</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessenger(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id&nbsp;<I><FONT  color=991122 face=HELVETICA>team</I></FONT>&nbsp;=&nbsp;&ndash;1, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t&nbsp;*<I><FONT  color=991122 face=HELVETICA>error</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessenger(</TT></B></FONT>const BMessenger &amp;<I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessenger(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BMessenger and sets its target to a local <I><FONT  color=991122 face=HELVETICA>looper</I></FONT>/<I><FONT  color=991122 face=HELVETICA>handler</I></FONT>, to the (running) application identified by <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> or <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, or to the target of some other <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT>. 
+<P>
+<UL>
+<LI><B>Looper/handler</B>.  To target a looper, supply a <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> and pass a <B><TT>NULL</TT></B> <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>.  When the messenger sends a message, the message will be handled by <I><FONT  color=991122 face=HELVETICA>looper</I></FONT>'s preferred handler.  If you want the message to be sent to a specific handler within a looper, supply a <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> and pass a <B><TT>NULL</TT></B> <I><FONT  color=991122 face=HELVETICA>looper. </I></FONT> The handler must already be attached to a looper, and can't switch loopers after this BMessenger is constructed.
+<P>
+<LI><B>Signature or team</B>.  If you supply a <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> but leave <I><FONT  color=991122 face=HELVETICA>team</I></FONT> as &ndash;1, the messenger targets an app with that signature.  (The app must already be running; in the case of multiple instances of a running app, the exact instance is indeterminate)  If you supply a <I><FONT  color=991122 face=HELVETICA>team</I></FONT> but no <I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, you target exactly that team, regardless of signature.  By supplying both a <I><FONT  color=991122 face=HELVETICA>team</I></FONT> and a <I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, you can specify a specific instance of an app.  In this case, <I><FONT  color=991122 face=HELVETICA>team</I></FONT> must be an app that has the proper <I><FONT  color=991122 face=HELVETICA>signature</I></FONT>.
+<P>
+Messages sent to a remote target are received and handled by the remote application's <A HREF="Application.html#BApplication">BApplication</A> object.
+<P>
+</UL>
+<P>
+The BMessenger doesn't own its target.
+<P>
+<b>RETURN CODES</b>
+<P>
+The constructor places an error code in <I><FONT  color=991122 face=HELVETICA>error</I></FONT> (if provided).  
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The target was properly set.
+<P>
+</UL>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The application identified by <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> couldn't be found, or both <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> and <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> are invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TEAM_ID">B_BAD_TEAM_ID</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>team</I></FONT>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MISMATCHED_VALUES">B_MISMATCHED_VALUES</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>team</I></FONT> isn't a <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> app, or <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> is associated with a <A HREF="Looper.html#BLooper">BLooper</A> other than <I><FONT  color=991122 face=HELVETICA>looper</I></FONT>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_HANDLER">B_BAD_HANDLER</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> isn't associated with a <A HREF="Looper.html#BLooper">BLooper</A> (
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="~BMessenger()"></A>~BMessenger()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BMessenger()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the BMessenger; the target isn't affected.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>IsTargetLocal()   see <A HREF="#Target()">Target()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsValid()"></A>IsValid()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsValid(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the target looper, whether local or remote, still exists.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function doesn't tell you whether the looper is actually ready to receive messages, or whether the handler (if it was specified in the constructor) exists.  In other words, a valid BMessenger is no guarantee that a message will actually get to the target.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="LockTarget()"></A>LockTarget()
+, 
+<A NAME="LockTargetWithTimeout()"></A>LockTargetWithTimeout()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>LockTarget(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>LockTargetWithTimeout(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/importantBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions apply to local targets only.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+These functions attempt to lock the target looper in the manner of the similarly named <A HREF="Looper.html#BLooper">BLooper</A> functions (see <B><TT>BLooper::LockTarget()</TT></B>).  In addition to the error codes reported there, these functions return <B><TT>false</TT></B> and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> (respectively) if the target isn't local, or if the looper is otherwise invalid.
+<P>
+<HR>
+<H3>
+<A NAME="SendMessage()"></A>SendMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendMessage(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>reply</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;<I><FONT  color=991122 face=HELVETICA>deliveryTimeout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;<I><FONT  color=991122 face=HELVETICA>replyTimeout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendMessage(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Handler.html#BHandler">BHandler</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;<I><FONT  color=991122 face=HELVETICA>deliveryTimeout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendMessage(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessenger&nbsp;*<I><FONT  color=991122 face=HELVETICA>replyMessenger</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;<I><FONT  color=991122 face=HELVETICA>deliveryTimeout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendMessage(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>command</I></FONT>, <A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>reply</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendMessage(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>command</I></FONT>, <A HREF="Handler.html#BHandler">BHandler</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sends a copy of <I><FONT  color=991122 face=HELVETICA>message</I></FONT> (or a <A HREF="Message.html#BMessage">BMessage</A> based on a <I><FONT  color=991122 face=HELVETICA>command</I></FONT> constant) to the object's target.  The caller retains ownership of <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.  The function doesn't return until the message has been delivered; if you're sending a <I><FONT  color=991122 face=HELVETICA>message</I></FONT> (as opposed to a <I><FONT  color=991122 face=HELVETICA>command</I></FONT> constant) you can set a microsecond delivery timeout through <I><FONT  color=991122 face=HELVETICA>deliveryTimeout</I></FONT>.
+<P>
+The target can respond to the message: 
+<P>
+<UL>
+<LI>If you supply a <I><FONT  color=991122 face=HELVETICA>reply</I></FONT> <A HREF="Message.html#BMessage">BMessage</A>, the response is synchronous, with an optional timeout (<I><FONT  color=991122 face=HELVETICA>replyTimeout</I></FONT>) that starts ticking after the original message has been delivered.  If the response times out, or the target deletes the original message without responding, the <I><FONT  color=991122 face=HELVETICA>reply<B><TT>&ndash;></I>what</TT></B></FONT> is set to <B><TT><A HREF="misc.html#B_NO_REPLY">B_NO_REPLY</A></TT></B>.  The caller is responsible for allocating and freeing <I><FONT  color=991122 face=HELVETICA>reply</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>message</I></FONT> and <I><FONT  color=991122 face=HELVETICA>reply</I></FONT> can be the same object.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Use caution when requesting a synchronous reply:  If you call <B><TT><A HREF="#SendMessage()">SendMessage()</A></TT></B> from the target looper's thread, you'll deadlock (or, at best, time out). 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<UL>
+<LI>If you supply a reply target (<I><FONT  color=991122 face=HELVETICA>replyMessenger</I></FONT> or <I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT>), the response is asynchronous, and is sent to the reply target.  
+<P>
+<LI>If you supply neither a reply message nor a reply target, the target's response is sent to <B><TT><A HREF="Application.html#be_app_messenger">be_app_messenger</A></TT></B>.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The message was delivered (and the synchronous reply was received, if applicable).
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>deliveryTimeout</I></FONT> expired; the message never made it to the target.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_WOULD_BLOCK">B_WOULD_BLOCK</A></TT></B>.  You requested a 0 <I><FONT  color=991122 face=HELVETICA>deliveryTimeout</I></FONT>, and the target's message queue is full.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  The messenger's target is invalid, or the reply port was deleted while waiting for a reply (synchronous response requests only).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_PORTS">B_NO_MORE_PORTS</A></TT></B>.  You asked for a synchronous reply, but there are no more reply ports.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you specified a <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> when you constructed your <A HREF="#BMessenger">BMessenger</A>, and if that handler has since changed loopers, <B><TT><A HREF="#SendMessage()">SendMessage()</A></TT></B> won't deliver its message, but it doesn't complain (it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Target()"></A>Target()
+, 
+<A NAME="IsTargetLocal()"></A>IsTargetLocal()
+, 
+<A NAME="Team()"></A>Team()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>Target(</TT></B></FONT><A HREF="Looper.html#BLooper">BLooper</A> **<I><FONT  color=991122 face=HELVETICA>looper</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsTargetLocal(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const 
+<P>
+
+
+<TR><TD>
+inline team_id <B><TT><FONT  color=000022 size=+1>Team(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Target()">Target()</A></TT></B> returns the BMessenger's handler (directly) and looper (by reference in <I><FONT  color=991122 face=HELVETICA>looper</I></FONT>).  This function only works for local targets.  If <B><TT><A HREF="#Target()">Target()</A></TT></B> returns <B><TT>NULL</TT></B>, it can mean one of four things:
+<P>
+<UL>
+<LI>The target is remote; <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> is set to <B><TT>NULL</TT></B>.
+<P>
+<LI>The BMessenger hasn't been initialized; <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> is set to <B><TT>NULL</TT></B>.
+<P>
+<LI>The handler is the looper's preferred handler; <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> will be valid.
+<P>
+<LI>The handler has been deleted; <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> will be valid given that it hasn't been deleted as well.
+<P>
+</UL>
+<P>
+<B><TT><A HREF="#IsTargetLocal()">IsTargetLocal()</A></TT></B> returns true if the target is local.  <B><TT><A HREF="#Team()">Team()</A></TT></B> returns a target's team.  
+<P>
+<HR>
+<H3>Team()  see <A HREF="#Target()">Target()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BMessenger &amp;<B><TT><FONT  color=000022 size=+1>operator =(</TT></B></FONT>const BMessenger&amp;<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the left-side BMessenger's target to that of the right-side object.
+<P>
+<HR>
+<H3>
+<A NAME="=="></A>==
+ (equality)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>operator ==(</TT></B></FONT>const BMessenger&amp;<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Two BMessengers are equal if they have the same target.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

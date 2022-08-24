@@ -1,0 +1,401 @@
+<HTML><HEAD><TITLE>The Input Server: BInputDevice</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BInputDevice"></A>BInputDevice
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/InputDevice.h">be/interface/InputDevice.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  By the system only.  See 
+<P>
+<H6><A HREF="InputDevice.summary.html"><i>Summary</i></A></H6>
+<P>
+A BInputDevice object is a "downstream" representation of an Input Server device, such as a mouse or a keyboard, within a "regular" application.   The BInputDevice can <B><TT><A HREF="#Start()">Start()</A></TT></B> and <B><TT><A HREF="#Stop()">Stop()</A></TT></B> the device it represents, and can send it <I>input device control messages</I> through its <B><TT><A HREF="#Control()">Control()</A></TT></B> function.   
+<P>
+You never create BInputDevice objects yourself; instead, you ask the system to return one or more instances to you through the <B><TT><A HREF="#find_input_device()">find_input_device()</A></TT></B> or <B><TT><A HREF="#get_input_devices()">get_input_devices()</A></TT></B> functions.  Alternatively, you can work without an object by invoking the static versions of <B><TT><A HREF="#Start()">Start()</A></TT></B>, <B><TT><A HREF="#Stop()">Stop()</A></TT></B>, and <B><TT><A HREF="#Control()">Control()</A></TT></B>.   Note, however, that the static functions control <I>all</I> devices of a given type, whereas a BInputDevice instance can talk to a specific device.
+<P>
+BInputDevice objects don't live in the Input Server&mdash;they're used in "normal" applications as a means to control an Input Server device add-on.  
+<P>
+The BInputDevice object is provided, primarily, to let an application talk to a custom input device. 
+<P>
+You never subclass BInputDevice.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BInputDevice()"></A>BInputDevice()
+</H3>
+<P>
+<B><TT>The constructor is private.  Use <A HREF="#find_input_device()">find_input_device()</A></TT></B> or <B><TT><A HREF="#get_input_devices()">get_input_devices()</A></TT></B> to retrieve a BInputDevice instance.
+<P>
+<HR>
+<H3>
+<A NAME="~BInputDevice()"></A>~BInputDevice()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~</TT></B></FONT>BInputDevice<B><TT><FONT  color=000022 size=+1>()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the BInputDevice object.  Deleting this object doesn't affect the device that it represents.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Control()"></A>Control()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Control(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>code</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>Control(input_device_type</TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>code</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends an input device control message to the object's input device or, in the static version, to all devices of the given type, where, <I><FONT  color=991122 face=HELVETICA>type</I></FONT> can be <B><TT><A HREF="InputDefs.html#Device%20Types">B_POINTING_DEVICE</A></TT></B>, <B><TT><A HREF="InputDefs.html#Device%20Types">B_KEYBOARD_DEVICE</A></TT></B>, or <B><TT><A HREF="InputDefs.html#Device%20Types">B_UNDEFINED_DEVICE</A></TT></B>.  Input devices receive these messages in their <B><TT><A HREF="#Control()">Control()</A></TT></B> function.
+<P>
+The control message is described by the <I><FONT  color=991122 face=HELVETICA>code</I></FONT> value; it can be supplemented or refined by <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.  For example, <I><FONT  color=991122 face=HELVETICA>code</I></FONT> can indicate that a certain parameter should be set, and <I><FONT  color=991122 face=HELVETICA>message</I></FONT> can supply the requested value.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In general, you only use this function to send custom messages to a (custom) device.  You never use it to send messages to a Be-defined input device since the messages that these devices respond to are covered by Be-defined functions.  See <a href="InputServerMessages.html#Input%20Device%20Control%20Messages">"Input Device Control Messages"</a> for a list of the messages that the Be-defined devices respond to, the functions that cover them, and the German women who love them.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>Start() </H3>
+<P>
+<HR>
+<H3>
+<A NAME="Name()"></A>Name()
+, 
+<A NAME="Type()"></A>Type()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Name(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<B><TT>input_device_type</TT></B> <B><TT><FONT  color=000022 size=+1>Type(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>Name()<A HREF="#Name()">Start() </A></TT></B> returns a pointer to the input device's name.  The name, which is set when the device is registered, is meant to be human-readable and appropriate for use as the label of a UI element (such as a menu field).  Device names are not unique. 
+<P>
+<B><TT><A HREF="#Type()">Type()</A></TT></B> returns the input device's type, one of <B><TT><A HREF="InputDefs.html#Device%20Types">B_POINTING_DEVICE</A></TT></B>, <B><TT><A HREF="InputDefs.html#Device%20Types">B_KEYBOARD_DEVICE</A></TT></B>, and <B><TT><A HREF="InputDefs.html#Device%20Types">B_UNDEFINED_DEVICE</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Start()"></A>Start()
+, 
+<A NAME="Stop()"></A>Stop()
+, 
+<A NAME="IsRunning()"></A>IsRunning()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Start(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Start(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsRunning(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>Start(</TT></B></FONT>input_device_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>Stop(</TT></B></FONT>input_device_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Start()">Start()</A></TT></B> tells the object's input device to start generating events; <B><TT><A HREF="#Stop()">Stop()</A></TT></B> tells it to stop generating events.  <B><TT><A HREF="#IsRunning()">IsRunning()</A></TT></B> returns true if the device is currently generating events (i.e. if it has been started and hasn't been stopped).
+<P>
+The static versions of <B><TT><A HREF="#Start()">Start()</A></TT></B> and <B><TT><A HREF="#Stop()">Stop()</A></TT></B> start and stop all devices of the given <I><FONT  color=991122 face=HELVETICA>type</I></FONT>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The device is now started (<B><TT><A HREF="#Start()">Start()</A></TT></B>) or stopped (<B><TT><A HREF="#Stop()">Stop()</A></TT></B>)&mdash;even if the device was already started or stopped. 
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The device couldn't be found.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The Input Server tells a device to start and stop without asking the device if the operation was successful.  This means, for example, that <B><TT><A HREF="#Start()">Start()</A></TT></B> can return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> (and <B><TT><A HREF="#IsRunning()">IsRunning()</A></TT></B> can return <B><TT>true</TT></B>)  even if the device isn't really running.  For the Be-provided devices this isn't an issue&mdash;starting and stopping always succeeds (as long as the device exists).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>Start() </H3>
+<P>
+<HR>
+<H3>Type()  see <A HREF="#Name()">Name()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="C%20Functions"></A><FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="find_input_device()"></A>find_input_device()
+, 
+<A NAME="get_input_devices()"></A>get_input_devices()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="#BInputDevice*">BInputDevice*</A> <B><TT><FONT  color=000022 size=+1>find_input_device(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_input_devices(</TT></B></FONT><A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *<I><FONT  color=991122 face=HELVETICA>list</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions get BInputDevice objects for you.
+<P>
+<B><TT><A HREF="#find_input_device()">find_input_device()</A></TT></B> creates and hands you a BInputDevice object that represents the Input Server device registered as <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>name</I></FONT> is invalid, the function returns <B><TT>NULL</TT></B>.  The caller is responsible for deleting the object.  Note that  <B><TT><A HREF="#find_input_device()">find_input_device()</A></TT></B> returns a new BInputDevice object for each (valid) call, even if you ask for the same device more than once.
+<P>
+<B><TT><A HREF="#get_input_devices()">get_input_devices()</A></TT></B> creates a new BInputDevice object for each registered device, and puts the objects in your <I><FONT  color=991122 face=HELVETICA>list</I></FONT> argument.  <I><FONT  color=991122 face=HELVETICA>list</I></FONT> must already be allocated, and is automatically emptied by the function (even if the function fails). If the function succeeds, the caller owns the contents, and needs to delete the items in the list:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#include &lt;interface/Input.h>
+&nbsp;&nbsp;&nbsp;#include &lt;support/List.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;static bool del_InputDevice( void *ptr )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if( ptr ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BInputDevice *dev = (BInputDevice *)ptr;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete dev;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return true;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;void SomeFunc( void )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Get a list of all input devices.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BList list_o_devices;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t retval = get_input_devices( &amp;list_o_devices );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if( retval != B_OK ) return;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Do something with the input devices.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Dispose of the device list.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list_o_devices.DoForEach( del_InputDevice );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list_o_devices.MakeEmpty();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#get_input_devices()">get_input_devices()</A></TT></B> returns:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.    Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  General failure.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  Couldn't talk to the Input Server.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.  The Input Server is no longer on speaking terms with your application.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_WOULD_BLOCK">B_WOULD_BLOCK</A></TT></B>.  More trouble communicating with the Input Server.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="watch_input_devices()"></A>watch_input_devices()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>watch_input_devices(</TT></B></FONT><A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>start</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Tells the Input Server to start or stop watching (as <I><FONT  color=991122 face=HELVETICA>start</I></FONT> is <B><TT>true</TT></B> or <B><TT>false</TT></B>) for changes to the set of registered devices.  Change notifications are sent to <I><FONT  color=991122 face=HELVETICA>target</I></FONT>.  The set of messages that the Server may send are listed in <B>Input Server Messages</B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#watch_input_devices()">watch_input_devices()</A></TT></B> is not currently implemented.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

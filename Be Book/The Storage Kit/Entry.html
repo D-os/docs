@@ -1,0 +1,987 @@
+<HTML><HEAD><TITLE>The Storage Kit: BEntry</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BEntry"></A>BEntry
+</H1>
+<P>
+Derived from:  <A HREF="Statable.html#BStatable">BStatable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/Entry.h">be/storage/Entry.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Entry.summary.html"><i>Summary</i></A></H6>
+<P>
+The BEntry class defines objects that represent "locations" in the file system hierarchy.  Each location (or <I>entry</I>) is given as a name within a directory.   For example, when you create a BEntry thus...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry entry("/boot/home/fido");</PRE>
+<P>
+...you're telling the BEntry object to represent the <I>location</I> of the file called <B>fido</B> within the directory "/boot/home".
+<P>
+A BEntry doesn't care whether the entry you tell it to represent is a plain file, a directory, or a symbolic link&mdash;it doesn't even care if the entry even <I>exists</I> (but we'll get to that later in "<a href="#Abstract%20Entries">Abstract Entries</a>"):  
+<P>
+<UL>
+<LI>All the BEntry cares about is a <I>name</I> in a <I>directory</I>. 
+<P>
+</UL>
+<P>
+The most important implication of this is the object's attitude towards data.  <B>BEntries don't know how to operate on data</B>.  You can't use a BEntry to read or write a file's data or attributes.  For data operations, you have to turn your BEntry into a BNode.
+<P>
+Nonetheless, it's often convenient to speak of a BEntry as <I>having</I> data; for example, the phrase "the entry's data" really means "the data that lies in the file that's located by the entry."
+<P>
+<HR>
+<H3>
+<A NAME="Talents%20and%20Abilities"></A>Talents and Abilities
+</H3>
+<P>
+A properly initialized BEntry object (we'll get to the rules of initialization later) knows the following:
+<P>
+<UL>
+<LI><B>Location info.</B>  A BEntry knows its own (leaf) name (<B><TT><A HREF="#GetName()">GetName()</A></TT></B>), its full pathname (<B><TT><A HREF="#GetPath()">GetPath()</A></TT></B>), and the identity of its parent directory (<B><TT><A HREF="#GetParent()">GetParent()</A></TT></B>). 
+<P>
+<LI><B><A HREF="Statable.html#BStatable">BStatable</A> info.</B>  As a descendant of <A HREF="Statable.html#BStatable">BStatable</A>, a BEntry can return statistical information about the entry's data&mdash;its size, creation date, owner, and so on.
+<P>
+<LI><B><TT><A HREF="misc.html#entry_ref">entry_ref</A> identifier.</TT></B>  A BEntry can return the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> that globally identifies the entry (<B><TT><A HREF="#GetRef()">GetRef()</A></TT></B>).
+<P>
+</UL>
+<P>
+A BEntry can do these things:
+<P>
+<UL>
+<LI><B>Perform hierarchical operations</B>.  A BEntry can change the name of its entry (<B><TT><A HREF="#Rename()">Rename()</A></TT></B>), move it to another directory (<B><TT>Move()</TT></B>), and remove it from the file hierarchy (<B><TT><A HREF="#Remove()">Remove()</A></TT></B>).
+<P>
+<LI><B>Initialize <A HREF="Node.html#BNode">BNode</A> objects. </B> The constructors and <B><TT>SetTo()</TT></B> initializers for <A HREF="Node.html#BNode">BNode</A> and its children (BFile, <A HREF="Directory.html#BDirectory">BDirectory</A>, and BSymLink) accept BEntry arguments. 
+<P>
+</UL>
+<P>
+As mentioned above, the most important thing that a BEntry <I>can't</I> do is access its own data:  <B>A BEntry can't read or write data or attributes.</B>  To do these things you need a <A HREF="Node.html#BNode">BNode</A> object.
+<P>
+(Actually, this isn't entirely true:  A BEntry <I>can</I> set the size of its data through the <B><TT>BStatable::SetSize()</TT></B> function. The function only works on plain files.)
+<P>
+<A NAME="17132:%20head2:%20Initializing%20and%20Traversing"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Initializing%20and%20Traversing"></A>Initializing and Traversing
+</H3>
+<P>
+To initialize a <A HREF="#BEntry">BEntry</A>, you have to tell it which entry to represent; in other words, you have to identify a directory and a name.  You can initialize a BEntry object directly...
+<P>
+<UL>
+<LI>during construction,
+<P>
+<LI>through the <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function,
+<P>
+<LI>or through the assignment operator.
+<P>
+</UL>
+<P>
+Or you can have some other object initialize your BEntry for you, by passing the BEntry as an argument to...
+<P>
+<UL>
+<LI>BDirectory's <B><TT><A HREF="Directory.html#FindEntry()">FindEntry()</A></TT></B> or <B><TT><A HREF="Directory.html#GetEntry()">GetEntry()</A></TT></B> function,
+<P>
+<LI>BEntryList's <B><TT><A HREF="Directory.html#GetNextEntry()">GetNextEntry()</A></TT></B> function (implemented by <A HREF="Directory.html#BDirectory">BDirectory</A> and BQuery).
+<P>
+<LI>BEntry's <B><TT><A HREF="#GetParent()">GetParent()</A></TT></B> function.
+<P>
+</UL>
+<P>
+In all cases (except the assignment operator) you're asked if you want to "traverse" the entry during initialization.  Traversal is used to "resolve" symbolic links:
+<P>
+<UL>
+<LI><B>If you traverse</B>:  The BEntry will point to the entry that the symbolic link is linked to.
+<P>
+<LI><B>If you don't traverse</B>:  The BEntry will point to the symbolic link itself.
+<P>
+</UL>
+<P>
+For example, let's say <B>/boot/home/fidoLink</B> is linked to <B>/fido</B>, to wit:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ cd /boot/home
+&nbsp;&nbsp;&nbsp;$ ln -s ./fido fidoLink</PRE>
+<P>
+Now let's make a traversed BEntry for <B>fidoLink</B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* The second argument is the traversal bool. */
+&nbsp;&nbsp;&nbsp;BEntry entry("/boot/home/fidoLink", true);</PRE>
+<P>
+If we ask for the entry's pathname...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;entry.GetPath(&amp;path);
+&nbsp;&nbsp;&nbsp;printf("Pathname:  %sn", path.Path());</PRE>
+<P>
+...we see
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;Pathname:  /boot/home/fido</PRE>
+<P>
+In other words, the BEntry refers to <B>fido</B>, not <B>fidoLink.
+<P>
+</B>Traversal resolves nested links&mdash;it really wants to find a "real" file (or directory).  If the entry that you're initializing to isn't a link, then the traversal flag is ignored.  
+<P>
+<H4>
+<A NAME="When%20to%20Traverse"></A>When to Traverse
+</H4>
+<P>
+When should you traverse, and when not?  Here are a few rules of thumbs:
+<P>
+<UL>
+<LI>If somebody hands you a file reference&mdash;if your app gets a <B><TT><A HREF="../The%20Application%20Kit/Application.html#RefsReceived()">RefsReceived()</A></TT></B> message&mdash;then you probably want to traverse the entry.  
+<P>
+<LI>If you're pawing over the contents of a directory (through BDirectory's <B><TT><A HREF="Directory.html#GetNextEntry()">GetNextEntry()</A></TT></B>), then you probably don't want to traverse.
+<P>
+<LI>If you're looking at the result of a query (through BQuery's <B><TT><A HREF="Directory.html#GetNextEntry()">GetNextEntry()</A></TT></B>), then you almost <I>certainly</I> don't want to traverse.  The query finds entries that satisfy certain criteria; if a symbolic link is in the list, it's because the link itself was a winner.  If the linked-to file is also a winner, it will show up on its own.
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="Traverso%20Post%20Facto"></A>Traverso Post Facto
+</H4>
+<P>
+Let's say you create a BEntry (to a symlink) without traversing, but then you decide that you <I>do</I> want to resolve the link.  Unfortunately, you can't resolve in-place; instead, you have to initialize another BEntry using info (<B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> or pathname) that you get from the link entry:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry entry1("/boot/home/fidoLink", false);
+&nbsp;&nbsp;&nbsp;BEntry entry2;
+&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* First we check to see if it&gt;s a link. */
+&nbsp;&nbsp;&nbsp;if (entry1.IsSymLink()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Get the link&gt;s entry_ref... */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry1.GetRef(&amp;ref);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* ...and use it to initialize the other BEntry. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry2.SetTo(&amp;ref, true);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<A NAME="10970:%20head2:%20Abstract%20Entries"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Abstract%20Entries"></A>Abstract Entries
+</H3>
+<P>
+As we all should know by now, a BEntry identifies a name within a specific directory.  The directory that a BEntry identifies must exist, but the entry that corresponds to the name doesn't have to.  In other words...
+<P>
+<UL>
+<LI>A BEntry can represent a file that doesn't exist.  The entry is said to be "abstract."
+<P>
+</UL>
+<P>
+For example, the following construction creates a BEntry object based on a <A HREF="Directory.html#BDirectory">BDirectory</A> and a name:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry entry(someDir, "myFile.h");</PRE>
+<P>
+Let's assume that <B>myFile.h</B> doesn't exist.  As long as the directory that's referred to by <B><TT>someDir</TT></B> <I>does</I> exist, then the construction is legal.  Some of the BEntry functions (those inherited from <A HREF="Statable.html#BStatable">BStatable</A>, for instance) won't work, but the object itself is valid.  
+<P>
+But validity doesn't equal existence:
+<P>
+<UL>
+<LI><B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> and  <B><TT><A HREF="#InitCheck()">InitCheck()</A><I> do</TT></B></I> <I>not</I> tell you if a BEntry's entry actually exists.  Don't be confused; a return value of <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> simply means the object is valid.
+<P>
+</UL>
+<P>
+If you want to know if a BEntry's entry actually exists, use the <B><TT><A HREF="#Exists()">Exists()</A></TT></B> function.  
+<P>
+<H4>
+<A NAME="Creating%20a%20File%20From%20an%20Abstract%20Entry"></A>Creating a File From an Abstract Entry
+</H4>
+<P>
+To turn an abstract BEntry into a real entry (or, more accurately, a real node), you have to specify the flavor of node that you want.  There are two methods for creating a node; the first is general, the second applies to plain files only.
+<P>
+<B><H5>
+<A NAME="The%20General%20Approach.%20%20"></A>The General Approach.  
+</H5>
+<P>
+</B>BDirectory's <B><TT><A HREF="Directory.html#CreateFile()">CreateFile()</A></TT></B>, <B><TT><A HREF="Directory.html#CreateDirectory()">CreateDirectory()</A></TT></B>, and <B><TT><A HREF="Directory.html#CreateSymLink()">CreateSymLink()</A></TT></B> functions create nodes of the designated flavor.  The functions don't take BEntry arguments directly; instead, you invoke the functions on the BEntry's directory, passing the entry's leaf name as an argument.  Here we turn an abstract entry (<B><TT>entry</TT></B>) into a directory:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;char name[B_FILE_NAME_LENGTH]; /* A buffer for the name. */
+&nbsp;&nbsp;&nbsp;BDirectory parent;  /* The parent of our entry. */
+&nbsp;&nbsp;&nbsp;BDirectory target_dir; /* The product of the transformation. */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (!entry.Exists()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry.GetParent(&amp;path);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry.GetName(name);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parent.SetTo(&amp;path);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parent.CreateDirectory(name, &amp;dir);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<H5>
+<A NAME="The%20Plain-File-Only%20Approach.%20%20"></A>The Plain-File-Only Approach.  
+</H5>
+<P>
+You can create a plain file by passing the BEntry to the <A HREF="File.html#BFile">BFile</A> constructor or <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function.  To do this, you also have to add <B><TT>B_CREATE_FILE</TT></B> to the "open mode" flags:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BFile file;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (!entry.Exists()) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file.SetTo(&amp;entry, B_CREATE_FILE|B_READ_WRITE);</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="Subtleties%20and%20Details"></A>Subtleties and Details
+</H3>
+<P>
+The following details understand you should, particularly if you want to participate in bedevtalk.
+<P>
+<H4>
+<A NAME="File%20Descriptors"></A>File Descriptors
+</H4>
+<P>
+Although it's not intuitively obvious, a BEntry object <I>does</I> consume a file descriptor.  The file descriptor is opened on the entry's directory.  
+<P>
+Your app has a limited number of file descriptors (currently 128, max), so you may not want to cache BEntry objects as your primary means for identifying an entry.  If you're going to be dealing with a lot of entries and you want to keep track of them all, it's better to cache <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> structures or <A HREF="Path.html#BPath">BPath</A> objects.
+<P>
+<H4>
+<A NAME="Directories%20are%20Persistent,%20Names%20Are%20Not"></A>Directories are Persistent, Names Are Not
+</H4>
+<P>
+One more time:  A BEntry identifies an entry as a name in a directory.  As described above, the directory is maintained internally as a file descriptor; the name is simply a string.  This means that...
+<P>
+<UL>
+<LI><B>The directory for a given BEntry is persistent</B>.  If you move the directory, the file descriptor, and so the <A HREF="#BEntry">BEntry</A>, moves with it.
+<P>
+<LI><B>The name isn't persistent</B>.  If the user renames the leaf that a BEntry is pointing to, the BEntry will become abstract.
+<P>
+</UL>
+<P>
+For example, take the following BEntry...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry entry("/boot/home/lbj/footFetish.jpeg");</PRE>
+<P>
+If the user moves the directory...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ cd /boot/home
+&nbsp;&nbsp;&nbsp;$ mv lbj jfk</PRE>
+<P>
+The BEntry (<B><TT>entry</TT></B>) "moves" with the directory.  If you print the pathname and ask if the BEntry's entry exists...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;entry.GetPath(&amp;path);
+&nbsp;&nbsp;&nbsp;printf("> Foot movie:  %sn", path.Path());
+&nbsp;&nbsp;&nbsp;printf("> Exists?  %sn", entry.Exists()?"Oui":"Non");</PRE>
+<P>
+...you'll see this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;> Foot movie:  /boot/home/jfk/footFetish.jpeg
+&nbsp;&nbsp;&nbsp;> Exists?  Oui</PRE>
+<P>
+The same isn't so for the name portion of a BEntry.  If the user now moves <B>footFetish.jpeg</B>...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ cd /boot/home/jfk
+&nbsp;&nbsp;&nbsp;$ mv footFetish.jpeg hammerToe.jpeg</PRE>
+<P>
+...your BEntry <I>will not</I> follow the file (it doesn't "follow the data").  The object will still represent the entry called <B>footFetish.jpeg</B>.  The BEntry will, in this case, become abstract.
+<P>
+<B>Don't be confused:</B>  The BEntry only "loses track" of a renamed entry if the name change is made behind the object's back.  Manipulating the entry name through the BEntry object's <B><TT><A HREF="#Rename()">Rename()</A></TT></B> function (for example), doesn't baffle the object.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;BEntry entry("/boot/home/lbj/footFetish.jpeg");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;entry.Rename("hammerToe.jpeg");
+&nbsp;&nbsp;&nbsp;entry.GetPath(&amp;path);
+&nbsp;&nbsp;&nbsp;printf("> Foot movie:  %sn", path.Path());
+&nbsp;&nbsp;&nbsp;printf("> Exists?  %sn", entry.Exists()?"Oui":"Non");</PRE>
+<P>
+...and we see...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;> Foot movie:  /boot/home/lbj/hammerToe.jpeg
+&nbsp;&nbsp;&nbsp;> Exists?  Oui</PRE>
+<P>
+<H4>
+<A NAME="BEntries%20and%20Locked%20Nodes"></A>BEntries and Locked Nodes
+</H4>
+<P>
+You can't lock an entry, but you can lock the entry's node (through BNode's <B><TT><A HREF="Node.html#Lock()">Lock()</A> </TT></B>function).  Initializing a BEntry to point to a locked node is permitted, but t<B>he entry's directory must <I>not be locked.  </B></I>If the directory is locked, the BEntry constructor and <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function fail and set <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  
+<P>
+Furthermore, the destination directories in BEntry's <B><TT><A HREF="#Rename()">Rename()</A></TT></B> and <B><TT><A HREF="#MoveTo()">MoveTo()</A></TT></B> must be unlocked for the functions to succeed.  And <I>all</I> directories in the path to the entry must be unlocked for<B><TT> GetPath() </TT></B>to succeed.
+<P>
+If you get a <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B> error, you may want to try again&mdash;it's strongly advised that locks be held as briefly as possible.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BEntry()"></A>BEntry()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BEntry(</TT></B></FONT>const <A HREF="Directory.html#BDirectory">BDirectory</A> *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BEntry(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BEntry(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BEntry(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BEntry(</TT></B></FONT>const BEntry &amp;<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BEntry object that represents the entry described by the arguments.  See the analogous <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> functions for descriptions of the flavorful constructors.
+<P>
+The default constructor does nothing; it should be followed by a call to <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>.  
+<P>
+The copy constructor points the new object to the entry that's represented by the argument.  The two objects themselves maintain separate representation of the entry; in other words, they each contain their own <B>a)</B> file descriptor and <B>b)</B> string to identify the entry's <B>a)</B> directory and <B>b)</B> name.
+<P>
+To see if the initialization was successful, call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B>.  
+<P>
+<HR>
+<H3>
+<A NAME="~BEntry"></A>~BEntry
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BEntry()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Closes the BEntry's file descriptor and destroys the BEntry object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Exists()"></A>Exists()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool<B><TT><FONT  color=000022 size=+1> Exists(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the entry exists; <B><TT>false</TT></B> otherwise.
+<P>
+<HR>
+<H3>
+<A NAME="GetName()"></A>GetName()
+, 
+<A NAME="GetPath()"></A>GetPath()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> GetName(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> GetPath(</TT></B></FONT><A HREF="Path.html#BPath">BPath</A> *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return the leaf name and full pathname of the BEntry's entry.  The arguments must be allocated before they're passed in.
+<P>
+<B><TT>GetName()</TT></B> copies the leaf name into <I><FONT  color=991122 face=HELVETICA>buffer. </I></FONT> The buffer must be large enough to accommodate the name; <B><TT>B_FILE_NAME_LENGTH</TT></B> is a 100% safe bet:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;char name[B_FILE_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;entry.GetName(name);</PRE>
+<P>
+If <B><TT><A HREF="#GetName()">GetName()</A></TT></B> fails, <I><FONT  color=991122 face=HELVETICA>*buffer</I></FONT> is pointed at <B><TT>NULL</TT></B>. 
+<P>
+<B><TT>GetPath()</TT></B> takes the entry's full pathname and initializes the <A HREF="Path.html#BPath">BPath</A> argument with it.  To retrieve the path from the <A HREF="Path.html#BPath">BPath</A> object, call <B><TT><A HREF="Path.html#Path()">BPath::Path()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;entry.GetPath(&amp;path);
+&nbsp;&nbsp;&nbsp;printf(">Entry pathname:  %sn", path.Path());</PRE>
+<P>
+If <B><TT><A HREF="#GetPath()">GetPath()</A></TT></B> fails, the argument is <B><TT><A HREF="#Unset()">Unset()</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The information was successfully retrieved.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BEntry isn't initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B> (<B><TT><A HREF="#GetPath()">GetPath()</A></TT></B> only).  A directory in the entry's path is locked.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetParent()"></A>GetParent()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> GetParent(</TT></B></FONT>BEntry *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> GetParent(</TT></B></FONT><A HREF="Directory.html#BDirectory">BDirectory</A> *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Gets the directory, as a BEntry or <A HREF="Directory.html#BDirectory">BDirectory</A> object, in which the object's entry lives.  The argument must be allocated before it's passed in.
+<P>
+If the function is unsuccessful, the argument is <B><TT><A HREF="#Unset()">Unset()</A></TT></B>.  Because of this, you should be particularly careful if you're using the BEntry-argument version to destructively get a BEntry's parent:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if (entry.GetParent(&amp;entry) != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* you just lost &gt;entry&gt; */ 
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This example <I>is</I> legal; for example, you can use destructive iteration to loop your way up to the root directory.  When you reach the root ("/"), <B><TT><A HREF="#GetParent()">GetParent()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry entry("/boot/home/fido");
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;char name[B_FILE_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Spit out the path components backwards, one at a time. */
+&nbsp;&nbsp;&nbsp;do {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry.GetName(name);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("> %sn", name);
+&nbsp;&nbsp;&nbsp;} while ((err=entry.GetParent(&amp;entry)) == B_OK);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Complain for reasons other than reaching the top. */
+&nbsp;&nbsp;&nbsp;if (err != B_ENTRY_NOT_FOUND)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf(">> Error: %sn", strerror(err));</PRE>
+<P>
+This produces:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;> fido
+&nbsp;&nbsp;&nbsp;> home
+&nbsp;&nbsp;&nbsp;> boot
+&nbsp;&nbsp;&nbsp;> /</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The information was successfully retrieved.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  This BEntry isn't initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  Attempt to get the parent of the root directory.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_FDS">B_NO_MORE_FDS</A></TT></B>.  Couldn't get another file descriptor.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetPath()  see <A HREF="#GetName()">GetName()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetRef()"></A>GetRef()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> GetRef(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Gets the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> for the object's entry; <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> must be allocated before it's passed in.  As with BEntry objects, <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> structures can be abstract&mdash;getting a valid <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> does <I>not</I> guarantee that the entry actually exists.
+<P>
+If the function isn't successful, <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> is unset.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> was successfully retrieved.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  This object isn't initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Storage for the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>'s name couldn't be allocated.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetStat()"></A>GetStat()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetStat(</TT></B></FONT>struct stat *<I><FONT  color=991122 face=HELVETICA>st</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetStat()</TT></B> returns the <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure for the entry.  The structure is copied into the <I><FONT  color=991122 face=HELVETICA>st</I></FONT> argument, which must be allocated.  The <A HREF="Statable.html#BStatable">BStatable</A> object does <I>not</I> cache the <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure; every time you call <B><TT><A HREF="#GetStat()">GetStat()</A></TT></B>, fresh <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> information is retrieved.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't get the necessary resources to complete the transaction.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The entry doesn't exist (abstract entry).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the status of the previous construction, assignment operation, or <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> call.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The initialization was successful.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The object is uninitialized (this includes <B><TT><A HREF="#Unset()">Unset()</A></TT></B>).
+<P>
+<LI>See <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> for other errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>MoveTo()  see <A HREF="#Rename()">Rename()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Remove()"></A>Remove()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Remove(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Remove()">Remove()</A></TT></B> "unlinks" the entry from its directory.  The entry's node isn't destroyed until all file descriptors  that are open on the node are closed.  This means that if you create <A HREF="File.html#BFile">BFile</A> based on a <A HREF="#BEntry">BEntry</A>, and then <B><TT><A HREF="#Remove()">Remove()</A> </TT></B>the <A HREF="#BEntry">BEntry</A>, the <A HREF="File.html#BFile">BFile</A> will still be able to read and write the file's data&mdash;the <A HREF="File.html#BFile">BFile</A> has no way of knowing that the entry is gone.  When the <A HREF="File.html#BFile">BFile</A> is deleted, the node will be destroyed as well.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#Remove()">Remove()</A></TT></B> does <I>not</I> invalidate the BEntry.  It simply makes it abstract (see "<a href="#Abstract%20Entries">Abstract Entries</a>").
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BEntry is not initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  The entry's directory is locked.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Rename()"></A>Rename()
+, 
+<A NAME="MoveTo()"></A>MoveTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Rename(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>clobber = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>MoveTo(</TT></B></FONT><A HREF="Directory.html#BDirectory">BDirectory</A> *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>path = NULL</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>clobber = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions move the BEntry's entry and node to a new location.  In both cases, the BEntry must <I>not</I> be abstract&mdash;you can't rename or move an abstract entry.
+<P>
+<B><TT>Rename()</TT></B> moves the entry to a new name, as given by <I><FONT  color=991122 face=HELVETICA>path</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is usually a simple leaf name, but it can be a relative path.  In the former case (simple leaf) the entry is renamed within its current directory.  In the latter, the entry is moved into a subdirectory of its current directory, as given by the argument.
+<P>
+<B><TT><A HREF="#MoveTo()">MoveTo()</A></TT></B> moves the entry to a different directory and optionally renames the leaf.  Again, <I><FONT  color=991122 face=HELVETICA>path</I></FONT> can be a simple leaf or a relative path; in both cases,  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is reckoned off of <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>.  If path is <B><TT>NULL</TT></B>, the entry is moved to <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, but retains its old leaf name.
+<P>
+If the entry's new location is already taken, the <I><FONT  color=991122 face=HELVETICA>clobber</I></FONT> argument decides whether the existing entry is removed to make way for yours.  If it's <B><TT>true</TT></B>, the existing entry is removed; if it's <B><TT>false</TT></B>, the <B><TT><A HREF="#Rename()">Rename()</A></TT></B> or <B><TT><A HREF="#MoveTo()">MoveTo()</A></TT></B> function fails. 
+<P>
+Upon success, <B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B> is updated to reflect the change to its entry.  For example, when you invoke <B><TT><A HREF="#Rename()">Rename()</A></TT></B> on a <A HREF="#BEntry">BEntry</A>, the name of <I>that specific</I> BEntry object also changes.  If the rename or move-to isn't successful, <B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B> isn't altered.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BEntry is not initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  A directory to the new location doesn't exist, or this is an abstract entry.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_EXISTS">B_FILE_EXISTS</A></TT></B>.  The new location is already taken (and you're not clobbering).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  The directory that you're moving the entry into is locked.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+, 
+<A NAME="Unset()"></A>Unset()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> <FONT  face=HELVETICA>= false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> <FONT  face=HELVETICA>= false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const <A HREF="Directory.html#BDirectory">BDirectory</A> *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> <FONT  face=HELVETICA>= false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void<B><TT><FONT  color=000022 size=+1> Unset(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the BEntry's current entry reference, and initializes it to refer to the entry identified by the argument(s):
+<P>
+<UL>
+<LI>In the <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> version, the BEntry is initialized to refer to the given <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>.
+<P>
+<LI>In the <I><FONT  color=991122 face=HELVETICA>path</I></FONT> version, <I><FONT  color=991122 face=HELVETICA>path</I></FONT> can be absolute or relative, and can contain "." and ".." elements.  If <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is relative, it's reckoned off of the current working directory.
+<P>
+<LI>In the<I><FONT  color=991122 face=HELVETICA> dir</I></FONT>/<I><FONT  color=991122 face=HELVETICA>path</I></FONT> version, <I><FONT  color=991122 face=HELVETICA>path</I></FONT> must be relative.  It's reckoned off of the directory given by <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>.
+<P>
+</UL>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> argument is used to resolve (or not) entries that are symlinks:
+<P>
+<UL>
+<LI>If <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> is <B><TT>true</TT></B>, the link is resolved.  
+<P>
+<LI>If <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> is <B><TT>false</TT></B>, the BEntry refers to the link itself.
+<P>
+</UL>
+<P>
+See "&nbsp;<a href="#Initializing%20and%20Traversing%20on%20page40">"Initializing and Traversing" on page40</a>" for more information.
+<P>
+When you initialize a <A HREF="#BEntry">BEntry</A>, you're describing a leaf name within a directory.  The directory <I>must</I> exist, but the leaf doesn't have to.  This allows you to create a BEntry to a file that doesn't exist (yet).  See "&nbsp;<a href="#Abstract%20Entries%20on%20page42">"Abstract Entries" on page42</a>" for more information.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>Remember&mdash;successfully initializing a BEntry consumes a file descriptor</B>.  When you re-initialize, the old file descriptor is closed.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>Unset()</TT></B> removes the object's association with its current entry, and sets <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The BEntry was successfully initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Bad argument value; uninitialized <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> or <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  A directory in the path to the entry doesn't exist. 
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  The entry's directory is locked.
+<P>
+</UL>
+<P>
+<HR>
+<H3>Unset()  see <A HREF="#SetTo()">SetTo()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BEntry&amp; operator<B><TT><FONT  color=000022 size=+1>=(</TT></B></FONT>const BEntry &amp;<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+In the expression
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry a = b;</PRE>
+<P>
+BEntry <I>a</I> is initialized to refer to the same entry as<I> b</I>.  To gauge the success of the assignment, you should call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> immediately afterwards.   Assigning a BEntry to itself is safe.
+<P>
+Assigning from an uninitialized BEntry is "successful":  The assigned-to BEntry will also be uninitialized (<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>).
+<P>
+<HR>
+<H3>
+<A NAME="=="></A>==
+, 
+<A NAME="!="></A>!=
+ (comparison)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+   bool operator<B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const BEntry &amp;<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+   bool operator<B><TT><FONT  color=000022 size=+1>!=(</TT></B></FONT>const BEntry &amp;<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Two BEntry objects are said to be equal if they refer to the same entry (even if the entry is abstract), or if they're both uninitialized.
+<P>
+<HR>
+<H2>
+<A NAME="Global%20C%20Function"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unction
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="get_ref_for_path()"></A>get_ref_for_path()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_ref_for_path(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns in <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> an entry_ref for the file specified by the <I><FONT  color=991122 face=HELVETICA>path</I></FONT> argument.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> was returned successfully.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The file wasn't found, or the pathname string is empty.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory.
+<P>
+<LI>Other file errors.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

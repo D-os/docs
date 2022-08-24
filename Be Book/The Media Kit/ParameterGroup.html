@@ -1,0 +1,548 @@
+<HTML><HEAD><TITLE>The Media Kit: BParameterGroup</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BParameterGroup"></A>BParameterGroup
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/ParameterWeb.h">be/media/ParameterWeb.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="ParameterGroup.summary.html"><i>Summary</i></A></H6>
+<P>
+A BParameterGroup object serves as a logical grouping of BParameters.  Each <A HREF="Parameter.html#BParameter">BParameter</A> belongs to exactly one <A HREF="#BParameterGroup">BParameterGroup</A>, and is in fact created by the BParameterGroup object to which it belongs, via the <B><TT><A HREF="ParameterWeb.html#MakeGroup()">BParameterWeb::MakeGroup()</A> </TT></B>function.
+<P>
+BParamaeterGroups can be nested one inside another.
+<P>
+A BParameterGroup object that's owned by a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> is a logical candidate for a pane in a multi-pane control panel such as a <A HREF="../The%20Interface%20Kit/TabView.html#BTabView">BTabView</A>, wherein each tab causes another BParameterGroup's BParameters to be displayed.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BParameterGroup()"></A>BParameterGroup()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BParameterGroup()">BParameterGroup()</A></TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Rather than directly creating a BParameterGroup object via the new operator, you should call <B><TT><A HREF="ParameterWeb.html#MakeGroup()">BParameterWeb::MakeGroup()</A></TT></B> to create a  top-level group, or <B><TT>BParameterGroup::MakeGroup()</TT></B> if you want to create a subgroup.
+<P>
+<HR>
+<H3>
+<A NAME="~BParameterGroup()"></A>~BParameterGroup()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BParameterGroup()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+You don't need to delete a BParameterGroup object; the <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> that owns it will do this for you when the web is deleted.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="CountGroups()"></A>CountGroups()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountGroups(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the number of subgroups in the group.  This count doesn't subgroups nested within subgroups. 
+<P>
+<HR>
+<H3>
+<A NAME="CountParameters()"></A>CountParameters()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountParameters(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the number of BParameters in the group.  This count doesn't include BParameters in subgroups. 
+<P>
+<HR>
+<H3>
+<A NAME="GroupAt()"></A>GroupAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BParameterGroup *<B><TT><FONT  color=000022 size=+1>ParameterGroup(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the subgroup at the specified <I><FONT  color=991122 face=HELVETICA>index</I></FONT> within the BParameterGroup.  If the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is negative, or is greater than <B><TT><A HREF="#CountGroups()">CountGroups()</A></TT></B>-1, <B><TT>NULL</TT></B> is returned.
+<P>
+<HR>
+<H3>
+<A NAME="MakeNullParameter()"></A>MakeNullParameter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="NullParameter.html#BNullParameter">BNullParameter</A> *<B><TT><FONT  color=000022 size=+1>MakeNullParameter(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, media_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>kind</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new <A HREF="NullParameter.html#BNullParameter">BNullParameter</A> within the group, with the internal ID specified by <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, which should be unique within the <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> that owns the group.
+<P>
+The type of media data that travels through the null parameter is indicated by <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, which could be <B><TT>B_MEDIA_UNKNOWN_TYPE</TT></B> or <B><TT>B_MEDIA_NO_TYPE</TT></B>.  The parameter's <I><FONT  color=991122 face=HELVETICA>name</I></FONT> will be displayed by client applications that display information about the node, and the parameter has the specified <I><FONT  color=991122 face=HELVETICA>kind</I></FONT>.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>
+</UL>
+<B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_WEB_PHYSICAL_INPUT"></A>B_WEB_PHYSICAL_INPUT
+</TT></B></TD>
+<TD>The parameter represents a physical input (such as a microphone jack or line input jack).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WEB_PHYSICAL_OUTPUT"></A>B_WEB_PHYSICAL_OUTPUT
+</TT></B></TD>
+<TD>The parameter represents a physical output (such as a line output jack or headphone jack).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WEB_LOGICAL_INPUT"></A>B_WEB_LOGICAL_INPUT
+</TT></B></TD>
+<TD>The parameter represents a point at which bits of data are transferred between the computer and the A/V input hardware.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WEB_LOGICAL_OUTPUT"></A>B_WEB_LOGICAL_OUTPUT
+</TT></B></TD>
+<TD>The parameter represents a point at which bits of data are transferred between the computer and the A/V output hardware.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WEB_ADC_CONVERTER"></A>B_WEB_ADC_CONVERTER
+</TT></B></TD>
+<TD>The parameter represents an analog to digital converter.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WEB_DAC_CONVERTER"></A>B_WEB_DAC_CONVERTER
+</TT></B></TD>
+<TD>The parameter represents a digital to analog converter.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WEB_BUFFER_INPUT"></A>B_WEB_BUFFER_INPUT
+</TT></B></TD>
+<TD>The parameter represents a media_input.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WEB_BUFFER_OUTPUT"></A>B_WEB_BUFFER_OUTPUT
+</TT></B></TD>
+<TD>The parameter represents a media_output.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GENERIC"></A>B_GENERIC
+</TT></B></TD>
+<TD>The parameter's kind isn't one of the above.</TD>
+</TABLE>
+<P>
+These kinds are used when a control panel needs to draw a signal flow diagram, so it can use the appropriate symbols for these points in the flow.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you create your own kind, you won't break anything, but you should contact Be Developer Support for guidance, so we can standardize given your needs.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  </B>the <A HREF="NullParameter.html#BNullParameter">BNullParameter</A> class.
+<P>
+<HR>
+<H3>
+<A NAME="MakeDiscreteParameter()"></A>MakeDiscreteParameter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="ContinuousParameter.html#BContinuousParameter">BContinuousParameter</A> *<B><TT><FONT  color=000022 size=+1>MakeContinuousParameter(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, media_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>kind</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new <A HREF="DiscreteParameter.html#BDiscreteParameter">BDiscreteParameter</A> object and attaches it to the group.  The <A HREF="DiscreteParameter.html#BDiscreteParameter">BDiscreteParameter</A> will have the specified internal <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, which should be unique within the <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> that owns the group.
+<P>
+The <A HREF="DiscreteParameter.html#BDiscreteParameter">BDiscreteParameter</A> will affect media data of the specified <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, and will have the specified <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.
+<P>
+The kind of discrete parameter is specified by <I><FONT  color=991122 face=HELVETICA>kind</I></FONT>, and may be any of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_MUTE"></A>B_MUTE
+</TT></B></TD>
+<TD>The parameter represents a mute control; a value of 0 passes data through unchanged, while a value of 1 mutes the data.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ENABLE"></A>B_ENABLE
+</TT></B></TD>
+<TD>The parameter represents an enable toggle; a value of 0 disables the function while a value of 1 enables it.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INPUT_MUX"></A>B_INPUT_MUX
+</TT></B></TD>
+<TD>The parameter represents an input MUX.  The value specifies which input should pass through.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OUTPUT_MUX"></A>B_OUTPUT_MUX
+</TT></B></TD>
+<TD>The parameter represents an output MUX; the value specifies which output should receive the incoming data.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TUNER_CHANNEL"></A>B_TUNER_CHANNEL
+</TT></B></TD>
+<TD>The parameter represents a channel tuner (like a TV channel); the value indicates the channel number.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRACK"></A>B_TRACK
+</TT></B></TD>
+<TD>The parameter's value indicates a track number.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RECSTATE"></A>B_RECSTATE
+</TT></B></TD>
+<TD>The parameter indicates whether the node is silent (0), playing (1), or recording (2).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SHUTTLE_MODE"></A>B_SHUTTLE_MODE
+</TT></B></TD>
+<TD>The parameter indicates performance mode: -1 for backwards, 0 for stop, 1 for playing, and 2 for paused.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RESOLUTION"></A>B_RESOLUTION
+</TT></B></TD>
+<TD>The parameter indicates video or audio resolution.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_COLOR_SPACE"></A>B_COLOR_SPACE
+</TT></B></TD>
+<TD>The parameter indicates video color space.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FRAME_RATE"></A>B_FRAME_RATE
+</TT></B></TD>
+<TD>The parameter represents a selector for picking frame rate.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="MakeContinuousParameter()"></A>MakeContinuousParameter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="ContinuousParameter.html#BContinuousParameter">BContinuousParameter</A> *<B><TT><FONT  color=000022 size=+1>MakeContinuousParameter(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, media_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>kind</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>unit</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <I><FONT  color=991122 face=HELVETICA>minValue</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>maxValue</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>step</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new <A HREF="ContinuousParameter.html#BContinuousParameter">BContinuousParameter</A> object and attaches it to the group.  The <A HREF="ContinuousParameter.html#BContinuousParameter">BContinuousParameter</A> will have the specified internal <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, which should be unique within the <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> that owns the group.
+<P>
+The <A HREF="ContinuousParameter.html#BContinuousParameter">BContinuousParameter</A> will affect media data of the specified <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, and will have the specified <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.
+<P>
+The kind of parameter the <A HREF="ContinuousParameter.html#BContinuousParameter">BContinuousParameter</A> represents is specified by <I><FONT  color=991122 face=HELVETICA>kind</I></FONT>, and may be any of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_MASTER_GAIN"></A>B_MASTER_GAIN
+</TT></B></TD>
+<TD>The parameter represents the main volume control.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GAIN"></A>B_GAIN
+</TT></B></TD>
+<TD>The parameter represents a gain control.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BALANCE"></A>B_BALANCE
+</TT></B></TD>
+<TD>The parameter represents a balance control.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FREQUENCY"></A>B_FREQUENCY
+</TT></B></TD>
+<TD>The parameter represents a frequency, like a radio tuner.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LEVEL"></A>B_LEVEL
+</TT></B></TD>
+<TD>The parameter represents a level, as in EQ and effects.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SHUTTLE_SPEED"></A>B_SHUTTLE_SPEED
+</TT></B></TD>
+<TD>The parameter represents playback speed.  A value of 1.0 indicates normal speed; less than 1.0 is slower, greater than 1.0 is faster.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CROSSFADE"></A>B_CROSSFADE
+</TT></B></TD>
+<TD>The parameter indicates a crossfade for mixing audio or video; 0 indicates that the the first of a pair of streams should be presented, 100 indicates that the other should be presented, and values in between indicate the degree of mixing that should occur.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_COMPRESSION"></A>B_COMPRESSION
+</TT></B></TD>
+<TD>The parameter indicates compression ratio; the value is 0 for no compression, 99 for 100:1 compression.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_QUALITY"></A>B_QUALITY
+</TT></B></TD>
+<TD>The parameter indicates quality level; the value is 0 for maximum compression, 100 for no compression.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BITRATE"></A>B_BITRATE
+</TT></B></TD>
+<TD>The parameter indicates bit rate in bits per second.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GOP_SIZE"></A>B_GOP_SIZE
+</TT></B></TD>
+<TD>The parameter indicates a "group of pictures" such as how many frames apart a keyframe should be inserted into a video stream.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TUNER_CHANNEL"></A>B_TUNER_CHANNEL
+</TT></B></TD>
+<TD>The parameter represents a channel tuner (like a TV channel); the value indicates the channel number.</TD>
+</TABLE>
+<P>
+The units of measurement are specified by <I><FONT  color=991122 face=HELVETICA>unit</I></FONT>, and the parameter's value can range from <I><FONT  color=991122 face=HELVETICA>minValue</I></FONT> to <I><FONT  color=991122 face=HELVETICA>maxValue</I></FONT>, with a granularity of <I><FONT  color=991122 face=HELVETICA>step</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="Name()"></A>Name()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Name(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the name of the BParameterGroup.  This name can be displayed to the user; for example, it could be used as the label of a BTab.
+<P>
+<HR>
+<H3>
+<A NAME="ParameterAt()"></A>ParameterAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Parameter.html#BParameter">BParameter</A> *<B><TT><FONT  color=000022 size=+1>ParameterAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="Parameter.html#BParameter">BParameter</A> at the specified <I><FONT  color=991122 face=HELVETICA>index</I></FONT> within the BParameterGroup.  If the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is negative, or is greater than <B><TT><A HREF="#CountParameters()">CountParameters()</A></TT></B>-1, <B><TT>NULL</TT></B> is returned.
+<P>
+<HR>
+<H3>
+<A NAME="Web()"></A>Web()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> *<B><TT><FONT  color=000022 size=+1>Web(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> that owns the group.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,621 @@
+<HTML><HEAD><TITLE>The Device Kit: BJoystick</TITLE></HEAD><BODY BGCOLOR=#ffffff><!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Device Kit Table of Contents</FONT></A>
+<TD>
+<A HREF="The%20Device%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Device Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+<HR>
+<H1><A NAME="BJoystick">BJoystick</A></H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/device/Joystick.h">be/device/Joystick.h</A>
+<P>
+Library:  libdevice.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="Joystick.summary.html"><i>Summary</i></A></H6>
+<P>
+A BJoystick object provides an interface to a joystick (or other game controller) connected to the computer.  The BeOS supports joysticks on the BeBox and Intel platforms.
+<P>
+The BeBox supports up to four analog joysticks, each of which can have up to two axes and two buttons; digital joysticks aren't supported by the built-in game ports.  You can install a card that provides additional game ports (such as the Sound Blaster AWE64), and use digital joysticks on those ports.
+<P>
+BeOS for Intel systems supports joysticks through game ports on cards, as well as some built-in game ports.
+<P>
+Unlike the event and message-driven interface to the mouse and keyboard, the interface to a joystick is strictly demand-driven.  An application must repeatedly poll the state of the joystick by calling the BJoystick object's <B><TT><A HREF="#Update()">Update()</A></TT></B> function.  <B><TT><A HREF="#Update()">Update()</A></TT></B> queries the port and updates the object's data members to reflect the current state of the joystick.
+<P>
+There are two modes available.  Standard mode supports only two axes per joystick, and two buttons per joystick.  This mode has been available since the early days of the BeOS.  You read the joystick in standard mode by looking at the BJoystick member variables <B><TT>vertical</TT></B> and <B><TT>horizontal</TT></B> to determine the joystick's axis values, and <B><TT>button1</TT></B> and <B><TT>button2</TT></B> to determine the state of the buttons.
+<P>
+Enhanced mode supports up to 32 buttons per joystick, and an indefinite number of axes and hats (thumb controls, usually located at the top of a stick).  It also supports multiple joysticks chained to a single game port.  Instead of reading variables to determine the state of the joystick, there are several functions provided to let you do this.
+<P>
+In addition, enhanced mode provides a mechanism for determining what joysticks are available and what types of (and how many) controls are available on the joysticks.  There's also a preference application (cleverly named "Joysticks") that lets the user select and configure joysticks connected to their computer.
+<P>
+<HR>
+<H2><A NAME=""><FONT SIZE=6>D</FONT>ata <FONT SIZE=6>M</FONT>embers</A></H2>
+<P>
+bigtime_t <B><TT>timestamp</TT></B>&nbsp;&nbsp;&nbsp;The time of the most recent update, as measured in microseconds from the beginning of 1970.
+<P>
+int16 <B><TT>horizontal</TT></B>&nbsp;&nbsp;&nbsp;The horizontal position of the joystick at the time of the last update.  Values increase as the joystick moves from left to right.
+<P>
+int16 <B><TT>vertical</TT></B>&nbsp;&nbsp;&nbsp;The vertical position of the joystick at the time of the last update.  Values decrease as the joystick moves forward and increase as it's pulled back.
+<P>
+bool <B><TT>button1</TT></B>&nbsp;&nbsp;&nbsp;<B><TT>false</TT></B> if the first button was pressed at the time of the last update, and <B><TT>true</TT></B> if not.
+<P>
+bool <B><TT>button2</TT></B>&nbsp;&nbsp;&nbsp;<B><TT>false</TT></B> if the second button was pressed at the time of the last update, and <B><TT>true</TT></B> if not.
+</UL>
+<P>
+The <B><TT>horizontal</TT></B> and <B><TT>vertical</TT></B> data members record values read directly from the ports, values that simply digitize the analog output of the joysticks.  This class makes no effort to translate the values to a standard scale or range.  Values can range from 0 through 4,095, but joysticks typically don't use the full range and some don't register all values within the range that is used.  The scale is not linear&mdash;identical increments in different parts of the range can reflect differing amounts of horizontal and vertical movement.  The exact variance from linearity and the extent of the usable range are partly characteristics of the individual joystick and partly functions of the computer's hardware.
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>Typically you won't use these data members if you're using enhanced mode; they're provided primarily for backward compatibility.
+</TD>
+</TR>
+</TABLE>
+<P>
+<HR>
+<H2><A NAME=""><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor</A></H2>
+<P>
+<HR>
+<H3><A NAME="BJoystick()">BJoystick()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BJoystick(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</TT></B></FONT>Initializes the BJoystick object so that all values are set to 0.  Before using the object, you must call <B><TT><A HREF="#Open()">Open()</A></TT></B> to open a particular joystick port.  For the object to register any meaningful values, you must call <B><TT><A HREF="#Update()">Update()</A></TT></B> to query the open port.
+<P>
+<B>See also:  <TT><A HREF="#Open()">Open()</A></TT></B>, <B><TT><A HREF="#Update()">Update()</A></TT></B> 
+<P>
+<HR>
+<H3><A NAME="~BJoystick()">~BJoystick()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BJoystick(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</TT></B></FONT>Closes the port, if it was not closed already.
+<P>
+<HR>
+<H2><A NAME=""><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions</A></H2>
+<P>
+<I><HR>
+<H3>ButtonValues() see <A HREF="#CountButtons()">CountButtons()</A></H3>
+<P>
+<HR>
+<H3>Close() see <A HREF="#Open()">Open()</A></H3>
+<P>
+</I><HR>
+<H3><A NAME="CountAxes()">CountAxes()</A>, <A NAME="GetAxisValues()">GetAxisValues()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountAxes(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+status_t </TT></B></FONT><B><TT><FONT  color=000022 size=+1>GetAxisValues(</TT></B></FONT>int16 *<I><FONT  color=991122 face=HELVETICA>outValues</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>forStick</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</FONT>CountAxes()</TT></B> returns the number of axes on the opened game port.
+<P>
+<B><TT>GetAxisValues()</TT></B> fills the array pointed to by <I><FONT  color=991122 face=HELVETICA>outValues</I></FONT> with the values of all the axes connected to the specified joystick.  The <I><FONT  color=991122 face=HELVETICA>forStick</I></FONT> parameter lets you choose which joystick on the game port to read the values from (the default is to read from the first stick on the port).
+<P>
+The returned values range from -32,768 to 32,767.
+<P>
+The array <I><FONT  color=991122 face=HELVETICA>outValues</I></FONT> must be large enough to contain the values for all the axes.  You can ensure that this is the case by using the following code:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int16 *axes;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;axes = (int16 *) malloc(sizeof(int16) * stick-&gt;CountAxes());
+&nbsp;&nbsp;&nbsp;stick-&gt;GetAxisValues(axes);</PRE>
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>These functions can only be used in enhanced mode.
+</TD>
+</TR>
+</TABLE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The name was returned successfully.
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The joystick specified by <I><FONT  color=991122 face=HELVETICA>forStick</I></FONT> doesn't exist.
+<P>
+<HR>
+<H3><A NAME="CountButtons()">CountButtons()</A>, <A NAME="GetButtonValues()">GetButtonValues()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountButtons(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+uint32 </TT></B></FONT><B><TT><FONT  color=000022 size=+1>ButtonValues(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</FONT>CountButtons()</TT></B> returns the number of buttons on the opened game port.
+<P>
+<B><TT>ButtonValues()</TT></B> returns a 32-bit number in which each bit represents the state of one button.  The <I><FONT  color=991122 face=HELVETICA>forStick</I></FONT> parameter lets you choose which joystick on the game port to read the values from (the default is to read from the first stick on the port).  You can deterimine if a particular button is down by using the following code:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;uint32 buttonValues = stick-&gt;ButtonValues();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (buttonValues &amp; (1 &lt;&lt; whichButton)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* button number whichButton is pressed */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>These functions can only be used in enhanced mode.
+</TD>
+</TR>
+</TABLE>
+<P>
+<HR>
+<H3><A NAME="CountDevices()">CountDevices()</A>, <A NAME="GetDeviceName()">GetDeviceName()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountDevices(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+status_t </TT></B></FONT><B><TT><FONT  color=000022 size=+1>GetDeviceName(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, char *<I><FONT  color=991122 face=HELVETICA>outName</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>bufSize</I></FONT> = <FONT  face=HELVETICA>B_OS_NAME_LENGTH</FONT><B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</FONT>CountDevices()</TT></B> returns the number of game ports on the computer.
+<P>
+<B><TT>GetDeviceName()</TT></B> returns the name of the device specified by the given <I><FONT  color=991122 face=HELVETICA>index</I></FONT>.  The buffer pointed to by <I><FONT  color=991122 face=HELVETICA>outName</I></FONT> is filled with the device name; <I><FONT  color=991122 face=HELVETICA>bufSize</I></FONT> indicates the size of the buffer.
+<P>
+The names returned by <B><TT>GetDeviceName()</TT></B> can be passed into the <B><TT><A HREF="#Open()">Open()</A></TT></B> function to open a device.
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>The BJoystick doesn't need to have an open device before you use these functions; in fact, your application will typically use these to provide user interface allowing the user to choose the joystick device they'd like to use.
+</TD>
+</TR>
+</TABLE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The name was returned successfully.
+<P>
+B_BAD_INDEX.  The specified <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is invalid.
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  The device name is too long for the buffer.
+<P>
+<HR>
+<H3><A NAME="CountHats()">CountHats()</A>, <A NAME="GetHatValues()">GetHatValues()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountHats(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+status_t </TT></B></FONT><B><TT><FONT  color=000022 size=+1>GetHatValues(</TT></B></FONT>int8 *<I><FONT  color=991122 face=HELVETICA>outHats</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>forStick</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</FONT>CountHats()</TT></B> returns the number of hats on the opened game port.
+<P>
+<B><TT>GetHatValues()</TT></B> fills the array pointed to by <I><FONT  color=991122 face=HELVETICA>outHats</I></FONT> with the values of all the hats connected to the specified joystick.  The <I><FONT  color=991122 face=HELVETICA>forStick</I></FONT> parameter lets you choose which joystick on the game port to read the values from (the default is to read from the first stick on the port).
+<P>
+The return value means the following:
+<P>
+<UL>
+<LI>0: Centered
+<P>
+<LI>1: Up
+<P>
+<LI>2: Up and right
+<P>
+<LI>3: Right
+<P>
+<LI>4: Down and right
+<P>
+<LI>5: Down
+<P>
+<LI>6: Down and left
+<P>
+<LI>7: Left
+<P>
+<LI>8: Up and left
+</UL>
+<P>
+The array <I><FONT  color=991122 face=HELVETICA>outHats</I></FONT> must be large enough to contain the values for all the hats.  You can ensure that this is the case by using the following code:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int8 *hats;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;hats = (int8 *) malloc(sizeof(int8) * stick-&gt;CountAxes());
+&nbsp;&nbsp;&nbsp;stick-&gt;GetHatValues(hats);</PRE>
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>These functions can only be used in enhanced mode.
+</TD>
+</TR>
+</TABLE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The name was returned successfully.
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The joystick specified by <I><FONT  color=991122 face=HELVETICA>forStick</I></FONT> doesn't exist.
+<P>
+<HR>
+<H3><A NAME="CountSticks()">CountSticks()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountSticks(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</TT></B></FONT>Returns the number of joysticks connected to the opened game port.
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>This function can only be used in enhanced mode.
+</TD>
+</TR>
+</TABLE>
+<P>
+<HR>
+<H3><A NAME="GetAxisNameAt()">GetAxisNameAt()</A>, <A NAME="GetHatNameAt()">GetHatNameAt()</A>, <A NAME="GetButtonNameAt()">GetButtonNameAt()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAxisNameAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>outName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+status_t </TT></B></FONT><B><TT><FONT  color=000022 size=+1>GetHatNameAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>outName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+status_t </TT></B></FONT><B><TT><FONT  color=000022 size=+1>GetButtonNameAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>outName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</TT></B></FONT>Returns the name of the control specified by the given <I><FONT  color=991122 face=HELVETICA>index</I></FONT>.  The <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> object pointed to by <I><FONT  color=991122 face=HELVETICA>outName</I></FONT> is set to the control's name.
+<P>
+<B><TT>GetAxisNameAt()</TT></B> returns the specified axis' name, <B><TT>GetHatNameAt()</TT></B> returns the specified hat's name, and <B><TT>GetButtonNameAt()</TT></B> returns the specified button's name.
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>These functions can only be used in enhanced mode.
+</TD>
+</TR>
+</TABLE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The name was returned successfully.
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.  The specified <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is invalid.<I>
+<P>
+</I><HR>
+<H3>GetAxisValues() see <A HREF="#CountAxes()">CountAxes()</A></H3>
+<P>
+<I><HR>
+<H3>GetButtonNameAt() see <A HREF="#GetAxisNameAt()">GetAxisNameAt()</A></H3>
+<P>
+</I><HR>
+<H3><A NAME="GetControllerModule()">GetControllerModule()</A>, <A NAME="GetControllerName()">GetControllerName()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetControllerModule(</TT></B></FONT><A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>outName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+status_t </TT></B></FONT><B><TT><FONT  color=000022 size=+1>GetControllerName(</TT></B></FONT><A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>outName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</FONT>GetControllerModule()</TT></B> returns the name of the joystick module that represents the opened joystick device.  If the device isn't in enhanced mode, this always returns "Legacy".
+<P>
+<B><TT>GetControllerName()</TT></B> returns the name of the joystick that's been configured for the opened device.  This is the same string that appears in the Joysticks preference application.  The returned string is always "2-axis" if the device isn't in enhanced mode.
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>These functions can only be used in enhanced mode.
+</TD>
+</TR>
+</TABLE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The name was returned successfully.
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.  The specified <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is invalid.<I>
+<P>
+</I><HR>
+<H3>GetDeviceName() see <A HREF="#CountDevices()">CountDevices()</A></H3>
+<P>
+<I><HR>
+<H3>GetHatNameAt() see <A HREF="#GetAxisNameAt()">GetAxisNameAt()</A></H3>
+<P>
+<HR>
+<H3>GetHatValues() see <A HREF="#CountHats()">CountHats()</A></H3>
+<P>
+<HR>
+<H3>EnableCalibration() see <A HREF="#IsCalibrationEnabled()">IsCalibrationEnabled()</A></H3>
+<P>
+</I><HR>
+<H3><A NAME="EnterEnhancedMode()">EnterEnhancedMode()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>EnterEnhancedMode(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</TT></B></FONT>Switches the device into enhanced mode.  If <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> isn't <B><TT><A HREF="../The%20Support%20Kit/misc.html#NULL">NULL</A></TT></B>, it's treated as a reference to a joystick description file (such as those in /boot/beos/etc/joysticks).  If <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> is <B><TT><A HREF="../The%20Support%20Kit/misc.html#NULL">NULL</A></TT></B>, the currently-configured joystick settings (as per the Joysticks preference application) are used.
+<P>
+If enhanced mode is entered successfully (or the device is already in enhanced mode), <B><TT><A HREF="../The%20Interface%20Kit/Font.html#true">true</A></TT></B> is returned.  Otherwise, <B><TT>EnterEnhancedMode()</TT></B> returns <B><TT><A HREF="../The%20Interface%20Kit/Font.html#false">false</A></TT></B>.
+<P>
+<HR>
+<H3><A NAME="IsCalibrationEnabled()">IsCalibrationEnabled()</A>, <A NAME="EnableCalibration()">EnableCalibration()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsCalibrationEnabled(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+status_t </TT></B></FONT><B><TT><FONT  color=000022 size=+1>EnableCalibration(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>calibrates</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</FONT>IsCalibrationEnabled()</TT></B> returns <B><TT><A HREF="../The%20Interface%20Kit/Font.html#true">true</A></TT></B> if axis values returned by the joystick will be calibrated automatically into the range -32,768 to 32,767, or <B><TT><A HREF="../The%20Interface%20Kit/Font.html#false">false</A></TT></B> if the raw values will be returned.
+<P>
+<B><TT>EnableCalibration()</TT></B> enables or disables automatic calibration for the joystick's axes.  Specify a value of <B><TT><A HREF="../The%20Interface%20Kit/Font.html#true">true</A></TT></B> for <I><FONT  color=991122 face=HELVETICA>calibrates</I></FONT> to enable calibration; otherwise, specify <B><TT><A HREF="../The%20Interface%20Kit/Font.html#false">false</A></TT></B>.
+<P>
+The names returned by <B><TT>GetDeviceName()</TT></B> can be passed into the <B><TT><A HREF="#Open()">Open()</A></TT></B> function to open a device.
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>The Joysticks preference application lets the user calibrate the joystick.  Calibration is enabled by default.  These functions may only be used in enhanced mode.
+</TD>
+</TR>
+</TABLE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The name was returned successfully.
+<P>
+B_NO_INIT.  The device isn't in enhanced mode.
+<P>
+<HR>
+<H3><A NAME="Open()">Open()</A>, <A NAME="Close()">Close()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Open(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>devName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<TR><TD>
+status_t </TT></B></FONT><B><TT><FONT  color=000022 size=+1>Open(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>devName</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>enterEnhanced</I></FONT><B><TT><FONT  color=000022 size=+1>)
+
+<TR><TD>
+void </TT></B></FONT><B><TT><FONT  color=000022 size=+1>Close(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</TT></B></FONT>These functions open the joystick port specified by <I><FONT  color=991122 face=HELVETICA>devName</I></FONT> and close it again.
+<P>
+On the BeBox, there are two ports on the back of the computer, and they have names that correspond to their labels on the machine (and in The BeOS User's Guide diagram):
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD></TD>
+<TD>"joystick1"  (on the top)
+<br>
+"joystick2"  (on the bottom)
+</TD>
+</TR>
+</TABLE>
+<P>
+By attaching a Y cable to a machine port, you can make it support two joysticks.  Cables, therefore, add two additional ports:
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD></TD>
+<TD>"joystick3"  (on the top)
+<br>
+"joystick4"  (on the bottom)
+</TD>
+</TR>
+</TABLE>
+<P>
+The cable maps the bottom row of pins on a machine port to the top row on a cable port.  Therefore, the first two names listed above correspond to the top row of pins on a machine port; the last two names correspond to the bottom row of pins.
+<P>
+On other systems, the <I><FONT  color=991122 face=HELVETICA>devName</I></FONT> should be the name of a game port device.  The easiest way to determine valid device names is by using the <B><TT><A HREF="#CountDevices()">CountDevices()</A></TT></B> and <B><TT><A HREF="#GetDeviceName()">GetDeviceName()</A></TT></B> functions.
+<P>
+If it's able to open the port, <B><TT><A HREF="#Open()">Open()</A></TT></B> returns a positive integer.  If unable or if the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> isn't valid, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  If the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> port is already open, <B><TT>Open()</TT></B> tries to close it first, then open it again.
+<P>
+By default, <B><TT>Open()</TT></B> opens the device in enhanced mode.  If you want to use the old, unenhanced mode, you can use the second form of <B><TT>Open()</TT></B> to specify whether or not you want to use enhanced mode; set <I><FONT  color=991122 face=HELVETICA>enterEnhanced</I></FONT> to <B><TT><A HREF="../The%20Interface%20Kit/Font.html#true">true</A></TT></B> to use enhanced mode; specify <B><TT><A HREF="../The%20Interface%20Kit/Font.html#false">false</A></TT></B> if you don't want enhanced mode.
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>Even in enhanced mode, the classic BJoystick data members are valid (for compatibility with older applications).  However, they only give you access to the first two axes and buttons of the joystick.
+</TD>
+</TR>
+</TABLE>
+<P>
+To be able to obtain joystick data, a BJoystick object must have a port open.  
+<P>
+<HR>
+<H3><A NAME="SetMaxLatency()">SetMaxLatency()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetMaxLatency(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>maxLatency</I></FONT><B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</TT></B></FONT>Specifies the maximum latency to allow when accessing the joystick.  Returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the change is applied successfully, otherwise returns an error code.
+<P>
+<HR>
+<H3><A NAME="Update()">Update()</A></H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Update(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+</TABLE></TABLE>
+
+<P>
+</TT></B></FONT>Updates the data members of the object so that they reflect the current state of the joystick.  An application would typically call <B><TT><A HREF="#Update()">Update()</A></TT></B> periodically to poll the condition of the device, then read the values of the data members, or&mdash;if in enhanced mode&mdash;call the various functions for obtaining joystick state information.
+<P>
+This function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if the BJoystick object doesn't have a port open, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if it does.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Device Kit Table of Contents</FONT></A>
+<TD>
+<A HREF="The%20Device%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Device Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+<!-- Footer for Release 4 HTML Be Book -->
+<hr>
+<br>
+<p>
+
+<center><i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,<br>...in lovely HTML...<br>for BeOS Release 4.5.<center><br><p><font face=helvetiva>Copyright &copy; 1999 Be, Inc.  All rights reserved.
+<p>Text last modified </font>June 6, 1999.
+</body>
+</html>
+

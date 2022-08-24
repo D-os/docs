@@ -1,0 +1,659 @@
+<HTML><HEAD><TITLE>The Media Kit: BMediaEventLooper</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMediaEventLooper"></A>BMediaEventLooper
+</H1>
+<P>
+Derived from:  <A HREF="MediaNode.html#BMediaNode">BMediaNode</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaEventLooper.h">be/media/MediaEventLooper.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="MediaEventLooper.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMediaEventLooper class provides a control thread that automatically queues received media events and calls the <B><TT><A HREF="#HandleEvent()">HandleEvent()</A></TT></B> function you implement to process them as necessary.  This takes a lot of the drudgery out of writing nodes:
+<P>
+<LI>You don't have to write a service thread to receive and process incoming messages; BMediaEventLooper does this for you (much like a <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A>, hence the similarity in names).
+<P>
+<LI>You don't have to write code to queue up events until it's time to handle them, since BMediaEventLooper maintains a <A HREF="TimedEventQueue.html#BTimedEventQueue">BTimedEventQueue</A> for you.  Just push events onto the queue as you receive them and the BMediaEventLooper pops them off for you at the appropriate times and asks you to handle them.
+<P>
+<LI>If all your node needs to do is know when <B><TT><A HREF="MediaNode.html#Start()">Start()</A></TT></B>, <B><TT><A HREF="MediaNode.html#Stop()">Stop()</A></TT></B>, and <B><TT><A HREF="MediaNode.html#Seek()">Seek()</A></TT></B> requests come due, your node doesn't even have to override these functions&mdash;BMediaEventLooper automatically intercepts them and pushes them onto the queue for you.
+<P>
+<LI>The <A HREF="TimedEventQueue.html#BTimedEventQueue">BTimedEventQueue</A> employed by BMediaEventLooper automatically provides support for queueing multiple start, stop, and seek events.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Implementing%20a%20Node%20(the%20Easy%20Way)"></A><FONT SIZE=6>I</FONT>mplementing a <FONT SIZE=6>N</FONT>ode (the <FONT SIZE=6>E</FONT>asy <FONT SIZE=6>W</FONT>ay)
+</H2>
+<P>
+Although BMediaEventLooper does take away a lot of the complicated node construction work, there's still work to be done.  There are still plenty of  hooks you have to implement yourself (which ones, exactly, depend on whether you're a producer or a consumer).
+<P>
+You can study a specific example of how to implement a node using BMediaEventLooper by reading <a href="ExampleNode.html#A%20BMediaEventLooper%20Example">"A BMediaEventLooper Example"</a>.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<UL>
+<LI><B><TT><A HREF="#CleanUpEvent()">CleanUpEvent()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#ControlLoop()">ControlLoop()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#HandleEvent()">HandleEvent()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#OfflineTime()">OfflineTime()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMediaEventLooper()"></A>BMediaEventLooper()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+explicit <B><TT><FONT  color=000022 size=+1>BMediaEventLooper(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>apiVersion</I></FONT> = <B><TT>B_BEOS_VERSION</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+You need to override this function to handle your node's initialization needs.  The <I><FONT  color=991122 face=HELVETICA>apiVersion</I></FONT> argument indicates the version of the BeOS API the object was written for; you should let the default value be used&mdash;this will cause your node to inherit the API version of the BeOS version you're compiling under.
+<P>
+<HR>
+<H3>
+<A NAME="~BMediaEventLooper()"></A>~BMediaEventLooper()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BMediaEventLooper(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls <B><TT><A HREF="#Quit()">Quit()</A></TT></B> to stop the control thread and free allocated memory.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>BufferDuration() see <A HREF="#SetBufferDuration()">SetBufferDuration()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="CleanUpEvent()"></A>CleanUpEvent()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>CleanUpEvent(</TT></B></FONT>const media_timed_event *<I><FONT  color=991122 face=HELVETICA>event</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implement this function to clean up after custom events you've created and added to your queue.  It's called when a custom event is removed from the queue, to let you handle any special tidying-up that the event might require.
+<P>
+<HR>
+<H3>
+<A NAME="ControlLoop()"></A>ControlLoop()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ControlLoop(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function waits for messages, pops events off the queue, and calls <B><TT><A HREF="#DispatchEvent()">DispatchEvent()</A></TT></B>.  It's called automatically when the BMediaEventLooper is <B><TT><A HREF="#Run()">Run()</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you choose to reimplement this function, be very careful; it's very easy to cause Bad Things to happen.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="ControlThread()"></A>ControlThread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+thread_id <B><TT><FONT  color=000022 size=+1>ControlThread(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the control thread's thread_id.
+<P>
+<HR>
+<H3>
+<A NAME="DispatchEvent()"></A>DispatchEvent()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DispatchEvent(</TT></B></FONT>const media_timed_event *<I><FONT  color=991122 face=HELVETICA>event</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>lateness</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>realTimeEvent</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls <B><TT><A HREF="#HandleEvent()">HandleEvent()</A></TT></B> to let your code handle the specified <I><FONT  color=991122 face=HELVETICA>event</I></FONT>.  If your code doesn't handle it, this function may have a default handler to process it.  In general, you won't call this function.
+<P>
+It's the control loop's job to remove the event from the queue; this function doesn't do that.
+<P>
+<HR>
+<H3>EventLatency() see <A HREF="#SetEventLatency()">SetEventLatency()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="EventQueue()"></A>EventQueue()
+, 
+<A NAME="RealTimeQueue()"></A>RealTimeQueue()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="TimedEventQueue.html#BTimedEventQueue">BTimedEventQueue</A> *<B><TT><FONT  color=000022 size=+1>EventQueue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="TimedEventQueue.html#BTimedEventQueue">BTimedEventQueue</A> *<B><TT><FONT  color=000022 size=+1>RealTimeQueue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>EventQueue()</TT></B> returns a pointer to the <A HREF="TimedEventQueue.html#BTimedEventQueue">BTimedEventQueue</A> used by the message handler.  <B><TT>RealTimeQueue()</TT></B> returns a pointer to the <A HREF="TimedEventQueue.html#BTimedEventQueue">BTimedEventQueue</A> used to queue real-time events.
+<P>
+<HR>
+<H3>
+<A NAME="HandleEvent()"></A>HandleEvent()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>HandleEvent(</TT></B></FONT>const media_timed_event *<I><FONT  color=991122 face=HELVETICA>event</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>lateness</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>realTimeEvent</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implement this function to handle incoming media events.  The <I><FONT  color=991122 face=HELVETICA>event</I></FONT> argument references a media_timed_event structure that describes the event.  <I><FONT  color=991122 face=HELVETICA>lateness</I></FONT> indicates how late the event is, and <I><FONT  color=991122 face=HELVETICA>realTimeEvent</I></FONT> is true if the event needs to be handled in real time.
+<P>
+The BMediaEventLooper will call this function from the <B><TT><A HREF="#DispatchEvent()">DispatchEvent()</A></TT></B> function.  It's the control loop's job to remove the event from the queue.
+<P>
+<HR>
+<H3>OfflineTime() see <A HREF="#SetOfflineTime()">SetOfflineTime()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="NodeRegistered()"></A>NodeRegistered()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>NodeRegistered(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The Media Server calls this hook function after the node has been registered.  This is derived from BMediaNode; BMediaEventLooper implements it to call <B><TT><A HREF="#Run()">Run()</A></TT></B> automatically when the node is registered; if you implement <B><TT>NodeRegistered()</TT></B> you should call through to <B><TT><A HREF="#BMediaEventLooper::NodeRegistered()">BMediaEventLooper::NodeRegistered()</A></TT></B> after you've done your custom operations.
+<P>
+<HR>
+<H3>Priority() see <A HREF="#SetPriority()">SetPriority()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Quit()"></A>Quit()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Quit(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Closes the node's control port and closes the control thread.  Blocks until the control thread is gone.
+<P>
+<HR>
+<H3>
+<A NAME="Run()"></A>Run()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Run(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Spawns and runs the control thread; this is called automatically by the default <B><TT><A HREF="#NodeRegistered()">NodeRegistered()</A></TT></B> implementation.  If you override <B><TT><A HREF="#NodeRegistered()">NodeRegistered()</A></TT></B>, be sure you call through to the default implementation, or call <B><TT>Run()</TT></B>.
+<P>
+<HR>
+<H3>RunState() see <A HREF="#SetRunState()">SetRunState()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SchedulingLatency()"></A>SchedulingLatency()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>SchedulingLatency(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the scheduling latnecy, in microseconds, of the node.
+<P>
+<HR>
+<H3>
+<A NAME="SetBufferDuration()"></A>SetBufferDuration()
+, 
+<A NAME="BufferDuration()"></A>BufferDuration()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetBufferDuration(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>duration</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>BufferDuration(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetBufferDuration()</TT></B> sets the duration of the node's buffers.  The <I><FONT  color=991122 face=HELVETICA>duration</I></FONT> is clamped to 0 if it's less than 0.
+<P>
+<B><TT>BufferDuration()</TT></B> returns the duration of the nodes' buffers.
+<P>
+<HR>
+<H3>
+<A NAME="SetEventLatency()"></A>SetEventLatency()
+, 
+<A NAME="EventLatency()"></A>EventLatency()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetEventLatency(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>latency</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>EventLatency(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetEventLatency()</TT></B> sets the event latency.  The event latency is the total latency of your node, including both your internal latency and the downstream latency.  This latency is taken into account by the BMediaEventLooper when deciding when to pop events off the queue for you to process.
+<P>
+<B><TT>EventLatency()</TT></B> returns the event latency.
+<P>
+<HR>
+<H3>
+<A NAME="SetOfflineTime()"></A>SetOfflineTime()
+, 
+<A NAME="OfflineTime()"></A>OfflineTime()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetOfflineTime(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>offlineTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual bigtime_t <B><TT><FONT  color=000022 size=+1>OfflineTime(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetOfflineTime()</TT></B> sets the time that <B><TT>OfflineTime()</TT></B> will return.
+<P>
+Augment <B><TT>OfflineTime()</TT></B> to compute the node's current time; it's called by the Media Kit when it's in offline mode.  Update any appropriate internal information as well, then call through to the BMediaEventLooper implementation.
+<P>
+<HR>
+<H3>
+<A NAME="SetPriority()"></A>SetPriority()
+, 
+<A NAME="Priority()"></A>Priority()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetPriority(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>priority</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>Priority(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetPriority()</TT></B> sets the control thread's priority.  Values less than 0 are clamped to 0, and values greater than 120 are clamped to 120.
+<P>
+<B><TT>Priority()</TT></B> returns the control thread's current priority.
+<P>
+<HR>
+<H3>
+<A NAME="SetRunState()"></A>SetRunState()
+, 
+<A NAME="RunState()"></A>RunState()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetRunState(</TT></B></FONT>run_state <I><FONT  color=991122 face=HELVETICA>state</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+run_state <B><TT><FONT  color=000022 size=+1>RunState(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetRunState()</TT></B> sets the node's current run state.
+<P>
+<B><TT>RunState()</TT></B> returns the current run state.
+<P>
+<B>See also:  <TT><A HREF="#run_state">run_state</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="run_state"></A>run_state
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaEventLooper.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_IN_DISTRESS</TT></B></TD>
+<TD>The node is experiencing problems.</TD>
+<TR>
+<TD><B><TT>B_UNREGISTERED</TT></B></TD>
+<TD>The node hasn't been registered with the Media roster yet.</TD>
+<TR>
+<TD><B><TT><A HREF="SoundPlayer.html#sound_player_notification">B_STOPPED</A></TT></B></TD>
+<TD>The node isn't running.</TD>
+<TR>
+<TD><B><TT><A HREF="SoundPlayer.html#sound_player_notification">B_STARTED</A></TT></B></TD>
+<TD>The node is running.</TD>
+<TR>
+<TD><B><TT>B_QUITTING</TT></B></TD>
+<TD>The node's in the process of shutting down.</TD>
+<TR>
+<TD><B><TT>B_TERMINATED</TT></B></TD>
+<TD>The node has been terminated.</TD>
+<TR>
+<TD><B><TT>B_USER_RUN_STATES</TT></B></TD>
+<TD>Base for user-defined run states.</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

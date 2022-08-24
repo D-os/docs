@@ -1,0 +1,592 @@
+<HTML><HEAD><TITLE>The Interface Kit: BScrollBar</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BScrollBar"></A>BScrollBar
+</H1>
+<P>
+Derived from:  public <A HREF="View.html#BView">BView</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/ScrollBar.h">be/interface/ScrollBar.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="ScrollBar.summary.html"><i>Summary</i></A></H6>
+<P>
+A BScrollBar object displays a vertical or horizontal scroll bar that users can operate to scroll the contents of another view, a <I>target view</I>.  Scroll bars usually are grouped as siblings of the target view under a common parent.  That way, when the parent is resized, the target and scroll bars can be automatically resized to match.  (A companion class, <A HREF="ScrollView.html#BScrollView">BScrollView</A>, defines just such a container view; a <A HREF="ScrollView.html#BScrollView">BScrollView</A> object sets up the scroll bars for a target view and makes itself the parent of the target and the scroll bars.)
+<P>
+<HR>
+<H3>
+<A NAME="The%20Update%20Mechanism"></A>The Update Mechanism
+</H3>
+<P>
+BScrollBars are different from other views in one important respect:  All their drawing and event handling is carried out within the Application Server, not in the application.  A BScrollBar object doesn't receive <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> or <B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B> notifications; the server intercepts updates and interface messages that would otherwise be reported to the BScrollBar and handles them itself.  As the user moves the knob on a scroll bar or presses a scroll arrow, the Application Server continuously refreshes the scroll bar's image on-screen and informs the application with a steady stream of <B><TT><A HREF="../Messages/GeneralMessages.html#B_VALUE_CHANGED">B_VALUE_CHANGED</A></TT></B> messages.
+<P>
+The window dispatches these messages by calling the BScrollBar's <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> function.  Each function call notifies the BScrollBar of a change in its value and, consequently, of a need to scroll the target view.
+<P>
+Confining the update mechanism for scroll bars to the Application Server limits the volume of communication between the application and server and enhances the efficiency of scrolling.  The application's messages to the server can concentrate on updating the target view as its contents are being scrolled, rather than on updating the scroll bars themselves.
+<P>
+<HR>
+<H3>
+<A NAME="Value%20and%20Range"></A>Value and Range
+</H3>
+<P>
+A scroll bar's value determines what the target view displays.  The assumption is that the left coordinate value of the target view's bounds rectangle should match the value of the horizontal scroll bar, and the top of the target view's bounds rectangle should match the value of the vertical scroll bar.  When a BScrollBar is notified of a change of value (through <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B>), it calls the target view's <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B> function to put the new value at the left or top of the bounds rectangle.
+<P>
+The value reported in a <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> notification and passed to <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B> depends on where the user moves the scroll bar's knob and on the range of values the scroll bar represents.  The range is first set in the BScrollBar constructor and can be modified by the <B><TT><A HREF="#SetRange()">SetRange()</A></TT></B> function.
+<P>
+The range must be large enough to bring all the coordinate values where the target view can draw into its bounds rectangle.  If everything the target view can draw is conceived as being enclosed in a "data rectangle," the range of a horizontal scroll bar must extend from a minimum that makes the left side of the target's bounds rectangle coincide with the left side of its data rectangle, to a maximum that puts the right side of the bounds rectangle at the right side of the data rectangle.  This is illustrated in part below:
+<P>
+<IMG SRC="art/ScrollBar.GIF" ALIGN="bottom">
+<P>
+As this illustration helps demonstrate, the maximum value of a horizontal scroll bar can be no less than the right coordinate value of the data rectangle minus the width of the bounds rectangle.  Similarly, for a vertical scroll bar, the maximum value can be no less than the bottom coordinate of the data rectangle minus the height of the bounds rectangle.  The range of a scroll bar subtracts the dimensions of the target's bounds rectangle from its data rectangle.  (The minimum values of horizontal and vertical scroll bars can be no greater than the left and top sides of the data rectangle.)
+<P>
+What the target view can draw may change from time to time as the user adds or deletes data.  As this happens, the range of the scroll bar should be updated with the <B><TT><A HREF="#SetRange()">SetRange()</A></TT></B> function.  The range may also need to be recalculated when the target view is resized.
+<P>
+<HR>
+<H3>
+<A NAME="Coordination"></A>Coordination
+</H3>
+<P>
+Scroll bars control the target view, but a target can also be scrolled without the intervention of its scroll bars (by calling <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B> or <B><TT>ScrollBy()</TT></B> directly).  Therefore, not only must a scroll bar know about its target, but a target view must know about its scroll bars.  When a BScrollBar sets its target, the target <A HREF="View.html#BView">BView</A> is notified and records the identity of the BScrollBar.
+<P>
+The two objects communicate whenever the display changes:  When the scroll bar is the instrument that initiates scrolling, <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> calls the target view's <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B> function.  To cover cases of target-initiated scrolling, <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B> calls the BScrollBar's <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> function so that the scroll bars can be updated on-screen.  <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> in turn calls <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B>, which makes sure the exchange of function calls doesn't get too circular.
+<P>
+<HR>
+<H3>
+<A NAME="Scroll%20Bar%20Options"></A>Scroll Bar Options
+</H3>
+<P>
+Users have control over some aspects of how scroll bars look and behave.  With the ScrollBar preferences application, they can choose:
+<P>
+<UL>
+<LI>Whether the knob should be a fixed size, or whether it should grow and shrink to proportionally represent how much of a document (how much of the data rectangle) is visible within the target view.  A proportional knob is the default.
+<P>
+<LI>Whether double, bidirectional scroll arrows should appear on each end of the scroll bar, or whether each end should have only a single, unidirectional arrow.  Double arrows are the default.
+<P>
+<LI>Which of three patterns should appear on the knob.
+<P>
+<LI>What the size of the knob should be&mdash;the minimum length of a proportional knob or the fixed length of a knob that's not proportional.  The default length is 15 pixels.
+<P>
+</UL>
+<P>
+When this class constructs a new <A HREF="#BScrollBar">BScrollBar</A>, it conforms the object to the choices the user has made.
+<P>
+<B>See also:  <TT><A HREF="functions.html#set_scroll_bar_info()">set_scroll_bar_info()</A></TT></B>, <B><TT>BView::ScrollBar()</TT></B>, the <A HREF="ScrollView.html#BScrollView">BScrollView</A> class
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Scrolls the target view when the BScrollBar is informed that its value has changed; can be augmented to coordinate other activities with the change in value..
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BScrollBar()"></A>BScrollBar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BScrollBar(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>target</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <I><FONT  color=991122 face=HELVETICA>min</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>max</I></FONT>, orientation <I><FONT  color=991122 face=HELVETICA>posture</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BScrollBar(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BScrollBar and connects it to the <I><FONT  color=991122 face=HELVETICA>target</I></FONT> view that it will scroll.  It will be a horizontal scroll bar if <I><FONT  color=991122 face=HELVETICA>posture</I></FONT> is <B><TT>B_HORIZONTAL</TT></B> and a vertical scroll bar if <I><FONT  color=991122 face=HELVETICA>posture</I></FONT> is <B><TT><A HREF="misc.html#B_VERTICAL">B_VERTICAL</A></TT></B>.
+<P>
+The range of values that the scroll bar can represent at the outset is set by <I><FONT  color=991122 face=HELVETICA>min</I></FONT> and <I><FONT  color=991122 face=HELVETICA>max</I></FONT>.  These values should be calculated from the boundaries of a rectangle that encloses the entire contents of the target view&mdash;everything that it can draw.  If <I><FONT  color=991122 face=HELVETICA>min</I></FONT> and <I><FONT  color=991122 face=HELVETICA>max</I></FONT> are both 0, the scroll bar is disabled and the knob is not drawn.
+<P>
+The object's initial value is 0 even if that falls outside the range set for the scroll bar.
+<P>
+The other arguments, <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> and <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, are the same as for other BViews:
+<P>
+<UL>
+<LI>The <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> rectangle locates the scroll bar within its parent view.  For consistency in the user interface, a horizontal scroll bar should be <B><TT>B_H_SCROLL_BAR_HEIGHT</TT></B> coordinate units high, and a vertical scroll bar should be <B><TT>B_V_SCROLL_BAR_WIDTH</TT></B> units wide.
+<P>
+<LI>The BScrollBar's <I><FONT  color=991122 face=HELVETICA>name</I></FONT> identifies it and permits it to be located by the <B><TT><A HREF="Bitmap.html#FindView()">FindView()</A></TT></B> function.  It can be <B><TT>NULL</TT></B>.
+<P>
+</UL>
+<P>
+Unlike other BViews, the BScrollBar constructor doesn't set an automatic resizing mode.  By default, scroll bars have the resizing behavior that befits their posture&mdash;horizontal scroll bars resize themselves horizontally (as if they had a resizing mode that combined <B><TT><A HREF="misc.html#B_FOLLOW_LEFT_RIGHT">B_FOLLOW_LEFT_RIGHT</A></TT></B> with <B><TT><A HREF="ViewGeneral.html#B_FOLLOW_BOTTOM">B_FOLLOW_BOTTOM</A></TT></B>) and vertical scroll bars resize themselves vertically (as if their resizing mode combined <B><TT>B_FOLLOW_TOP_BOTTOM</TT></B> with <B><TT><A HREF="ViewGeneral.html#B_FOLLOW_RIGHT">B_FOLLOW_RIGHT</A></TT></B>).
+<P>
+<HR>
+<H3>
+<A NAME="~BScrollBar()"></A>~BScrollBar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BScrollBar()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Disconnects the scroll bar from its target.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BScrollBar object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message doesn't contain data for a BScrollBar object, the return value will be <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B>, then adds the BScrollBar's range, orientation, current value and proportion, and the size of its big and little steps to the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Makes sure that the Application Server is cognizant of the BScrollBar's value, if a value was set before the object was attached to a window.
+<P>
+<B>See also:  <TT>BHandler::AttachedToWindow()</TT></B>  
+<P>
+<HR>
+<H3>GetRange()   see <A HREF="#SetRange()">SetRange()</A></H3>
+<P>
+<HR>
+<H3>GetSteps()   see <A HREF="#SetSteps()">SetSteps()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Orientation()"></A>Orientation()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+orientation <B><TT><FONT  color=000022 size=+1>Orientation(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>B_HORIZONTAL</TT></B> if the object represents a horizontal scroll bar and <B><TT><A HREF="misc.html#B_VERTICAL">B_VERTICAL</A></TT></B> if it represents a vertical scroll bar.
+<P>
+<B>See also:  </B>the BScrollBar constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetProportion()"></A>SetProportion()
+, 
+<A NAME="Proportion()"></A>Proportion()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetProportion(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>ratio</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Proportion(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return a value between 0.0 and 1.0 that represents the proportion of the entire document that can be displayed within the target view&mdash;the ratio of the width (or height) of the target's bounds rectangle to the width (or height) of its data rectangle.  This ratio determines the size of a proportional scroll knob relative to the whole scroll bar.  It's not adjusted to take into account the minimum size of the knob.
+<P>
+The proportion should be reset as the size of the data rectangle changes (as data is entered and removed from the document) and when the target view is resized.
+<P>
+<HR>
+<H3>
+<A NAME="SetRange()"></A>SetRange()
+, 
+<A NAME="GetRange()"></A>GetRange()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetRange(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>min</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>max</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetRange(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>min</I></FONT>, float *<I><FONT  color=991122 face=HELVETICA>max</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions modify and return the range of the scroll bar.  <B><TT><A HREF="#SetRange()">SetRange()</A></TT></B> sets the minimum and maximum values of the scroll bar to <I><FONT  color=991122 face=HELVETICA>min</I></FONT> and <I><FONT  color=991122 face=HELVETICA>max</I></FONT>.  <B><TT><A HREF="#GetRange()">GetRange()</A></TT></B> places the current minimum and maximum in the variables that <I><FONT  color=991122 face=HELVETICA>min</I></FONT> and <I><FONT  color=991122 face=HELVETICA>max</I></FONT> refer to.
+<P>
+If the scroll bar's current value falls outside the new range, it will be reset to the closest value&mdash;either <I><FONT  color=991122 face=HELVETICA>min</I></FONT> or <I><FONT  color=991122 face=HELVETICA>max</I></FONT>&mdash;within range.  <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> is called to inform the BScrollBar of the change whether or not it's attached to a window.
+<P>
+If the BScrollBar is attached to a window, any change in its range will be immediately reflected on-screen.  The knob will move to the appropriate position to reflect the current value.
+<P>
+Setting both the minimum and maximum to 0 disables the scroll bar.  It will be drawn without a knob.
+<P>
+<B>See also:  </B>the BScrollBar constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetSteps()"></A>SetSteps()
+, 
+<A NAME="GetSteps()"></A>GetSteps()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSteps(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>smallStep</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>bigStep</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetSteps(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>smallStep</I></FONT>, float *<I><FONT  color=991122 face=HELVETICA>bigStep</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetSteps()">SetSteps()</A></TT></B> sets how much a single user action should change the value of the scroll bar&mdash;and therefore how far the target view should scroll.  <B><TT><A HREF="#GetSteps()">GetSteps()</A></TT></B> provides the current settings.
+<P>
+When the user presses one of the scroll arrows at either end of the scroll bar, its value changes by a <I><FONT  color=991122 face=HELVETICA>smallStep</I></FONT> coordinate units.  When the user clicks in the bar itself (other than on the knob), it changes by a <I><FONT  color=991122 face=HELVETICA>bigStep</I></FONT> units.  For an application that displays text, the small step of a vertical scroll bar should be large enough to bring another line of text into view.
+<P>
+The default small step is 1.0, which should be too small for most purposes; the default large step is 10.0, which is also probably too small.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Although the step values are specified using type float, only integral values should be specified; otherwise, the scroll bar won't behave as expected.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Currently, a BScrollBar's steps can be successfully set only after it's attached to a window.
+<P>
+<B>See also:  <TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetTarget()"></A>SetTarget()
+, 
+<A NAME="Target()"></A>Target()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetTarget(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetTarget(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>Target(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the target of the <A HREF="#BScrollBar">BScrollBar</A>, the view that the scroll bar scrolls.  <B><TT><A HREF="#SetTarget()">SetTarget()</A></TT></B> sets the target to <I><FONT  color=991122 face=HELVETICA>view</I></FONT>, or to the <A HREF="View.html#BView">BView</A> identified by <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  <B><TT><A HREF="#Target()">Target()</A></TT></B> returns the current target view.  The target can also be set when the BScrollBar is constructed.
+<P>
+<B><TT><A HREF="#SetTarget()">SetTarget()</A></TT></B> can be called either before or after the BScrollBar is attached to a window.  If the target is set by <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, the named view must eventually be found within the same window as the scroll bar.  Typically, the target and its scroll bars are children of a container view that serves to bind them together as a unit.
+<P>
+When the target is successfully set, a pointer to the BScrollBar object is passed to the target view.  This lets the target update its scroll bars when its contents are scrolled.
+<P>
+<B>See also:  </B>the BScrollBar constructor, <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B>, <B><TT>BView::ScrollBar()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetValue()"></A>SetValue()
+, 
+<A NAME="Value()"></A>Value()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetValue(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>value</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Value(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions modify and return the value of the scroll bar.  The value is usually set as the result of user actions; <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> provides a way to do it programmatically.  <B><TT><A HREF="#Value()">Value()</A></TT></B> returns the current value, whether set by <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> or by the user.
+<P>
+<B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> assigns a new <I><FONT  color=991122 face=HELVETICA>value</I></FONT> to the scroll bar and calls the <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> hook function, whether or not the new value is really a change from the old.  If the <I><FONT  color=991122 face=HELVETICA>value</I></FONT> passed lies outside the range of the scroll bar, the BScrollBar is reset to the closest value within range&mdash;that is, to either the minimum or the maximum value previously specified.
+<P>
+If the scroll bar is attached to a window, changing its value updates its on-screen display.  The call to <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> enables the object to scroll the target view so that it too is updated to conform to the new value.
+<P>
+The initial value of a scroll bar is 0.
+<P>
+<B>See also:  <TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B>, <B><TT><A HREF="#SetRange()">SetRange()</A></TT></B> 
+<P>
+<HR>
+<H3>Target()   see <A HREF="#SetTarget()">SetTarget()</A></H3>
+<P>
+<HR>
+<H3>Value()   see <A HREF="#SetValue()">SetValue()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ValueChanged()"></A>ValueChanged()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ValueChanged(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>newValue</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Responds to a notification that the value of the scroll bar has changed to <I><FONT  color=991122 face=HELVETICA>newValue</I></FONT>.  For a horizontal scroll bar, this function interprets <I><FONT  color=991122 face=HELVETICA>newValue</I></FONT> as the coordinate value that should be at the left side of the target view's bounds rectangle.  For a vertical scroll bar, it interprets <I><FONT  color=991122 face=HELVETICA>newValue</I></FONT> as the coordinate value that should be at the top of the rectangle.  It calls <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B> to scroll the target's contents into position, unless they have already been scrolled.
+<P>
+<B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> is called as the result both of user actions (<B><TT><A HREF="../Messages/GeneralMessages.html#B_VALUE_CHANGED">B_VALUE_CHANGED</A></TT></B> messages received from the Application Server) and of programmatic ones.  Programmatically, scrolling can be initiated by the target view (calling <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B>) or by the BScrollBar (calling <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> or <B><TT><A HREF="#SetRange()">SetRange()</A></TT></B>).
+<P>
+In all these cases, the target view and the scroll bars need to be kept in synch.  This is done by a chain of function calls:  <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> calls <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B>, which in turn calls <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B>, which then calls <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> again.  It's up to <B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> to get off this merry-go-round, which it does by checking the target view's bounds rectangle.  If <I><FONT  color=991122 face=HELVETICA>newValue</I></FONT> already matches the left or top side of the bounds rectangle, if forgoes calling <B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B>.
+<P>
+<B><TT><A HREF="#ValueChanged()">ValueChanged()</A></TT></B> does nothing if a target <A HREF="View.html#BView">BView</A> hasn't been set&mdash;or if the target has been set by name, but the name doesn't correspond to an actual <A HREF="View.html#BView">BView</A> within the scroll bar's window.
+<P>
+Derived classes can override this function to interpret <I><FONT  color=991122 face=HELVETICA>newValue</I></FONT> differently, or to do something in addition to scrolling the target view.
+<P>
+<B>See also:  <TT><A HREF="#SetTarget()">SetTarget()</A></TT></B>, <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B>, <B><TT>BView::ScrollTo()</TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_range" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Minimum and maximum values of the scroll bar.</TD>
+<TR>
+<TD>"_steps" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Small and large steps of the scroll bar.</TD>
+<TR>
+<TD>"_val"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Current value of the scroll bar.</TD>
+<TR>
+<TD>"_orient"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Orientation of the scroll bar.</TD>
+<TR>
+<TD>"_prop"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Proportion of the document visible in the target view.</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

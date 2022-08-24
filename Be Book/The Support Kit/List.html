@@ -1,0 +1,571 @@
+<HTML><HEAD><TITLE>The Support Kit: BList</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BList"></A>BList
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/support/List.h">be/support/List.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="List.summary.html"><i>Summary</i></A></H6>
+<P>
+A BList object is a compact, ordered list of data pointers.  BList objects can contain pointers to any type of data, including&mdash;and especially&mdash;objects. 
+<P>
+An item assigned to a BList is identified by an index to its position in the list.  Indices start at 0 and are neither arbitrary nor permanent.  If, for example, you insert an item into the middle of a list, the indices of the items at the tail of the list are incremented (by one).  Similarly, removing an item decrements the indices of the following items.
+<P>
+A BList stores its items as type <B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">void *</A></TT></B>, so it's necessary to cast an item to the correct type when you retrieve it.  For example, items retrieved from a list of <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> objects must be cast as <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> pointers:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BBitmap *theImage = (BBitmap *)myList->ItemAt(anIndex);</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+There's nothing to prevent you from adding a <B><TT>NULL</TT></B> pointer to a BList.  However, functions that retrieve items from the list (such as <B><TT><A HREF="#ItemAt()">ItemAt()</A></TT></B>) return <B><TT>NULL</TT></B> when the requested item can't be found.  Thus, you can't distinguish between a valid <B><TT>NULL</TT></B> item and an invalid attempt to access an item that isn't there.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BList()"></A>BList()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BList(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>count</I></FONT> = 20<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BList(</TT></B></FONT>const BList&amp; <I><FONT  color=991122 face=HELVETICA>anotherList</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BList by allocating enough memory to hold <I><FONT  color=991122 face=HELVETICA>count</I></FONT> items.  As the list grows and shrinks, additional memory is allocated and freed in blocks of the same size.
+<P>
+The copy constructor creates an independent list of data pointers, but it doesn't copy the pointed-to data.  For example: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BList *newList = new BList(oldList);</PRE>
+<P>
+Here, the contents of <I><FONT  color=991122 face=HELVETICA>oldList</I></FONT> and <I><FONT  color=991122 face=HELVETICA>newList</I></FONT>&mdash;the actual data pointers&mdash;are separate and independent.  Adding, removing, or reordering items in <I><FONT  color=991122 face=HELVETICA>oldList</I></FONT> won't affect the number or order of items in <I><FONT  color=991122 face=HELVETICA>newList</I></FONT>.  But if you modify the data that an item in <I><FONT  color=991122 face=HELVETICA>oldList</I></FONT> points to, the modification will be seen through the analogous item in <I><FONT  color=991122 face=HELVETICA>newList</I></FONT>.
+<P>
+The block size of a BList that's created through the copy constructor is the same as that of the original BList.
+<P>
+<HR>
+<H3>
+<A NAME="~BList()"></A>~BList()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BList()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the list of data pointers, but doesn't free the data that they point to.  To destroy the data, you need to free each item individually:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void *anItem;
+&nbsp;&nbsp;&nbsp;for ( int32 i = 0; anItem = myList->ItemAt(i); i++ )
+&nbsp;&nbsp;&nbsp;    delete anItem;
+&nbsp;&nbsp;&nbsp;delete myList;</PRE>
+<P>
+<B>See also:  <TT><A HREF="#MakeEmpty()">MakeEmpty()</A></TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddItem()"></A>AddItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>AddItem(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>item</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>AddItem(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds an item to the BList at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>&mdash;or, if no index is supplied, at the end of the list.  If necessary, additional memory is allocated to accommodate the new item.
+<P>
+Adding an item never removes an item already in the list.  If the item is added at an index that's already occupied, items currently in the list are bumped down one slot to make room.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is out of range (greater than the current item count, or less than zero), the function fails and returns <B><TT>false</TT></B>.  Otherwise it returns <B><TT>true</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="AddList()"></A>AddList()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>AddList(</TT></B></FONT>BList *<I><FONT  color=991122 face=HELVETICA>list</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>AddList(</TT></B></FONT>BList *<I><FONT  color=991122 face=HELVETICA>list</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Adds the contents of another BList to this BList.  The items from the other BList are inserted at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>&mdash;or, if no index is given, they're appended to the end of the list.  If the index is out of range, the function fails and returns <B><TT>false</TT></B>.  If successful, it returns <B><TT>true</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#AddItem()">AddItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="CountItems()"></A>CountItems()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountItems(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of items currently in the list.
+<P>
+<HR>
+<H3>
+<A NAME="DoForEach()"></A>DoForEach()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DoForEach(</TT></B></FONT>bool (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(void *)<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DoForEach(</TT></B></FONT>bool (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(void *, void *), void *<I><FONT  color=991122 face=HELVETICA>arg2</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls the <I><FONT  color=991122 face=HELVETICA>func</I></FONT> function once for each item in the BList.  Items are visited in order, beginning with the first one in the list (index 0) and ending with the last.  If a call to <I><FONT  color=991122 face=HELVETICA>func</I></FONT> returns <B><TT>true</TT></B>, the iteration is stopped, even if some items have not yet been visited.
+<P>
+<I><FONT  color=991122 face=HELVETICA>func</I></FONT> must be a function that takes one or two arguments.  The first argument is the currently-considered item from the list; the second argument, if <I><FONT  color=991122 face=HELVETICA>func</I></FONT> requires one, is passed to <B><TT><A HREF="#DoForEach()">DoForEach()</A></TT></B> as <I><FONT  color=991122 face=HELVETICA>arg2</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="FirstItem()"></A>FirstItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>FirstItem(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the first item in the list, or <B><TT>NULL</TT></B> if the list is empty.  This function doesn't remove the item from the list.
+<P>
+<B>See also:  <TT><A HREF="#LastItem()">LastItem()</A></TT></B>, <B><TT><A HREF="#ItemAt()">ItemAt()</A> 
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="HasItem()"></A>HasItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasItem(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>item</I></FONT> is in the list, and <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>
+<A NAME="IndexOf()"></A>IndexOf()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IndexOf(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the index where a particular <I><FONT  color=991122 face=HELVETICA>item</I></FONT> is located in the list, or a negative number if the <I><FONT  color=991122 face=HELVETICA>item</I></FONT> isn't in the list.  If the item is in the list more than once, the index returned will be the position of its first occurrence.
+<P>
+<HR>
+<H3>
+<A NAME="IsEmpty()"></A>IsEmpty()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsEmpty(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the list is empty (if it contains no items), and <B><TT>false</TT></B> otherwise.
+<P>
+<B>See also:  <TT><A HREF="#MakeEmpty()">MakeEmpty()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ItemAt()"></A>ItemAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>ItemAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the item at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, or <B><TT>NULL</TT></B> if the index is out of range.  This function doesn't remove the item from the list.
+<P>
+<B>See also:  <TT><A HREF="#Items()">Items()</A></TT></B>, <B><TT><A HREF="#FirstItem()">FirstItem()</A></TT></B>, <B><TT><A HREF="#LastItem()">LastItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Items()"></A>Items()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>Items(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the BList's list.  You can index directly into the list if you're certain that the index is in range:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myType *item = (myType *)Items()[index];</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="LastItem()"></A>LastItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>LastItem(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the last item in the list without removing it.  If the list is empty, this function returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT>RemoveLastItem()</TT></B>, <B><TT><A HREF="#FirstItem()">FirstItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MakeEmpty()"></A>MakeEmpty()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>MakeEmpty(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Empties the BList of all its items, without freeing the data that they point to.
+<P>
+<B>See also:  <TT><A HREF="#IsEmpty()">IsEmpty()</A></TT></B>, <B><TT><A HREF="#RemoveItem()">RemoveItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="RemoveItem()"></A>RemoveItem()
+, 
+<A NAME="RemoveItems()"></A>RemoveItems()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>RemoveItem(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>RemoveItem(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>RemoveItems(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#RemoveItem()">RemoveItem()</A></TT></B> removes an item from the list.  If passed an <I><FONT  color=991122 face=HELVETICA>item</I></FONT>, the function looks for the item in the list, removes it, and returns <B><TT>true</TT></B>.  If it can't find the item, it returns <B><TT>false</TT></B>.  If the item is in the list more than once, this function removes only its first occurrence.
+<P>
+If passed an <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <B><TT><A HREF="#RemoveItem()">RemoveItem()</A></TT></B> removes the item at that index and returns it.  If there's no item at the index, it returns <B><TT>NULL</TT></B>.
+<P>
+<B><TT><A HREF="#RemoveItems()">RemoveItems()</A></TT></B> removes a group of <I><FONT  color=991122 face=HELVETICA>count</I></FONT> items from the list, beginning with the item at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>.  If the index is out of range, it fails and returns <B><TT>false</TT></B>.  Otherwise, it removes the items, without checking to be sure that the list actually holds that many items at the index, and returns <B><TT>true</TT></B>.
+<P>
+The list is compacted after an item is removed.  Because of this, you mustn't try to empty a list (or a range within a list) by removing items at monotonically increasing indices.  You should either start with the highest index and move towards the head of the list, or remove at the same index (the lowest in the range) some number of times.  As an example of the latter, the following code removes the first five items in the list:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;for ( int32 i = 0; i &lt; 5; i++ )
+&nbsp;&nbsp;&nbsp;    myList->RemoveItem(0);</PRE>
+<P>
+<B>See also:  <TT><A HREF="#MakeEmpty()">MakeEmpty()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SortItems()"></A>SortItems()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>SortItems(</TT></B></FONT>int (*<I><FONT  color=991122 face=HELVETICA>compareFunc</I></FONT>)(const void *, const void *)<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Rearranges the items in the list.  The items are sorted using the <I><FONT  color=991122 face=HELVETICA>compareFunc</I></FONT> comparison function passed as an argument.  This function should return a negative number if the first item is ordered before the second, a positive number if the second is ordered before the first, and 0 if the two items are ordered equivalently.
+<P>
+The arguments passed to the comparison function are declared to be <B><TT>void*</TT></B>; however, they should be regarded as pointers to the items in the list&mdash;in other words, as pointers to pointers.
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BList&amp; <B><TT><FONT  color=000022 size=+1>operator =(</TT></B></FONT>const BList&amp;<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Copies the contents of one BList object into another: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BList newList = oldList;</PRE>
+<P>
+After the assignment, each object has its own independent copy of list data; destroying one of the objects won't affect the other.
+<P>
+Only the items in the list are copied, not the data they point to.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

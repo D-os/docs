@@ -1,0 +1,680 @@
+<HTML><HEAD><TITLE>The Interface Kit: BTextControl</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BTextControl"></A>BTextControl
+</H1>
+<P>
+Derived from:  public <A HREF="Control.html#BControl">BControl</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/TextControl.h">be/interface/TextControl.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="TextControl.summary.html"><i>Summary</i></A></H6>
+<P>
+A BTextControl object displays a labeled text field that behaves like other control devices.  When the user presses certain keys after modifying the text in the field, it delivers a message to a designated target.
+<P>
+There are two parts to the view:  A static label on the left, which the user cannot modify, and an editable field on the right, which behaves just like a one-line BTextView.  In fact, the BTextControl installs a <A HREF="TextView.html#BTextView">BTextView</A> object as its child to handle editing chores within this part of the view.  It's this child view that responds to keyboard events for the BTextControl rather than the control object itself.
+<P>
+The child <A HREF="TextView.html#BTextView">BTextView</A> must become the focus view for the window before the user can enter or edit text in the field.  If the user modifies the contents of the field and then causes the child to cease being the focus view, the BTextControl delivers a message to its target, just like any other <A HREF="Control.html#BControl">BControl</A> object when it's invoked.  The message notifies the target that the user has finished making changes to the text.  (It doesn't matter what causes the change in focus&mdash;a click in another text field, for example, or a <B><TT><A HREF="misc.html#B_TAB">B_TAB</A></TT></B> character that navigates to another view.)
+<P>
+The BTextControl is also invoked when the user types a <B><TT><A HREF="misc.html#B_ENTER">B_ENTER</A></TT></B> character, though this doesn't change the focus view.  It selects all the text in the field.
+<P>
+You can arrange for another message&mdash;a "modification message"&mdash;to be sent when the user makes the first change to the text after the child <A HREF="TextView.html#BTextView">BTextView</A> has become the focus view (or after <B><TT><A HREF="misc.html#B_ENTER">B_ENTER</A></TT></B> caused all the text to be selected).  This message notifies the target that editing has begun.
+<P>
+Note that BTextControls only allow the user to edit a single line of text; newline characters are automatically stripped from the text, if they're inserted.
+<P>
+Because the label is drawn by the BTextControl itself and the editable text is drawn by its child <A HREF="TextView.html#BTextView">BTextView</A>, you can assign different properties (color or font, for example) to each string.  The BTextControl has only one child; <B><TT><A HREF="Bitmap.html#ChildAt()">ChildAt()</A></TT></B> returns it when passed an index of&nbsp;0.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BTextControl()"></A>BTextControl()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BTextControl(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>label</I></FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>text</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FOLLOW_LEFT</FONT>&nbsp;|&nbsp;<FONT  face=HELVETICA>B_FOLLOW_TOP</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_WILL_DRAW</FONT>&nbsp;|&nbsp;<FONT  face=HELVETICA>B_NAVIGABLE</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BTextControl(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BTextControl by assigning it a <I><FONT  color=991122 face=HELVETICA>label</I></FONT> and some <I><FONT  color=991122 face=HELVETICA>text</I></FONT>, both of which can be <B><TT>NULL</TT></B>.  If the <I><FONT  color=991122 face=HELVETICA>label</I></FONT> is <B><TT>NULL</TT></B>, the entire bounds rectangle is assigned to the text.  Otherwise, half the view is assigned to the label and half to the text, though the exact proportion can be changed by the <B><TT><A HREF="#SetDivider()">SetDivider()</A></TT></B> function.  The label always is on the left and the text always on the right. By default, both label and text are aligned at the left margins of their respective sections; call <B><TT><A HREF="#SetAlignment()">SetAlignment()</A></TT></B> to alter the alignment.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>message</I></FONT> parameter is the same as the one declared for the <A HREF="Control.html#BControl">BControl</A> constructor.  It establishes a model for the messages the BTextControl will send when it's invoked.  It can be <B><TT>NULL</TT></B>.  See <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetMessage()">SetMessage()</A></TT></B> and<B><TT><A HREF="ScrollBar.html#SetTarget()">SetTarget()</A></TT></B> in the <A HREF="../The%20Application%20Kit/Invoker.html#BInvoker">BInvoker</A> class and <B><TT><A HREF="MenuItem.html#Invoke()">Invoke()</A></TT></B> in the <A HREF="Control.html#BControl">BControl</A> class for more information.  
+<P>
+The <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> arguments are the same as those declared for the <A HREF="View.html#BView">BView</A> class and are passed up the inheritance hierarchy to the <A HREF="View.html#BView">BView</A> constructor without change.  When the BTextControl is attached to a window, it will be resized to the optimal height for displaying the label and text.
+<P>
+<B>See also:  <TT><A HREF="#SetDivider()">SetDivider()</A></TT></B>, <B><TT><A HREF="#SetAlignment()">SetAlignment()</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetMessage()">BInvoker::SetMessage()</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetTarget()">BInvoker::SetTarget()</A></TT></B>, <B><TT><A HREF="Control.html#Invoke()">BControl::Invoke()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BTextControl()"></A>~BTextControl()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BTextControl()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees memory allocated by the BTextControl and its <A HREF="TextView.html#BTextView">BTextView</A> child.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BTextControl object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message doesn't contain data for a BTextControl object, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B>, which will archive the child <A HREF="TextView.html#BTextView">BTextView</A> if the <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> flag is <B><TT>true</TT></B>, then adds the alignment of the label and the text, the modification message, and the divider to the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="Control.html#BControl">BControl</A> version of <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> to set up its child <A HREF="TextView.html#BTextView">BTextView</A> and to make the view and low colors of the BTextControl the same as the background view color of its new parent .  This function also adjusts the height of the BTextControl to fit the height of the label and text, given the fonts used to display them.
+<P>
+<B>See also:  <TT>BView::AttachedToWindow()</TT></B>, <B><TT><A HREF="Control.html#AttachedToWindow()">BControl::AttachedToWindow()</A></TT></B> 
+<P>
+<HR>
+<H3>Divider()   see <A HREF="#SetDivider()">SetDivider()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the label.  (The BTextControl defers to its child <A HREF="TextView.html#BTextView">BTextView</A> to draw the editable text string.)
+<P>
+<B>See also:  <TT>BView::Draw()</TT></B> 
+<P>
+<HR>
+<H3>GetAlignment()   see <A HREF="#SetAlignment()">SetAlignment()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetPreferredSize()"></A>GetPreferredSize()
+, 
+<A NAME="ResizeToPreferred()"></A>ResizeToPreferred()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual  void <B><TT><FONT  color=000022 size=+1>GetPreferredSize(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float&nbsp;*<I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ResizeToPreferred(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#GetPreferredSize()">GetPreferredSize()</A></TT></B> calculates the optimal size for the BTextControl to display the label and the text, given its current font and the current font of its <A HREF="TextView.html#BTextView">BTextView</A> child; it places the result in the variables that the <I><FONT  color=991122 face=HELVETICA>width</I></FONT> and <I><FONT  color=991122 face=HELVETICA>height</I></FONT> arguments refer to.  <B><TT><A HREF="#ResizeToPreferred()">ResizeToPreferred()</A></TT></B> resizes the BTextControl to its preferred size, keeping its left and top sides constant, and adjusts the size of the <A HREF="TextView.html#BTextView">BTextView</A> to fit.
+<P>
+<B>See also:  <TT>BView::GetPreferredSize()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MakeFocus()"></A>MakeFocus()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MakeFocus(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Passes the <B><TT><A HREF="#MakeFocus()">MakeFocus()</A></TT></B> instruction on to the child BTextView.  If the <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> is <B><TT>true</TT></B>, this function selects all the text in the child <A HREF="TextView.html#BTextView">BTextView</A>, which becomes the new focus view for the window.  If the <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> is <B><TT>false</TT></B>, the child will no longer be the focus view.  If the text has changed when the child ceases to be the focus view, the BTextControl is considered to have been invoked; a copy of its model message is posted so that it will be delivered to the target handler.
+<P>
+Note that the BTextControl itself never becomes the focus view, so will return <B><TT>false</TT></B> to all <B><TT><A HREF="Tab.html#IsFocus()">IsFocus()</A></TT></B> queries.
+<P>
+<B>See also:  <TT>BView::MakeFocus()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MessageReceived()"></A>MessageReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MessageReceived(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Handles scripting requests for the BTextControl.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Handler.html#MessageReceived()">BHandler::MessageReceived()</A></TT></B> 
+<P>
+<HR>
+<H3>ModificationMessage()   see <A HREF="#SetModificationMessage()">SetModificationMessage()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MouseDown()"></A>MouseDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MouseDown(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Makes the child <A HREF="TextView.html#BTextView">BTextView</A> the focus view when the user clicks in the BTextControl but outside the text.
+<P>
+<B>See also:  <TT><A HREF="TextView.html#MouseDown()">BTextView::MouseDown()</A></TT></B> 
+<P>
+<HR>
+<H3>ResizeToPreferred()   see <A HREF="#GetPreferredSize()">GetPreferredSize()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ResolveSpecifier()"></A>ResolveSpecifier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>ResolveSpecifier(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>command</I></FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>property</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Resolves specifiers for the "Text" and "Value" properties.  See <a href="#Scripting%20Support">"Scripting Support"</a> in the class overview and "Scripting" in <B>The Application Kit</B> chapter for more information.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Handler.html#ResolveSpecifier()">BHandler::ResolveSpecifier()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetAlignment()"></A>SetAlignment()
+, 
+<A NAME="GetAlignment()"></A>GetAlignment()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetAlignment(</TT></B></FONT>alignment <I><FONT  color=991122 face=HELVETICA>forLabel</I></FONT>, alignment <I><FONT  color=991122 face=HELVETICA>forText</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetAlignment(</TT></B></FONT>alignment *<I><FONT  color=991122 face=HELVETICA>forLabel</I></FONT>, alignment *<I><FONT  color=991122 face=HELVETICA>forText</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and report the alignment of the label and the text within their respective portions of the view.  Three settings are possible:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_ALIGN_LEFT"></A>B_ALIGN_LEFT
+</TT></B></TD>
+<TD>The label or text is aligned at the left boundary of its part of the view rectangle.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ALIGN_RIGH"></A>B_ALIGN_RIGH
+T</TT></B></TD>
+<TD>The label or text is aligned at the right boundary of its part of the view rectangle.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ALIGN_CEN"></A>B_ALIGN_CEN
+TER</TT></B></TD>
+<TD>The label or text is centered within its part of the view rectangle.</TD>
+</TABLE>
+<P>
+The default alignment is <B><TT><A HREF="#B_ALIGN_LEFT">B_ALIGN_LEFT</A></TT></B> for both label and text.
+<P>
+<B>See also:  <TT><A HREF="#SetDivider()">SetDivider()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetDivider()"></A>SetDivider()
+, 
+<A NAME="Divider()"></A>Divider()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetDivider(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>xCoordinate</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Divider(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the <I><FONT  color=991122 face=HELVETICA>x</I></FONT> coordinate value that marks the division between the label portion of the view rectangle on the left and the text portion on the right.  It's stated in the coordinate system of the BTextControl.
+<P>
+<B>See also:  </B>the BTextControl constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetEnabled()"></A>SetEnabled()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetEnabled(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Disables the BTextControl if the <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> flag is <B><TT>false</TT></B>, and reenables it if <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> is <B><TT>true</TT></B>.  BTextControls are enabled by default.
+<P>
+This function augments the <A HREF="Control.html#BControl">BControl</A> version of <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B>.  When the control is disabled, it makes the text unselectable (and therefore uneditable) and draws it in a way that displays its disabled state.  When the control is re-enabled, it makes the text editable (and therefore selectable) and draws it as normal text.
+<P>
+<B>See also:  <TT><A HREF="Control.html#SetEnabled()">BControl::SetEnabled()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetModificationMessage()"></A>SetModificationMessage()
+, 
+<A NAME="ModificationMessage()"></A>ModificationMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetModificationMessage(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>ModificationMessage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the message that the BTextControl sends to its target when the user begins to enter or edit text.
+<P>
+<B><TT><A HREF="#SetModificationMessage()">SetModificationMessage()</A></TT></B> assigns <I><FONT  color=991122 face=HELVETICA>message</I></FONT> to the <A HREF="#BTextControl">BTextControl</A>, freeing the message previously assigned, if any.  The message becomes the responsibility of the BTextControl object and will be freed only when it's replaced by another message or the BTextControl is freed; you shouldn't free it yourself.  Passing a <B><TT>NULL</TT></B> pointer to this function deletes the current modification message without replacing it.
+<P>
+The assigned <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> becomes the model for the message that the BTextControl sends whenever the user modifies the text when the child <A HREF="TextView.html#BTextView">BTextView</A> is the focus view.
+<P>
+Before sending the message, the BTextControl adds these two pieces of information to it:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Data name</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>When the user modified the text, as measured by the number of microseconds since 12:00:00 AM January 1, 1970..</TD>
+<TR>
+<TD>"source"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINTER_TYPE">B_POINTER_TYPE</A></TT></B></TD>
+<TD>A pointer to the BTextControl object.</TD>
+</TABLE>
+<P>
+These names should not be used for any data that you place in the model <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.
+<P>
+<B><TT><A HREF="#ModificationMessage()">ModificationMessage()</A></TT></B> returns the model message.
+<P>
+<HR>
+<H3>
+<A NAME="SetText()"></A>SetText()
+, 
+<A NAME="Text()"></A>Text()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetText(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>text</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Text(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the text displayed by the BTextControl&mdash;or rather by its child BTextView.  The text is first set by the constructor.
+<P>
+<HR>
+<H3>
+<A NAME="TextView()"></A>TextView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="TextView.html#BTextView">BTextView</A> *<B><TT><FONT  color=000022 size=+1>TextView(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the child <A HREF="TextView.html#BTextView">BTextView</A> object that handles the BTextControl's editing chores.
+<P>
+<B>See also:  </B>the <A HREF="TextView.html#BTextView">BTextView</A> class
+<P>
+<HR>
+<H3>
+<A NAME="WindowActivated()"></A>WindowActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WindowActivated(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Makes sure that the BTextControl is redrawn when the window is activated and deactivated, if its child <A HREF="TextView.html#BTextView">BTextView</A> is the current focus view.  This gives the BTextControl a chance to draw or erase the indication that it's the current focus for keyboard navigation.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_a_label"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Alignment of label in frame.</TD>
+<TR>
+<TD>"_a_text"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Alignment of text in frame.</TD>
+<TR>
+<TD>"_divide"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>x-coordinate dividing label and text in frame.</TD>
+<TR>
+<TD>"_mod_msg"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>Invocation message for the control (only present if one was defined).</TD>
+</TABLE>
+<P>
+The following view is added to the "_views" field (deep copy only):
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Name</B></TH>
+<TH>Level</TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_input_"</TD>
+<TD>0</TD>
+<TD>Text input view.</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

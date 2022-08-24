@@ -1,0 +1,894 @@
+<HTML><HEAD><TITLE>The Storage Kit: BNode</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BNode"></A>BNode
+</H1>
+<P>
+Derived from:  <A HREF="Statable.html#BStatable">BStatable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/Node.h">be/storage/Node.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Node.summary.html"><i>Summary</i></A></H6>
+<P>
+The BNode class gives you access to the data that a file system entry (a file, directory, or symbolic link) contains.  There are two parts to this data:
+<P>
+<UL>
+<LI>There's the "data portion" itself...
+<P>
+<LI>...and then there are the node's attributes.
+<P>
+</UL>
+<P>
+The content of the data portion depends on the node's flavor:
+<P>
+<UL>
+<LI>If it's a regular file, the data is whatever it is that the file is meant to contain:  ASCII text, binary image or sound data, executable code, and so on.  Note that resources (as created by the <A HREF="Resources.html#BResources">BResources</A> class) are kept in the data portion.
+<P>
+<LI>If it's a directory, the data is the list of entries that the directory contains.
+<P>
+<LI>If it's a symbolic link, the data is the path of the "linked-to" file.  The path can be absolute or relative.
+<P>
+</UL>
+<P>
+The content of the attributes, on the other hand, isn't qualified by the node's flavor:  Any node can contain any set of attributes.
+<P>
+<HR>
+<H3>
+<A NAME="Nodes%20are%20Dumb"></A>Nodes are Dumb
+</H3>
+<P>
+Keep in mind that the concept of a "node" designates the <I>data parts</I> (data and attributes) of a file (a file, directory, or link).  Contrast this with an "entry," which designates the entity's <I>location</I> within the file system:  For example, you can write to a "node" (but not an entry), and you can rename an "entry" (but not a node).   
+<P>
+This isn't just a conceptual crutch, it's the law:  Nodes really don't know where they're located.  For example, you can't ask a node for its name, or for the identity of its parent.  This has some serious implications, the most important of which is...
+<P>
+<UL>
+<LI>If you need to store a reference to a file (or directory, or symbolic link), don't store the node&mdash;in other words, don't cache the BNode object.  Instead, store the information that you used to create the BNode (typically, a pathname or <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> structure).
+<P>
+</UL>
+<P>
+Now that we've got that straight, we'll relax the rules a bit:
+<P>
+<UL>
+<LI><A HREF="Directory.html#BDirectory">BDirectory</A> objects are node/entry hybrids.  A <A HREF="Directory.html#BDirectory">BDirectory</A> <I>does</I> know its own name (and parent, and so on).
+<P>
+</UL>
+<P>
+This doesn't really change the "store the info" rule.  Even if you're dealing exclusively with <A HREF="Directory.html#BDirectory">BDirectory</A> objects, you should keep the generative information around.  The primary reason for this is...
+<P>
+<HR>
+<H3>
+<A NAME="The%20"Node%20Pool"%20is%20Limited%20(File%20Descriptors)"></A>The "Node Pool" is Limited (File Descriptors)
+</H3>
+<P>
+Every BNode object consumes a "file descriptor."  Your application can only maintain 256 file descriptors at a time.  Because of this limit, you shouldn't keep BNodes around that you don't need.  Keep in mind that <A HREF="Entry.html#BEntry">BEntry</A> objects also consumes file descriptors (one per object).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The file descriptor limit will probably be lifted, or at least settable, in a subsequent release.  But even then you should be frugal.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Derived%20Classes%20and%20their%20Uses"></A>Derived Classes and their Uses
+</H3>
+<P>
+BNode has three derived classes:  <A HREF="File.html#BFile">BFile</A>, <A HREF="Directory.html#BDirectory">BDirectory</A>, and BSymLink.  The derived classes define functions that let you access the node's data portion in the appropriate style; for example...
+<P>
+<UL>
+<LI><A HREF="File.html#BFile">BFile</A> implements <B><TT><A HREF="File.html#Read()">Read()</A></TT></B> and <B><TT><A HREF="File.html#Write()">Write()</A></TT></B> functions that let you retrieve arbitrary amounts of data from arbitrary positions in the file.
+<P>
+<LI><A HREF="Directory.html#BDirectory">BDirectory</A> implements functions, such as <B><TT><A HREF="Directory.html#GetNextEntry()">GetNextEntry()</A></TT></B> and <B><TT><A HREF="Directory.html#FindEntry()">FindEntry()</A></TT></B>, that read entries from the directory.  
+<P>
+<LI>BSymLink's <B><TT><A HREF="SymLink.html#ReadLink()">ReadLink()</A> </TT></B>returns the pathname that it contains.
+<P>
+</UL>
+<P>
+If you want to (sensibly) look at a node's data portion, you must create an instance of the appropriate derived class.  In other words, if you want to browse a directory, you have to create a <A HREF="Directory.html#BDirectory">BDirectory</A> instance; if you want to write to a file, you create a BFile.  
+<P>
+Be aware that it's not (always) an error to create an instance of the "wrong" derived class; setting a <A HREF="File.html#BFile">BFile</A> to a symbolic link, for example, will traverse the link such that the <A HREF="File.html#BFile">BFile</A> opens the file that the symbolic link is linked to.  See the individual derived class specifications for more information.
+<P>
+<HR>
+<H3>
+<A NAME="BNode%20Instances"></A>BNode Instances
+</H3>
+<P>
+In practice, you almost always want to create an instance of one of the BNode-derived classes; but if, for whatever reason, you find yourself holding a BNode instance, here's what you'll be able to do with it:
+<P>
+<UL>
+<LI><B>Read and write attributes</B>.  The attribute-accessing functions (<B><TT><A HREF="#ReadAttr()">ReadAttr()</A></TT></B>, <B><TT><A HREF="#WriteAttr()">WriteAttr()</A></TT></B>, and so on) are general&mdash;they work without regard for the node's flavor.  Thus, you don't need an instance of a specific derived class to read and write attributes.
+<P>
+<LI><B>Get <TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A> information.</TT></B>  The <A HREF="Statable.html#BStatable">BStatable</A> functions can be invoked on any flavor of node.
+<P>
+<LI><B>Lock the node</B>.  This prevents other "agents" (other objects, other apps, the user) from accessing reading or writing the node's data and attributes.  See <a href="#Node%20Locking">"Node Locking"</a>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Converting%20a%20BNode%20to%20an%20Instance%20of%20a%20Derived%20Class"></A>Converting a BNode to an Instance of a Derived Class
+</H3>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This section describes situations and presents solutions to problems that are a bit esoteric.  If you never create direct instances of BNode (and you never <I>have</I> to), then you should skip this and go to <a href="#Node%20Locking">"Node Locking"</a>. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+There may be times when you find yourself holding on to a BNode (instance) that you want to convert into a <A HREF="File.html#BFile">BFile</A>, <A HREF="Directory.html#BDirectory">BDirectory</A>, or BSymLink.  However, you can't go <I>directly</I> from a BNode instance to an instance of <A HREF="File.html#BFile">BFile</A>, <A HREF="Directory.html#BDirectory">BDirectory</A>, or <A HREF="SymLink.html#BSymLink">BSymLink</A>&mdash;you can't tell your BNode to "cast itself" as one of its children.
+<P>
+There are solutions, however...
+<P>
+<H4>
+<A NAME="Converting%20to%20BDirectory"></A>Converting to BDirectory
+</H4>
+<P>
+Converting from a BNode to a <A HREF="Directory.html#BDirectory">BDirectory</A>, while not transparent, is pretty simple:  Grab the <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> out of the BNode and pass it to the <A HREF="Directory.html#BDirectory">BDirectory</A> constructor or <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function.  Regard this example function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void Node2Directory(BNode *node, BDirectory *dir)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!node || !dir) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir.Unset();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node.GetNodeRef(&amp;nref);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Set the BDirectory.  If nref isn&gt;t a directory node,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * the SetTo() will fail.  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dir.SetTo(&amp;nref);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<H4>
+<A NAME="Converting%20to%20BFile%20or%20BSymLink"></A>Converting to BFile or BSymLink
+</H4>
+<P>
+Converting a BNode instance to a <A HREF="File.html#BFile">BFile</A> or <A HREF="SymLink.html#BSymLink">BSymLink</A> isn't as neat as the foregoing.  Instead, you have to cache the information that you used to initialize the BNode in the first place, and then reuse it to create the <A HREF="File.html#BFile">BFile</A> or BSymLink.  
+<P>
+For example, let's say you receive an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>.  You turn it into a <A HREF="#BNode">BNode</A>, but then decide you need the data-writing power of a BFile.  If, in the meantime, you lost the original <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>, you're sunk&mdash;there's nothing you can do. 
+<P>
+<A NAME="30883:%20head2:%20Node%20Locking"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Node%20Locking"></A>Node Locking
+</H3>
+<P>
+Another feature provided by the BNode class is "node locking":  Through BNode's <B><TT><A HREF="#Lock()">Lock()</A> </TT></B>function you can restrict access to the node.  The lock is removed when <B><TT><A HREF="#Unlock()">Unlock()</A> </TT></B>is called, or when the BNode object is deleted.
+<P>
+<UL>
+<LI>When you lock a node, you prevent other objects (or agents) from reading or writing the node's data and attributes.  No other agent can even <I>open</I> the node&mdash;other BNode constructions and POSIX open() calls (on that node) will fail while you hold the lock.
+<P>
+<LI>You can only acquire a node lock if there are no file descriptors open on the node (with one exception).  This means that no other BNode may be open on the node (locked or not), nor may the node be held open because of a POSIX <B><TT>open()</TT></B> (or <B><TT>opendir()</TT></B>) call. 
+<P>
+</UL>
+<P>
+The one exception to the no-file descriptors rule has to do with BEntries:  Let's say you lock a directory, and then you initialize a <A HREF="Entry.html#BEntry">BEntry</A> to point to an entry within that directory.  Even though the <A HREF="Entry.html#BEntry">BEntry</A> creates a file descriptor to the directory (as explained in the <A HREF="Entry.html#BEntry">BEntry</A> class), the initialization <I>will</I> succeed.
+<P>
+<H4>
+<A NAME="Implications"></A>Implications
+</H4>
+<P>
+For files (and, less importantly, symlinks), the implications of locking are pretty clear:  No one else can read or write the file.  For directories, it's worth a closer look:
+<P>
+<UL>
+<LI>Locking a directory means that the contents of the directory can't change:  You can't create new nodes in the directory, or rename or remove existing ones.  (You can, however, create abstract entries within the directory; see <A HREF="Entry.html#BEntry">BEntry</A> for more on abstract entries.)
+<P>
+</UL>
+<P>
+Locking a node does <I>not</I> lock the node's entry:  <B>You can't "lock out" entry operations, such as rename, move, and remove. </B> Even if you have a node locked, the entry that acts as the "container" for that node could disappear.  If you want to prevent such operations on a node's entry, lock the entry's parent directory.
+<P>
+In general, you should try to avoid locking your nodes.  If you must lock, try to make it brief.  The primary reason (and, pretty much, the only reason) to lock is if separate elements in the data and/or attributes must be kept in a consistent state.  In such a case, you should hold the lock just long enough to ensure consistency.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+You shouldn't use locks to "privatize" data.  Locking isn't meant to be used as a heightened permissions bit.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BNode()"></A>BNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNode(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNode(</TT></B></FONT>const <A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNode(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNode(</TT></B></FONT>const <A HREF="Directory.html#BDirectory">BDirectory</A> *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BNode()">BNode()</A>
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNode(</TT></B></FONT>const BNode &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BNode object that's initialized to represent a specific file system node.  To retrieve the status of the initialization, call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> immediately after constructing the object:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BNode node("/boot/lbj/FidoOnFire.gif");
+&nbsp;&nbsp;&nbsp;if (node.InitCheck() != B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* The object wasn&gt;t initialized. */</PRE>
+<P>
+A successfully initialized BNode object creates a "file descriptor" through which the object reads and writes the node's data and attributes.  You can only have 256 file descriptors at a time (per application).  The object's file descriptor is closed when the object is deleted, reset (through <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>), or unset (<B><TT><A HREF="#Unset()">Unset()</A></TT></B>).
+<P>
+<UL>
+<LI><B>Default constructor</B>.  The object's status will be <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A>,</TT></B> and the file descriptor isn't allocated until you actually initialize the object with a call to <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>.
+<P>
+<LI><B>Copy constructor</B>.  The new BNode is set to the same node as the argument.  Each of the two BNode objects has its own file descriptor.
+<P>
+<LI><B>Other constructors</B>.  See the <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> functions.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="~BNode()"></A>~BNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual ~<B><TT><FONT  color=000022 size=+1><A HREF="#BNode()">BNode()</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the object's file descriptor, unlocks the node (if it was locked), and destroys the object.  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="GetAttrInfo()"></A>GetAttrInfo()
+, 
+<A NAME="attr_info"></A>attr_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> GetAttrInfo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>attr</I></FONT>, attr_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+typedef struct <B><TT><FONT  color=000022 size=+1>attr_info</TT></B></FONT> {}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Gets information about the attribute named by <I><FONT  color=991122 face=HELVETICA>attr</I></FONT>.  The information is copied into <I><FONT  color=991122 face=HELVETICA>info</I></FONT>, which must be allocated before it's passed in. 
+<P>
+The <B><TT>attr_info</TT></B> structure, defined in <B>be/kernel/fs_attr.h</B>, is
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct attr_info
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t size;
+&nbsp;&nbsp;&nbsp;} attr_info;</PRE>
+<P>
+<UL>
+<LI><B><TT>type</TT></B> is a constant (<B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B>, etc) that describes the type of data that the attribute holds.  
+<P>
+<LI><B><TT>size</TT></B> is the size of the attribute's data, in bytes.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The node doesn't have an attribute named <I><FONT  color=991122 face=HELVETICA>attr</I></FONT>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  The object is uninitialized.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetNextAttrName()"></A>GetNextAttrName()
+, 
+<A NAME="RewindAttrs()"></A>RewindAttrs()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> GetNextAttrName(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> RewindAttrs(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Every BNode maintains a pointer into its list of attributes.  <B><TT>GetNextAttrName()</TT></B> retrieves the name of the attribute that the pointer is currently pointing to, and then bumps the pointer to the next attribute.  The name is copied into the <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, which should be at least <B><TT>B_ATTR_NAME_LENGTH</TT></B> characters long.  The copied name is <B><TT>NULL</TT></B>-terminated.  When you've asked for every name in the list, <B><TT>GetNextAttrName()</TT></B> returns an error.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#GetNextAttrName()">GetNextAttrName()</A></TT></B> does <I>not</I> clear its argument if it returns an error.  This will be corrected in a subsequent release.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>RewindAttrs()</TT></B> resets the BNode's attribute pointer to the first element in the list.  
+<P>
+To visit every attribute name, you would do something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Print every attribute name. */
+&nbsp;&nbsp;&nbsp;char buf[B_ATTR_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (node.GetNextAttrName(buf) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("> Attr name:  %sn", buf);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The attribute list is not static; when you ask for the next attribute name, you're asking for the next name in the list<I> as it exists right now</I>.  
+<P>
+Furthermore, the ordinal position of an attribute within the list is indeterminate.  "Newer" attributes are not necessarily added to the end of the list:  If you alter the list while you're walking through it, you may get curious results&mdash;you may not see the attribute that you just now added (for example).  
+<P>
+In general, it's best to avoid altering the list while you're iterating over it.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  You've hit the end of the list.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  The object is uninitialized.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the status of the most recent initialization.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The object was successfully initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The object is uninitialized.
+<P>
+<LI>See the <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function for a list other return values.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Lock()"></A>Lock()
+, 
+<A NAME="Unlock()"></A>Unlock()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Lock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Unlock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Locks and unlocks the BNode's node.  While the node is locked, no other object can access the node's data or attributes.  More precisely, no other agent can create a file descriptor to the node.  If a file descriptor already exists to this node, the <B><TT>Lock()</TT></B> function fails.
+<P>
+See "<a href="#Node%20Locking">Node Locking</a>" for details.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The node was successfully locked or unlocked.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  (<B><TT>Lock()</TT></B>)  The node can't be locked.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  (<B><TT>Unlock()</TT></B>) The node isn't locked.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  The object is uninitialized.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="ReadAttr()"></A>ReadAttr()
+, 
+<A NAME="WriteAttr()"></A>WriteAttr()
+, 
+<A NAME="RemoveAttr()"></A>RemoveAttr()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>ReadAttr(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t <I><FONT  color=991122 face=HELVETICA>offset</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>length</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>WriteAttr(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t <I><FONT  color=991122 face=HELVETICA>offset</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>length</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t  <B><TT><FONT  color=000022 size=+1>RemoveAttr(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>attr</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions read, write, and remove the node's attributes.  Attributes are name/data pairs, where names must be unique (within a given node) and the data can be of arbitrary length. 
+<P>
+<B><TT>ReadAttr()</TT></B> reads the data in the attribute named <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, and copies it in <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  The length of the buffer (the maximum number of bytes to copy) is given by <I><FONT  color=991122 face=HELVETICA>length</I></FONT>.  Currently, the <I><FONT  color=991122 face=HELVETICA>type</I></FONT> and <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> arguments are unused (or unreliable).  The function returns the number of bytes that were actually read.
+<P>
+<B><TT>WriteAttr()</TT></B> erases the data currently held by <I><FONT  color=991122 face=HELVETICA>name</I></FONT> (if such an attribute exists) and replaces it with a copy of the first <I><FONT  color=991122 face=HELVETICA>length</I></FONT> bytes of data in <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  The <I><FONT  color=991122 face=HELVETICA>type</I></FONT> argument <I>is</I> remembered&mdash;you can retrieve an attribute's type through <B><TT><A HREF="#GetAttrInfo()">GetAttrInfo()</A></TT></B>, for example&mdash;and you need to specify the correct type when you're forming a query (see <A HREF="Query.html#BQuery">BQuery</A> and the note below).  But, as mentioned above, you don't need to match types when you're reading the attribute.  The <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> argument is currently unreliable and shouldn't be used.  The functions returns the number of bytes that were written.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you want to use the attribute in a query, its type must be either string, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int64</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint64</A></TT></B>, <B><TT>double</TT></B>, or <B><TT>float</TT></B>.  (In other words, <I><FONT  color=991122 face=HELVETICA>type</I></FONT> must be  <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>, or <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B>, or <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_UINT32_TYPE">B_UINT32_TYPE</A></TT></B>, and so on.)
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The value of an indexed attribute must be no more than 255 bytes long.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>RemoveAttr()</TT></B> deletes the attribute given by <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT>ReadAttr()</TT></B> and <B><TT>WriteAttr()</TT></B>, if successful, return the number of bytes read or written.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  (<B><TT>Remove</TT></B>) The attribute was successfully removed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  (<B><TT>ReadAttr() </TT></B>and <B><TT>Remove()</TT></B>)  The attribute doesn't exist.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  The object is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  (<B><TT><A HREF="#WriteAttr()">WriteAttr()</A></TT></B> and <B><TT><A HREF="Entry.html#Remove()">Remove()</A></TT></B>)  This object is a read-only BFile.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  (<B><TT><A HREF="#WriteAttr()">WriteAttr()</A></TT></B> and <B><TT><A HREF="Entry.html#Remove()">Remove()</A></TT></B>)  The node is on a read-only volume.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_DEVICE_FULL">B_DEVICE_FULL</A></TT></B>.  (<B><TT>WriteAttr()</TT></B>)  Out of disk space.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  (<B><TT>WriteAttr()</TT></B>)  Not enough memory to complete the operation. 
+<P>
+</UL>
+<P>
+<HR>
+<H3>RemoveAttr()   see  <A HREF="#ReadAttr()">ReadAttr()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="RenameAttr()"></A>RenameAttr()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RenameAttr(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new_name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Moves the attribute given by <I><FONT  color=991122 face=HELVETICA>name</I></FONT> to <I><FONT  color=991122 face=HELVETICA>new_name</I></FONT>.  If <I>new_name</I> exists, it's clobbered.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. The attribute was successfully renamed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>name</I></FONT> attribute doesn't exist.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  The object is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  This object is a read-only BFile.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  The node is on a read-only volume.
+<P>
+</UL>
+<P>
+<HR>
+<H3>RewindAttrs   see  <A HREF="#GetNextAttrName()">GetNextAttrName()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+, 
+<A NAME="Unset()"></A>Unset()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const <A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const <A HREF="Directory.html#BDirectory">BDirectory</A> *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Unset(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Closes the BNode's current file descriptor and opens it on the node (of the entry) that's designated by the arguments.
+<P>
+<UL>
+<LI>In the <I><FONT  color=991122 face=HELVETICA>path</I></FONT> version, <I><FONT  color=991122 face=HELVETICA>path</I></FONT> can be absolute or relative, and can contain "." and ".." elements.  If <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is relative, it's reckoned off of the current working directory.
+<P>
+<LI>In the<I><FONT  color=991122 face=HELVETICA> dir</I></FONT>/<I><FONT  color=991122 face=HELVETICA>path</I></FONT> version, <I><FONT  color=991122 face=HELVETICA>path</I></FONT> must be relative.  It's reckoned off of the directory given by <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>.
+<P>
+</UL>
+<P>
+BNode instances never traverse symbolic links.  If the designated entry is a symbolic link, the BNode will open the link's node.  (Conversely, <A HREF="File.html#BFile">BFile</A> instances <I>always</I> traverse symbolic links.)
+<P>
+<B><TT><A HREF="#Unset()">Unset()</A></TT></B> closes the BNode's file descriptor and sets <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  All is well.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The designated entry doesn't exist.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Uninitialized or malformed argument.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  The node is locked.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Sync()"></A>Sync()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Sync(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Immediately performs any pending disk transactions for the file, returning <B><TT>B_OK</TT></B> on success and an appropriate error message otherwise.
+<P>
+<HR>
+<H3>Unlock()   see  <A HREF="#Lock()">Lock()</A></H3>
+<P>
+<HR>
+<H3>Unset()   see  <A HREF="#SetTo()">SetTo()</A></H3>
+<P>
+<HR>
+<H3>WriteAttr()   see  <A HREF="#ReadAttr()">ReadAttr()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BNode&amp; operator<B><TT><FONT  color=000022 size=+1>=(</TT></B></FONT>const BNode &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+In the expression
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BNode a = b;</PRE>
+<P>
+BNode <I>a</I> is initialized to refer to the same node as<I> b</I>.  To gauge the success of the assignment, you should call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> immediately afterwards.   It's safe to assign a BNode to itself.
+<P>
+<HR>
+<H3>
+<A NAME="=="></A>==
+, 
+<A NAME="!="></A>!=
+ (comparison)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const BNode &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>!=(</TT></B></FONT>const BNode &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Two BNode objects are said to be equal if they're set to the same node, or if they're both <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

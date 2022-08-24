@@ -1,0 +1,490 @@
+<HTML><HEAD><TITLE>The Storage Kit: Attribute C Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Attribute%20C%20Functions"></A>Attribute C Functions
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/fs_attr.h">be/kernel/fs_attr.h</A>
+<P>
+Library:  libroot.so
+<P>
+The BeOS supports a powerful system of attributes that can be attached to files.  Once these attributes are attached, you can query the file system for attributes whose values match certain specifications; this is discussed in the section on the <B><TT>fs_query</TT></B> functions, and in the section on the <A HREF="Query.html#BQuery">BQuery</A> class.
+<P>
+Before you can perform these queries, however, you need to attach attributes to the file.  There are two ways to do this.  The typical mechanism for attaching attributes to files is through the <A HREF="Node.html#BNode">BNode</A> class, which provides a convenient interface for doing this.  This section discusses the lower-level way to do this, by calling the C <B><TT>fs_attr</TT></B> functions directly.
+<P>
+This collection of functions also lets you look at the attributes attached to a file, get their names and sizes, and read their contents.
+<P>
+The <B><TT>fs_attr</TT></B> functions make use of directory pointers (DIR *).  While these are true directory pointers, the data they hold aren't useful outside the <B><TT>fs_attr</TT></B> API; they're basically magic cookies that represent the file's attribute directory.  Likewise, the dirent structures returned by some of these functions are also not useful outside this API.
+<P>
+<A NAME="42204:%20head2:%20An%20Example"></A>
+<P>
+<HR>
+<H3>
+<A NAME="An%20Example"></A>An Example
+</H3>
+<P>
+Before dropping straight into the reference on the <B><TT>fs_attr</TT></B> API, let's have a look at a simple sample of how to use some of its features.  The sample code fragment below opens the attribute directory for a file named <B>/boot/home/dirtylaundry</B> and scans through all the attributes in the file, fetching their names and values.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;DIR *d;
+&nbsp;&nbsp;&nbsp;dirent_t *ent;
+&nbsp;&nbsp;&nbsp;attr_info info;
+&nbsp;&nbsp;&nbsp;int fd;
+&nbsp;&nbsp;&nbsp;char *buffer;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;d = fs_open_attr_dir("/boot/home/dirtylaundry");
+&nbsp;&nbsp;&nbsp;if (d) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (ent = fs_read_attr_dir(d)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fd = open("/boot/home/dirtylaundry", O_RDONLY);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fs_stat_attr(fd, ent->d_name, &amp;info);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer = (char *) malloc((size_t) info.size);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (buffer) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fs_read_attr(fd, ent->d_name, info.type, 0, buffer,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; info.size);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;close(fd);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fs_close_attr_dir(d);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This snippet begins by opening the attribute directory for the file, using the <B><TT><A HREF="#fs_open_attr_dir()">fs_open_attr_dir()</A></TT></B> function.  If this is successful, it returns a pointer to a directory that contains the list of attributes.  A <B><TT>while</TT></B> loop is used to read into <I><FONT  color=991122 face=HELVETICA>ent</I></FONT> each attribute from the attribute directory by calling <B><TT>fs_read_attr_dir()</TT></B>.  The information this call provides includes the size and type of the attribute, as well as its name.
+<P>
+Once we know the name of the attribute, we can obtain the type and size of the attribute by calling <B><TT>fs_stat_attr()</TT></B>; now we have all the information needed to get the value of the attribute.  After allocating a buffer to contain the value of the attribute, we pass the attribute's name (ent->d_name), and the type and size (info.type and info.size) into the <B><TT>fs_read_attr()</TT></B> function.  The value of the attribute is stored in the <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> we specify.
+<P>
+This sample skimps a bit on error handling; you'll do better, of course.
+<P>
+<HR>
+<H2>
+<A NAME="Attribute%20Functions"></A><FONT SIZE=6>A</FONT>ttribute <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="fs_close_attr_dir"></A>fs_close_attr_dir
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_close_attr_dir</TT></B></FONT>(DIR *<I><FONT  color=991122 face=HELVETICA>dirp</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Closes the specified attribute directory.  You should pass into this function the pointer returned when you called <B><TT>fs_open_attr_dir</TT></B>() or <B><TT>fs_fopen_attr_dir</TT></B>().
+<P>
+If successful, this function returns 0; otherwise it  returns -1 and sets <B><TT>errno</TT></B> to a descriptive code. 
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid directory reference specified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>fs_fopen_attr_dir() see <A HREF="#fs_open_attr_dir()">fs_open_attr_dir()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="fs_open_attr_dir()"></A>fs_open_attr_dir()
+, 
+<A NAME="fs_fopen_attr_dir()"></A>fs_fopen_attr_dir()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+DIR *<B><TT><FONT  color=000022 size=+1>fs_open_attr_dir(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+DIR *<B><TT><FONT  color=000022 size=+1>fs_fopen_attr_dir</TT></B></FONT>(int <I><FONT  color=991122 face=HELVETICA>fd</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Opens the attribute directory for the file specified by pathname or file descriptor.
+<P>
+The attribute directory for a file contains a list of the attributes that are attached to the file.  Once the attribute directory is open, you can use the <B><TT>fs_read_attr_dir()</TT></B> function to find out which attributes are present.
+<P>
+If the directory is opened successfully, a pointer to the directory structure is returned.  This pointer should be passed to the other <B><TT>fs_attr</TT></B> functions to read entries from the attribute directory, as well as to close the directory when you're finished with it.
+<P>
+If an error occurs while opening the attribute directory, this function returns <B><TT>NULL</TT></B> and sets <B><TT>errno</TT></B> to one of the values listed below.  
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid file descriptor, or a file error prevented the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  No matching attribute was found for the specified file.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is longer than <B><TT>B_PATH_NAME_LENGTH</TT></B> characters.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LINK_LIMIT">B_LINK_LIMIT</A></TT></B>.  A loop was detected in the directory structure.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to complete the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  The specified file is currently in use.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_FDS">B_NO_MORE_FDS</A></TT></B>.  Too many open files; all file descriptors are in use.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_read_attr"></A>fs_read_attr
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>fs_read_attr</TT></B></FONT>(int <I><FONT  color=991122 face=HELVETICA>fd</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>attribute</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t <I><FONT  color=991122 face=HELVETICA>pos</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>count</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Reads the attribute of the type and name specified by <I><FONT  color=991122 face=HELVETICA>type</I></FONT> and <I><FONT  color=991122 face=HELVETICA>attribute</I></FONT>  from the file descriptor <I><FONT  color=991122 face=HELVETICA>fd</I></FONT>.  The attribute's data is read starting at the offset <I><FONT  color=991122 face=HELVETICA>pos</I></FONT> and stored in the <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>count</I></FONT> specifies the maximum number of bytes to be read.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>type</I></FONT> can be any of the standard BeOS type definitions, such as <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>.  See the header file <B>be/support/TypeConstants.h</B> for a complete list of these types.  Note that the type of the attribute is a hint only; there's no reason you can't read a <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B> attribute as an integer (except that the data would probably not make any sense if you did).
+<P>
+If the attribute is read successfully, <B><TT>fs_read_attr()</TT></B> returns the actual number of bytes of data read from the attribute into the buffer.  If an error occurs, this function returns -1 sets <B><TT>errno</TT></B> to an appropriate value.  
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid file descriptor <I><FONT  color=991122 face=HELVETICA>fd</I></FONT> specified.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  No matching attribute was found for the specified file descriptor.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_read_attr_dir"></A>fs_read_attr_dir
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct dirent *<B><TT><FONT  color=000022 size=+1>fs_read_attr_dir</TT></B></FONT>(DIR *<I><FONT  color=991122 face=HELVETICA>dirp</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Reads the current attribute from the specified attribute directory, and bumps the <I><FONT  color=991122 face=HELVETICA>dirp</I></FONT> so it points to the next attribute.  The <I><FONT  color=991122 face=HELVETICA>dirp</I></FONT> pointer that you pass to this function should have been retrieved through a previous call to <B><TT><A HREF="#fs_open_attr_dir()">fs_open_attr_dir()</A></TT></B> or <B><TT><A HREF="#fs_fopen_attr_dir()">fs_fopen_attr_dir()</A></TT></B>.  
+<P>
+A pointer to a <B><TT>dirent</TT></B> structure is returned.  This structure contains information about the attribute.  Do not dispose of or alter the data contained by this pointer; it belongs to the operating system.
+<P>
+Once a file's attribute directory has been opened, you can loop over this function to iteratively retrieve the names of all the attributes in the file.  An attribute's name is recorded in the <B><TT>d_name</TT></B> field of the <B><TT>dirent</TT></B> structure; see the example in &nbsp;<a href="#An%20Example%20on%20page193">"An Example" on page193</a>.  
+<P>
+This function <I>doesn't</I> let you get the type or value of an attribute.  For that, use <B><TT>fs_stat_attr()</TT></B>.
+<P>
+If you're looking for files that have a particular value for one or more attributes, however, you should try using the <B><TT>fs_query</TT></B> functions, which allow you to more easily establish complex search operations on the values of one or more attributes.
+<P>
+If an error occurs (including reaching the end of the directory), this function returns <B><TT>NULL</TT></B>.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid directory reference specified.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_A_DIRECTORY">B_NOT_A_DIRECTORY</A></TT></B>.  The attribute directory is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  You've reached the end of the attribute directory.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_remove_attr()"></A>fs_remove_attr()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_remove_attr(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>fd</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>attribute</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the named <I><FONT  color=991122 face=HELVETICA>attribute</I></FONT> from the file given by the file descriptor <I><FONT  color=991122 face=HELVETICA>fd</I></FONT>.
+<P>
+If the function is successful, <B><TT>fs_remove_attr()</TT></B> returns 0.  Otherwise, it returns -1 and sets <B><TT>errno</TT></B> to an appropriate value.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>fd</I></FONT> is invalid, or file opened with read-only access.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid attribute name specified.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  Disk containing the file is read-only.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  No matching attribute was found.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_rewind_attr_dir()"></A>fs_rewind_attr_dir()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_rewind_attr_dir</TT></B></FONT>(DIR *<I><FONT  color=991122 face=HELVETICA>dirp</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Rewinds the attribute directory to the beginning.  This lets you start over again at the top of a file's attribute directory and read your way down toward the bottom.
+<P>
+Returns a result code specifying whether or not the operation was successful.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Unlike most of the other file system C functions,<B><TT> <A HREF="#fs_rewind_attr_dir()">fs_rewind_attr_dir()</A></TT></B> doesn't set<B><TT> errno</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid directory reference specified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_stat_attr"></A>fs_stat_attr
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_stat_attr</TT></B></FONT>(int <I><FONT  color=991122 face=HELVETICA>fd</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct attr_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns, in the <B><TT>attr_info</TT></B> structure pointed to by <I><FONT  color=991122 face=HELVETICA>info</I></FONT>, the type and size of the specified attribute on the file whose descriptor is specified by <I><FONT  color=991122 face=HELVETICA>fd</I></FONT>.
+<P>
+The <B><TT>attr_info</TT></B> structure is defined as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct attr_info
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<I><FONT  color=991122 face=HELVETICA>type</I></FONT> contains a code defining the format of the data contained by the attribute; standard values for this field are defined in the <B>be/support/TypeConstants.h</B> header file.
+<P>
+<I><FONT  color=991122 face=HELVETICA>size</I></FONT> specifies the size of the data the attribute contains.
+<P>
+Upon success, the function returns 0.  Otherwise, it returns -1 and sets <B><TT>errno</TT></B> to an appropriate value.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The requested attribute was not found for the file.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid file descriptor specified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_write_attr()"></A>fs_write_attr()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>fs_write_attr(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>fd</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>attribute</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t <I><FONT  color=991122 face=HELVETICA>pos</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the value of the named <I><FONT  color=991122 face=HELVETICA>attribute</I></FONT> to the data in the specified <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  The data's type is specified by <I><FONT  color=991122 face=HELVETICA>type</I></FONT> and should be one of the codes defined in <B>be/support/TypeConstants.h</B>.  The length of the data to be written is specified by <I><FONT  color=991122 face=HELVETICA>count</I></FONT>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+At this time, writing at an offset within an attribute is not fully supported, so you should always specify a <I><FONT  color=991122 face=HELVETICA>pos</I></FONT> of 0 to write at the beginning of the attribute.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If the attribute already has a value, this function wholly replaces that value with the new data&mdash;even if the new data is smaller than the existing data.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Under the Be File System, files have a special attribute storage area which contains the smaller attributes.  When this space is filled up, or an attribute too large to fit into the space is added to the file, additional disk blocks are allocated for the new attributes.  However, only one attribute is written per block in these additional blocks.  The moral of the story is: use attributes wisely.  They can be your friends, but if you overuse them, you'll bloat your files.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Upon success, the function returns the number of bytes that were actually written.  Otherwise, it returns -1 and sets <B><TT>errno</TT></B> to an appropriate value.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The attribute name is too long or is an empty string.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to complete the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid file descriptor <I><FONT  color=991122 face=HELVETICA>fd</I></FONT> specified, or the the file is read-only.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,759 @@
+<HTML><HEAD><TITLE>The Interface Kit: BTabView</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BTabView"></A>BTabView
+</H1>
+<P>
+Derived from:  public <A HREF="View.html#BView">BView</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/TabView.h">be/interface/TabView.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="TabView.summary.html"><i>Summary</i></A></H6>
+<P>
+The tab view is a fairly common construct in modern user interfaces.  The BTabView class serves as a container for a series of <A HREF="Tab.html#BTab">BTab</A> objects as well as their target views; the tabs run horizontally across the top of the view from left to right, and beneath them is a container view in which the currently-selected tab's target view is presented.  A box is drawn around the container view to clearly define the relationship between the tabs and the container view.
+<P>
+<HR>
+<H2>
+<A NAME="Creating%20a%20BTabView"></A><FONT SIZE=6>C</FONT>reating a <FONT SIZE=6>B</FONT><FONT SIZE=6>T</FONT>ab<FONT SIZE=6>V</FONT>iew
+</H2>
+<P>
+In the figure below, we see a window that contains a BTabView with two <A HREF="Tab.html#BTab">BTab</A> objects attached, called "Construct" and "Obliterate."  The "Construct" tab is currently selected, and its target view is visible.  The target view for the "Construct" tab contains two <A HREF="Slider.html#BSlider">BSlider</A> objects (these sliders are used as an example in the <A HREF="Slider.html#BSlider">BSlider</A> section and you can learn more about them there).
+<P>
+<IMG SRC="art/constructo.GIF" ALIGN="bottom">
+<P>
+The BTabView in this window is constructed using the following code, which can be used in the constructor of the parent window:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BRect r;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTabView *tabView;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTab *tab;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r = Bounds();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.InsetBy(5,5);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tabView = new BTabView(r, "tab_view");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tabView->SetViewColor(216,216,216,0);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r = tabView->Bounds();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.InsetBy(5,5);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.bottom -= tabView->TabHeight();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tab = new BTab();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tabView->AddTab(new ConstView(r), tab);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tab->SetLabel("Construct");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tab = new BTab();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tabView->AddTab(new DestView(r), tab);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tab->SetLabel("Obliterate");</PRE>
+<P>
+This code creates a <A HREF="#BTabView">BTabView</A>, then sets its view color to the shade of grey used by standard BTabView and <A HREF="Tab.html#BTab">BTab</A> objects.
+<P>
+Notice that the frame rectangle for the tabs' target views is being computed by taking the bounds rectangle of the <A HREF="#BTabView">BTabView</A>, insetting it by five pixels on each side (to leave some room between it and the bounding box of the BTabView), and subtracting the tab height from the bottom edge of the rectangle.  This places the target view inside the tab view.  You can adjust this computation to position the target view to your liking.
+<P>
+Then two <A HREF="Tab.html#BTab">BTab</A> objects are created and added to the BTabView.  The ConstView and DestView classes are derived from <A HREF="View.html#BView">BView</A> and represent the "Construct" and "Obliterate" panels of the window (including the various controls contained in those panels).
+<P>
+When the user clicks the "Obliterate" tab, the window will change to look like this:
+<P>
+<IMG SRC="art/obliterate.gif" ALIGN="bottom">
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#AddTab()">AddTab()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Can be augmented to assist in setting up tabs as they're added to the BTabView.
+<P>
+<B><TT><A HREF="#Draw()">Draw()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Draws the BTabView.  Can be augmented or reimplemented to customize the appearance of the view.
+<P>
+<B><TT><A HREF="#DrawBox()">DrawBox()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Draws the box that surrounds the container view.  Can be augmented or reimplemented to customize the appearance of the view.
+<P>
+<B><TT><A HREF="#DrawTabs()">DrawTabs()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Draws all the tabs in the BTabView.  Can be augmented or reimplemented to customize the appearance of the view.
+<P>
+<B><TT><A HREF="#MakeFocus()">MakeFocus()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Makes the BTabView the focus view, or removes the focus from the BTabView.  Can be augmented to take any additional action necessary when this transition occurs.
+<P>
+<B><TT><A HREF="#RemoveTab()">RemoveTab()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Removes a tab from the BTabView.  Can be augmented to perform any additional action necessary.
+<P>
+<B><TT><A HREF="#Select()">Select()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Changes the currently-selected tab.  Can be augmented to perform any additional action necessary.
+<P>
+<B><TT><A HREF="#SetFocusTab()">SetFocusTab()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Shifts the focus from one tab to another within the BTabView.  Can be augmented to perform whatever additional action may be needed when the tab focus changes.
+<P>
+<B><TT><A HREF="#SetTabHeight()">SetTabHeight()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Sets the height of the BTabView's tabs.  Can be augmented to perform additional actions.
+<P>
+<B><TT><A HREF="#SetTabWidth()">SetTabWidth()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Sets the width of the tabs.  Can be augmented to perform whatever added functions are necessary.
+<P>
+<B><TT><A HREF="#TabAt()">TabAt()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Returns a pointer to a specific <A HREF="Tab.html#BTab">BTab</A> object.  Can be augmented to perform whatever added functions are necessary.
+<P>
+<B><TT><A HREF="#TabFrame()">TabFrame()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Returns the frame rectangle for a given tab.  Can be augmented to adjust the frame rectangle for customization of the appearance of your BTabView.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BTabView()"></A>BTabView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BTabView(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;button_width <I><FONT  color=991122 face=HELVETICA>width</I></FONT> = <B><TT><A HREF="#B_WIDTH_AS_USUAL">B_WIDTH_AS_USUAL</A></TT></B>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT> = <B><TT><A HREF="misc.html#B_FOLLOW_ALL">B_FOLLOW_ALL</A></TT></B>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = <B><TT><A HREF="ViewGeneral.html#B_FULL_UPDATE_ON_RESIZE">B_FULL_UPDATE_ON_RESIZE</A></TT></B> | <B><TT><A HREF="ViewGeneral.html#B_WILL_DRAW">B_WILL_DRAW</A></TT></B> | <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE_JUMP">B_NAVIGABLE_JUMP</A></TT></B> | <B><TT><A HREF="ViewGeneral.html#B_FRAME_EVENTS">B_FRAME_EVENTS</A></TT></B> | <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE">B_NAVIGABLE</A></TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BTabView(</TT></B></FONT>const BTabView &amp;<I><FONT  color=991122 face=HELVETICA>tabView</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BTabView(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BTabView to the <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> rectangle, stated in its eventual parent's coordinate system, and assigns it the specified <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, resizing mode, and <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>.  These are described in detail in the <A HREF="View.html#BView">BView</A> section.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>width</I></FONT> parameter, which can be one of the following values, specifies the widths of the tabs in the BTabView.  All tabs in a BTabView are the same width.
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_WIDTH_FROM_WIDEST"></A>B_WIDTH_FROM_WIDEST
+</TT></B></TD>
+<TD>Each tab's width is determined based upon the width of the widest tab name..</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WIDTH_AS_USUAL"></A>B_WIDTH_AS_USUAL
+</TT></B></TD>
+<TD>The default tab width is used for all tabs.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WIDTH_FROM_LABEL"></A>B_WIDTH_FROM_LABEL
+</TT></B></TD>
+<TD>The tab width for each tab is based on the width of the tab's label.</TD>
+</TABLE>
+<P>
+The container view for the BTabView's subviews is created and added to the BTabView as well.
+<P>
+<HR>
+<H3>
+<A NAME="~BTabView()"></A>~BTabView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BTabView()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees all memory the BTabView allocated, and deletes every <A HREF="Tab.html#BTab">BTab</A> attached to it. 
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BTabView object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the message doesn't contain archived data for a <A HREF="#BTabView">BTabView</A>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddTab()"></A>AddTab()
+, 
+<A NAME="RemoveTab()"></A>RemoveTab()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AddTab(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>target</I></FONT>, <A HREF="Tab.html#BTab">BTab</A> *<I><FONT  color=991122 face=HELVETICA>tab</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual <A HREF="Tab.html#BTab">BTab</A> *RemoveTab(int32 tab_index)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>AddTab() </TT></B>adds the specified <I><FONT  color=991122 face=HELVETICA>tab</I></FONT> as the rightmost tab in the BTabView.  The new tab's target view is set to <I><FONT  color=991122 face=HELVETICA>target</I></FONT>.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>tab</I></FONT> is <B><TT>NULL</TT></B>, a new <A HREF="Tab.html#BTab">BTab</A> object is constructed and added to the BTabView.  You can get a pointer to the new tab using the <B><TT><A HREF="#TabAt()">TabAt()</A></TT></B> function
+<P>
+If you choose to reimplement <B><TT>AddTab()</TT></B>, you should call the inherited form of this function once the <A HREF="Tab.html#BTab">BTab</A> has been customized.
+<P>
+<B><TT>RemoveTab()</TT></B> removes the tab with the specified index number from the BTabView and returns a pointer to the <A HREF="Tab.html#BTab">BTab</A> object.  The <A HREF="Tab.html#BTab">BTab</A> is not deleted&mdash;if you don't need it anymore, you can do that yourself.
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B> and stores the BTabView in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls <B><TT>BView::AttachedToWindow()</TT></B>, then selects the first tab in the tab view.
+<P>
+<B>See also:  <TT>BView::AttachedToWindow()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the tabs and the box that encloses the container view that displays the selected tab's target view.
+<P>
+<HR>
+<H3>
+<A NAME="DrawBox()"></A>DrawBox()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawBox(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>selTabRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the box that encloses the container view.  <I><FONT  color=991122 face=HELVETICA>selTabRect</I></FONT> is the frame rectangle of the currently-selected tab; this information is used to allow the box to attach properly to the current tab.  This is the same rectangle that the <B><TT><A HREF="#DrawTabs()">DrawTabs()</A></TT></B> function returns.
+<P>
+This is called for you by the <B><TT><A HREF="#Draw()">Draw()</A></TT></B> function and is provided primarily as a hook for customizing the appearance of your BTabView.
+<P>
+<HR>
+<H3>
+<A NAME="DrawTabs()"></A>DrawTabs()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>DrawTabs(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws all the tabs in the BTabView and returns the frame rectangle of the currently-selected tab.  This rectangle should then be passed to <B><TT><A HREF="#DrawBox()">DrawBox()</A></TT></B> to draw the container view's enclosing box.
+<P>
+This is called for you by the <B><TT><A HREF="#Draw()">Draw()</A></TT></B> function and is provided primarily as a hook for customizing the appearance of your BTabView.
+<P>
+<HR>
+<H3>FocusTab() see <A HREF="#SetFocusTab()">SetFocusTab()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="KeyDown()"></A>KeyDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>KeyDown(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>bytes</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>KeyDown()</TT></B> function handles keyboard navigation of the BTabView; the down and left arrow keys move the focus to the left, and the up and right arrow keys move the focus to the right.  The space bar and enter keys select the focused tab.
+<P>
+All other keys are passed through to the <B><TT>BView::KeyDown()</TT></B> function for further processing.
+<P>
+<B>See also:  </B>the <B>Keyboard Information</B> appendix, "B_KEY_DOWN" in the <B>Message Protocols</B> appendix, <B><TT>BView::KeyDown()</TT></B>, <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#modifiers()">modifiers()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MakeFocus()"></A>MakeFocus()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MakeFocus(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>focused</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Makes the BTabView the current focus by first calling <B><TT>BView::MakeFocus()</TT></B>, then making the currently-selected tab the focus of the BTabView.
+<P>
+<B>See also:  </B> <B><TT>BView::MakeFocus()
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="MouseDown()"></A>MouseDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MouseDown(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Identifies which tab (if any) the user clicked and selects that tab.  If the mouse was not inside a tab when clicked, the <B><TT>BView::MouseDown</TT></B> function is called.
+<P>
+<B>See also:  </B> "B_MOUSE_DOWN" in the <B>Message Protocols</B> appendix, <B><TT>GetMouse()</TT></B> 
+<P>
+<HR>
+<H3>RemoveTab() see <A HREF="#AddTab()">AddTab()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Select()"></A>Select()
+, 
+<A NAME="Selection()"></A>Selection()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Select(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>tab</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>Selection(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>Select()</TT></B> selects the tab specified by its index number, first deselecting the previously-selected tab.
+<P>
+<B><TT>Selection()</TT></B> returns the index number of the currently-selected tab.
+<P>
+<HR>
+<H3>
+<A NAME="SetFocusTab()"></A>SetFocusTab()
+, 
+<A NAME="FocusTab()"></A>FocusTab()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetFocusTab(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>tab</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>focused</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FocusTab(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetFocusTab()</TT></B> sets the <I><FONT  color=991122 face=HELVETICA>focus</I></FONT> state of the specified <I><FONT  color=991122 face=HELVETICA>tab</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>focused</I></FONT> is <B><TT>true</TT></B>, the specified tab becomes the new focus; if <I><FONT  color=991122 face=HELVETICA>focused</I></FONT> is <B><TT>false</TT></B>, the focus is removed from the currently-focused tab but no new focus is set (the BTabView becomes focusless).
+<P>
+<B><TT>FocusTab()</TT></B> returns the index number of the tab that is currently the focus.
+<P>
+<HR>
+<H3>
+<A NAME="SetTabHeight()"></A>SetTabHeight()
+, 
+<A NAME="TabHeight()"></A>TabHeight()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetTabHeight(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>TabHeight(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetTabHeight()</TT></B> sets the height of the tabs in the BTabView.  <B><TT>TabHeight()</TT></B> returns the current tab height.
+<P>
+When you change the tab height, the container view for the target views is resized so that the BTabView doesn't change size.  Making the tabs taller by N pixelscauses the container view's top edge to move down by N pixels, and decreasing the heights of the tabs increases the height of the container view.
+<P>
+<HR>
+<H3>
+<A NAME="SetTabWidth()"></A>SetTabWidth()
+, 
+<A NAME="TabWidth()"></A>TabWidth()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetTabWidth(</TT></B></FONT>button_width <I><FONT  color=991122 face=HELVETICA>width</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+button_width <B><TT><FONT  color=000022 size=+1>TabWidth(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetTabWidth()</TT></B> sets the width of the tabs in the <A HREF="#BTabView">BTabView</A>, and <B><TT>TabWidth()</TT></B> returns the current width setting.  <I><FONT  color=991122 face=HELVETICA>width</I></FONT> must be one of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_WIDTH_FROM_WIDEST"></A>B_WIDTH_FROM_WIDEST
+</TT></B></TD>
+<TD>Each tab's width is determined based upon the width of the widest tab name..</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WIDTH_AS_USUAL"></A>B_WIDTH_AS_USUAL
+</TT></B></TD>
+<TD>The default tab width is used for all tabs.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="TabAt()"></A>TabAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="Tab.html#BTab">BTab</A> *<B><TT><FONT  color=000022 size=+1>TabAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>tab_index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the <A HREF="Tab.html#BTab">BTab</A> object at the specified index.  The leftmost tab is index number 0.
+<P>
+<HR>
+<H3>
+<A NAME="TabFrame()"></A>TabFrame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>TabFrame(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>tab_index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the frame rectangle of the tab whose index number is specified.  The leftmost tab is index number 0.
+<P>
+<B>See also:  <TT><A HREF="#DrawTabs()">DrawTabs()</A></TT></B>, <B><TT><A HREF="#DrawBox()">DrawBox()</A></TT></B>, <B><TT><A HREF="#Draw()">Draw()</A>
+<P>
+</TT></B><HR>
+<H3>TabHeight() see <A HREF="#SetTabHeight()">SetTabHeight()</A></H3>
+<P>
+<HR>
+<H3>TabWidth() see <A HREF="#SetTabWidth()">SetTabWidth()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="WindowActivated()"></A>WindowActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WindowActivated(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT>WindowActivated()</TT></B>, then calls <B><TT><A HREF="#DrawTabs()">DrawTabs()</A></TT></B> to redraw the tabs.
+<P>
+<B>See also:  <TT><A HREF="Window.html#WindowActivated()">BWindow::WindowActivated()</A></TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_high"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>The height of the tabs.</TD>
+<TR>
+<TD>"_but_width"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT16_TYPE">B_INT16_TYPE</A></TT></B></TD>
+<TD>The tab width value.</TD>
+<TR>
+<TD>"_sel"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Which tab is selected.</TD>
+</TABLE>
+<P>
+The archived tabs are added to the "_l_items" field (deep copy only).  The tabs' target views are added to the "_views" field (deep copy only), with the leftmost tab inserted first in the "_views" array, and the rightmost tab inserted last.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

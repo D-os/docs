@@ -1,0 +1,428 @@
+<HTML><HEAD><TITLE>The Interface Kit: BMenuBar</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMenuBar"></A>BMenuBar
+</H1>
+<P>
+Derived from:  public <A HREF="Menu.html#BMenu">BMenu</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/MenuBar.h">be/interface/MenuBar.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="MenuBar.summary.html"><i>Summary</i></A></H6>
+<P>
+A BMenuBar is a menu that can stand at the root of a menu hierarchy.  Rather than appear on-screen when commanded to do so by a user action, a BMenuBar object has a settled location in a window's view hierarchy, just like other views.  Typically, the root menu is the menu bar that's drawn across the top of the window.  It's from this use that the class gets its name.
+<P>
+However, instances of this class can also be used in other ways.  A BMenuBar might simply display a list of items arranged in a column somewhere in a window.  Or it might contain just one item, where that item controls a pop-up menu (a <A HREF="PopUpMenu.html#BPopUpMenu">BPopUpMenu</A> object).  Rather than look like a "menu bar," the BMenuBar object would look something like a button.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Key%20Menu%20Bar"></A>The Key Menu Bar
+</H3>
+<P>
+The "real" menu bar at the top of the window usually represents an extensive menu hierarchy; each of its items typically controls a submenu.
+<P>
+The user should be able to operate this menu bar from the keyboard (using the arrow keys and Enter).  There are two ways that the user can put the BMenuBar and its hierarchy in focus for keyboard events:
+<P>
+<UL>
+<LI>Clicking an item in the menu bar.  If the "click to open" preference is not turned off, this opens the submenu the item controls so that it stays visible on-screen and puts the submenu in focus.
+<P>
+<LI>Pressing the Menu key or Command-Escape.  This puts the BMenuBar in focus and selects its first item.
+<P>
+</UL>
+<P>
+Either method opens the entire menu hierarchy to keyboard navigation.
+<P>
+If a window's view hierarchy includes more than one BMenuBar object, the Menu key (or Command-Escape) must choose one of them to put in focus.  By default, it picks the last one that was attached to the window.  However, the <B><TT><A HREF="Window.html#SetKeyMenuBar()">SetKeyMenuBar()</A></TT></B> function defined in the <A HREF="Window.html#BWindow">BWindow</A> class can be called to designate a different BMenuBar object as the "key" menu bar for the window.
+<P>
+<HR>
+<H3>
+<A NAME="A%20Kind%20of%20BMenu"></A>A Kind of BMenu
+</H3>
+<P>
+BMenuBar inherits most of its functions from the <A HREF="Menu.html#BMenu">BMenu</A> class.  It reimplements the <B><TT>AttachedToWindow()</TT></B>, <B><TT>Draw()</TT></B>, and <B><TT>MouseDown()</TT></B> functions that set up the object and respond to messages, but these aren't functions that you'd call from application code; they're called for you.
+<P>
+The only real function (other than the constructor) that the BMenuBar class adds to those it inherits is <B><TT><A HREF="#SetBorder()">SetBorder()</A></TT></B>, which determines how the list of items is bordered.
+<P>
+Therefore, for most BMenuBar operations&mdash;adding submenus, finding items, temporarily disabling the menu bar, and so on&mdash;you must call inherited functions and treat the object like the <A HREF="Menu.html#BMenu">BMenu</A> that it is.
+<P>
+<B>See also:  </B>the <A HREF="Menu.html#BMenu">BMenu</A> class
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMenuBar()"></A>BMenuBar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMenuBar(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FOLLOW_LEFT_RIGHT</FONT> | <FONT  face=HELVETICA>B_FOLLOW_TOP</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;menu_layout&nbsp;<I><FONT  color=991122 face=HELVETICA>layout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_ITEMS_IN_ROW</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>resizeToFit</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMenuBar(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes the BMenuBar by assigning it a <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> rectangle, a <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, and a <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, just like other BViews.  These values are passed up the inheritance hierarchy to the <A HREF="View.html#BView">BView</A> constructor.  The default resizing mode (<B><TT><A HREF="misc.html#B_FOLLOW_LEFT_RIGHT">B_FOLLOW_LEFT_RIGHT</A></TT></B> plus <B><TT><A HREF="ViewGeneral.html#B_FOLLOW_TOP">B_FOLLOW_TOP</A></TT></B>) is designed for a true menu bar (one that's displayed along the top edge of a window).  It permits the menu bar to adjust itself to changes in the window's width, while keeping it glued to the top of the window frame.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>layout</I></FONT> argument determines how items are arranged in the menu bar.  By default, they're arranged in a row as befits a true menu bar.  If an instance of this class is being used to implement something other than a horizontal menu, items can be laid out in a column (<B><TT>
+<A NAME="B_ITEMS_IN_COLUMN"></A>B_ITEMS_IN_COLUMN
+</TT></B>) or in a matrix (<B><TT>
+<A NAME="B_ITEMS_IN_MATRIX"></A>B_ITEMS_IN_MATRIX
+</TT></B>).
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>resizeToFit</I></FONT> flag is turned on, as it is by default, the frame rectangle of the BMenuBar will be automatically resized to fit the items it displays.  This is generally a good idea, since it relieves you of the responsibility of testing user preferences to determine what size the menu bar should be.  Because the font and font size for menu items are user preferences, items can vary in size from user to user.
+<P>
+When <I><FONT  color=991122 face=HELVETICA>resizeToFit</I></FONT> is <B><TT>true</TT></B>, the <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> rectangle determines only where the menu bar is located, not how large it will be.  The rectangle's <B><TT>left</TT></B> and <B><TT>top</TT></B> data members are respected, but the <B><TT>right</TT></B> and <B><TT>bottom</TT></B> sides are adjusted to accommodate the items that are added to the menu bar.
+<P>
+Two kinds of adjustments are made if the <I><FONT  color=991122 face=HELVETICA>layout</I></FONT> is <B><TT><A HREF="Menu.html#B_ITEMS_IN_ROW">B_ITEMS_IN_ROW</A></TT></B>, as it typically is for a menu bar:
+<P>
+<UL>
+<LI>The height of the menu bar is adjusted to the height of a single item.
+<P>
+<LI>If the <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT> includes <B><TT><A HREF="misc.html#B_FOLLOW_LEFT_RIGHT">B_FOLLOW_LEFT_RIGHT</A></TT></B>, the width of the menu bar is adjusted to match the width of its parent view.  This means that a true menu bar (one that's a child of the window's top view) will always be as wide as the window.
+<P>
+</UL>
+<P>
+Two similar adjustments are made if the menu bar <I><FONT  color=991122 face=HELVETICA>layout</I></FONT> is <B><TT><A HREF="#B_ITEMS_IN_COLUMN">B_ITEMS_IN_COLUMN</A></TT></B>:
+<P>
+<UL>
+<LI>The width of the menu bar is adjusted to the width of the widest item.
+<P>
+<LI>If the <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT> includes <B><TT>B_FOLLOW_TOP_BOTTOM</TT></B>, the height of the menu bar is adjusted to match the height of its parent view.
+<P>
+</UL>
+<P>
+After setting up the key menu bar and adding items to it, you may want to set the minimum width of the window so that certain items won't be hidden when the window is resized smaller.
+<P>
+Change the <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, the <I><FONT  color=991122 face=HELVETICA>layout</I></FONT>, and the <I><FONT  color=991122 face=HELVETICA>resizeToFit</I></FONT> flag as needed for BMenuBars that are used for a purpose other than to implement a true menu bar.
+<P>
+<B>See also:  </B>the <A HREF="Menu.html#BMenu">BMenu</A> constructor, <B><TT><A HREF="Window.html#SetSizeLimits()">BWindow::SetSizeLimits()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BMenuBar()"></A>~BMenuBar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BMenuBar()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees all the items and submenus in the entire menu hierarchy, and all memory allocated by the BMenuBar.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BMenuBar object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message doesn't contain data for a BMenuBar object, this function returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B>, which serves to archive the BMenuBar's current state and, if the <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> flag is <B><TT>true</TT></B>, all its menu items.  This function then adds the BMenuBar's border style to the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="Menu.html#Archive()">BMenu::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Finishes the initialization of the BMenuBar by setting up the whole hierarchy of menus that it controls, and by making the <A HREF="Window.html#BWindow">BWindow</A> to which it has become attached the target handler for all items in the menu hierarchy, except for those items for which a target has already been set.
+<P>
+This function also makes the BMenuBar the key menu bar, the BMenuBar object whose menu hierarchy the user can navigate from the keyboard.  If a window contains more than one BMenuBar in its view hierarchy, the last one that's added to the window gets to keep this designation.  However, the key menu bar should always be the real menu bar at the top of the window.  It can be explicitly set with BWindow's <B><TT><A HREF="Window.html#SetKeyMenuBar()">SetKeyMenuBar()</A></TT></B> function.
+<P>
+<B>See also:  <TT><A HREF="Window.html#SetKeyMenuBar()">BWindow::SetKeyMenuBar()</A></TT></B> 
+<P>
+<HR>
+<H3>Border()   see <A HREF="#SetBorder()">SetBorder()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the menu&mdash;whether as a true menu bar, as some other kind of menu list, or as a single item that controls a pop-up menu.  This function is called as the result of update messages; you don't need to call it yourself.
+<P>
+<B>See also:  <TT>BView::Draw()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Hide()"></A>Hide()
+, 
+<A NAME="Show()"></A>Show()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Hide(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Show(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions override their <A HREF="Menu.html#BMenu">BMenu</A> counterparts to restore the normal behavior for views when they're hidden and unhidden.  When an ordinary <A HREF="Menu.html#BMenu">BMenu</A> is hidden, the window that displays it is also removed from the screen.  But it would be a mistake to remove the window that displays a BMenuBar.  Hiding a BMenuBar is like hiding a typical view; only the view is hidden, not the window.
+<P>
+<B>See also:  <TT>BView::Hide()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MouseDown()"></A>MouseDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MouseDown(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initiates mouse tracking and keyboard navigation of the menu hierarchy.  This function is called to notify the BMenuBar of a mouse-down event.
+<P>
+<B>See also:  <TT>BView::MouseDown()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetBorder()"></A>SetBorder()
+, 
+<A NAME="Border()"></A>Border()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetBorder(</TT></B></FONT>menu_bar_border <I><FONT  color=991122 face=HELVETICA>border</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+menu_bar_border <B><TT><FONT  color=000022 size=+1>Border(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetBorder()">SetBorder()</A></TT></B> determines how the menu list is bordered.  The <I><FONT  color=991122 face=HELVETICA>border</I></FONT> argument can be any of three values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_BORDER_FRAME"></A>B_BORDER_FRAME
+</TT></B></TD>
+<TD>The border is drawn around the entire frame rectangle.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BORDER_CONTENTS"></A>B_BORDER_CONTENTS
+</TT></B></TD>
+<TD>The border is drawn around just the list of items.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BORDER_EACH_ITEM"></A>B_BORDER_EACH_ITEM
+</TT></B></TD>
+<TD>A border is drawn around each item.</TD>
+</TABLE>
+<P>
+<B><TT><A HREF="#Border()">Border()</A></TT></B> returns the current setting.  The default is <B><TT><A HREF="#B_BORDER_FRAME">B_BORDER_FRAME</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_border"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Menu bar border (exists only if not <B><TT>B_BORDER_FRAME</TT></B>)</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

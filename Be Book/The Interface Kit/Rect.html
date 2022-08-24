@@ -1,0 +1,628 @@
+<HTML><HEAD><TITLE>The Interface Kit: BRect</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BRect"></A>BRect
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Rect.h">be/interface/Rect.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor or on the stack, typically the latter.
+<P>
+<H6><A HREF="Rect.summary.html"><i>Summary</i></A></H6>
+<P>
+A BRect object represents a rectangle.  BRects are used throughout the Interface Kit to define the frames of windows, views, bitmaps&mdash;even the screen itself.  A BRect is defined by its four sides, expressed as the public data members <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#left">left</A></TT></B>, <B><TT>top</TT></B>, <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#right">right</A></TT></B>, and <B><TT>bottom</TT></B>. 
+<P>
+<IMG SRC="art/Rect1.GIF" ALIGN="bottom">
+ 
+<P>
+When used in the screen coordinate system(as a window or view's frame, for example) a BRect's sides are aligned with the x and y axes (as shown here), and its coordinate values, which are stored as floats, are floored.  
+<P>
+<HR>
+<H3>
+<A NAME="Rectangle%20Size%20and%20Area"></A>Rectangle Size and Area
+</H3>
+<P>
+You would expect a BRect defined thus...:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BRect rect(0, 0, 3, 3);</PRE>
+<P>
+...to have a width of 3.0 and a height of 3.0.  These, indeed, are the values returned by the <B><TT><A HREF="#Width()">Width()</A></TT></B> and <B><TT><A HREF="#Height()">Height()</A></TT></B> functions.  However, the coordinate system considers integer coordinates to fall in the center of pixels, so the rectangle "touches" a 4x4 pixel grid when it's applied to the screen&mdash;it appears one pixel wider and one higher than <B><TT><A HREF="#Width()">Width()</A> </TT></B>and <B><TT><A HREF="#Height()">Height()</A></TT></B> would have you believe.  The mapping of rectangle coordinates to pixels is explained in greater detail in <a href="3_CoordinateSpace.html#The%20Coordinate%20Space">"The Coordinate Space"</a>.
+<P>
+<IMG SRC="art/PixGrid.GIF" ALIGN="bottom">
+<P>
+A rectangle's area includes the points that lie along its sides, but it doesn't necessarily contain the entire area of the pixels that it "lights up."  For example, consider the point at (3.1, 3.1).  This point falls outside the (0,0,3,3) BRect defined above (i.e the point doesn't <B><TT>Intersect()</TT></B> with the BRect), even though it corresponds to one of the pixels that the BRect touches (as shown here).
+<P>
+<IMG SRC="art/Rectpoint.GIF" ALIGN="bottom">
+<P>
+<HR>
+<H3>
+<A NAME="Rectangle%20Validity"></A>Rectangle Validity
+</H3>
+<P>
+To represent a valid rectangle, a BRect's <B><TT>top</TT></B> value must be less than or equal to <B><TT>bottom</TT></B>, and its <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#left">left</A></TT></B> must be less than or equal to <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#right">right</A></TT></B>.  Invalid rectangles are meaningless and can't be used (to define a window or view's area, etc.)  Note that the BRect constructor and Set...() function don't prevent you from creating an invalid rectangle.  Use the <B><TT><A HREF="#IsValid()">IsValid()</A></TT></B> boolean function to test a BRect object's validity.
+<P>
+<HR>
+<H2>
+<A NAME="Data%20Members"></A><FONT SIZE=6>D</FONT>ata <FONT SIZE=6>M</FONT>embers
+</H2>
+<P>
+float <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#left">left</A>
+<br>
+</TT></B>The value of the rectangle's left side.
+<P>
+float <B><TT>top</TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+The value of the rectangle's top.
+<P>
+float <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#right">right</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+The value of the rectangle's right side.
+<P>
+float <B><TT>bottom</TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+The value of the rectangle's bottom.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor"></A><FONT SIZE=6>C</FONT>onstructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BRect()"></A>BRect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline <B><TT><FONT  color=000022 size=+1>BRect(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>left</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>top</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>right</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>bottom</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+inline <B><TT><FONT  color=000022 size=+1>BRect(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>leftTop</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>rightBottom</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+inline <B><TT><FONT  color=000022 size=+1>BRect(</TT></B></FONT>const BRect&amp; <I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+inline <B><TT><FONT  color=000022 size=+1>BRect(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes a BRect as four sides, as two diametrically opposed corners, or as a copy of some other BRect object.  A rectangle that's not assigned any initial values is invalid, until a specific assignment is made, either through a <B><TT><A HREF="#Set()">Set()</A></TT></B> function or by setting the object's data members directly.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Contains()"></A>Contains()
+, 
+<A NAME="Intersects()"></A>Intersects()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Contains(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Contains(</TT></B></FONT>BRect <I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Intersects(</TT></B></FONT>BRect <I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Contains()">Contains()</A></TT></B> returns <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>point </I></FONT>or <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> lies entirely within the BRect's rectangle (and <B><TT>false</TT></B> if not).  A rectangle contains the points that lie along its edges; for example, two identical rectangles contain each other.
+<P>
+<B><TT>Intersect()</TT></B> returns <B><TT>true</TT></B> if the BRect has any area&mdash;even a corner or part of a side&mdash;in common with <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, and <B><TT>false</TT></B> if it doesn't.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function's results are unpredictable if either rectangle is invalid.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="#&amp;">&amp;</A></TT></B> (intersection), <B><TT><A HREF="#|">|</A></TT></B> (union), <B><TT><A HREF="Point.html#ConstrainTo()">BPoint::ConstrainTo()</A></TT></B> 
+<P>
+<HR>
+<H3>Height()  see <A HREF="#Width()">Width()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="InsetBy()"></A>InsetBy()
+, 
+<A NAME="InsetBySelf()"></A>InsetBySelf()
+, 
+<A NAME="InsetByCopy()"></A>InsetByCopy()
+, 
+<A NAME="OffsetBy()"></A>OffsetBy()
+, 
+<A NAME="OffsetBySelf()"></A>OffsetBySelf()
+, 
+<A NAME="OffsetByCopy()"></A>OffsetByCopy()
+, 
+<A NAME="OffsetTo()"></A>OffsetTo()
+, 
+<A NAME="OffsetToSelf()"></A>OffsetToSelf()
+, 
+<A NAME="OffsetToCopy()"></A>OffsetToCopy()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>InsetBy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>InsetBy(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BRect &amp;<B><TT><FONT  color=000022 size=+1>InsetBySelf(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BRect &amp;<B><TT><FONT  color=000022 size=+1>InsetBySelf(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BRect <B><TT><FONT  color=000022 size=+1>InsetByCopy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BRect <B><TT><FONT  color=000022 size=+1>InsetByCopy(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>OffsetBy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>OffsetBy(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BRect &amp;<B><TT><FONT  color=000022 size=+1>OffsetBySelf(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BRect &amp;<B><TT><FONT  color=000022 size=+1>OffsetBySelf(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BRect <B><TT><FONT  color=000022 size=+1>OffsetByCopy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BRect <B><TT><FONT  color=000022 size=+1>OffsetByCopy(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>OffsetTo(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>OffsetTo(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BRect &amp;<B><TT><FONT  color=000022 size=+1>OffsetToSelf(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BRect &amp;<B><TT><FONT  color=000022 size=+1>OffsetToSelf(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BRect <B><TT><FONT  color=000022 size=+1>OffsetToCopy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BRect <B><TT><FONT  color=000022 size=+1>OffsetToCopy(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sorting out the different versions, there are three basic rectangle-manipulation functions here:
+<P>
+<UL>
+<LI><B><TT><A HREF="#InsetBy()">InsetBy()</A></TT></B> insets the sides of the BRect's rectangle by <I><FONT  color=991122 face=HELVETICA>x</I></FONT> units (left and right sides) and <I><FONT  color=991122 face=HELVETICA>y</I></FONT> units (top and bottom).  Positive inset values shrink the rectangle; negative values expand it.  Note that both sides of each pair moves the full amount.  For example, if you inset a BRect by (4,4), the left side moves (to the right) four units and the right side moves (to the left) four units (and similarly with the top and bottom).
+<P>
+<LI><B><TT><A HREF="#OffsetBy()">OffsetBy()</A></TT></B> moves the BRect horizontally by <I><FONT  color=991122 face=HELVETICA>x</I></FONT> units and vertically by <I><FONT  color=991122 face=HELVETICA>y</I></FONT> units.  The rectangle's size doesn't change.
+<P>
+<LI><B><TT><A HREF="#OffsetTo()">OffsetTo()</A></TT></B> moves the BRect to the location (<I><FONT  color=991122 face=HELVETICA>x</I></FONT>,<I><FONT  color=991122 face=HELVETICA>y</I></FONT>).
+<P>
+</UL>
+<P>
+If a <A HREF="Point.html#BPoint">BPoint</A> argument is used, the BPoint's <B><TT>x</TT></B> and <B><TT>y</TT></B> values are used as the <I><FONT  color=991122 face=HELVETICA>x</I></FONT> and <I><FONT  color=991122 face=HELVETICA>y</I></FONT> arguments.
+<P>
+The <B><TT>...Self()</TT></B> versions of the functions are the same as the simpler versions, but they conveniently return the modified BRect.  The <B><TT>...Copy()</TT></B> versions copy the <A HREF="#BRect">BRect</A>, and then modify and return the copy (without changing the original).
+<P>
+<HR>
+<H3>Intersects()  see <A HREF="#Contains()">Contains()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsValid()"></A>IsValid()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline bool <B><TT><FONT  color=000022 size=+1>IsValid(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the BRect's right side is greater than or equal to its left and its bottom is greater than or equal to its top, and <B><TT>false</TT></B> otherwise.  An invalid rectangle can't be used to define an interface area (such as the frame of a view or window).
+<P>
+<HR>
+<H3>LeftBottom(), LeftTop()  see <A HREF="#Set()">Set()</A></H3>
+<P>
+<HR>
+<H3>OffsetBy(), OffsetByCopy(), OffsetBySelf()  see <A HREF="#InsetBy()">InsetBy()</A></H3>
+<P>
+<HR>
+<H3>OffsetTo(), OffsetToCopy(), OffsetToSelf()  see <A HREF="#InsetBy()">InsetBy()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="PrintToStream()"></A>PrintToStream()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>PrintToStream(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Prints the contents of the BRect object to standard out in the form:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"BRect(<I>left</I>, <I>top</I>, <I>right</I>, <I>bottom</I>)"</PRE>
+<P>
+<HR>
+<H3>RightBottom(), RightTop()  see <A HREF="#Set()">Set()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Set()"></A>Set()
+, 
+<A NAME="SetLeftTop()"></A>SetLeftTop()
+, 
+<A NAME="SetLeftBottom()"></A>SetLeftBottom()
+, 
+<A NAME="SetRightTop()"></A>SetRightTop()
+, 
+<A NAME="SetRightBottom()"></A>SetRightBottom()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline void <B><TT><FONT  color=000022 size=+1>Set(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>left</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>top</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>right</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>bottom</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetLeftTop(</TT></B></FONT>const <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetLeftBottom(</TT></B></FONT>const <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetRightTop(</TT></B></FONT>const <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetRightBottom(</TT></B></FONT>const <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>LeftTop(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>LeftBottom(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>RightTop(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>RightBottom(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Set()">Set()</A></TT></B> sets the object's rectangle by defining the coordinates of all four sides.  The other <B><TT>Set...()</TT></B> functions move one of the rectangle's corners to the <A HREF="Point.html#BPoint">BPoint</A> argument; the other corners and sides are modified concomittantly.  None of these functions prevents you from creating an invalid rectangle.
+<P>
+The BPoint-returning functions return the coordinates of one of the rectangle's four corners.
+<P>
+<HR>
+<H3>
+<A NAME="Width()"></A>Width()
+, 
+<A NAME="IntegerWidth()"></A>IntegerWidth()
+, 
+<A NAME="Height()"></A>Height()
+, 
+<A NAME="IntegerHeight()"></A>IntegerHeight()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline float <B><TT><FONT  color=000022 size=+1>Width(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline int32 <B><TT><FONT  color=000022 size=+1>IntegerWidth(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+inline float <B><TT><FONT  color=000022 size=+1>Height(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline int32 <B><TT><FONT  color=000022 size=+1>IntegerHeight(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Width()">Width()</A></TT></B> returns the numerical difference between the rectangle's right and left sides (i.e. <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#right">right</A>&nbsp;</TT></B>&ndash;&nbsp;<B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#left">left</A></TT></B>). <B><TT><A HREF="#IntegerWidth()">IntegerWidth()</A></TT></B> does the same, but rounds up in the case of a fractional difference.  
+<P>
+<B><TT><A HREF="#Height()">Height()</A></TT></B> and <B><TT><A HREF="#IntegerHeight()">IntegerHeight()</A></TT></B> perform similar calculations for the height of the rectangle (i.e. <B><TT>bottom</TT></B>&nbsp;&ndash;&nbsp;<B><TT>top</TT></B> and ceil(<B><TT>bottom</TT></B>&nbsp;&ndash;&nbsp;<B><TT>top</TT></B>)).  
+<P>
+The width and height of a BRect's rectangle, as returned through these functions  
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline BRect&amp;<I><FONT  color=991122 face=HELVETICA> </I></FONT><B><TT><FONT  color=000022 size=+1>operator =(</TT></B></FONT>const BRect&amp; <I><FONT  color=991122 face=HELVETICA>from</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Copies <I><FONT  color=991122 face=HELVETICA>from</I></FONT>'s rectangle data into the left-side object. 
+<P>
+<HR>
+<H3>
+<A NAME="=="></A>==
+ (equality), 
+<A NAME="!="></A>!=
+ (inequality)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>operator ==(</TT></B></FONT>BRect<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>operator !=(</TT></B></FONT>BRect<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+== returns <B><TT>true</TT></B> if the two objects' rectangles exactly coincide.
+<P>
+!= returns <B><TT>true</TT></B> if the two objects' rectangles don't coincide.
+<P>
+<HR>
+<H3>
+<A NAME="&amp;"></A>&amp;
+ (intersection)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BRect <B><TT><FONT  color=000022 size=+1>operator &amp;(</TT></B></FONT>BRect<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates and returns a new BRect that's the intersection of the two operands.  The new BRect encloses the area that the two operands have in common.  If the two operands don't intersect, the new BRect will be invalid.
+<P>
+<HR>
+<H3>
+<A NAME="|"></A>|
+ (union)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BRect <B><TT><FONT  color=000022 size=+1>operator |(</TT></B></FONT>BRect<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates and returns a new BRect that minimally but completely encloses the area defined by both of the operands.  The shaded area illustrates the union of the two outlined rectangles:
+<P>
+<IMG SRC="art/RectUnion.GIF" ALIGN="bottom">
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

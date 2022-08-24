@@ -1,0 +1,409 @@
+<HTML><HEAD><TITLE>The Interface Kit: BDragger</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BDragger"></A>BDragger
+</H1>
+<P>
+Derived from:  public <A HREF="View.html#BView">BView</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Dragger.h">be/interface/Dragger.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Dragger.summary.html"><i>Summary</i></A></H6>
+<P>
+A BDragger is a view that  lets users drag and drop some other view.  The other view is the <I><FONT  color=991122 face=HELVETICA>target</I></FONT> of the BDragger and its immediate relative&mdash;a sibling, a parent, or an only child.  The BDragger draws a handle, usually at the corner of the target view, that the user can grab.  When the user drags the handle the target view appears to move with the handle.
+<P>
+When dragged in this way, the target view itself doesn't actually move.  Instead, the view is archived in a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object and the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> is dragged.  When the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> is dropped, the target <A HREF="View.html#BView">BView</A> can be reconstructed from the archive (along with the BDragger).  The new object is a duplicate&mdash;a replicant&mdash;of the target view.
+<P>
+This class works closely with the <A HREF="Shelf.html#BShelf">BShelf</A> class.  A <A HREF="Shelf.html#BShelf">BShelf</A> object accepts dragged BViews, reconstructs them from their archives, and installs them in another view hierarchy.
+<P>
+BDraggers are under the control of DeskBar's "Show Replicants" / "Hide Replicants" menu item.  Showing replicants means that the BDragger handles are visible on-screen; hiding replicants means that the handles are hidden.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BDragger()"></A>BDragger()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDragger(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, <A HREF="View.html#BView">BView</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>target</I></FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FOLLOW_NONE</FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_WILL_DRAW</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDragger(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates a new BDragger and sets its target view.  The BDragger and the target <A HREF="View.html#BView">BView</A> must be directly related in the view hierarchy (as parent-child or as siblings); but, note well, the constructor doesn't establish this relationship for you.  After you construct you <A HREF="#BDragger">BDragger</A>, you have to do one of three things:
+<P>
+<UL>
+<LI>add the target as a child of the dragger, 
+<P>
+<LI>add the dragger as a child of the target, 
+<P>
+<LI>or add the dragger as a sibling of the target.   
+<P>
+</UL>
+<P>
+If  you add the target as a child of  <A HREF="#BDragger">BDragger</A>, it should be the only child that the BDragger has.
+<P>
+A BDragger draws in the right bottom corner of its <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> rectangle.  If the target view is a parent or a sibling of the <A HREF="#BDragger">BDragger</A>, that rectangle needs to be no larger than the image the BDragger draws (the handle).  However, if the target is the BDragger's child, the dragger's frame rectangle must enclose the target's frame (so that the dragger doesn't clip the target).
+<P>
+A BDragger is fully functional once it has been constructed and attached to the view hierarchy of its target.  You don't need to call any other functions.  However, the whole endeavor fails if the target <A HREF="View.html#BView">BView</A> can't be archived.
+<P>
+<HR>
+<H3>
+<A NAME="~BDragger()"></A>~BDragger()
+</H3>
+<P>
+virtual <B><TT>
+<A NAME="~BDragger()"></A>~BDragger()
+</TT></B> 
+<P>
+Frees all memory the BDragger allocated (principally for the bitmap image it draws).
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="HideAllDraggers()"></A>HideAllDraggers()
+, 
+<A NAME="ShowAllDraggers()"></A>ShowAllDraggers()
+, 
+<A NAME="AreDraggersDrawn()"></A>AreDraggersDrawn()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>HideAllDraggers(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>ShowAllDraggers(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+static bool <B><TT><FONT  color=000022 size=+1>AreDraggersDrawn(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions communicate with all BDragger objects in all applications (provided they're attached to windows).  <B><TT><A HREF="#HideAllDraggers()">HideAllDraggers()</A></TT></B> hides the BDragger objects so that they're not visible on-screen.  <B><TT><A HREF="#ShowAllDraggers()">ShowAllDraggers()</A></TT></B> undoes the effect of <B><TT><A HREF="#HideAllDraggers()">HideAllDraggers()</A></TT></B> and causes all BDragger objects to draw their handles.  The Show Replicants / Hide Replicants menu item does its work through these functions.
+<P>
+<B><TT><A HREF="#HideAllDraggers()">HideAllDraggers()</A></TT></B> may or may not hide the BDragger view in the way that BView's <B><TT><A HREF="Menu.html#Hide()">Hide()</A></TT></B> function does.  The BDragger may still be visible, although it won't draw anything until <B><TT><A HREF="#ShowAllDraggers()">ShowAllDraggers()</A></TT></B> is called.  Therefore, if the target <A HREF="View.html#BView">BView</A> is the BDragger's child, it will not be hidden when <B><TT><A HREF="#HideAllDraggers()">HideAllDraggers()</A></TT></B> erases its parent.
+<P>
+<B><TT><A HREF="#AreDraggersDrawn()">AreDraggersDrawn()</A></TT></B> returns <B><TT>true</TT></B> when the BDraggers are shown and <B><TT>false</TT></B> when they're hidden.
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BDragger object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  If the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message doesn't contain and archived <A HREF="#BDragger">BDragger</A>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+<HR>
+<H3>ShowAllDraggers()   see <A HREF="#HideAllDraggers()">HideAllDraggers()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Records the BDragger's hierarchical relationship to the target view and then calls  <B><TT>BView::Archive()</TT></B>.  The <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> flag has no significance for BDragger itself, but note that the flag is passed on to the <A HREF="View.html#BView">BView</A> version.
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+, 
+<A NAME="DetachedFromWindow()"></A>DetachedFromWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DetachedFromWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> makes sure that the BDragger is under the control of the <B><TT><A HREF="#HideAllDraggers()">HideAllDraggers()</A></TT></B> and <B><TT><A HREF="#ShowAllDraggers()">ShowAllDraggers()</A></TT></B> functions, makes its low and background view colors match the view color of its parent, and determines the BDragger's precise relationship to its target view.  To make this determination, the target must be in the view hierarchy; it can't be added to the window after the BDragger is.  For example, if the target is the BDragger's child, it should be added to the BDragger and then the BDragger added to the window.
+<P>
+<B><TT><A HREF="#DetachedFromWindow()">DetachedFromWindow()</A></TT></B> removes the BDragger from the control of the <B><TT><A HREF="#HideAllDraggers()">HideAllDraggers()</A></TT></B> and <B><TT><A HREF="#ShowAllDraggers()">ShowAllDraggers()</A></TT></B> functions.
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the handle&mdash;or fails to draw it and has the parent view draw in that area instead, if all BDraggers are hidden.
+<P>
+<HR>
+<H3>
+<A NAME="IsVisibilityChanging()"></A>IsVisibilityChanging()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsVisibilityChanging(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if two things are true:
+<P>
+<UL>
+<LI>The BDragger is the parent of its target.
+<P>
+<LI>The BDragger handle was visible but now should not be, or it wasn't visible and now should be.
+<P>
+</UL>
+<P>
+Otherwise, this function returns <B><TT>false</TT></B>.  
+<P>
+What's this function for?  It's in the API so derived classes can implement their own versions of <B><TT><A HREF="#Draw()">Draw()</A></TT></B>.  If the BDragger isn't the parent of its target, the visibility of the BDragger view can be controlled by the <B><TT><A HREF="Menu.html#Hide()">Hide()</A></TT></B> and <B><TT><A HREF="Menu.html#Show()">Show()</A></TT></B> functions rather than <B><TT><A HREF="#Draw()">Draw()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="MessageReceived()"></A>MessageReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MessageReceived(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Responds to messages that regulate the visibility of the BDragger handle.
+<P>
+<HR>
+<H3>
+<A NAME="MouseDown()"></A>MouseDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MouseDown(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>where</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Responds to a <B><TT><A HREF="misc.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B> message by archiving the target view (and the BDragger) and initiating a drag-and-drop operation, or by taking other appropriate action.
+<P>
+<HR>
+<H3>
+<A NAME="PopUp()"></A>PopUp()
+, 
+<A NAME="SetPopUp()"></A>SetPopUp()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="PopUpMenu.html#BPopUpMenu">BPopUpMenu</A> *<B><TT><FONT  color=000022 size=+1>PopUp(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetPopUp(</TT></B></FONT><A HREF="PopUpMenu.html#BPopUpMenu">BPopUpMenu</A> *<I><FONT  color=991122 face=HELVETICA>context_menu</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns and sets the <A HREF="PopUpMenu.html#BPopUpMenu">BPopUpMenu</A> displayed when the user right clicks on the BDragger view after it has been attached to a BShelf.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_popup"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>Archive of the pop-up menu.  Field present only if this menu was set with <B><TT><A HREF="#SetPopUp()">SetPopUp()</A></TT></B>.</TD>
+<TR>
+<TD>"_rel"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Relationship to the target view; one of: <B><TT>TARGET_IS_PARENT</TT></B>, <B><TT>TARGET_IS_CHILD</TT></B>, or <B><TT>TARGET_IS_SIBLING</TT></B>.</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

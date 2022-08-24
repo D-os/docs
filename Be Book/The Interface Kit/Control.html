@@ -1,0 +1,714 @@
+<HTML><HEAD><TITLE>The Interface Kit: BControl</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BControl"></A>BControl
+</H1>
+<P>
+Derived from:  public <A HREF="View.html#BView">BView</A>, public <A HREF="../The%20Application%20Kit/Invoker.html#BInvoker">BInvoker</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Control.h">be/interface/Control.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Control.summary.html"><i>Summary</i></A></H6>
+<P>
+BControl is an abstract class for views that draw control devices on the screen.  Objects that inherit from BControl emulate, in software, real-world control devices&mdash;like the switches and levers on a machine, the check lists and blank lines on a form to fill out, or the dials and knobs on a home appliance. 
+<P>
+Controls translate the messages that report generic mouse and keyboard events into other messages with more specific instructions for the application.  A BControl object can be customized by setting the message it posts when invoked and the target object that should handle the message. 
+<P>
+Controls also register a current value, stored as an <B><TT>int32</TT></B> integer that's typically set to <B><TT>B_CONTROL_ON</TT></B> or <B><TT>B_CONTROL_OFF</TT></B>.  The value is changed only by calling <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B>, a virtual function that derived classes can implement to be notified of the change.
+<P>
+<HR>
+<H3>
+<A NAME="Derived%20Classes"></A>Derived Classes
+</H3>
+<P>
+The Interface Kit currently includes six classes derived from BControl&mdash;<A HREF="Button.html#BButton">BButton</A>, <A HREF="PictureButton.html#BPictureButton">BPictureButton</A>, <A HREF="RadioButton.html#BRadioButton">BRadioButton</A>, <A HREF="CheckBox.html#BCheckBox">BCheckBox</A>, <A HREF="ColorControl.html#BColorControl">BColorControl</A>, and BTextControl.  In addition, it has two classes&mdash;<A HREF="ListView.html#BListView">BListView</A> and <A HREF="MenuItem.html#BMenuItem">BMenuItem</A>&mdash;that implement control devices but are not derived from this class.  <A HREF="ListView.html#BListView">BListView</A> and its subclass, <A HREF="OutlineListView.html#BOutlineListView">BOutlineListView</A>, share an interface with the <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> class (of the Support Kit) and <A HREF="MenuItem.html#BMenuItem">BMenuItem</A> is designed to work with the other classes in the menu system.  Like <A HREF="#BControl">BControl</A>, <A HREF="ListView.html#BListView">BListView</A> and <A HREF="MenuItem.html#BMenuItem">BMenuItem</A> inherit from the Application Kit's <A HREF="../The%20Application%20Kit/Invoker.html#BInvoker">BInvoker</A> class.
+<P>
+As <A HREF="ListView.html#BListView">BListView</A> and <A HREF="MenuItem.html#BMenuItem">BMenuItem</A> demonstrate, it's possible to implement a control device that's not a BControl.  However, it's simpler to take advantage of the code that's already provided by the BControl class.  That way you can keep a simple programming interface and avoid reimplementing functions that BControl has defined for you.  If your application defines its own control devices&mdash;dials, sliders, selection lists, and the like&mdash;they should be derived from BControl.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Enables and disables the control device; can be augmented by derived classes to note when the state of the object has changed.
+<P>
+<B><TT><A HREF="#SetValue()">SetValue()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Changes the value of the control device; can be augmented to take collateral action when the change is made.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BControl()"></A>BControl()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BControl(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>label</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BControl(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BControl by setting its initial value to&nbsp;0 (<B><TT>B_CONTROL_OFF</TT></B>), assigning it a <I><FONT  color=991122 face=HELVETICA>label</I></FONT>, and registering a model <I><FONT  color=991122 face=HELVETICA>message</I></FONT> that captures what the control does&mdash;the command it gives when it's invoked and the information that accompanies the command.  The <I><FONT  color=991122 face=HELVETICA>label</I></FONT> and the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> can each be <B><TT>NULL</TT></B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>label</I></FONT> is copied, but the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> is not.  The <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object becomes the property of the BControl; it should not be deleted, posted, assigned to another object, or otherwise used in application code.  The label and message can be altered after construction with the <B><TT><A HREF="#SetLabel()">SetLabel()</A></TT></B> and <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetMessage()">SetMessage()</A></TT></B> functions.
+<P>
+The BControl class doesn't define a <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function to draw the label or a <B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B> function to post the message.  (It does define <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B>, but only to enable keyboard navigation between controls.)  It's up to derived classes to determine how the <I><FONT  color=991122 face=HELVETICA>label</I></FONT> is drawn and how the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> is to be used.  Typically, when a BControl object needs to take action (in response to a click, for example), it calls the <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> function, which copies the model message and delivers the copy to the designated target.  By default, the target is the window where the control is located, but <B><TT><A HREF="ScrollBar.html#SetTarget()">SetTarget()</A></TT></B> can designate another handler.
+<P>
+Before delivering the message, <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> adds two data field to it, under the names "when" and "source".  These names should not be used for data items in the model.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> arguments are identical to those declared for the <A HREF="View.html#BView">BView</A> class and are passed unchanged to the <A HREF="View.html#BView">BView</A> constructor.
+<P>
+The BControl begins life enabled, and the system plain font is made the default font for all control devices.
+<P>
+<B>See also:  </B>the <A HREF="View.html#BView">BView</A> constructor, <B><TT><A HREF="../The%20Application%20Kit/Looper.html#PostMessage()">BLooper::PostMessage()</A></TT></B> in the Application Kit, <B><TT><A HREF="#SetLabel()">SetLabel()</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetMessage()">SetMessage()</A></TT></B>, <B><TT><A HREF="ScrollBar.html#SetTarget()">SetTarget()</A></TT></B>, <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BControl()"></A>~BControl()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BControl()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the model message and all memory allocated by the BControl.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BControl object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> doesn't contain data for a BControl object, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Archives the BControl by recording its label, current value, model message, and whether or not it's disabled in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Overrides BView's version of this function to set the BControl's low color and view color so that it matches the view color of its new parent.  It also makes the <A HREF="Window.html#BWindow">BWindow</A> to which the BControl has become attached the default target for the <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> function, provided that another target hasn't already been set.
+<P>
+<B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> is called for you when the BControl becomes a child of a view already associated with the window.
+<P>
+<B>See also:  <TT>BView::AttachedToWindow()</TT></B>, <B><TT>BView::SetFontName()</TT></B>, <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>, <B><TT><A HREF="ScrollBar.html#SetTarget()">SetTarget()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetSupportedSuites()"></A>GetSupportedSuites()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetSupportedSuites(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Adds the name "suite/vnd.Be-control" to the <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.  See <a href="#Scripting%20Support">"Scripting Support"</a> in the class overview and the "Scripting" section in <B>The Application Kit</B> chapter for more information.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Handler.html#GetSupportedSuites()">BHandler::GetSupportedSuites()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Invoke()"></A>Invoke()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Invoke(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Copies the BControl's model <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> and sends the copy so that it will be dispatched to the designated target (which may be a BLooper's preferred handler).  The following two pieces of information are added to the copy before it's delivered:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Data name</B></TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>When the control was invoked, as measured in the number of milliseconds since 12:00:00 AM January 1, 1970.</TD>
+<TR>
+<TD>"source"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINTER_TYPE">B_POINTER_TYPE</A></TT></B></TD>
+<TD>A pointer to the BControl object.  This permits the message handler to request more information from the source of the message.</TD>
+</TABLE>
+<P>
+These two names shouldn't be used for data fields in the model.
+<P>
+BControl's version of <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> overrides the version that the <A HREF="../The%20Application%20Kit/Invoker.html#BInvoker">BInvoker</A> class defines.  It's designed to be called by derived classes in their <B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B> and <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> functions; it's not called for you in BControl code.  It's up to each derived class to define what user actions trigger the call to <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>&mdash;what activity constitutes "invoking" the control.
+<P>
+This function doesn't check to make sure the BControl is currently enabled.  Derived classes should make that determination before calling <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Invoker.html#Invoke()">BInvoker::Invoke()</A></TT></B>, <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> 
+<P>
+<HR>
+<H3>IsEnabled()   see <A HREF="#SetEnabled()">SetEnabled()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsFocusChanging()"></A>IsFocusChanging()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsFocusChanging(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the BControl is being asked to draw because the focus changed, and <B><TT>false</TT></B> if not.  If the return value is <B><TT>true</TT></B>, either the BControl has just become the focus view or it has just lost that status and the <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function has been called to update the on-screen display.
+<P>
+This function can be called from inside <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> to learn whether it's necessary to draw or erase the visible indication that the BControl is the focus view.  <B><TT><A HREF="Tab.html#IsFocus()">IsFocus()</A></TT></B> will return the new status of the view. 
+<P>
+<B>See also:  <TT><A HREF="#MakeFocus()">MakeFocus()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="KeyDown()"></A>KeyDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>KeyDown(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>bytes</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="View.html#BView">BView</A> version of <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> to toggle the BControl's value and call <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> when the character encoded in <I><FONT  color=991122 face=HELVETICA>bytes</I></FONT> is either <B><TT><A HREF="misc.html#B_SPACE">B_SPACE</A></TT></B> or <B><TT><A HREF="misc.html#B_ENTER">B_ENTER</A></TT></B>.  This is done to facilitate keyboard navigation and make all derived control devices operable from the keyboard.  Some derived classes&mdash;<A HREF="CheckBox.html#BCheckBox">BCheckBox</A> in particular&mdash;find this version of the function to be adequate.  Others, like <A HREF="RadioButton.html#BRadioButton">BRadioButton</A>, reimplement it.
+<P>
+<B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> is called only when the BControl is the focus view in the active window.  (However, if the window has a default button, <B><TT><A HREF="misc.html#B_ENTER">B_ENTER</A></TT></B> events will be passed to that object and won't be dispatched to the focus view.)
+<P>
+<B>See also:  <TT>BView::KeyDown()</TT></B>, <B><TT><A HREF="#MakeFocus()">MakeFocus()</A></TT></B> 
+<P>
+<HR>
+<H3>Label()   see <A HREF="#SetLabel()">SetLabel()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MakeFocus()"></A>MakeFocus()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MakeFocus(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>focused</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="View.html#BView">BView</A> version of this function to call the BControl's <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function when the focus changes.  This is done to aid keyboard navigation among control devices.  If the <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function of a derived class has a section of code that checks whether the object is in focus and marks the on-screen display to show that it is (and removes any such marking when it isn't), the visual part of keyboard navigation will be taken care of.  The derived class doesn't have to reimplement <B><TT><A HREF="#MakeFocus()">MakeFocus()</A></TT></B>.  Most of the derived classes implemented in the Interface Kit depend on this version of the function.
+<P>
+When <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> is called from this function, <B><TT><A HREF="#IsFocusChanging()">IsFocusChanging()</A></TT></B> returns <B><TT>true</TT></B>.
+<P>
+<B>See also:  <TT>BView::MakeFocus()</TT></B>, <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B>, <B><TT><A HREF="#IsFocusChanging()">IsFocusChanging()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MessageReceived()"></A>MessageReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MessageReceived(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Handles scripting messages for the BControl.  See &nbsp;<a href="#Scripting%20Support%20on%20page101">"Scripting Support" on page101</a> for a description of the messages.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Handler.html#MessageReceived()">BHandler::MessageReceived()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ResolveSpecifier()"></A>ResolveSpecifier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>ResolveSpecifier(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>command</I></FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>property</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Resolves specifiers for the "Label" and "Value" properties.  See <a href="#Scripting%20Support">"Scripting Support"</a> in the class overview and the "Scripting" section of <B>The Application Kit</B> chapter for more information.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Handler.html#ResolveSpecifier()">BHandler::ResolveSpecifier()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetEnabled()"></A>SetEnabled()
+, 
+<A NAME="IsEnabled()"></A>IsEnabled()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetEnabled(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsEnabled(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> enables the BControl if the <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> flag is <B><TT>true</TT></B>, and disables it if <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> is <B><TT>false</TT></B>.  <B><TT><A HREF="#IsEnabled()">IsEnabled()</A></TT></B> returns whether or not the object is currently enabled.  BControls are enabled by default.
+<P>
+While disabled, a BControl won't let the user navigate to it; the <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE">B_NAVIGABLE</A></TT></B> flag is turned off if <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> is <B><TT>false</TT></B> and turned on again if <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> is <B><TT>true</TT></B>.
+<P>
+Typically, a disabled BControl also won't post messages or respond visually to mouse and keyboard manipulation.  To indicate this nonfunctional state, the control device is displayed on-screen in subdued colors.  However, it's left to each derived class to carry out this strategy in a way that's appropriate for the kind of control it implements.  The BControl class merely marks an object as being enabled or disabled; none of its functions take the enabled state of the device into account.
+<P>
+Derived classes can augment <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> (override it) to take action when the control device becomes enabled or disabled.  To be sure that <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> has been called to actually make a change, its current state should be checked before calling the inherited version of the function.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyControl::SetEnabled(bool enabled)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( enabled == IsEnabled() )
+&nbsp;&nbsp;&nbsp;        return;
+&nbsp;&nbsp;&nbsp;    BControl::SetEnabled(enabled);
+&nbsp;&nbsp;&nbsp;    /* <I>Code that responds to the change in state goes here</I>. */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Note, however, that you don't have to override <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> just to update the on-screen display when the control becomes enabled or disabled.  If the BControl is attached to a window, the kit's version of <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> always calls the <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function.  Therefore, the device on-screen will be updated automatically&mdash;as long as <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> has been implemented to take the enabled state into account.
+<P>
+<B>See also:  </B>the BControl constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetLabel()"></A>SetLabel()
+, 
+<A NAME="Label()"></A>Label()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetLabel(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Label(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the label on a control device&mdash;the text that's displayed, for example, on top of a button or alongside a check box or radio button.  The label is a null-terminated string.
+<P>
+<B><TT><A HREF="#SetLabel()">SetLabel()</A></TT></B> frees the old label, replaces it with a copy of <I><FONT  color=991122 face=HELVETICA>string</I></FONT>, and updates the control on-screen so the new label will be displayed to the user&mdash;but only if the <I><FONT  color=991122 face=HELVETICA>string</I></FONT> that's passed differs from the current label.  The label is first set by the constructor and can be modified thereafter by this function.
+<P>
+<B><TT><A HREF="#Label()">Label()</A></TT></B> returns the current label.  The string it returns belongs to the BControl and may be altered or freed in due course.
+<P>
+<B>See also:  </B>the BControl constructor, <B><TT>BView::AttachedToWindow()</TT></B>, <B><TT>BView::SetFontName()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetValue()"></A>SetValue()
+, 
+<A NAME="Value()"></A>Value()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetValue(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>value</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>Value(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the value of the BControl object.
+<P>
+<B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> assigns the object a new value.  If the <I><FONT  color=991122 face=HELVETICA>value</I></FONT> passed is in fact different from the BControl's current value, this function calls the object's <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function so that the new value will be reflected in what the user sees on-screen; otherwise it does nothing.
+<P>
+<B><TT><A HREF="#Value()">Value()</A></TT></B> returns the current value.
+<P>
+Classes derived from BControl should call <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> to change the value of the control device in response to user actions.  The derived classes defined in the Be software kits change values only by calling this function.
+<P>
+Since <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> is a virtual function, you can override it to take note whenever a control's value changes.  However, if you want your code to act only when the value actually changes, you must check to be sure the new value doesn't match the old before calling the inherited version of the function.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyControl::SetValue(int32 value)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( value != Value() ) {
+&nbsp;&nbsp;&nbsp;        BControl::SetValue(value);
+&nbsp;&nbsp;&nbsp;        /* <I>MyControl's additions to SetValue() go here</I> */
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Remember that the BControl version of <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B> does nothing unless the new value differs from the old.
+<P>
+<HR>
+<H3>Value()   see <A HREF="#SetValue()">SetValue()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="WindowActivated()"></A>WindowActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WindowActivated(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Makes sure that the <A HREF="#BControl">BControl</A>, if it's the focus view, is redrawn when the window is activated or deactivated.
+<P>
+<B>See also:  <TT>BView::WindowActivated()</TT></B> 
+<P>
+<A NAME="13299:%20head2:%20Scripting%20Support"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Scripting%20Support"></A><FONT SIZE=6>S</FONT>cripting <FONT SIZE=6>S</FONT>upport
+</H2>
+<P>
+The BControl class implements the suite called "suite/vnd.Be-control" consisting of the following messages: 
+<P>
+<HR>
+<H3>
+<A NAME="The%20Enabled%20Property"></A>The Enabled Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns whether or not the BControl is currently enabled.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Enables or disables the BControl.</TD>
+</TABLE>
+<P>
+The "Enabled" property corresponds to the methods <B><TT><A HREF="#IsEnabled()">IsEnabled()</A></TT></B> and <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B>, using a boolean to store the data.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Label%20Property"></A>The Label Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the BControl's label.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the label of the BControl.</TD>
+</TABLE>
+<P>
+The "Label" property corresponds to the methods <B><TT><A HREF="#Label()">Label()</A></TT></B> and <B><TT><A HREF="#SetLabel()">SetLabel()</A></TT></B>, using a string to store the data.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Value%20Property"></A>The Value Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the BControl's value.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the value of the BControl.</TD>
+</TABLE>
+<P>
+The "Value" property corresponds to the methods <B><TT><A HREF="#Value()">Value()</A></TT></B> and <B><TT><A HREF="#SetValue()">SetValue()</A></TT></B>, using an int32 to store the data.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_msg"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>The BControl's modal invocation message.</TD>
+<TR>
+<TD>"_label"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The BControl's label.</TD>
+<TR>
+<TD>"_val"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The BControl's value.</TD>
+<TR>
+<TD>"_disable"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if the control is disabled.</TD>
+</TABLE>
+<P>
+Some of these fields may not be present if the setting they represent isn't used, or is the default value.  For example, if the value is 0, the "_val" field won't be found in the archive.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,243 @@
+<HTML><HEAD><TITLE>Messages: Node Monitor Messages</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Messages Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Messages%20Master%20Index.html"><FONT face=HELVETICA>Messages Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Node%20Monitor%20Messages"></A>Node Monitor Messages
+</H1>
+<P>
+The Node Monitor is a mechanism that lets you watch for changes to a particular file or directory (or "node").  You ask the Node Monitor to start or stop watching a given node by calling the <B><TT><A HREF="../The%20Storage%20Kit/NodeMonitor.html#watch_node()">watch_node()</A></TT></B> function; you can stop all monitoring through the <B><TT><A HREF="../The%20Storage%20Kit/NodeMonitor.html#stop_watching()">stop_watching()</A></TT></B> function.
+<P>
+When you call <B><TT><A HREF="../The%20Storage%20Kit/NodeMonitor.html#watch_node()">watch_node()</A></TT></B>, you tell the Node Monitor which aspects of the node you want to track&mdash;changes to its name, to its size, its attributes, and so on.  Each of these "trackable" elements corresponds to a particular type of message (identified by the message's "opcode" field) that's sent back to your application when that element actually changes (when the file is renamed,  changes size, gains an attribute, and so on).
+<P>
+<HR>
+<H3>
+<A NAME="B_ENTRY_CREATED"></A>B_ENTRY_CREATED
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>
+</UL>
+<B>Field</B></TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_ENTRY_CREATED</TT></B> indicates that a new entry was created.</TD>
+<TR>
+<TD>"name" </TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>   </TD>
+<TD>The name of the new entry.</TD>
+<TR>
+<TD>"directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number for the directory in which the entry was created.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the device on which the new entry resides.</TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the new entry itself.  (More accurately, it identifies the node that corresponds to the entry.)</TD>
+</TABLE>
+<P>
+<A NAME="20445:%20apiName:%20B_ENTRY_REMOVED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_ENTRY_REMOVED"></A>B_ENTRY_REMOVED
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD><B><TT>B_ENTRY_REMOVED</TT></B> indicates that an entry was removed.</TD>
+<TR>
+<TD>"directory"</TD>
+<TD><B><TT>B_INT64_TYPE</TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number of the directory from which the entry was removed.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the device that the removed node used to live on.</TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT>B_INT64_TYPE</TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the node that was removed.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_ENTRY_MOVED"></A>B_ENTRY_MOVED
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_ENTRY_MOVED</TT></B> indicates that an existing entry moved from one directory to another.</TD>
+<TR>
+<TD>"name" </TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>   </TD>
+<TD>The name of the entry that moved.</TD>
+<TR>
+<TD>"from directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number of the directory from that the node was removed from.</TD>
+<TR>
+<TD>"to directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number of the directory that the node was added to.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the device that the moved node entry lives on.  (You can't move a file between devices, so this value will be apply to the file's old and new locations.)</TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the node that was removed.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_STAT_CHANGED"></A>B_STAT_CHANGED
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD><B><TT>B_STAT_CHANGED</TT></B> indicates that some statistic of a node (as recorded in its <B><TT><A HREF="../The%20Storage%20Kit/NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure) changed. </TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT>B_INT64_TYPE</TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the node.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the node's device.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_ATTR_CHANGED"></A>B_ATTR_CHANGED
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD><B><TT>B_ATTR_CHANGED</TT></B> indicates that some attribute of a node changed. </TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT>B_INT64_TYPE</TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the node.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the node's device.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_DEVICE_MOUNTED"></A>B_DEVICE_MOUNTED
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD><B><TT>B_DEVICE_MOUNTED</TT></B> indicates that a new device (or file system volume) has been mounted. </TD>
+<TR>
+<TD>"new device"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the newly-mounted device.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the device that holds the directory of the new device's mount point.</TD>
+<TR>
+<TD>"directory"</TD>
+<TD><B><TT>B_INT64_TYPE</TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number of the directory that acts as the new device's mount point.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_DEVICE_UNMOUNTED"></A>B_DEVICE_UNMOUNTED
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD><B><TT>B_DEVICE_UNMOUNTED</TT></B> indicates that a device has been unmounted. </TD>
+<TR>
+<TD>"new device"</TD>
+<TD><B><TT>B_INT32_TYPE</TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the unmounted device.</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Messages Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Messages%20Master%20Index.html"><FONT face=HELVETICA>Messages Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

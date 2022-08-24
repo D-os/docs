@@ -1,0 +1,820 @@
+<HTML><HEAD><TITLE>The Storage Kit: The Node Monitor</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Node%20Monitor"></A>The Node Monitor
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/NodeMonitor.h">be/storage/NodeMonitor.h</A>
+<P>
+Library:  libbe.so
+<P>
+The Node Monitor is a service that lets you ask to be notified of certain file system changes.  You can ask to be told when a change is made to...
+<P>
+<UL>
+<LI>The contents of a specific directory.
+<P>
+<LI>The name of a specific entry.
+<P>
+<LI>Any stat field of a specific entry.
+<P>
+<LI>Any attribute of a specific entry.
+<P>
+</UL>
+<P>
+You can also ask to be notified when...
+<P>
+<UL>
+<LI>Volumes are mounted and unmounted.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Volume monitoring is also provided by the <A HREF="VolumeRoster.html#BVolumeRoster">BVolumeRoster</A> class:  BVolumeRoster can talk to the Node Monitor for you.  The <A HREF="VolumeRoster.html#BVolumeRoster">BVolumeRoster</A> volume-watching API is more humane than that which you'll find here.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+When something interesting happens, the Node Monitor lets you know by sending a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> to the target of your choice.
+<P>
+<HR>
+<H2>
+<A NAME="Node%20Monitor%20Functions"></A><FONT SIZE=6>N</FONT>ode <FONT SIZE=6>M</FONT>onitor <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+There are two Node Monitor functions, <B><TT><A HREF="#watch_node()">watch_node()</A></TT></B> and <B><TT><A HREF="#stop_watching()">stop_watching()</A></TT></B>.  The names are a wee bit misleading, so before we go on to the full technical descriptions, let's nip some buds:
+<P>
+<UL>
+<LI><B><TT><A HREF="#watch_node()">watch_node()</A></TT></B> tells the Node Monitor to start <I>or stop </I>watching a <I>specific</I> node, or to watch for volumes being mounted and unmounted.  Memorize the emphasized words.
+<P>
+<LI><B><TT><A HREF="#stop_watching()">stop_watching()</A></TT></B> tells the Node Monitor to stop sending notifications to a particular target. 
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="watch_node()"></A>watch_node()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>watch_node(</TT></B></FONT>const node_ref *<I><FONT  color=991122 face=HELVETICA>nref</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>watch_node(</TT></B></FONT>const node_ref *<I><FONT  color=991122 face=HELVETICA>nref</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> *<I><FONT  color=991122 face=HELVETICA>handler,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>const <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> *<I><FONT  color=991122 face=HELVETICA>looper = NULL</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#watch_node()">watch_node()</A></TT></B> tells the Node Monitor to...
+<P>
+<UL>
+<LI>...start paying attention to the node specified by the <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> argument.  If you're watching for volumes (only), <I><FONT  color=991122 face=HELVETICA>nref</I></FONT> can be <B><TT>NULL</TT></B>.  The easiest way to get a <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> is to invoke <B><TT><A HREF="Statable.html#GetNodeRef()">BStatable::GetNodeRef()</A></TT></B> on any <A HREF="Entry.html#BEntry">BEntry</A> or <A HREF="Node.html#BNode">BNode</A> object.
+<P>
+<LI>The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> argument lists the changes that you want the Monitor to pay attention to.   See below for details. 
+<P>
+<LI>The target of the change notification messages is specified either as a <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A>, or as a BHandler*/BLooper* pair.   (The target specification follows the <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetTarget()">BInvoker::SetTarget()</A></TT></B> protocol; see the <A HREF="../The%20Application%20Kit/Invoker.html#BInvoker">BInvoker</A> class for details.)  The notification shows up as a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> in the target's <B><TT><A HREF="../The%20Application%20Kit/Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>You can't tell the Node Monitor to send its notifications to another application. </B> Currently, the <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> that you specify must identify a target in the caller's team.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Jumping ahead a bit, here's a sample function that tells the Node Monitor to watch for name and attribute changes to a given entry.  The Monitor's notifications will be sent to the application's main loop:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t WatchThis(BEntry *entry)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry->GetNodeRef(&amp;nref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (watch_node(&amp;nref, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_WATCH_NAME | B_WATCH_ATTR,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be_app_messenger));
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<H4>
+<A NAME="Monitor%20Flags"></A>Monitor Flags
+</H4>
+<P>
+<B><TT>watch_node()</TT></B>'s  <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> argument is a combination of the following
+<P>
+<UL>
+<LI><B><TT>B_WATCH_NAME</TT></B> watches for name changes.  This includes moving the node to a different directory, or removing the node altogether.
+<P>
+<LI><B><TT>B_WATCH_STAT</TT></B> watches for <I>any</I> change to the node's <B><TT><A HREF="#stat">stat</A></TT></B> structure.  This includes changes to the size, modification date, owner, and so on.  See &nbsp;<a href="#The%20stat%20Structure%20on%20page155">"The stat Structure" on page155</a> in the <A HREF="Statable.html#BStatable">BStatable</A> class for a description of what's in the <B><TT><A HREF="#stat">stat</A></TT></B> structure.
+<P>
+<LI><B><TT>B_WATCH_ATTR</TT></B> watches for changes to <I>any</I> of the node's attributes.  This includes adding and removing attributes.
+<P>
+<LI><B><TT>B_WATCH_DIRECTORY</TT></B> only applies to nodes that are directories.  The flag tells the Monitor to watch for changes (new entries, entry deletions,  entries being renamed) to the directory.  (You can apply the other flags to a directory, as well).  It's not an error to set <B><TT>B_WATCH_DIRECTORY</TT></B> on a node that isn't a directory&mdash;but it doesn't <I>do</I> anything for you.
+<P>
+<LI><B><TT>B_WATCH_ALL</TT></B>. This is a convenience that combines all the above.  
+<P>
+<LI><B><TT>B_WATCH_MOUNT</TT></B> watches for volumes being mounted and unmounted.  As mentioned above, the <I><FONT  color=991122 face=HELVETICA>nref</I></FONT> argument isn't needed (it can be <B><TT>NULL</TT></B>) if all you're doing is watching volumes.  <B><TT>B_WATCH_MOUNT</TT></B> <I>isn't</I> included in <B><TT>B_WATCH_ALL</TT></B>.
+<P>
+</UL>
+<P>
+There's one other constant, which lives in a class by itself: 
+<P>
+<UL>
+<LI><B><TT>B_STOP_WATCHING</TT></B> tells the Node Monitor to stop watching the <I><FONT  color=991122 face=HELVETICA>nref</I></FONT> argument.
+<P>
+</UL>
+<P>
+You can't combine <B><TT>B_STOP_WATCHING</TT></B> with any of the others in an attempt to stop watching a specific category of changes.  For example, if you call...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;watch_node(&amp;nref, B_WATCH_STAT, be_app_messenger);
+&nbsp;&nbsp;&nbsp;watch_node(&amp;nref, B_WATCH_ATTR, be_app_messenger);</PRE>
+<P>
+...and then call...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;watch_node(&amp;nref, B_STOP_WATCHING, be_app_messenger);</PRE>
+<P>
+...both of the previous Monitor calls are stopped.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>B_STOP_WATCHING</TT></B> does <I>not</I> apply to volume watching.  The only way to stop monitoring volume un/mounts is to call <B><TT><A HREF="#stop_watching()">stop_watching()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<H4>
+<A NAME="Combining%20Flags%20and%20the%204096%20Limit"></A>Combining Flags and the 4096 Limit
+</H4>
+<P>
+If you can, you should combine as many flags as you're going to need in single calls to <B><TT><A HREF="#watch_node()">watch_node()</A></TT></B>. Recall the example used above:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;watch_node(&amp;nref, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_WATCH_NAME | B_WATCH_ATTR, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be_app_messenger);</PRE>
+<P>
+This is better than making separate <B><TT><A HREF="#watch_node()">watch_node()</A></TT></B> calls (one to pass <B><TT>B_WATCH_NAME</TT></B> and another to pass <B><TT>B_WATCH_ATTR</TT></B>)&mdash;not only because the single call is naturally more efficient than two, but also because <B>the Node Monitor can only monitor 4096 nodes per team at a time</B>.  Every call to <B><TT><A HREF="#watch_node()">watch_node()</A></TT></B> consumes a Node Monitor slot, even if you're <I>already</I> monitoring the requested node.  
+<P>
+If you want to watch all aspects of a node, just pass <B><TT>B_WATCH_ALL</TT></B> to every <B><TT><A HREF="#watch_node()">watch_node()</A></TT></B> call.  This will consume only a single Node Monitor slot.
+<P>
+<A NAME="25840:%20head3:%20Notification%20Messages"></A>
+<P>
+<H4>
+<A NAME="Notification%20Messages"></A>Notification Messages
+</H4>
+<P>
+A <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> notification sent by the Node Monitor looks like this:
+<P>
+<UL>
+<LI>The <B><TT>what</TT></B> value is <B><TT>B_NODE_MONITOR.
+<P>
+</TT></B><LI>The field named "opcode" is an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> constant that tells you what happened.  
+<P>
+<LI>Additional fields give you information (device, node, name, and so on) about the node (or volume) that it happened to. 
+<P>
+</UL>
+<P>
+The "opcode" constants and additional fields are described in "<a href="#Opcode%20Constants">Opcode Constants</a>."  In general, the opcodes correspond to the flags that you passed to <B><TT><A HREF="#watch_node()">watch_node()</A></TT></B>; however, this correspondence isn't always one-to-one.  
+<P>
+There are seven opcode constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="#B_ENTRY_CREATED">B_ENTRY_CREATED</A></TD>
+<TR>
+<TD><A HREF="#B_ENTRY_REMOVED">B_ENTRY_REMOVED</A></TD>
+<TR>
+<TD><A HREF="#B_ENTRY_MOVED">B_ENTRY_MOVED</A></TD>
+<TR>
+<TD><A HREF="#B_STAT_CHANGED">B_STAT_CHANGED</A></TD>
+<TR>
+<TD><A HREF="#B_ATTR_CHANGED">B_ATTR_CHANGED</A></TD>
+<TR>
+<TD><A HREF="#B_DEVICE_MOUNTED">B_DEVICE_MOUNTED</A></TD>
+<TR>
+<TD><A HREF="#B_DEVICE_UNMOUNTED">B_DEVICE_UNMOUNTED</A></TD>
+</TABLE></TT></B>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The Node Monitor is off and running.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Bad <I><FONT  color=991122 face=HELVETICA>nref</I></FONT> argument (not applicable to mount-only watches), or poorly formed target.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't allocate resources, or out of Node Monitor slots. 
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Some cases of bad <I><FONT  color=991122 face=HELVETICA>nref</I></FONT> arguments erroneously return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>. This will be fixed.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="stop_watching()"></A>stop_watching()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>stop_watching(</TT></B></FONT><A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>stop_watching(</TT></B></FONT>const <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> *<I><FONT  color=991122 face=HELVETICA>handler,</I></FONT> const <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> *<I><FONT  color=991122 face=HELVETICA>looper = NULL</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Tells the Node Monitor to stop sending notifications to the target described by the arguments.  All the Node Monitor "slots" that were allocated to the target are freed.  Keep in mind that are only 4096 slots for the entire system.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The target is now out of the Node Monitor loop.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Badly formed target description.
+<P>
+</UL>
+<A NAME="30223:%20head1:%20Opcode%20Constants"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Opcode%20Constants"></A><FONT SIZE=6>O</FONT>pcode <FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+The following sections describe the "opcode" constants; these are the values that appear in the "opcode" field of the BMessages that are generated by the Node Monitor.  Note that in these descriptions, the use of the terms "entry" and "node" is sometimes blurred.
+<P>
+<HR>
+<H3>
+<A NAME="B_ENTRY_CREATED"></A>B_ENTRY_CREATED
+</H3>
+<P>
+<UL>
+<LI>A completely new entry was created in a monitored directory.  (This doesn't include entries that are moved into this directory from some other directory&mdash;see <B><TT><A HREF="#B_ENTRY_MOVED">B_ENTRY_MOVED</A></TT></B>.)
+<P>
+</UL>
+<P>
+You get this notification if you applied <B><TT>B_WATCH_DIRECTORY</TT></B> to the directory in which the entry was created.  The message's fields are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_ENTRY_CREATED</TD>
+<TR>
+<TD></TT></B>"name" </TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>   </TD>
+<TD>The name of the new entry.</TD>
+<TR>
+<TD>"directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number for the directory in which the entry was created.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the device on which the new entry resides.</TD>
+</TABLE>
+<P>
+<A NAME="35823:%20head2:%20Parsing%20and%20Tricks"></A>
+<P>
+<H4>
+<A NAME="Parsing%20and%20Tricks"></A>Parsing and Tricks
+</H4>
+<P>
+In your code, you would parse a <B><TT>B_ENTRY_CREATED</TT></B> message like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyTarget::MessageReceived(BMessage *msg)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 opcode;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev_t device;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t directory;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t node;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *name;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (msg->what == B_NODE_MONITOR) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (msg->FindInt32("opcode", &amp;opcode) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (opcode) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case B_ENTRY_CREATED:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg->FindInt32("device", &amp;device);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg->FindInt64("directory", &amp;directory);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg->FindInt64("node", &amp;node);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg->FindString("name", &amp;name);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+So, what do you do with these fields?
+<P>
+<H5>
+<A NAME="Create%20an%20entry_ref%20to%20the%20entry.%20%20"></A>Create an entry_ref to the entry.  
+</H5>
+<P>
+The "device", "directory", and "name" fields can be used to create an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> to the new entry:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;const char *name;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;msg->FindInt32("device", &amp;ref.device);
+&nbsp;&nbsp;&nbsp;msg->FindInt64("directory", &amp;ref.directory);
+&nbsp;&nbsp;&nbsp;msg->FindString("name", &amp;name);
+&nbsp;&nbsp;&nbsp;ref.set_name(name);
+&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+<H5>
+<A NAME="Create%20a%20node_ref%20to%20the%20entry.%20%20"></A>Create a node_ref to the entry.  
+</H5>
+<P>
+If you want to start Node Monitoring the new entry (or, more accurately, the node of the new entry), you stuff "device" and "directory" into a <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;msg->FindInt32("device", &amp;nref.device);
+&nbsp;&nbsp;&nbsp;msg->FindInt64("node", &amp;nref.node);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;err = watch_node(&amp;nref, B_WATCH_ALL, be_app_messenger);
+&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+<H5>
+<A NAME="Create%20a%20node_ref%20to%20the%20entry's%20parent.%20%20"></A>Create a node_ref to the entry's parent.  
+</H5>
+<P>
+Note that the "directory" field is a node number.  By combining this number with the "device" field, you can create a <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> that points to the entry's parent.  From there, you're a <B><TT><A HREF="File.html#SetTo()">SetTo()</A></TT></B> away from a <A HREF="Directory.html#BDirectory">BDirectory</A> object:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;BDirectory dir;
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;msg->FindInt32("device", &amp;nref.device);
+&nbsp;&nbsp;&nbsp;msg->FindInt64("directory", &amp;nref.node);
+&nbsp;&nbsp;&nbsp;err = dir.SetTo(&amp;nref);</PRE>
+<P>
+<A NAME="20445:%20apiName:%20B_ENTRY_REMOVED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_ENTRY_REMOVED"></A>B_ENTRY_REMOVED
+</H3>
+<P>
+<UL>
+<LI> A node was removed (deleted) from a directory.
+<P>
+</UL>
+<P>
+You get this if you applied <B><TT>B_WATCH_NAME</TT></B> on the node itself, or <B><TT>B_WATCH_DIRECTORY</TT></B> on the directory that the node lived in.  The message's fields are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Description</TH>
+<TR>
+<TD></B>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_ENTRY_REMOVED</TD>
+<TR>
+<TD></TT></B>"directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number of the directory from which the entry was removed.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the device that the removed node used to live on.</TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the node that was removed.</TD>
+</TABLE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Since this message is telling you that the node was removed, the "node" value will be invalid.  The node number <I>can</I> be useful (and sometimes necessary) for comparison with cached node numbers (as demonstrated below).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Parsing the message is the same as for <B><TT><A HREF="#B_ENTRY_CREATED">B_ENTRY_CREATED</A></TT></B>, but without the "name" field.   See "<a href="#Parsing%20and%20Tricks">Parsing and Tricks</a>," above.
+<P>
+Note that the <B><TT><A HREF="#B_ENTRY_REMOVED">B_ENTRY_REMOVED</A></TT></B> message is sent as soon as the node's entry is "unlinked" from its directory.  The node itself may linger for while after that.  Follow this logic:
+<P>
+<UL>
+<LI>When a file (regardless of flavor) is removed, the entry for that file is <I>immediately</I> removed ("unlinked") from the file hierarchy, and the Node Monitor message is <I>immediately</I> sent&mdash;even if you have an object that has opened the file's node.  
+<P>
+<LI>The node isn't actually destroyed until the last open object (to that node) is destroyed.  (In POSIX speak, the node is destroyed when the last file descriptor to the node is closed.)  
+<P>
+<LI>Until the node is destroyed, the open objects (file descriptors) can still access the node's data.
+<P>
+</UL>
+<P>
+You can take advantage of this to warn a user that a file is going to go away, or to make a backup, or whatever.  For example, let's say you have an application that lets the user open files; each time a file is opened, your <B><TT>OpenFile()</TT></B> function creates a <A HREF="File.html#BFile">BFile</A> object and starts  the Node Monitor running:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t YourApp::OpenFile(const char *pathname)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BFile *file;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file = new BFile(pathname, B_READ_WRITE);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((err=file->InitCheck()) != B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file->GetNodeRef(&amp;nref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = watch_node(&amp;nref, B_WATCH_NAME, be_app_messenger);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete file;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* We&gt;ve got the file and we&gt;re monitoring it; now we cache 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * the BFile by adding it to a BList (data member).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * function.  There&gt;s a race condition between the 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * watch_node() call above and the following AddItem().
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return ((FileList->AddItem((void *)file)) ? B_OK : B_ERROR);&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Now we receive a Node Monitor message telling us the node has been removed.  We stuff the "device" and "node" fields into a <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> and pass them to a (fictitious) <B><TT>AlertUser()</TT></B> function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void YourApp::MessageReceived(BMessage *msg)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 opcode;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (msg->what == B_NODE_MONITOR) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (msg->FindInt32("opcode", &amp;opcode) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (opcode) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case B_ENTRY_REMOVED:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg->FindInt32("device", &amp;nref.device);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg->FindInt64("node", &amp;nref.node);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GoodbyeFile(nref);&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The implementation of <B><TT>GoodbyeFile()</TT></B> (which we won't show here) would walk down the <A HREF="File.html#BFile">BFile</A> list looking for a <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> that matches the argument:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void YourApp::GoodbyeFile(node_ref nref)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BFile *filePtr;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 ktr = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node_ref cref;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while ((*filePtr = (BFile *)FileList->ItemAt(ktr++))) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filePtr->GetNodeRef(&amp;cref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (nref == cref) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* We found it.  Now we do whatever
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * we need to do.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If a match is found, your app could then do whatever it needs to do.  Remember&mdash;the node's data is still valid until your <A HREF="File.html#BFile">BFile</A> is destroyed or re-initialized.
+<P>
+<HR>
+<H3>
+<A NAME="B_ENTRY_MOVED"></A>B_ENTRY_MOVED
+</H3>
+<P>
+<UL>
+<LI> A node was moved from one directory to a different directory.
+<P>
+</UL>
+<P>
+You get this if you applied <B><TT>B_WATCH_NAME</TT></B> on the node itself, or <B><TT>B_WATCH_DIRECTORY</TT></B> on <I>either</I> of the directories.  The message's fields are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Description</TH>
+<TR>
+<TD></B>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_ENTRY_MOVED</TD>
+<TR>
+<TD></TT></B>"name" </TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>   </TD>
+<TD>The name of the entry that moved.</TD>
+<TR>
+<TD>"from directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number of the directory from that the node was removed from.</TD>
+<TR>
+<TD>"to directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number of the directory that the node was added to.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the device that the moved node entry lives on.  (You can't move a file between devices, so this value will be apply to the file's old and new locations.)</TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the node that moved.</TD>
+</TABLE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Moving a node<I> does not </I>change its <B><TT>ino_t</TT></B> number.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Parsing the message is much the same as for <B><TT><A HREF="#B_ENTRY_CREATED">B_ENTRY_CREATED</A></TT></B>, modulo the directory field changes.  See "<a href="#Parsing%20and%20Tricks">Parsing and Tricks</a>."
+<P>
+Moving a node doesn't affect the objects that hold the node open.  They (the objects) can continue to read and write data from the node.
+<P>
+<HR>
+<H3>
+<A NAME="B_STAT_CHANGED"></A>B_STAT_CHANGED
+</H3>
+<P>
+<UL>
+<LI>A field in the node's <TT>
+<A NAME="B_STAT_CHANGED"></A>stat
+</TT> structure changed (this doesn't include the <TT>
+<A NAME="B_STAT_CHANGED"></A>stat
+</TT> structure disappearing because the node was deleted).
+<P>
+</UL>
+<P>
+You get this if you applied <B><TT>B_WATCH_STAT</TT></B> on the node itself.  The message's fields are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Description</TH>
+<TR>
+<TD></B>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_STAT_CHANGED</TD>
+<TR>
+<TD></TT></B>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the node.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the node's device.</TD>
+</TABLE>
+<P>
+The <B><TT><A HREF="#stat">stat</A></TT></B> structure is described in &nbsp;<a href="#The%20stat%20Structure%20on%20page155">"The stat Structure" on page155</a> in the <A HREF="Statable.html#BStatable">BStatable</A> class.  The fields that you can change are:
+<P>
+<UL>
+<LI>Owner (<B><TT>st_uid</TT></B>), group (<B><TT>st_gid</TT></B>), and permissions (low four bytes of <B><TT>st_mode</TT></B>).
+<P>
+</UL>
+<UL>
+<LI>Creation (<B><TT>st_ctime</TT></B>), modification (<B><TT>st_mtime</TT></B>), and access times (<B><TT>st_atime</TT></B>; currently unused).
+<P>
+</UL>
+<P>
+<UL>
+<LI>The size of the node's data (<B><TT>st_size</TT></B>).  The measurement doesn't include attributes.
+<P>
+</UL>
+<P>
+A couple of important points:
+<P>
+<UL>
+<LI>The <B><TT><A HREF="#B_STAT_CHANGED">B_STAT_CHANGED</A></TT></B> message doesn't give you enough information to construct an object from which you can get a <B><TT><A HREF="#stat">stat</A></TT></B> structure.  In other words, you can't play the same games that were described in "Parsing and Tricks."
+<P>
+<LI>The message also doesn't tell you which <B><TT><A HREF="#stat">stat</A></TT></B> field changed.
+<P>
+</UL>
+<P>
+In most uses of the <B><TT>B_STAT_CHANGED</TT></B> message, you have to cache the objects that you're monitoring so you can compare their <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B>s to the message fields (an example of this is given in <B><TT><A HREF="#B_ENTRY_REMOVED">B_ENTRY_REMOVED</A></TT></B>).  Furthermore, you may want to cache the objects' <B><TT><A HREF="#stat">stat</A></TT></B> structures so you can figure out which field changed. 
+<P>
+<HR>
+<H3>
+<A NAME="B_ATTR_CHANGED"></A>B_ATTR_CHANGED
+</H3>
+<P>
+<UL>
+<LI>An attribute of the node changed.
+<P>
+</UL>
+<P>
+You get this if you applied <B><TT>B_WATCH_ATTR</TT></B> on the node itself.  The message's fields are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_ATTR_CHANGED</TT></B> </TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the node.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the node's device.</TD>
+</TABLE>
+<P>
+Attributes are key/value pairs that can be "attached" to any file (regardless of flavor).  They're described in the <A HREF="Node.html#BNode">BNode</A> class.
+<P>
+As with <B><TT><A HREF="#B_STAT_CHANGED">B_STAT_CHANGED</A></TT></B> messages, you may not be able to use the <B><TT>B_ATTR_CHANGED</TT></B> information directly.  Instead, you have to cache references to the (BNode) objects that you're monitoring so you can compare their <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B>s to the message fields (an example of this is given in <B><TT><A HREF="#B_ENTRY_REMOVED">B_ENTRY_REMOVED</A></TT></B>).  
+<P>
+<HR>
+<H3>
+<A NAME="B_DEVICE_MOUNTED"></A>B_DEVICE_MOUNTED
+</H3>
+<P>
+<UL>
+<LI>A file system device (in other words, a <I>volume</I>) was mounted.
+<P>
+</UL>
+<P>
+You get this if you passed <B><TT>B_WATCH_MOUNT</TT></B> to <B><TT><A HREF="#watch_node()">watch_node()</A></TT></B>.  The message's fields are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Description</TH>
+<TR>
+<TD></B>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_DEVICE_MOUNTED</TD>
+<TR>
+<TD></TT></B>"new device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the newly-mounted device.</TD>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the device that holds the directory of the new device's mount point.</TD>
+<TR>
+<TD>"directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> (node) number of the directory that acts as the new device's mount point.</TD>
+</TABLE>
+<P>
+Obviously, there's no node involved, here, so the first argument to the <B><TT>watch_node()</TT></B> call can be <B><TT>NULL</TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp; watch_node(NULL, B_WATCH_MOUNT, be_app_messenger);</PRE>
+<P>
+Unlike with the other "watch flags," the only way to stop the mount-watching is to call <B><TT><A HREF="#stop_watching()">stop_watching()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="B_DEVICE_UNMOUNTED"></A>B_DEVICE_UNMOUNTED
+</H3>
+<P>
+<UL>
+<LI>A file system device (in other words, a <I>volume</I>) was unmounted.
+<P>
+</UL>
+<P>
+You get this if you passed <B><TT>B_WATCH_MOUNT</TT></B> to <B><TT><A HREF="#watch_node()">watch_node()</A></TT></B>.  The message's fields are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Description</TH>
+<TR>
+<TD></B>"opcode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>B_DEVICE_UNMOUNTED</TD>
+<TR>
+<TD></TT></B>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>dev_t</TT></B> number of the unmounted device.</TD>
+</TABLE>
+<P>
+Be careful with the device number:  <B><TT>dev_t</TT></B>s are quickly recycled.  You should only need this number if you're keeping a list of the <B><TT>dev_t</TT></B>s of all mounted disks and you want to remove the <B><TT>dev_t</TT></B> for this recently-unmounted volume (keeping in mind that a device mounted message bearing this <B><TT>dev_t</TT></B> may arrive in the meantime).
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

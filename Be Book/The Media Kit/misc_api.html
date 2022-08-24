@@ -1,0 +1,2397 @@
+<HTML><HEAD><TITLE>The Media Kit: Constants and Defined Types </TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Constants%20and%20Defined%20Types%20"></A>Constants and Defined Types 
+</H1>
+<P>
+This section describes the constants and defined types that make the Media Kit tick.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Codec%20Type%20Info"></A>Codec Type Info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_CODEC_TYPE_INFO"></A>B_CODEC_TYPE_INFO
+</TT></B></TD>
+<TD>Data is in codec type info format.</TD>
+</TABLE>
+<P>
+The <B><TT><A HREF="#B_CODEC_TYPE_INFO">B_CODEC_TYPE_INFO</A></TT></B> constant is used to indicate that data is a codec info structure; it's used in the <B><TT><A HREF="#user_data_type">user_data_type</A></TT></B> field in the <B><TT><A HREF="#media_format">media_format</A></TT></B> structure, for example.
+<P>
+<HR>
+<H3>
+<A NAME="Data%20Endianness"></A>Data Endianness
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_BIG_ENDIAN"></A>B_MEDIA_BIG_ENDIAN
+</TT></B></TD>
+<TD>The media data is big-endian</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_LITTLE_ENDIAN"></A>B_MEDIA_LITTLE_ENDIAN
+</TT></B></TD>
+<TD>The media data is little-endian.</TD>
+</TABLE>
+<P>
+These values indicate whether media data is little-endian or big-endian.
+<P>
+In addition, <B><TT>B_MEDIA_HOST_ENDIAN</TT></B> is defined to be one of these values, indicating the endianness of the system on which your application is running.
+<P>
+<HR>
+<H3>
+<A NAME="Media%20Message%20Size"></A>Media Message Size
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;be/media/MediaDefs.h>">&lt;be/media/MediaDefs.h></A><PRE>&nbsp;&nbsp;&nbsp;const size_t B_MEDIA_MESSAGE_SIZE = 16384;</PRE>
+<P>
+The <B><TT>B_MEDIA_MESSAGE_SIZE</TT></B> constant specifies the maximum possible size a message a node's service thread can receive.  16k is an upper limit and won't be exceeded.  Your thread can simply create a buffer this large, <B><TT><A HREF="../The%20Kernel%20Kit/Ports.html#read_port()">read_port()</A></TT></B> into it, and call <B><TT><A HREF="BufferConsumer.html#HandleMessage()">HandleMessage()</A></TT></B> to process it.
+<P>
+<HR>
+<H3>
+<A NAME="media_display_flags"></A>media_display_flags
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_F1_DOMINANT</TT></B></TD>
+<TD>The first buffer sent (temporally) will be an F1 field.</TD>
+<TR>
+<TD><B><TT>B_F2_DOMINANT</TT></B></TD>
+<TD>The first buffer sent (temporally) will be an F2 field.</TD>
+<TR>
+<TD><B><TT>B_TOP_SCANLINE_F1</TT></B></TD>
+<TD>The topmost scanline of the output buffer belongs to F1.</TD>
+<TR>
+<TD><B><TT>B_TOP_SCANLINE_F2</TT></B></TD>
+<TD>The topmost scanline of the output buffer belongs to F2.</TD>
+</TABLE>
+<P>
+These values are used to define the order in which the F1 and F2 fields of video data are used.
+<P>
+<HR>
+<H3>
+<A NAME="media_flags"></A>media_flags
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MEDIA_FLAGS_VERSION</TT></B></TD>
+<TD>Returns the Media Kit version as an int32 value.</TD>
+</TABLE>
+<P>
+The media_flags indicate values you can pass to <B><TT><A HREF="MediaRoster.html#MediaFlags()">BMediaRoster::MediaFlags()</A></TT></B> to get information about the version of the Media Kit that your application is running under.
+<P>
+<HR>
+<H3>
+<A NAME="media_format_family"></A>media_format_family
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_ANY_FORMAT_FAMILY</TT></B></TD>
+<TD>Any family.</TD>
+<TR>
+<TD><B><TT>B_BEOS_FORMAT_FAMILY</TT></B></TD>
+<TD>BeOS format.</TD>
+<TR>
+<TD><B><TT>B_QUICKTIME_FORMAT_FAMILY</TT></B></TD>
+<TD>QuickTime format.</TD>
+<TR>
+<TD><B><TT>B_AVI_FORMAT_FAMILY</TT></B></TD>
+<TD>AVI format.</TD>
+<TR>
+<TD><B><TT>B_ASF_FORMAT_FAMILY</TT></B></TD>
+<TD>ASF format.</TD>
+<TR>
+<TD><B><TT>B_MPEG_FORMAT_FAMILY</TT></B></TD>
+<TD>MPEG format.</TD>
+<TR>
+<TD><B><TT>B_WAV_FORMAT_FAMILY</TT></B></TD>
+<TD>WAVE format audio.</TD>
+<TR>
+<TD><B><TT>B_AIFF_FORMAT_FAMILY</TT></B></TD>
+<TD>AIFF format audio.</TD>
+<TR>
+<TD><B><TT>B_AVR_FORMAT_FAMILY</TT></B></TD>
+<TD>AVR format audio.</TD>
+<TR>
+<TD><B><TT>B_MISC_FORMAT_FAMILY</TT></B></TD>
+<TD>Miscellaneous.</TD>
+</TABLE>
+<P>
+These constants indicate the media format families the <A HREF="MediaFormats.html#BMediaFormats">BMediaFormats</A> class can map among.
+<P>
+<HR>
+<H3>
+<A NAME="media_format_flags"></A>media_format_flags
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MEDIA_RETAINED_DATA</TT></B></TD>
+<TD>Data in the buffer should be retained between calls to the decoder.  A decoder that requires this behavior will set this bit in <I><FONT  color=991122 face=HELVETICA>require_flags</I></FONT>, and an application that doesn't support this behavior will set this bit in <I><FONT  color=991122 face=HELVETICA>deny_flags</I></FONT>.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_MULTIPLE_BUFFERS</TT></B></TD>
+<TD>An application will set this flag in <I><FONT  color=991122 face=HELVETICA>require_flags</I></FONT> if it passes multiple buffers to the decoder; a decoder that doesn't support this will set this flag in <I><FONT  color=991122 face=HELVETICA>deny_flags</I></FONT>.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_CONTIGUOUS_BUFFER</TT></B></TD>
+<TD>A decoder will set this flag in <I><FONT  color=991122 face=HELVETICA>require_flags</I></FONT> if it requires that buffers be in contiguous physical memory (for example, if it uses a hardware decoder).  An application at doesn't support this should set this bit in <I><FONT  color=991122 face=HELVETICA>deny_flags</I></FONT>.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_LINEAR_UPDATES</TT></B></TD>
+<TD>An application sets this flag in <I><FONT  color=991122 face=HELVETICA>require_flags</I></FONT> if it requires the decoder to write linearly (instead of randomly) into the buffer (for example, if using overlays).  A decoder that really wants to write randomly should set this flag in <I><FONT  color=991122 face=HELVETICA>deny_flags</I></FONT>.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_MAUI_UNDEFINED_FLAGS</TT></B></TD>
+<TD>Both applications and decoders should set this in both <I><FONT  color=991122 face=HELVETICA>require_flags</I></FONT> and <I><FONT  color=991122 face=HELVETICA>deny_flags</I></FONT> to avoid allowing or denying support for features they know nothing about.</TD>
+</TABLE>
+<P>
+These flags are used when specifying media_format's <I><FONT  color=991122 face=HELVETICA>allow_flags</I></FONT> or <I><FONT  color=991122 face=HELVETICA>deny_flags</I></FONT> fields, to indicate how the decoder should behave. 
+<P>
+<HR>
+<H3>
+<A NAME="media_multi_matrix"></A>media_multi_matrix
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;be/media/MediaDefs.h>">&lt;be/media/MediaDefs.h></A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MATRIX_PROLOGIC_LR</TT></B></TD>
+<TD>Dolby ProLogic matrix.</TD>
+<TR>
+<TD><B><TT>B_MATRIX_AMBISONIC_WXYZ</TT></B></TD>
+<TD>Ambisonic WXYZ matrix.</TD>
+</TABLE>
+<P>
+These values identify a particular multi-channel audio matrix.
+<P>
+<HR>
+<H3>
+<A NAME="media_producer_status"></A>media_producer_status
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;be/media/MediaDefs.h>">&lt;be/media/MediaDefs.h></A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_DATA_NOT_AVAILABLE</TT></B></TD>
+<TD>There aren't any buffers ready for the destination.</TD>
+<TR>
+<TD><B><TT>B_DATA_AVAILABLE</TT></B></TD>
+<TD>There are buffers ready for the destination.</TD>
+<TR>
+<TD><B><TT>B_PRODUCER_STOPPED</TT></B></TD>
+<TD>The producer isn't running.</TD>
+</TABLE>
+<P>
+These values can be specified when your producer node calls <B><TT><A HREF="BufferProducer.html#SendDataStatus()">BBufferProducer::SendDataStatus()</A></TT></B> to tell the consumers it's feeding whether or not data is available for it to process.  The <B><TT>B_PRODUCER_STOPPED</TT></B> code is sent to indicate to downstream consumers that it's no longer running.
+<P>
+Consumers receive these values in the <B><TT><A HREF="BufferConsumer.html#ProducerDataStatus()">BBufferConsumer::ProducerDataStatus()</A></TT></B> hook function.
+<P>
+<HR>
+<H3>
+<A NAME="media_realtime_flags"></A>media_realtime_flags
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MEDIA_REALTIME_ALLOCATOR</TT></B></TD>
+<TD>When set, rtm_alloc() will return locked memory.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_REALTIME_AUDIO</TT></B></TD>
+<TD>Audio add-ons in the Media Server are locked in memory, and should lock their thread stacks using <B><TT>media_init_realtime_thread()</TT></B>.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_REALTIME_VIDEO</TT></B></TD>
+<TD>Video add-ons are locked in memory, and should lock their thread stacks using <B><TT>media_init_realtime_thread()</TT></B>.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_REALTIME_ANYKIND</TT></B></TD>
+<TD>All Media add-ons are locked in memory, and should lock their thread stacks using <B><TT>media_init_realtime_thread()</TT></B>.</TD>
+</TABLE>
+<P>
+These values are passed to realtime allocator functions to indicate what types of nodes should use locked memory.
+<P>
+<HR>
+<H3>
+<A NAME="media_type"></A>media_type
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaNode.h">be/media/MediaNode.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MEDIA_NO_TYPE</TT></B></TD>
+<TD>Typeless media data.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_UNKNOWN_TYPE</TT></B></TD>
+<TD>Unknown media type.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_RAW_AUDIO</TT></B></TD>
+<TD>Uncompressed, linear audio.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_RAW_VIDEO</TT></B></TD>
+<TD>Uncompressed, linear video.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_VBL</TT></B></TD>
+<TD>Raw data from VBL area.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_TIMECODE</TT></B></TD>
+<TD>Timecode data.  Undetermined format.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_MIDI</TT></B></TD>
+<TD>MIDI.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_TEXT</TT></B></TD>
+<TD>Text data; typically closed-captioning information.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_HTML</TT></B></TD>
+<TD>HTML data.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_MULTISTREAM</TT></B></TD>
+<TD>Multi-stream media data, such as AVI or QuickTime.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_PARAMETERS</TT></B></TD>
+<TD><A HREF="Controllable.html#BControllable">BControllable</A> change data.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_ENCODED_AUDIO</TT></B></TD>
+<TD>Encoded audio (such as AC3 or DTS).</TD>
+<TR>
+<TD><B><TT>B_MEDIA_ENCODED_VIDEO</TT></B></TD>
+<TD>Encoded video (such as Indeo or MPEG).</TD>
+<TR>
+<TD><B><TT>B_MEDIA_PRIVATE</TT></B></TD>
+<TD>Base value for private Be media types.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_FIRST_USER_TYPE</TT></B></TD>
+<TD>Base value for user-defined media types.</TD>
+</TABLE>
+<P>
+Types of media data.
+<P>
+<HR>
+<H3>
+<A NAME="multi_media_channels"></A>multi_media_channels
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_CHANNEL_LEFT</TT></B></TD>
+<TD>The left channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_RIGHT</TT></B></TD>
+<TD>The right channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_CENTER</TT></B></TD>
+<TD>The center channel (5.1+ or fake surround)</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_SUB</TT></B></TD>
+<TD>Subwoofer (5.1+).</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_REARLEFT</TT></B></TD>
+<TD>Quad surround or 5.1+.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_REARRIGHT</TT></B></TD>
+<TD>Quad surround or 5.1+</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_FRONT_LEFT_CENTER</TT></B></TD>
+<TD>Front-left center channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_FRONT_RIGHT_CENTER</TT></B></TD>
+<TD>Front-right center channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_BACK_CENTER</TT></B></TD>
+<TD>The rear center channel (6.1 or fake surround).</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_SIDE_LEFT</TT></B></TD>
+<TD>The left side channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_SIDE_RIGHT</TT></B></TD>
+<TD>The right side channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_TOP_CENTER</TT></B></TD>
+<TD>The top center channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_TOP_FRONT_LEFT</TT></B></TD>
+<TD>The top front-left channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_TOP_FRONT_CENTER</TT></B></TD>
+<TD>The top front-center channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_TOP_FRONT_RIGHT</TT></B></TD>
+<TD>The top front-right channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_TOP_BACK_LEFT</TT></B></TD>
+<TD>The top back-left channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_TOP_BACK_CENTER</TT></B></TD>
+<TD>The top back-center channel.</TD>
+<TR>
+<TD><B><TT>B_CHANNEL_TOP_BACK_RIGHT</TT></B></TD>
+<TD>The top back-right channel.</TD>
+</TABLE>
+<P>
+Speaker positions for multi-channel audio.
+<P>
+<A NAME="node_kind"></A>
+<P>
+<HR>
+<H3>
+<A NAME="node_kind"></A>node_kind
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaNode.h">be/media/MediaNode.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_BUFFER_PRODUCER">B_BUFFER_PRODUCER</A></TT></B></TD>
+<TD>The flavor implements <A HREF="BufferProducer.html#BBufferProducer.">BBufferProducer.</A></TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_BUFFER_CONSUMER">B_BUFFER_CONSUMER</A></TT></B></TD>
+<TD>The flavor implements BBufferConsumer.</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_TIME_SOURCE">B_TIME_SOURCE</A></TT></B></TD>
+<TD>The flavor implements BTimeSource.</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_CONTROLLABLE">B_CONTROLLABLE</A></TT></B></TD>
+<TD>The flavor implements BControllable.</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_FILE_INTERFACE">B_FILE_INTERFACE</A></TT></B></TD>
+<TD>The flavor implements BFileInterface.</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_ENTITY_INTERFACE">B_ENTITY_INTERFACE</A></TT></B></TD>
+<TD>The flavor implements BEntityInterface (not available for R4).</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_PHYSICAL_INPUT">B_PHYSICAL_INPUT</A></TT></B></TD>
+<TD>The flavor represents a physical input point (such as an input jack).</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_PHYSICAL_OUTPUT">B_PHYSICAL_OUTPUT</A></TT></B></TD>
+<TD>The flavor represents a physical output point (such as line output).</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_SYSTEM_MIXER">B_SYSTEM_MIXER</A></TT></B></TD>
+<TD>The flavor represents the system mixer.</TD>
+</TABLE>
+<P>
+Defines the type or types of node that a particular flavor supports.  Note that a flavor can implement more than one type of node, so you can combine these values using a bitwise or.
+<P>
+<HR>
+<H3>
+<A NAME="Quality"></A>Quality
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_ANY_QUALITY"></A>B_MEDIA_ANY_QUALITY
+</TT></B></TD>
+<TD>Any quality level (0.0).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_LOW_QUALITY"></A>B_MEDIA_LOW_QUALITY
+</TT></B></TD>
+<TD>Low quality (0.1).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_MEDIUM_QUALITY"></A>B_MEDIA_MEDIUM_QUALITY
+</TT></B></TD>
+<TD>Medium quality (0.5).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_HIGH_QUALITY"></A>B_MEDIA_HIGH_QUALITY
+</TT></B></TD>
+<TD>High quality (1.0).</TD>
+</TABLE>
+<P>
+These are default values you can use for various quality levels.
+<P>
+<HR>
+<H3>
+<A NAME="video_orientation"></A>video_orientation
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaNode.h">be/media/MediaNode.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_VIDEO_TOP_LEFT_RIGHT</TT></B></TD>
+<TD>Typical progressive scan: top to bottom, left to right.</TD>
+<TR>
+<TD><B><TT>B_VIDEO_BOTTOM_LEFT_RIGHT</TT></B></TD>
+<TD>Bottom to top, left to right (BMP and TGA graphics are oriented this way).</TD>
+</TABLE>
+<P>
+Indicates the orientation of video data (whether the data is oriented top to bottom or bottom to top).
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="encode_parameters"></A>encode_parameters
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>encode_parameters</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>quality</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>avg_field_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>max_field_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>_pad</TT></B></FONT>[27];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT><FONT  color=000022 size=+1>user_data</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <B><TT><FONT  color=000022 size=+1>user_data_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Parameters for encoding a buffer.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>quality</I></FONT> indicates the compression quality to use.  0.0 is lowest quality, 1.0 is high quality.  You can use the <B><TT><A HREF="#B_MEDIA_ANY_QUALITY">B_MEDIA_ANY_QUALITY</A></TT></B>, <B><TT><A HREF="#B_MEDIA_LOW_QUALITY">B_MEDIA_LOW_QUALITY</A></TT></B>, and so forth constants if you wish.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>avg_field_size</I></FONT> indicates the average size of a field that should be allowed, in bytes.  The encoder will try to maintain this average as it compresses.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>max_field_size</I></FONT> indicates the maximum field size that should be allowed, in bytes.  The encoder will try to encode each field to be smaller than this size.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>user_data</I></FONT> and <I><FONT  color=991122 face=HELVETICA>user_data_size</I></FONT> indicate user-defined data.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="live_node_info"></A>live_node_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>live_node_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>live_node_info()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>~live_node_info()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_node">media_node</A></TT></B> <B><TT><FONT  color=000022 size=+1>node</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A></TT></B> <B><TT><FONT  color=000022 size=+1>hint_point</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>name</TT></B></FONT>[<B><TT>B_MEDIA_NAME_LENGTH</TT></B>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>reserved</TT></B></FONT>[160];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The live_node_info structure describes an active node, and is returned by <B><TT><A HREF="MediaRoster.html#GetLiveNodes()">BMediaRoster::GetLiveNodes()</A></TT></B>.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>node</I></FONT> specifies which node the live_node_info structure describes.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>hint_point</I></FONT> is reserved for future use.  Pass a <A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> with x and y both set to 0.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_addon_id"></A>media_addon_id
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typdef int32 <B><TT><FONT  color=000022 size=+1>media_addon_id</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+A media add-on ID number.
+<P>
+<HR>
+<H3>
+<A NAME="media_audio_header"></A>media_audio_header
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_audio_header</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[16];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Defines the header of an audio buffer.  There are no Be-defined fields in this structure as of the release of BeOS R4; however, you may append fields to the end of this structure if you wish.
+<P>
+<HR>
+<H3>
+<A NAME="media_buffer_id"></A>media_buffer_id
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typdef int32 <B><TT><FONT  color=000022 size=+1>media_buffer_id</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+A media buffer ID number.
+<P>
+<HR>
+<H3>
+<A NAME="media_decode_info"></A>media_decode_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_decode_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <B><TT><FONT  color=000022 size=+1>time_to_decode</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>_pad[26]</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT><FONT  color=000022 size=+1>file_format_data</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <B><TT><FONT  color=000022 size=+1>file_format_data_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT><FONT  color=000022 size=+1>codec_data
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>size_t <B><TT><FONT  color=000022 size=+1>codec_data_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_decode_info</TT></B></FONT>();
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Provides options to decoders.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>time_to_decode</I></FONT> indicates how long, in microseconds, the decoder is allowed to take to decode the buffer.  Specify 0 to do it as fast as possible, or <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B> if you don't care.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>file_format_data</I></FONT> is a pointer to file-format specific data, and <I><FONT  color=991122 face=HELVETICA>file_format_data_size</I></FONT> indicates the size of this buffer.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>codec_data</I></FONT> is a pointer to a codec-specific data buffer, and <I><FONT  color=991122 face=HELVETICA>codec_data_size</I></FONT> indicates the size of the buffer.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_destination"></A>media_destination
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_destination</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_destination(</TT></B></FONT>port_id, int32<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_destination(</TT></B></FONT>const <B><TT><A HREF="#media_destination">media_destination</A></TT></B> &amp;<I><FONT  color=991122 face=HELVETICA>clone</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_destination">media_destination</A></TT></B> &amp; operator<B><TT><FONT  color=000022 size=+1>= </TT></B></FONT>(const <B><TT><A HREF="#media_destination">media_destination</A></TT></B> &amp;<I><FONT  color=991122 face=HELVETICA>clone</I></FONT>);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_destination()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>~media_destination()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port_id <B><TT><FONT  color=000022 size=+1>port</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>id</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static <B><TT><A HREF="#media_destination">media_destination</A></TT></B> <B><TT><FONT  color=000022 size=+1>null</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_media_destination_</TT></B></FONT>[2];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes the destination end of a media connection between two nodes.  The <I><FONT  color=991122 face=HELVETICA>port</I></FONT> indicates the port ID on which the destination communicates.  This can be different from the media_node.port value.
+<P>
+<HR>
+<H3>
+<A NAME="media_encode_info"></A>media_encode_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_encode_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>used_data_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <B><TT><FONT  color=000022 size=+1>start_time</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <B><TT><FONT  color=000022 size=+1>time_to_encode</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>_pad[22]</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT><FONT  color=000022 size=+1>file_format_data</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <B><TT><FONT  color=000022 size=+1>file_format_data_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT><FONT  color=000022 size=+1>codec_data
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>size_t <B><TT><FONT  color=000022 size=+1>codec_data_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_encode_info</TT></B></FONT>();
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Provides options to encoders and file writers about.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>flags</I></FONT> contains flags that alter the behavior of the encoder or writer.  The only defined value right now is <B><TT>B_MEDIA_KEY_FRAME</TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>used_data_size</I></FONT> is currently reserved for use by Be.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>start_time</I></FONT> indicates the time at which the buffer being written is located, in microseconds, from the start of the file.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>time_to_encode</I></FONT> indicates how long, in microseconds, the encoder is allowed to take to encode the buffer.  Specify 0 to do it as fast as possible, or <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B> if you don't care.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>file_format_data</I></FONT> is a pointer to file-format specific data, and <I><FONT  color=991122 face=HELVETICA>file_format_data_size</I></FONT> indicates the size of this buffer.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>codec_data</I></FONT> is a pointer to a codec-specific data buffer, and <I><FONT  color=991122 face=HELVETICA>codec_data_size</I></FONT> indicates the size of the buffer.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_encoded_audio_format"></A>media_encoded_audio_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_encoded_audio_format</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum <B><TT><FONT  color=000022 size=+1>audio_encoding</TT></B></FONT> {&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_ANY</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_raw_audio_format">media_raw_audio_format</A></TT></B> <B><TT><FONT  color=000022 size=+1>output</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>audio_encoding</TT></B> <B><TT><FONT  color=000022 size=+1>encoding</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>bit_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <B><TT><FONT  color=000022 size=+1>frame_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_multi_audio_info <B><TT><FONT  color=000022 size=+1>multi_info</TT></B></FONT>;<B><TT><FONT  color=000022 size=+1>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>uint32<B><TT><FONT  color=000022 size=+1> _reserved_</TT></B></FONT>[3];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static <B><TT><A HREF="#media_encoded_audio_format">media_encoded_audio_format</A></TT></B> <B><TT><FONT  color=000022 size=+1>wildcard</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes the format of encoded audio data.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>output</I></FONT> indicates the raw audio format that results from decoding the encoded audio.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>encoding</I></FONT> specifies the encoding format.  This should just be <B><TT>B_ANY</TT></B>; this field, and the audio_encoding enum, are depreciated.  Instead, the <A HREF="MediaFormats.html#BMediaFormats">BMediaFormats</A> database should be used to identify the encoding format.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>bit_rate</I></FONT> specifies the bit rate (not byte rate) of the data stream.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>frame_size</I></FONT> indicates the size of each frame of audio, in bytes.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>multi_info</I></FONT> provides multi-channel information.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_encoded_audio_header"></A>media_encoded_audio_header
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_encoded_audio_header</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>_reserved_0</TT></B></FONT>[14];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>buffer_flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>unused_mask</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>_reserved_2</TT></B></FONT>[3];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Defines the header of a an encoded audio buffer.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>buffer_flags</I></FONT> contains flags that provide additional information about the buffer.  The only value currently defined (other than 0) is <B><TT>B_MEDIA_KEY_FRAME</TT></B>, which indicates that the buffer is a key frame.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>unused_mask</I></FONT> indicates which bits of the last byte in the buffer are unused (since encoded audio may result in a number of bits that doesn't fill up the last byte in the buffer).
+<P>
+</UL>
+<P>
+If you wish, you can add more fields to the end of the header.
+<P>
+<HR>
+<H3>
+<A NAME="media_encoded_video_format"></A>media_encoded_video_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_encoded_video_format</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum <B><TT><FONT  color=000022 size=+1>video_encoding</TT></B></FONT> {&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_ANY</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_raw_video_format">media_raw_video_format</A></TT></B> <B><TT><FONT  color=000022 size=+1>output</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>avg_bit_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>max_bit_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>video_encoding</TT></B> <B><TT><FONT  color=000022 size=+1>encoding</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <B><TT><FONT  color=000022 size=+1>frame_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 <B><TT><FONT  color=000022 size=+1>forward_history</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 <B><TT><FONT  color=000022 size=+1>backward_history</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[3];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static <B><TT><A HREF="#media_encoded_video_format">media_encoded_video_format</A></TT></B> <B><TT><FONT  color=000022 size=+1>wildcard</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes the format of encoded video data.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>output</I></FONT> specifies the raw video format that results from decoding the video.  Set this to <B><TT>media_raw_video_format::wildcard</TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>avg_bit_rate</I></FONT> indicates the average bit rate of the video, and <I><FONT  color=991122 face=HELVETICA>max_bit_rate</I></FONT> specifies the maximum bit rate that occurs at any point in the video.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>encoding</I></FONT> has been depreciated, and should always be <B><TT>B_ANY</TT></B>; use the <A HREF="MediaFormats.html#BMediaFormats">BMediaFormats</A> lookup database to identify the encoding format.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>frame_size</I></FONT> indicates the size in bytes of a frame of data.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>forward_history</I></FONT> indicates the maximum number of future frames the encoding algorithm requires in order to decode the current frame.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>backward_history</I></FONT> indicates the maximum number of past frames the encoding algorithm requires in order to decode the current frame.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_encoded_video_header"></A>media_encoded_video_header
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_encoded_video_header</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>_reserved_1</TT></B></FONT>[9];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>field_flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 <B><TT><FONT  color=000022 size=+1>forward_history</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 <B><TT><FONT  color=000022 size=+1>backward_history</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>unsued_mask</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>_rserved_2</TT></B></FONT>[3];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>field_gamma</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>field_sequence</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>field_number</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>pulldown_number</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>first_active_line</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>line_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Defines the header of a video buffer.  The fields in this buffer are the same as those in the <B><TT><A HREF="#media_video_header">media_video_header</A></TT></B> structure, except for the reserved fields, the <I><FONT  color=991122 face=HELVETICA>forward_history</I></FONT> and <I><FONT  color=991122 face=HELVETICA>backward_history</I></FONT> fields, the <I><FONT  color=991122 face=HELVETICA>unused_mask</I></FONT>, which indicates which bits are unused in the last byte of the video buffer, and <I><FONT  color=991122 face=HELVETICA>field_flags</I></FONT>, which can be either 0 or <B><TT>B_MEDIA_KEY_FRAME</TT></B> (which indicates that the field is a key frame).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>forward_history</I></FONT> field indicates how many buffers ahead of the current one are required in order to decode the current buffer.  The <I><FONT  color=991122 face=HELVETICA>backward_history</I></FONT> field indicates the number of previous buffers are required to decode the current buffer.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>field_gamma</I></FONT> specifies the gamma at which the video was captured.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>field_sequence</I></FONT> is an identifying number assigned to the field when it was captured.  They progress in sequence; you can tell if a field was dropped by looking for skips in the sequence.  Note that this value doesn't necessarily start at 0, and it can wrap back around to 0.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>field_number</I></FONT> indicates which field of a video frame the buffer represents.  It's 0 for field 1, 1 for field 2, and so forth.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>pulldown_number</I></FONT> indicates that the field represented by the buffer is a duplicate of a field pulldown_number fields back.  If this value is 0, it's not a duplicate field.  This is used in cases when the video has been converted from one field rate to another, resulting in duplication of fields; these duplicated fields can be marked using pulldown numbers so video hardware and software can optimize their performance by knowing that duplicate fields exist.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>first_active_line</I></FONT> indicates the topmost line that actually contains video data (instead of VBL data); this is an NTSC or PAL line number, which is 1-based.  <I><FONT  color=991122 face=HELVETICA>line_count</I></FONT> indicates the number of active video lines in the field.
+<P>
+</UL>
+<P>
+You may add fields to the end of this buffer if your video format requires them.
+<P>
+<HR>
+<H3>
+<A NAME="media_file_format"></A>media_file_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_file_format</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum {&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_READABLE</TT></B></FONT> = 0x1,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_WRITABLE</TT></B></FONT> = 0x2,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_PERFECTLY_SEEKABLE</TT></B></FONT> = 0x4,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_IMPERFECTLY_SEEKABLE</TT></B></FONT> = 0x8,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_KNOWS_RAW_VIDEO</TT></B></FONT> = 0x10,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_KNOWS_RAW_AUDIO</TT></B></FONT> = 0x20,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_KNOWS_MIDI</TT></B></FONT> = 0x40,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_KNOWS_ENCODED_VIDEO</TT></B></FONT> = 0x80,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_KNOWS_ENCODED_AUDIO</TT></B></FONT> = 0x100,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_KNOWS_OTHER</TT></B></FONT> = 0x1000000,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_KNOWS_ANYTHING</TT></B></FONT> = 0x2000000
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>capabilities</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_file_format_id">media_file_format_id</A></TT></B> <B><TT><FONT  color=000022 size=+1>id</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_format_family">media_format_family</A></TT></B> <B><TT><FONT  color=000022 size=+1>family</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>version</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[25];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>mime_type</TT></B></FONT>[64];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>pretty_name</TT></B></FONT>[64];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>short_name</TT></B></FONT>[32];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>file_extension</TT></B></FONT>[8];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>reserved</TT></B></FONT>[88];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes a media file format.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>capabilities</I></FONT> is a bitfield providing informational flags describing the file format's capabilities.
+<P>
+<LI><B><TT>B_READABLE</TT></B> indicates that the file format is readable.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>id</I></FONT> is an opaque ID used by the Media Kit to construct a <A HREF="MediaFile.html#BMediaFile">BMediaFile</A> object.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>family</I></FONT> is one of the <B><TT><A HREF="#media_format_family">media_format_family</A></TT></B> constants.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>version</I></FONT> should be 100.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>mime_type</I></FONT> specifies the MIME type string that identifies the file format.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>pretty_name</I></FONT> is a nice user-viewable name, such as "QuickTime File Format".
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>short_name</I></FONT> is a short-form name, like "QuickTime".
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>file_extension</I></FONT> specifies the file extension used on files containing this format, such as ".mov".
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_file_format_id"></A>media_file_format_id
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_file_format_id</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t <B><TT><FONT  color=000022 size=+1>node</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev_t <B><TT><FONT  color=000022 size=+1>device</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>internal_id</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+A simple means for identifying file formats; used by the <B><TT><A HREF="#media_file_format">media_file_format</A></TT></B> structure.
+<P>
+<HR>
+<H3>
+<A NAME="media_format"></A>media_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A><PRE>&nbsp;&nbsp;&nbsp;struct <B><TT>
+<A NAME="media_format"></A>media_format
+</TT></B> {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_type <B><TT>
+<A NAME="type"></A>type
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code <B><TT>
+<A NAME="user_data_type"></A>user_data_type
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT>
+<A NAME="user_data"></A>user_data
+</TT></B>[48];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT>
+<A NAME="_reserved_"></A>_reserved_
+</TT></B>[3];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT>
+<A NAME="require_flags"></A>require_flags
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT>
+<A NAME="deny_flags"></A>deny_flags
+</TT></B>;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT>
+<A NAME="meta_data"></A>meta_data
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT>
+<A NAME="meta_data_size"></A>meta_data_size
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id <B><TT>
+<A NAME="meta_data_area"></A>meta_data_area
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id <B><TT>
+<A NAME="use_area"></A>use_area
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id <B><TT>
+<A NAME="team"></A>team
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT>
+<A NAME="thisPtr"></A>thisPtr
+</TT></B>;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;union {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_multi_audio_format <B><TT>
+<A NAME="raw_audio"></A>raw_audio
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_raw_video_format <B><TT>
+<A NAME="raw_video"></A>raw_video
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_multistream_format <B><TT>
+<A NAME="multistream"></A>multistream
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_encoded_audio_format <B><TT>
+<A NAME="encoded_audio"></A>encoded_audio
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_encoded_video_format <B><TT>
+<A NAME="encoded_video"></A>encoded_video
+</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT>
+<A NAME="_reserved_"></A>_reserved_
+</TT></B>[96];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} u;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT>
+<A NAME="IsVideo"></A>IsVideo
+</TT></B>() const ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT>
+<A NAME="Width"></A>Width
+</TT></B>() const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT>
+<A NAME="Height"></A>Height
+</TT></B>() const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color_space <B><TT>
+<A NAME="ColorSpace"></A>ColorSpace
+</TT></B>() const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 &amp;<B><TT>
+<A NAME="Width"></A>Width
+</TT></B>();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 &amp;<B><TT>
+<A NAME="Height"></A>Height
+</TT></B>();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color_space &amp;<B><TT>
+<A NAME="ColorSpace"></A>ColorSpace
+</TT></B>();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT>
+<A NAME="IsAudio"></A>IsAudio
+</TT></B>() const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 &amp;<B><TT>
+<A NAME="AudioFormat"></A>AudioFormat
+</TT></B>();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT>
+<A NAME="AudioFormat"></A>AudioFormat
+</TT></B>() const;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT>
+<A NAME="Encoding"></A>Encoding
+</TT></B>() const;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT>
+<A NAME="Matches"></A>Matches
+</TT></B>(const media_format *otherFormat) const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void <B><TT>
+<A NAME="SpecializeTo"></A>SpecializeTo
+</TT></B>(const media_format *otherFormat);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void <B><TT>
+<A NAME="SetMetaData"></A>SetMetaData
+</TT></B>(const void *data, int32 size);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *<B><TT>
+<A NAME="MetaData"></A>MetaData
+</TT></B>() const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT>
+<A NAME="MetaDataSize"></A>MetaDataSize
+</TT></B>() const;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>
+<A NAME="media_format"></A>media_format
+</TT></B>();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>
+<A NAME="media_format"></A>media_format
+</TT></B>(const media_format &amp;other);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<B><TT>
+<A NAME="media_format"></A>media_format
+</TT></B>();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>
+<A NAME="media_format"></A>media_format
+</TT></B> &amp; operator=(const media_format &amp;clone);
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="The%20media_format%20structure%20can%20describe%20any%20media%20data%20format%20the%20BeOS%20can%20support."></A>The media_format structure can describe any media data format the BeOS can support.
+</H3>
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>type</I></FONT> indicates the type of media the format describes.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>user_data_type</I></FONT> and <I><FONT  color=991122 face=HELVETICA>user_data</I></FONT> allow the application to store custom data in the media_format structure; user_data_type specifies the type of data stored in user_data (<TT>
+<A NAME="The%20media_format%20structure%20can%20describe%20any%20media%20data%20format%20the%20BeOS%20can%20support."></A>B_INT32_TYPE
+</TT>, <TT>
+<A NAME="The%20media_format%20structure%20can%20describe%20any%20media%20data%20format%20the%20BeOS%20can%20support."></A>B_STRING_TYPE
+</TT>, etc).
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>require_flags</I></FONT> and <I><FONT  color=991122 face=HELVETICA>deny_flags</I></FONT> are media_format_flags indicating what options are required, and what options are rejected.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>meta_data</I></FONT>, <I><FONT  color=991122 face=HELVETICA>meta_data_size</I></FONT>, <I><FONT  color=991122 face=HELVETICA>meta_data_area</I></FONT>, <I><FONT  color=991122 face=HELVETICA>use_area</I></FONT>, <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>thisPtr</I></FONT> are currently only used by decoders when communicating with the file reader; they're not currently for public use.
+<P>
+<LI>The union, <I><FONT  color=991122 face=HELVETICA>u</I></FONT>, permits the selection of a specific media format, such as raw audio or multistream data, and contains the descriptive information specific to that media format.
+<P>
+</UL>
+<P>
+If any field is 0, it's treated as a wildcard.
+<P>
+There are several convenience functions for fetching information from the format that take care of dealing with different types automatically:
+<P>
+<UL>
+<LI><B><TT>IsVideo()</TT></B> returns true if the format represents video (either raw or encoded), otherwise it returns false.
+<P>
+<LI><B><TT>Width()</TT></B> returns the width of the video data; its value is undetermined if the format doesn't represent video.
+<P>
+<LI><B><TT>Height()</TT></B> returns the height of the video data; its value is undetermined if the format doesn't represent video.
+<P>
+<LI><B><TT>ColorSpace()</TT></B> returns the video's color space.  Its value is undetermined if the format doesn't represent video.
+<P>
+<LI><B><TT>IsAudio()</TT></B> returns true if the format represents audio (either raw or encoded), otherwise it returns false.
+<P>
+<LI><B><TT>AudioFormat()</TT></B> returns the audio's sample format.
+<P>
+<LI><B><TT>Matches()</TT></B> returns <B><TT>true</TT></B> if the format matches the specified <I><FONT  color=991122 face=HELVETICA>otherFormat</I></FONT>, otherwise it returns <B><TT>false</TT></B>.
+<P>
+<LI><B><TT>SpecializeTo()</TT></B> adjusts the specified <I><FONT  color=991122 face=HELVETICA>otherFormat</I></FONT> as needed to match the format.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_header"></A>media_header
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_header</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_type">media_type</A></TT></B> <B><TT><FONT  color=000022 size=+1>type</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_buffer_id">media_buffer_id</A></TT></B> <B><TT><FONT  color=000022 size=+1>buffer</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>destination</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_node_id">media_node_id</A></TT></B> <B><TT><FONT  color=000022 size=+1>time_source</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_depreciated_
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>uint32 <B><TT><FONT  color=000022 size=+1>size_used</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>start_time</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>area_id</TT></B> <B><TT><FONT  color=000022 size=+1>owner</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_SEEK_TAG</TT></B></FONT> = &gt;TRST&gt;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Support%20Kit/misc.html#type_code">type_code</A></TT></B> <B><TT><FONT  color=000022 size=+1>user_data_type</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>user_data</TT></B></FONT>[64];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[2];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t <B><TT><FONT  color=000022 size=+1>file_pos</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <B><TT><FONT  color=000022 size=+1>orig_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>data_offset</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;union {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_audio_header">media_audio_header</A> </TT></B> <B><TT><FONT  color=000022 size=+1>raw_audio</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_video_header">media_video_header</A></TT></B> <B><TT><FONT  color=000022 size=+1>raw_video</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_multistream_header">media_multistream_header</A> </TT></B> <B><TT><FONT  color=000022 size=+1>multistream</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_encoded_audio_header">media_encoded_audio_header</A> </TT></B> <B><TT><FONT  color=000022 size=+1>encoded_audio</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_encoded_video_header">media_encoded_video_header</A> </TT></B> <B><TT><FONT  color=000022 size=+1>encoded_video</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[64];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>u</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Defines the header of a media data buffer.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>type</I></FONT> indicates the type of media the format describes.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> indicates what buffer the header goes with.  This field is filled out by the <B><TT><A HREF="BufferProducer.html#SendBuffer()">BBufferProducer::SendBuffer()</A></TT></B> function.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>destination</I></FONT> specifies the ID number of the media_destination to which the buffer is being sent.  This field is filled out by the <B><TT><A HREF="BufferProducer.html#SendBuffer()">BBufferProducer::SendBuffer()</A></TT></B> function.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>time_source</I></FONT> indicates the ID number of the node that encoded the <I><FONT  color=991122 face=HELVETICA>start_time</I></FONT>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>size_used</I></FONT> specifies how many bytes of the buffer actually contain data.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>start_time</I></FONT> indicates the performance time at which the buffer should be performed.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>owner</I></FONT> specifies the area ID of the buffer's owner.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>user_data_type</I></FONT> and <I><FONT  color=991122 face=HELVETICA>user_data</I></FONT> allow the application to store custom data in the media_format structure; <I><FONT  color=991122 face=HELVETICA>user_data_type</I></FONT> specifies the type of data stored in user_data (<B><TT><A HREF="#B_INT32_TYPE">B_INT32_TYPE</A></TT></B>, <B><TT><A HREF="#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>, etc).  The <B><TT>B_SEEK_TAG</TT></B> constant indicates that the <I><FONT  color=991122 face=HELVETICA>user_data</I></FONT> contains a seek tag.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>file_pos</I></FONT> indicates where in the corresponding file the data came from, and <I><FONT  color=991122 face=HELVETICA>orig_size</I></FONT> indicates how big it was; if the data didn't come from a file, these should be zero.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>data_offset</I></FONT> indicates the offset within the buffer to the data.  This is reflected by the <B><TT><A HREF="Buffer.html#Data()">BBuffer::Data()</A></TT></B> function.
+<P>
+<LI>The union, <I><FONT  color=991122 face=HELVETICA>u</I></FONT>, permits the selection of a specific media format, such as raw audio or multistream data, and contains the descriptive information specific to that media format.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_input"></A>media_input
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_input</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_input()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>~media_input(</TT></B></FONT>);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_node">media_node</A></TT></B> <B><TT><FONT  color=000022 size=+1>node</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_source">media_source</A></TT></B> <B><TT><FONT  color=000022 size=+1>source</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_destination">media_destination</A></TT></B> <B><TT><FONT  color=000022 size=+1>destination</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_format">media_format</A></TT></B> <B><TT><FONT  color=000022 size=+1>format</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>name</TT></B></FONT>[<B><TT>B_MEDIA_NAME_LENGTH</TT></B>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>_reserved_media_input_</TT></B></FONT>[4];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The media_input structure describes a complete connection between a media_source and media_destination, from the point-of-view of the consumer (the destination).
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>node</I></FONT> is the media_node that owns the input.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>source</I></FONT> is the source socket from which the data is being sent.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>destination</I></FONT> is the destination socket at which the data is arriving.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>format</I></FONT> is the format of the data.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT> is the input's name.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_multistream_format"></A>media_multistream_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_multistream_format</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_ANY</TT></B></FONT> = 0,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_VID</TT></B></FONT> = 1,&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_AVI</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_MPEG1</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_MPEG2</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_QUICKTIME</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_PRIVATE</TT></B></FONT> = 90000,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_FIRST_USER_TYPE</TT></B></FONT> = 100000
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>avg_bit_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>max_bit_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>avg_chunk_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>max_chunk_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_HEADER_HAS_FLAGS</TT></B></FONT> = 0x1,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_CLEAN_BUFFERS</TT></B></FONT> = 0x2,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_HOMOGENOUS_BUFFERS</TT></B></FONT> = 0x4
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>format</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[2];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct <B><TT><FONT  color=000022 size=+1>vid_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>frame_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>width</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>height</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/misc.html#color_space">color_space</A></TT></B> <B><TT><FONT  color=000022 size=+1>space</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>sampling_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>sample_format</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>byte_order</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>channel_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct <B><TT><FONT  color=000022 size=+1>avi_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>us_per_frame</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>width</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>height</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>type_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_type">media_type</A></TT></B> <B><TT><FONT  color=000022 size=+1>types</TT></B></FONT>[5];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;union {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vid_info <B><TT><FONT  color=000022 size=+1>vid</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;avi_info <B><TT><FONT  color=000022 size=+1>avi</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>u</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static <B><TT><A HREF="#media_multistream_format">media_multistream_format</A></TT></B> <B><TT><FONT  color=000022 size=+1>wildcard</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes the format of multistream media data, such as a QuickTime, AVI, or MPEG movie.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>avg_bit_rate</I></FONT> and <I><FONT  color=991122 face=HELVETICA>max_bit_rate</I></FONT> indicate the average and maximum bit rates of the media data.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>avg_chunk_size</I></FONT> and <I><FONT  color=991122 face=HELVETICA>max_chunk_size</I></FONT> indicate the average and maximum buffer sizes; if all buffers are the same size, these two values should be equal.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>flags</I></FONT> provides informational flags for the buffers.  <B><TT>B_HEADER_HAS_FLAGS</TT></B> indicates that the buffers' headers have valid flags; <B><TT>B_CLEAN_BUFFERS</TT></B> indicates that each buffer represents an integral number of frames, and <B><TT>B_HOMOGENOUS_BUFFERS</TT></B> indicates that each buffer has only one format in it.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>format</I></FONT> indicates the multistream data format (<B><TT>B_AVI</TT></B>, <B><TT>B_QUICKTIME</TT></B>, etc).
+<P>
+<LI>The union <I><FONT  color=991122 face=HELVETICA>u</I></FONT> contains either a <B><TT><A HREF="#vid_info">vid_info</A></TT></B> or an <B><TT><A HREF="#avi_info">avi_info</A></TT></B> structure that describes the video stream:
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="vid_info"></A>vid_info
+</H4>
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>frame_rate</I></FONT> specifies the video frame rate (in frames per second).
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="avi_info"></A>avi_info
+</H4>
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>us_per_frame</I></FONT> specifies the number of microseconds each frame should be displayed.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_multi_audio_format"></A>media_multi_audio_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_multi_audio_format</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_raw_audio_format raw;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_multi_audio_info <B><TT><FONT  color=000022 size=+1>multi</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes a multi-channel audio format.  This is constructed by using a media_raw_audio_format to describe the physical format of the sound, followed by a media_multi_audio_info structure that adds the multi-channel information.  This allows compatibility with existing BeOS software while adding support for multi-channel audio in new software.
+<P>
+<HR>
+<H3>
+<A NAME="media_multi_audio_info"></A>media_multi_audio_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_multi_audio_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>channel_mask</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 <B><TT><FONT  color=000022 size=+1>valid_bits</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>matrix_mask</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_b</TT></B></FONT>[3];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Provides information about multi-channel audio support.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>channel_mask</I></FONT> indicates which channels are supported; for each channel (<B><TT>B_CHANNEL_LEFT</TT></B>, etc) the corresponding bit is set in this mask.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>valid_bits</I></FONT> indicates how many bits in a 32-bit integer sample actually contain sample data.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>matrix_mask</I></FONT> indicates which multi-channel audio matrices are used.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_multistream_header"></A>media_multistream_header
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_multistream_header</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[14];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>unused_mask</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>_reserved_2</TT></B></FONT>[3];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_MASTER_HEADER</TT></B></FONT> = 0x1,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_SUBSTREAM_HEADER</TT></B></FONT> = 0x2,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_COMPLETE_BUFFER</TT></B></FONT> = 0x4
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Defines the header of a multistream media buffer.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>unused_mask</I></FONT> indicates which bits of the last byte in the buffer are unused.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>flags</I></FONT> provides informational flags about the buffer.  If <B><TT>B_MASTER_HEADER</TT></B> is specified, master stream header data is in the buffer; <B><TT>B_SUBSTREAM_HEADER</TT></B> indicates that the buffer contains substream header information.  <B><TT>B_COMPLETE_BUFFER</TT></B> indicates that the buffer's data represents an integral number of frames.
+<P>
+</UL>
+<P>
+You may add fields to the end of this structure if your multistream media format requires them.
+<P>
+<HR>
+<H3>
+<A NAME="media_node"></A>media_node
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;be/media/MediaDefs.h>">&lt;be/media/MediaDefs.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+class <B><TT><FONT  color=000022 size=+1>media_node</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_node()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>~media_node()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_node_id">media_node_id</A></TT></B> <B><TT><FONT  color=000022 size=+1>node</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port_id <B><TT><FONT  color=000022 size=+1>port</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>kind</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static <B><TT><A HREF="#media_node">media_node</A></TT></B> <B><TT><FONT  color=000022 size=+1>null</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[3];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT><A HREF="#media_node">media_node</A></TT></B> structure is the class that defines a node to client applications; interactions with the <A HREF="MediaRoster.html#BMediaRoster">BMediaRoster</A> regarding nodes is done using <B><TT><A HREF="#media_node">media_node</A></TT></B> objects.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>node</I></FONT> indicates the node's ID number.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>port</I></FONT> specifies the port ID number of the node's control port.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>kind</I></FONT> specifies the node's media kind.  See &nbsp;<a href="MediaNode.html#node_kind%20on%20page181">"node_kind" on page181</a> for a list of node kinds.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>null</I></FONT> represents a null node
+<P>
+</UL>
+<P>
+Applications will usually treat this as a black box.
+<P>
+<HR>
+<H3>
+<A NAME="media_node_attribute"></A>media_node_attribute
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaNode.h">be/media/MediaNode.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_node_attribute</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_R40_COMPILED</TT></B></FONT> = 1,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_USER_ATTRIBUTE_NAME</TT></B></FONT> = 0x1000000,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_FIRST_USER_ATTRIBUTE
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>what</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint64 <B><TT><FONT  color=000022 size=+1>data</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The media_node_attribute structure provides additional information about nodes.  Nodes can have as many of these as they want, and will return them from their <B><TT><A HREF="MediaNode.html#GetNodeAttributes()">BMediaNode::GetNodeAttributes()</A></TT></B> function.  Applications query the node using the <B><TT><A HREF="MediaRoster.html#GetNodeAttributesFor()">BMediaRoster::GetNodeAttributesFor()</A></TT></B> function.
+<P>
+The what field indicates the attribute type.  <B><TT>B_R40_COMPILED</TT></B> indicates that the node was compiled using BeOS Release 4.0; <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> returns this attribute automatically for nodes that were compiled using the Release 4.0 headers.  Nodes may create their own attribute types, beginning at <B><TT>B_FIRST_USER_ATTRIBUTE</TT></B>.
+<P>
+The <B><TT>B_USER_ATTRIBUTE_NAME</TT></B> attribute specifies the name of a protocol for the user attributes implemented by the node.  For example, if you devise a third-party standard for attribute values whose attribute IDs are greater than <B><TT>B_FIRST_USER_ATTRIBUTE</TT></B>, the value of <B><TT>B_USER_ATTRIBUTE_NAME</TT></B> would be the name of the standard.
+<P>
+The flags and data fields are used for different things depending on the what value; the <B><TT>B_R40_COMPILED</TT></B> attribute doesn't use them.
+<P>
+<HR>
+<H3>
+<A NAME="media_node_id"></A>media_node_id
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typdef int32 <B><TT><FONT  color=000022 size=+1>media_node_id</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+A node ID number.
+<P>
+<HR>
+<H3>
+<A NAME="media_output"></A>media_output
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_output</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_output()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>~media_output()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node <B><TT><FONT  color=000022 size=+1>node</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_source <B><TT><FONT  color=000022 size=+1>source</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_destination <B><TT><FONT  color=000022 size=+1>destination</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format <B><TT><FONT  color=000022 size=+1>format</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>name</TT></B></FONT>[<B><TT>B_MEDIA_NAME_LENGTH</TT></B>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>_reserved_media_output_</TT></B></FONT>[4];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The media_output structure describes a complete connection between a media_source and media_destination, from the point-of-view of the consumer (the destination).
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>node</I></FONT> is the media_node that owns the output.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>source</I></FONT> is the source socket from which the data is being sent.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>destination</I></FONT> is the destination socket to which the data is being sent.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>format</I></FONT> is the format of the data.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT> is the output's name.
+<P>
+</UL>
+<A NAME="media_raw_audio_format"></A>
+<P>
+<HR>
+<H3>
+<A NAME="media_raw_audio_format"></A>media_raw_audio_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct media_raw_audio_format {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum {&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_AUDIO_FLOAT = 0x24,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_AUDIO_INT = 0x4
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_AUDIO_SHORT = 0x2,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_AUDIO_UCHAR = 0x11,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_AUDIO_CHAR = 0x1,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_AUDIO_SIZE_MASK = 0xf
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>frame_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>channel_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>format</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>byte_order</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <B><TT><FONT  color=000022 size=+1>buffer_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static media_multi_audio_format <B><TT><FONT  color=000022 size=+1>wildcard</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes the format of raw audio data.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>frame_rate</I></FONT> indicates the frame rate, in Hertz.  One frame is one sample per channel (stereo buffers contain two samples per channel).  For audio, each buffer contains multiple audio samples, whereas video contains one frame, or one field (half-frame) per buffer.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>channel_count</I></FONT> indicates the number of channels of audio (typically this is either 1 for mono or 2 for stereo).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>format</I></FONT> specifies the sample format (for compressed formats, see media_encoded_audio_format):
+<P>
+<UL>
+<LI><B><TT>B_AUDIO_FLOAT</TT></B>.  Each sample is four bytes; 0 is the middle, -1.0 is the bottom, 1.0 is the top.
+<P>
+<LI><B><TT>B_AUDIO_INT</TT></B>.  Each sample is four bytes; 0 is the middle, 0x80000001 is the bottom, 0x7FFFFFFF is the top.
+<P>
+<LI><B><TT>B_AUDIO_SHORT</TT></B>.  Each sample is two bytes; 0 is the middle, -32767 is the bottom, 32767 is the top.
+<P>
+<LI><B><TT>B_AUDIO_UCHAR</TT></B>.  Each sample is one byte; 128 is the midpoint, 1 is the bottom, 255 is the top.
+<P>
+<LI><B><TT>B_AUDIO_CHAR</TT></B>.  Each sample is one byte; 0 is the midpoint, -127 is the bottom, 127 is the top.
+<P>
+</UL>
+<P>
+It's guaranteed that (<I><FONT  color=991122 face=HELVETICA>format</I></FONT> &amp; <B><TT>B_AUDIO_SIZE_MASK</TT></B>) will always be equal to the size of the sample.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>byte_order</I></FONT> indicates the endianness of the data (either <B><TT><A HREF="#B_MEDIA_BIG_ENDIAN">B_MEDIA_BIG_ENDIAN</A></TT></B> or <B><TT><A HREF="#B_MEDIA_LITTLE_ENDIAN">B_MEDIA_LITTLE_ENDIAN</A></TT></B>).
+<P>
+<I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT> indicates the size of each buffer.
+<P>
+<A NAME="media_raw_video_format"></A>
+<P>
+<HR>
+<H3>
+<A NAME="media_raw_video_format"></A>media_raw_video_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_raw_video_format</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>field_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>interlace</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>first_active</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>last_active</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>orientation</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>pixel_width_aspect</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>pixel_height_aspect</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_video_display_info <B><TT><FONT  color=000022 size=+1>display
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static media_raw_video_format <B><TT><FONT  color=000022 size=+1>wildcard</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes the format of raw video data.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>field_rate</I></FONT> indicates the field rate.  This is 59.94 for NTSC and 50.0 for PAL.  If you use BT848 in non-interlaced mode (thereby picking out only every other field), you'd specify 29.97.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>interlace</I></FONT> specifies how many fields there are per frame.  A value of 1 indicates that the video is progressive (non-interlaced).  NTSC video is interlaced such that there are two fields per frame, so for standard NTSC video, this value is 2.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>first_active</I></FONT> and <I><FONT  color=991122 face=HELVETICA>last_active</I></FONT> indicate where the VBL lines at the top of the frame end, and where they resume at the bottom of the frame; video data is confined between these two scan lines.  Usually you'll use 0 for <I><FONT  color=991122 face=HELVETICA>first_active</I></FONT> and <I><FONT  color=991122 face=HELVETICA>line_count</I></FONT>-1 for <I><FONT  color=991122 face=HELVETICA>last_active</I></FONT>; these indicate wildcard or "don't care" values.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>orientation</I></FONT> indicates the orientation of the video; this is typically <B><TT>B_VIDEO_TOP_LEFT_RIGHT</TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>pixel_width_aspect</I></FONT> and <I><FONT  color=991122 face=HELVETICA>pixel_height_aspect</I></FONT> specify the numerator and denominator of the video's aspect ratio.  If the aspect ratio is 4:3, these values will be 4 and 3, respectively.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_request_info"></A>media_request_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaNode.h">be/media/MediaNode.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_request_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum <B><TT><FONT  color=000022 size=+1>what_code</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_SET_VIDEO_CLIPPING_FOR</TT></B></FONT> = 1, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_REQUEST_FORMAT_CHANGE</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_SET_OUTPUT_ENABLED</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_SET_OUTPUT_BUFFERS_FOR</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_FORMAT_CHANGED</TT></B></FONT> = 4097
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;what_code <B><TT><FONT  color=000022 size=+1>what</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>change_tag</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t <B><TT><FONT  color=000022 size=+1>status</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>cookie</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void * <B><TT><FONT  color=000022 size=+1>user_data</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_source <B><TT><FONT  color=000022 size=+1>source</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_destination <B><TT><FONT  color=000022 size=+1>destination</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format <B><TT><FONT  color=000022 size=+1>format</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[32];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure contains information that describes a request that has been completed (or has failed).  It gets passed into the <B><TT><A HREF="MediaNode.html#RequestCompleted()">BMediaNode::RequestCompleted()</A></TT></B> function.
+<P>
+The <B><TT>what</TT></B> field describes what type of request has been completed:
+<P>
+<UL>
+<LI><B><TT>B_SET_VIDEO_CLIPPING_FOR</TT></B> indicates that a <B><TT><A HREF="BufferConsumer.html#SetVideoClippingFor()">BBufferConsumer::SetVideoClippingFor()</A></TT></B> request has been completed.  The <B><TT>source</TT></B> and <B><TT>destination</TT></B> fields contain these values from the request, and <B><TT>format.u.raw_video.display</TT></B> describes the new video display settings.
+<P>
+<LI><B><TT>B_REQUEST_FORMAT_CHANGE</TT></B> indicates that a <B><TT>BBufferConsumer::RequestFormatChange()</TT></B> request has been completed.  The <B><TT>source</TT></B> and <B><TT>destination</TT></B> fields contain these values from the request, and <B><TT>format</TT></B> contains the negotiated format (it may have been altered by the producer if there were wildcard fields).
+<P>
+<LI><B><TT>B_SET_OUTPUT_ENABLED</TT></B> indicates that a <B><TT><A HREF="BufferConsumer.html#SetOutputEnabled()">BBufferConsumer::SetOutputEnabled()</A></TT></B> request has been completed.  The <B><TT>source</TT></B> and <B><TT>destination</TT></B> fields contain these values from the request, and <B><TT>status</TT></B> is always <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<LI><B><TT>B_SET_OUTPUT_BUFFERS_FOR</TT></B> indicates that a <B><TT><A HREF="BufferConsumer.html#SetOutputBuffersFor()">BBufferConsumer::SetOutputBuffersFor()</A></TT></B> request has been completed.  The <B><TT>source</TT></B> and <B><TT>destination</TT></B> fields contain these values from the request, and <B><TT>cookie</TT></B> is a pointer to the <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> that was set.  Note that the change was only applied if <B><TT>status</TT></B> is <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<LI><B><TT>B_FORMAT_CHANGED</TT></B> indicates that a <B><TT><A HREF="BufferConsumer.html#FormatChanged()">BBufferConsumer::FormatChanged()</A></TT></B> request has been completed.  The <B><TT>source</TT></B> and <B><TT>destination</TT></B> fields contain these values from the request, and <B><TT>format</TT></B> indicates the new format.  The values seen here are from the initator's point of view.
+<P>
+</UL>
+<P>
+The <B><TT>user_data</TT></B> field contains the <I><FONT  color=991122 face=HELVETICA>userData</I></FONT> pointer passed to the function that initiated the request; this can be anything the node making the request wants.
+<P>
+<B><TT>status</TT></B> indicates the status of the function called, and is <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if no error occurred.
+<P>
+<HR>
+<H3>
+<A NAME="media_seek_tag"></A>media_seek_tag
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_seek_tag</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>data</TT></B></FONT>[16];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT><A HREF="#media_seek_tag">media_seek_tag</A></TT></B> type is used to contain the seek tag data placed in buffer headers by producers.  This can contain whatever information the producer deems necessary.
+<P>
+<HR>
+<H3>
+<A NAME="media_source"></A>media_source
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_source</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_source(</TT></B></FONT>port_id, int32<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_source(</TT></B></FONT>const <B><TT><A HREF="#media_source">media_source</A></TT></B> &amp;<I><FONT  color=991122 face=HELVETICA>clone</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#media_source">media_source</A></TT></B> &amp; operator<B><TT><FONT  color=000022 size=+1>= </TT></B></FONT>(const <B><TT><A HREF="#media_source">media_source</A></TT></B> &amp;<I><FONT  color=991122 face=HELVETICA>clone</I></FONT>);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_source()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>~media_source()</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port_id <B><TT><FONT  color=000022 size=+1>port</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>id</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static <B><TT><A HREF="#media_source">media_source</A></TT></B> <B><TT><FONT  color=000022 size=+1>null</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_media_source_</TT></B></FONT>[2];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes the source end of a media connection between two nodes.  The <B><TT>port</TT></B> field indicates the port ID on which the source communicates.  This must be the same as the media_node.port value.
+<P>
+<HR>
+<H3>
+<A NAME="media_video_display_info"></A>media_video_display_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_video_display_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color_space <B><TT><FONT  color=000022 size=+1>format</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>line_width</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>line_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>bytes_per_row</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>pixel_offset</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>line_offset</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[3];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static <B><TT><A HREF="#media_video_display_info">media_video_display_info</A></TT></B> <B><TT><FONT  color=000022 size=+1>wildcard</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes a video buffer in terms of how its contents should be interpreted in order to display it on the screen.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>format</I></FONT> specifies the buffer's color space.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>line_width</I></FONT> and <I><FONT  color=991122 face=HELVETICA>line_count</I></FONT> indicate the total width of the buffer in pixels, and the total height of the buffer in lines.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>bytes_per_row</I></FONT> specifies the number of bytes wide the buffer's image is, including any slop space.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>pixel_offset</I></FONT> indicates the number of pixels between the start of the buffer and the start of the video field.  The buffer is the framebuffer.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>line_offset</I></FONT> specifies the offset between the start of the buffer and the start of the field, in lines.  The buffer is the framebuffer.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>flags</I></FONT> are media_display_flags, indicating the dominance and order of the video fields.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_video_header"></A>media_video_header
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaDefs.h">be/media/MediaDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>media_video_header</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>_reserved_</TT></B></FONT>[12];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>field_gamma</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>field_sequence</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>field_number</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>pulldown_number</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>first_active_line</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>line_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Defines the header of a video buffer.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>field_gamma</I></FONT> specifies the gamma at which the video was captured.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>field_sequence</I></FONT> is an identifying number assigned to the field when it was captured.  They progress in sequence; you can tell if a field was dropped by looking for skips in the sequence.  Note that this value doesn't necessarily start at 0, and it can wrap back around to 0.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>field_number</I></FONT> indicates which field of a video frame the buffer represents.  It's 0 for field 1, 1 for field 2, and so forth.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>pulldown_number</I></FONT> indicates that the field represented by the buffer is a duplicate of a field pulldown_number fields back.  If this value is 0, it's not a duplicate field.  This is used in cases when the video has been converted from one field rate to another, resulting in duplication of fields; these duplicated fields can be marked using pulldown numbers so video hardware and software can optimize their performance by knowing that duplicate fields exist.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>first_active_line</I></FONT> indicates the topmost line that actually contains video data (instead of VBL data); this is an NTSC or PAL line number, which is 1-based.  <I><FONT  color=991122 face=HELVETICA>line_count</I></FONT> indicates the number of active video lines in the field.
+<P>
+</UL>
+<P>
+You may add fields to the end of this buffer if your video format requires them.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,796 @@
+<HTML><HEAD><TITLE>The Game Kit: BWindowScreen</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BWindowScreen"></A>BWindowScreen
+</H1>
+<P>
+Derived from:  public <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/game/WindowScreen.h">be/game/WindowScreen.h</A>
+<P>
+Library:  libgame.so
+<P>
+<H6><A HREF="WindowScreen.summary.html"><i>Summary</i></A></H6>
+<P>
+A BWindowScreen object provides exclusive access to the entire screen, bypassing the Application Server's window system.  The object has direct access to the graphics card driver:  It can set up the graphics environment on the graphics card, call driver-implemented drawing functions, and directly manipulate the frame buffer. 
+<P>
+<HR>
+<H3>
+<A NAME="Screen%20Access"></A>Screen Access
+</H3>
+<P>
+Like all windows, a BWindowScreen is hidden (off-screen) when it's constructed.  By calling <B><TT><A HREF="#Show()">Show()</A></TT></B> to put it on-screen and make it the active window, an application takes over the whole screen.  While the BWindowScreen is active, the Application Server's graphics operations are suspended&mdash;this means that you can't use any <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> functions, nor any functions in classes derived from BView; you have to draw directly into the screen's frame buffer, and nothing except what the application draws will be visible to the user&mdash;no other windows and no desktop.  When the BWindowScreen gives up active status, the Application Server automatically refreshes the screen with its old contents.
+<P>
+Although the BWindowScreen object provides a connection to the screen, you shouldn't draw from the BWindowScreen's thread.  Use the thread only to regulate the access of other threads to the frame buffer.
+<P>
+<HR>
+<H3>
+<A NAME="Keyboard%20and%20Mouse"></A>Keyboard and Mouse
+</H3>
+<P>
+A BWindowScreen object remains a window while it has control of the screen; it stays attached to the Application Server and its message loop continues to function.  It gets messages reporting the user's actions on the keyboard and mouse, just like any other active window.  Because it covers the whole screen, it's notified of all mouse and keyboard events.  You can attach filters to the window to get the messages as they arrive.  Or you can call the Interface Kit's <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_key_info()">get_key_info()</A></TT></B> function to poll the state of the keyboard and construct a nominal <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> so that you can call <B><TT>GetMouse()</TT></B> to poll the mouse.
+<P>
+<HR>
+<H3>
+<A NAME="Workspaces"></A>Workspaces
+</H3>
+<P>
+This class respects workspaces.  A BWindowScreen object releases its grip on the screen when the user turns to another workspace and reestablishes its control when the user returns to the workspace in which it's the active window.  
+<P>
+<HR>
+<H3>
+<A NAME="Debugging"></A>Debugging
+</H3>
+<P>
+A BWindowScreen object can be constructed in a debugging mode that lets you switch back and forth between the workspace in which the game is running and a workspace where error messages are printed.  See the constructor and the <B><TT><A HREF="#RegisterThread()">RegisterThread()</A></TT></B> function for details. 
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Can be implemented to do whatever is necessary when the BWindowScreen object obtains direct access to the frame buffer for the screen, and when it loses that access.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<A NAME="20346:%20funcNameFirst:%20BWindowScreen()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="BWindowScreen()"></A>BWindowScreen()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BWindowScreen(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>title</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>space</I></FONT>, status_t&nbsp;*<I><FONT  color=991122 face=HELVETICA>error</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>debugging</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BWindowScreen object by assigning the window a <I><FONT  color=991122 face=HELVETICA>title</I></FONT> and specifying a <I><FONT  color=991122 face=HELVETICA>space</I></FONT> configuration for the screen.  The window won't have a visible border or a tab in which to display the title to the user.  However, others&mdash;such as the Workspaces application&mdash;can use the title to identify the window.
+<P>
+The window is constructed to fill the screen; its frame rectangle contains every screen pixel when the screen is configured according to the <I><FONT  color=991122 face=HELVETICA>space</I></FONT> argument.  That argument describes the pixel dimensions and bits-per-pixel depth of the screen that the BWindowScreen object should establish when it obtains direct access to the frame buffer.  It should be one of the following constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_8_BIT_640x480</TT></B> </TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_16_BIT_640x480">B_16_BIT_640x480</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_640x480</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_800x600</TT></B> </TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_16_BIT_800x600">B_16_BIT_800x600</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_800x600</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_1024x768</TT></B> </TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_16_BIT_1024x768">B_16_BIT_1024x768</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_1024x768</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_1152x900</TT></B> </TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_16_BIT_1152x900">B_16_BIT_1152x900</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_1152x900</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_1280x1024</TT></B> </TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_16_BIT_1280x1024">B_16_BIT_1280x1024</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_1280x1024</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_1600x1200</TT></B> </TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_16_BIT_1600x1200">B_16_BIT_1600x1200</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_1600x1200</TT></B> </TD>
+</TABLE>
+<P>
+These are the same constants that can be passed to <B><TT><A HREF="../The%20Interface%20Kit/functions.html#set_screen_space()">set_screen_space()</A></TT></B>, the Interface Kit function that preference applications call to configure the screen.  
+<P>
+The space configuration applies only while the BWindowScreen object is in control of the screen.  When it gives up control, the previous configuration is restored.
+<P>
+The constructor assigns the window to the active workspace (<B><TT><A HREF="../The%20Interface%20Kit/Window.html#B_CURRENT_WORKSPACE">B_CURRENT_WORKSPACE</A></TT></B>).  It fails if another BWindowScreen object in any application is already assigned to the same workspace.
+<P>
+To be sure there wasn't an error in constructing the object, check the <I><FONT  color=991122 face=HELVETICA>error</I></FONT> argument.  If all goes well, the constructor sets the <I><FONT  color=991122 face=HELVETICA>error</I></FONT> variable to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If not, it sets it to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  If there's an error, it's likely to occur in this constructor, not the inherited <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> constructor.  Since the underlying window will probably exist, you'll need to instruct it to quit.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t error;
+&nbsp;&nbsp;&nbsp;MyWindowScreen *screen = 
+&nbsp;&nbsp;&nbsp;             new MyWindowScreen("Glacier", B_8_BIT_1024x768, &amp;error);
+&nbsp;&nbsp;&nbsp;if ( error != B_OK )
+&nbsp;&nbsp;&nbsp;    screen->PostMessage(B_QUIT_REQUESTED, screen);</PRE>
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>debugging</I></FONT> flag is <B><TT>true</TT></B>, the BWindowScreen is constructed in debugging mode.  This modifies its behavior and enables three functions, <B><TT><A HREF="#RegisterThread()">RegisterThread()</A></TT></B>, <B><TT><A HREF="#Suspend()">Suspend()</A></TT></B>, and <B><TT><A HREF="#SuspensionHook()">SuspensionHook()</A></TT></B>.  The debugging regime is described under those functions.
+<P>
+<B>See also:  <TT><A HREF="#RegisterThread()">RegisterThread()</A></TT></B>, the <A HREF="../Release%20Notes/InterfaceKit.html#BScreen">BScreen</A> class in the Interface Kit 
+<P>
+<HR>
+<H3>
+<A NAME="~BWindowScreen()"></A>~BWindowScreen()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BWindowScreen()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Closes the clone of the graphics card driver (through which the BWindowScreen object established its connection to the screen), unloads it from the application, and cleans up after it.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="CanControlFrameBuffer()"></A>CanControlFrameBuffer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>CanControlFrameBuffer(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the graphics card driver permits applications to control the configuration of the frame buffer, and <B><TT>false</TT></B> if not.  Control is exercised through these two functions:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#SetFrameBuffer()">SetFrameBuffer()</A></TT></B> 
+<br>
+<B><TT><A HREF="#MoveDisplayArea()">MoveDisplayArea()</A></TT></B> 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+A return of <B><TT>true</TT></B> means that these functions can communicate with the graphics card driver and at least the first will do something useful.  A return of <B><TT>false</TT></B> means that neither of them will work.
+<P>
+<B>See also:  <TT><A HREF="#SetFrameBuffer()">SetFrameBuffer()</A></TT></B>, <B><TT><A HREF="#MoveDisplayArea()">MoveDisplayArea()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="CardHookAt()"></A>CardHookAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+graphics_card_hook <B><TT><FONT  color=000022 size=+1>CardHookAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the graphics card "hook" function that's located at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> in its list of hook functions.  The function returns <B><TT>NULL</TT></B> if the graphics card driver doesn't implement a function at that index or the index is out of range.
+<P>
+The hook functions provide accelerated drawing capabilities.  They're documented under <a href="CardHooks.html#Graphics%20Card%20Hook%20Functions">"Graphics Card Hook Functions"</a>.  The first three hook functions (indices 0, 1, and 2) are not available through the Game Kit; if you pass an index of 0, 1, or 2 to <B><TT><A HREF="#CardHookAt()">CardHookAt()</A></TT></B>, it will return <B><TT>NULL</TT></B> even if the function is implemented.
+<P>
+An application can cache the pointers that <B><TT><A HREF="#CardHookAt()">CardHookAt()</A></TT></B> returns, but it should ask for a new set each time the depth or dimensions of the screen changes and each time the BWindowScreen object releases or regains control of the screen.  You'd typically call <B><TT><A HREF="#CardHookAt()">CardHookAt()</A></TT></B> in your implementation of <B><TT>ScreenConnection()</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="CardInfo()"></A>CardInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+graphics_card_info *<B><TT><FONT  color=000022 size=+1>CardInfo(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a description of the current configuration of the graphics card, as kept by the driver for the card.  The returned <B><TT><A HREF="gameAPI.html#graphics_card_info">graphics_card_info</A></TT></B> structure is defined in <B>be/addons/graphics/GraphicsCard.h</B> and is documented in <a href="../add-onsGraphicsCardMainOps.html#The%20Entry%20Point%20and%20General%20Opcodes">"The Entry Point and General Opcodes"</a> in the "Graphics Card Drivers" chapter.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The information returned by this function is only valid when the BWindowScreen is connected to the display.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="#FrameBufferInfo()">FrameBufferInfo()</A></TT></B> 
+<P>
+<HR>
+<H3>ColorList()   see <A HREF="#SetColorList()">SetColorList()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Disconnect()"></A>Disconnect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Disconnect(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Forces the BWindowScreen object to disconnect itself from the screen&mdash;to give up its authority over the graphics card driver, allowing the Application Server to reassert control.  Normally, you'd disconnect the BWindowScreen only when hiding the game, reducing it to an ordinary window in the background, or quitting.  The <B><TT><A HREF="#Hide()">Hide()</A></TT></B> and <B><TT><A HREF="#Quit()">Quit()</A></TT></B> functions automatically disconnect the BWindowScreen as part of the process of hiding and quitting.  <B><TT><A HREF="#Disconnect()">Disconnect()</A></TT></B> allows you to sever the connection before calling those functions.
+<P>
+Before breaking the screen connection, <B><TT><A HREF="#Disconnect()">Disconnect()</A></TT></B> causes the BWindowScreen object to receive a <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> notification with a flag of <B><TT>false</TT></B>.  It doesn't return until <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> returns and the connection is broken.   <B><TT><A HREF="#Hide()">Hide()</A></TT></B> and <B><TT><A HREF="#Quit()">Quit()</A></TT></B> share this behavior.
+<P>
+<B>See also:  <TT><A HREF="#Hide()">Hide()</A></TT></B>, <B><TT><A HREF="#Quit()">Quit()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="FrameBufferInfo()"></A>FrameBufferInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+frame_buffer_info *<B><TT><FONT  color=000022 size=+1>FrameBufferInfo(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the <B><TT><A HREF="gameAPI.html#frame_buffer_info">frame_buffer_info</A></TT></B> structure that holds the driver's current conception of the frame buffer.  The structure is defined in <B>addons/graphics/GraphicsCard.h</B> and is documented in <a href="../add-onsGraphicsCardFrameBufferOps.html#Frame%20Buffer%20Opcodes">"Frame Buffer Opcodes"</a> in the "Graphics Card Drivers" chapter.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The information returned by this function is only valid if <B><TT><A HREF="#SetFrameBuffer()">SetFrameBuffer()</A></TT></B> has been called.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="#SetSpace()">SetSpace()</A></TT></B>, <B><TT><A HREF="#SetFrameBuffer()">SetFrameBuffer()</A></TT></B>, <B><TT><A HREF="#MoveDisplayArea()">MoveDisplayArea()</A></TT></B>, <B><TT><A HREF="#CardInfo()">CardInfo()</A></TT></B>  
+<P>
+<HR>
+<H3>
+<A NAME="Hide()"></A>Hide()
+, 
+<A NAME="Show()"></A>Show()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Hide(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Show(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions augment their <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> counterparts to make sure that the BWindowScreen is disconnected from the screen before it's hidden and that it's ready to establish a connection when it becomes the active window.
+<P>
+<B><TT><A HREF="#Hide()">Hide()</A></TT></B> calls <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> (with an argument of <B><TT>false</TT></B>) and breaks the connection to the screen when <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> returns.  It then hides the window. 
+<P>
+<B><TT><A HREF="#Show()">Show()</A></TT></B> shows the window on-screen and makes it the active window, which will cause it to establish a direct connection to the graphics card driver for the screen.  Unlike <B><TT><A HREF="#Hide()">Hide()</A></TT></B>, it may return before <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B>  is called (with an argument of <B><TT>true</TT></B>).
+<P>
+<B>See also:  <TT><A HREF="../The%20Interface%20Kit/Window.html#Hide()">BWindow::Hide()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="IOBase()"></A>IOBase()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>IOBase(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the base address for the input/output registers on the graphics card.  Registers are addressed by 16-bit offsets from this base address.  (This function may not be supported in future releases.)
+<P>
+<HR>
+<H3>
+<A NAME="MoveDisplayArea()"></A>MoveDisplayArea()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>MoveDisplayArea(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Relocates the display area, the portion of the frame buffer that's mapped to the screen.  This function moves the area's left-top corner to (<I><FONT  color=991122 face=HELVETICA>x</I></FONT>,&nbsp;<I><FONT  color=991122 face=HELVETICA>y</I></FONT>); by default, the corner lies at (0,&nbsp;0).  The display area must lie entirely within the frame buffer.  
+<P>
+<B><TT><A HREF="#MoveDisplayArea()">MoveDisplayArea()</A></TT></B> only works if the graphics card driver permits application control over the frame buffer.  It must also permit a frame buffer with a total area larger than the display area.  If successful in relocating the display area, this function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>; if not, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#CanControlFrameBuffer()">CanControlFrameBuffer()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Quit()"></A>Quit()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Quit(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> version of <B><TT><A HREF="#Quit()">Quit()</A></TT></B> to force the BWindowScreen object to disconnect itself from the screen, so that it doesn't quit while in control of the frame buffer.  
+<P>
+Although <B><TT><A HREF="#Quit()">Quit()</A></TT></B> disconnects the object before quitting, this may not be soon enough for your application.  For example, if you need to destroy some drawing threads before the BWindowScreen object is itself destroyed, you should get rid of them after the screen connection is severed.  You can force the object to disconnect itself by calling <B><TT><A HREF="#Disconnect()">Disconnect()</A></TT></B>.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyWindowScreen::Quit()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    Disconnect();
+&nbsp;&nbsp;&nbsp;    kill_thread(drawing_thread_a);
+&nbsp;&nbsp;&nbsp;    kill_thread(drawing_thread_b);
+&nbsp;&nbsp;&nbsp;    BWindowScreen::Quit();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If the screen connection is still in place when <B><TT><A HREF="#Quit()">Quit()</A></TT></B> is called, it calls <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> with a flag of <B><TT>false</TT></B>.  It doesn't return until <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> returns and the connection is broken.
+<P>
+<B>See also:  <TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="RegisterThread()"></A>RegisterThread()
+, 
+<A NAME="Suspend()"></A>Suspend()
+, 
+<A NAME="SuspensionHook()"></A>SuspensionHook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>RegisterThread(</TT></B></FONT>thread_id <I><FONT  color=991122 face=HELVETICA>thread</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Suspend(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>label</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+virtual void *<B><TT><FONT  color=000022 size=+1>SuspensionHook(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>suspended</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These three functions aid in debugging a game application.  They have relevance only if the BWindowScreen is running in debugging mode.  To set up the mode, you must:
+<P>
+<UL>
+<LI>Construct the BWindowScreen with the <I><FONT  color=991122 face=HELVETICA>debugging</I></FONT> flag set to <B><TT>true</TT></B>.  The flag is <B><TT>false</TT></B> by default.
+<P>
+<LI>Register all drawing threads (all threads that can touch the frame buffer in any way) by passing the <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#thread_id">thread_id</A></TT></B> to <B><TT><A HREF="#RegisterThread()">RegisterThread()</A></TT></B> immediately after the thread is spawned&mdash;before <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#resume_thread()">resume_thread()</A></TT></B> is called to start the thread's execution.  The window thread for the BWindowScreen object should not draw and should not be registered.
+<P>
+<LI>Launch the application from the command line in a Terminal window.  The window will collect debugging output from the application while the BWindowScreen runs in a different workspace, generally the one at the immediately preceding index.  For example, if the Terminal window is in the fifth workspace (Command-F5), the game will run in the fourth (Command-F4); if the Terminal is in the fourth (CommandF4), the game runs in the third (Command-F3); and so on.  However, if the Terminal window is in the first workspace (Command-F1), the game runs in the second (Command-F2).
+<P>
+</UL>
+<P>
+The Terminal window is the destination for all messages the game writes to the standard error stream or to the standard output&mdash;from <B><TT>printf()</TT></B>, for example.  You can switch back and forth between the game and Terminal workspaces to check the messages and run your application.  When you switch from the game workspace to the Terminal workspace, all registered threads are suspended and the graphics context is saved.  When you switch back to the game, the graphics context is restored and the threads are resumed.
+<P>
+Calling <B><TT><A HREF="#Suspend()">Suspend()</A></TT></B> switches to the Terminal workspace programmatically, just as pressing the correct Command&ndash;function key combination would.  Registered threads are suspended, the Terminal workspace is activated, and the <I><FONT  color=991122 face=HELVETICA>label</I></FONT> passed as an argument is displayed in a message in the Terminal window.  You can resume the game by manually switching back to its workspace.
+<P>
+<B><TT><A HREF="#SuspensionHook()">SuspensionHook()</A></TT></B> is called whenever the game is suspended or resumed&mdash;whether by the user switching workspaces or by <B><TT><A HREF="#Suspend()">Suspend()</A></TT></B>.  It gives you an opportunity to save and restore any state that would otherwise be lost.  <B><TT><A HREF="#SuspensionHook()">SuspensionHook()</A></TT></B> is called with a <I><FONT  color=991122 face=HELVETICA>suspended</I></FONT> flag of <B><TT>true</TT></B> just after the application is suspended and with a flag of <B><TT>false</TT></B> just before it's about to be resumed.
+<P>
+<B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> is <I>not</I> called when you switch between the Terminal and game workspaces while in debugging mode.  However, it is called for all normal game activities&mdash;when the BWindowScreen is first activated and when it hides or quits, for example.
+<P>
+Debugging mode can also preserve some information in case of a crash.  Hold down all the left modifier keys (Shift, Control, Option, Command, Alt, or whatever the keys may happen to be on your keyboard), and press the F12 key.  This restarts the screen with a 640&nbsp;*&nbsp;480 resolution and displays a debugger window.  You should then be able to switch to the Terminal workspace to check the last set of messages before the crash, modify your code, and start again.
+<P>
+<HR>
+<H3>
+<A NAME="ScreenChanged()"></A>ScreenChanged()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ScreenChanged(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, color_space <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Overrides the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> version of <B><TT><A HREF="#ScreenChanged()">ScreenChanged()</A></TT></B> so that it does nothing.  This function is called automatically when the screen configuration changes.  It's not one that you should call in application code or reimplement for the game.
+<P>
+<B>See also:  <TT><A HREF="../The%20Interface%20Kit/Window.html#ScreenChanged()">BWindow::ScreenChanged()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ScreenConnected()"></A>ScreenConnected()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ScreenConnected(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>connected</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to take action when the application gains direct access to the screen and when it's about to lose that access.
+<P>
+This function is called with the <I><FONT  color=991122 face=HELVETICA>connected</I></FONT> flag set to <B><TT>true</TT></B> immediately after the BWindowScreen object becomes the active window and establishes a direct connection to the graphics card driver for the screen.  At that time, the Application Server's connection to the screen is suspended; drawing can only be accomplished through the screen access that the BWindowScreen object provides.
+<P>
+<B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> is called with a flag of <B><TT>false</TT></B> just before the BWindowScreen object is scheduled to lose its control over the screen and the Application Server's control is reasserted.  The BWindowScreen's connection to the screen will not be broken until this function returns.  It should delay returning until the application has finished all current drawing and no longer needs direct screen access.
+<P>
+Note that whenever <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> is called, the BWindowScreen object is guaranteed to be connected to the screen; if <I><FONT  color=991122 face=HELVETICA>connected</I></FONT> is <B><TT>true</TT></B>, it just became connected, if <I><FONT  color=991122 face=HELVETICA>connected</I></FONT> is <B><TT>false</TT></B>, it's still connected but will be disconnected when the function returns.
+<P>
+Derived classes typically use this function to regulate access to the screen.  For example, they may acquire a semaphore when the <I><FONT  color=991122 face=HELVETICA>connected</I></FONT> flag is <B><TT>false</TT></B>, so that application threads won't attempt direct drawing when the connection isn't in place, and release the semaphore for drawing threads to acquire when the flag is <B><TT>true</TT></B>.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyWindowScreen::ScreenConnected(bool connected)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( connected == false )
+&nbsp;&nbsp;&nbsp;        acquire_sem(directDrawingSemaphore);
+&nbsp;&nbsp;&nbsp;    else
+&nbsp;&nbsp;&nbsp;        release_sem(directDrawingSemaphore);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B>See also:  <TT><A HREF="#Disconnect()">Disconnect()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetColorList()"></A>SetColorList()
+, 
+<A NAME="ColorList()"></A>ColorList()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetColorList(</TT></B></FONT>rgb_color *<I><FONT  color=991122 face=HELVETICA>colors</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>first</I></FONT>&nbsp;=&nbsp;0, int32 <I><FONT  color=991122 face=HELVETICA>last</I></FONT>&nbsp;=&nbsp;255<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+rgb_color *<B><TT><FONT  color=000022 size=+1>ColorList(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and return the list of 256 colors that can be displayed when the frame buffer has a depth of 8 bits per pixel (the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space).  <B><TT><A HREF="#SetColorList()">SetColorList()</A></TT></B> is passed an array of one or more <I><FONT  color=991122 face=HELVETICA>colors</I></FONT> to replace the colors currently in the list.  The first color in the array replaces the color in the list at the specified <I><FONT  color=991122 face=HELVETICA>first</I></FONT> index; all colors up through the <I><FONT  color=991122 face=HELVETICA>last</I></FONT> specified index are modified.  It fails if either index is out of range.
+<P>
+<B><TT><A HREF="#SetColorList()">SetColorList()</A></TT></B> alters the list of colors kept on the graphics card.  If the BWindowScreen isn't connected to the screen, the new list takes effect when it becomes connected.
+<P>
+<B><TT><A HREF="#ColorList()">ColorList()</A></TT></B> returns a pointer to the entire list of 256 colors.  This is not the list kept by the graphics card driver, but a local copy.  It belongs to the BWindowScreen object and should be altered only by calling <B><TT><A HREF="#SetColorList()">SetColorList()</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Interface%20Kit/Screen.html#ColorMap()">BScreen::ColorMap()</A></TT></B> in the Interface Kit
+<P>
+<HR>
+<H3>
+<A NAME="SetFrameBuffer()"></A>SetFrameBuffer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetFrameBuffer(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Configures the frame buffer on the graphics card so that it's <I><FONT  color=991122 face=HELVETICA>width</I></FONT> pixel columns wide and <I><FONT  color=991122 face=HELVETICA>height</I></FONT> pixel rows high.  This function works only if the driver for the graphics card allows custom configurations (as reported by <B><TT><A HREF="#CanControlFrameBuffer()">CanControlFrameBuffer()</A></TT></B>) and the BWindowScreen object is currently connected to the screen.
+<P>
+The new dimensions of the frame buffer must be large enough to hold all the pixels displayed on-screen&mdash;that is, they must be at least as large as the dimensions of the display area.  If the driver can't accommodate the proposed <I><FONT  color=991122 face=HELVETICA>width</I></FONT> and <I><FONT  color=991122 face=HELVETICA>height</I></FONT>, <B><TT><A HREF="#SetFrameBuffer()">SetFrameBuffer()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>. If the change is made, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+This function doesn't alter the depth of the frame buffer or the size or location of the display area.
+<P>
+<B>See also:  <TT><A HREF="#MoveDisplayArea()">MoveDisplayArea()</A></TT></B>, <B><TT><A HREF="#SetSpace()">SetSpace()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetSpace()"></A>SetSpace()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetSpace(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>space</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Configures the screen space to one of the standard combinations of width, height, and depth.  The configuration is first set by the class constructor&mdash;permitted <I><FONT  color=991122 face=HELVETICA>space</I></FONT> constants are documented there&mdash;and it may be altered after construction only by this function.
+<P>
+Setting the screen space sets the dimensions of the frame buffer and display area.  For example, if <I><FONT  color=991122 face=HELVETICA>space</I></FONT> is <B><TT>B_32_BIT_800x600</TT></B>, the frame buffer will be 32 bits deep and at least 800 pixel columns wide and 600 pixel rows high.  The display area (the area of the frame buffer mapped to the screen) will also be 800 pixels * 600 pixels.  After setting the screen space, you can enlarge the frame buffer by calling <B><TT><A HREF="#SetFrameBuffer()">SetFrameBuffer()</A></TT></B> and relocate the display area in the larger buffer by calling <B><TT><A HREF="#MoveDisplayArea()">MoveDisplayArea()</A></TT></B>.
+<P>
+If the requested configuration is refused by the graphics card driver, <B><TT><A HREF="#SetSpace()">SetSpace()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  If all goes well, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<B>See also:  </B><a href="#the%20BWindowScreen%20constructor">the BWindowScreen constructor</a>, <B><TT><A HREF="#SetFrameBuffer()">SetFrameBuffer()</A></TT></B>, <B><TT><A HREF="#MoveDisplayArea()">MoveDisplayArea()</A></TT></B> 
+<P>
+<HR>
+<H3>Suspend()   see <A HREF="#RegisterThread()">RegisterThread()</A></H3>
+<P>
+<HR>
+<H3>SuspensionHook()   see <A HREF="#RegisterThread()">RegisterThread()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="WindowActivated()"></A>WindowActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WindowActivated(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Overrides the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> version of <B><TT><A HREF="#WindowActivated()">WindowActivated()</A></TT></B> to connect the BWindowScreen object to the screen (give it control over the graphics card driver) when the <I><FONT  color=991122 face=HELVETICA>active</I></FONT> flag is <B><TT>true</TT></B>.
+<P>
+This function doesn't disconnect the BWindowScreen when the flag is <B><TT>false</TT></B>, because there's no way for the window to cease being the active window without the connection already having been lost.
+<P>
+Don't reimplement this function in your application, even if you call the inherited version; rely instead on <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> for accurate notifications of when the BWindowScreen gains and loses control of the screen.
+<P>
+<B>See also:  <TT><A HREF="../The%20Interface%20Kit/Window.html#WindowActivated()">BWindow::WindowActivated()</A></TT></B>, <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="WorkspaceActivated()"></A>WorkspaceActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WorkspaceActivated(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>workspace</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Overrides the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> version of <B><TT><A HREF="#WorkspaceActivated()">WorkspaceActivated()</A></TT></B> to connect the BWindowScreen object to the screen when the <I><FONT  color=991122 face=HELVETICA>active</I></FONT> flag is <B><TT>true</TT></B> and to disconnect it when the flag is <B><TT>false</TT></B>.  User's typically activate the game by activating the workspace in which it's running, and deactivate it by moving to another workspace.
+<P>
+Don't override this function in your application; implement <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> instead.
+<P>
+<B>See also:  <TT><A HREF="../The%20Interface%20Kit/Window.html#WorkspaceActivated()">BWindow::WorkspaceActivated()</A></TT></B>, <B><TT><A HREF="#ScreenConnected()">ScreenConnected()</A></TT></B> 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

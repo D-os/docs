@@ -1,0 +1,602 @@
+<HTML><HEAD><TITLE>The Storage Kit: BStatable</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BStatable"></A>BStatable
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/Statable.h">be/storage/Statable.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Statable.summary.html"><i>Summary</i></A></H6>
+<P>
+BStatable is a pure abstract class that provides functionality for its two derived class, <A HREF="Entry.html#BEntry">BEntry</A> and BNode.  The BStatable functions let you get and set "statistical" information about a node in the file system. You can...
+<P>
+<UL>
+<LI>Determine whether the node is a file, directory, or symbolic link.
+<P>
+<LI>Get and set an node's owner, group, and permissions.
+<P>
+<LI>Get and set the node's creation, modification, and access times.
+<P>
+<LI>Get the size of the node's data (<I>not</I> counting attributes).
+<P>
+<LI>Get a <A HREF="Volume.html#BVolume">BVolume</A> object for the node's volume.
+<P>
+<LI>Get the <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> of the node (and pass it to <B><TT><A HREF="NodeMonitor.html#watch_node()">watch_node()</A></TT></B>, most likely).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Nodes%20and%20Entries"></A>Nodes and Entries
+</H3>
+<P>
+Technically, BStatable information pertains to <I>nodes</I>, not <I>entries</I>.  The fact that <A HREF="Entry.html#BEntry">BEntry</A> implements the BStatable functions is a (slightly confusing) convenience: When you invoke a BStatable function on a <A HREF="Entry.html#BEntry">BEntry</A> object, what you're really doing is asking for information about the node that corresponds to the object.
+<P>
+<H4>
+<A NAME="Abstract%20Entries"></A>Abstract Entries
+</H4>
+<P>
+As explained in <A HREF="Entry.html#BEntry">BEntry</A>, it's possible to create "abstract" <A HREF="Entry.html#BEntry">BEntry</A> objects; in other words, objects that don't correspond to actual files (nodes) on the disk.  You can't get (or set) BStatable information for abstract entries.  The BStatable functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> if the invoked-upon entry is abstract.
+<P>
+<HR>
+<H3>
+<A NAME="Relationship%20to%20stat()"></A>Relationship to stat()
+</H3>
+<P>
+The BStatable functions are covers for the POSIX <B><TT>stat()</TT></B> call.  <B><TT>stat() </TT></B>retrieves a file-specific <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure, which records the statistics listed above (and then some).  Although BStatable was designed to hide <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> details, you <I>can</I> get the <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure through the <B><TT><A HREF="#GetStat()">GetStat()</A></TT></B> function.  The <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure is described in <a href="#The%20stat%20Structure">"The stat Structure"</a> at the end of this specification.
+<P>
+<B><TT>stat()</TT></B> is notorious for being expensive.  Furthermore, the <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure is stale as soon as it gets back from the <B><TT>stat()</TT></B> call.  If you're concerned with efficiency, be aware that <I>every</I> BStatable function (the "setters" as well as the "getters") performs a <B><TT>stat()</TT></B>.  For example, calling <B><TT><A HREF="#GetOwner()">GetOwner()</A></TT></B> and  then <B><TT><A HREF="#GetGroup()">GetGroup()</A></TT></B> results in two <B><TT>stat()</TT></B> calls.  If you want to look at lot of fields (within the same <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure) all at once, you might consider using BStatable's <B><TT><A HREF="#GetStat()">GetStat()</A></TT></B> function.
+<P>
+As for integrity, BStatable info-getting functions are obviously in the same boat as the <B><TT>stat()</TT></B> call itself:  The retrieved data isn't guaranteed to be in sync with the actual state of the <B><TT>stat()</TT></B>'d item.
+<P>
+The <A HREF="Directory.html#BDirectory">BDirectory</A> class also defines a <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B>-retrieving function that, in some cases, can be more efficient than the <B><TT><A HREF="#GetStat()">GetStat()</A></TT></B> function defined here:
+<P>
+<UL>
+<LI>The <B><TT><A HREF="Directory.html#GetStatFor()">BDirectory::GetStatFor()</A></TT></B> function retrieves the <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure for the node of a named entry within a directory.  If you're interested in getting <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> information for a series of nodes within the same directory, you should use this function.  You have to call it iteratively (once for each named entry), but the accumulation of the iterated calls will be faster than the <B><TT><A HREF="#GetStat()">GetStat()</A></TT></B> calls made on the analogous <A HREF="Entry.html#BEntry">BEntry</A> objects.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Accessing%20Unreadable%20and%20Unwritable%20Entries"></A>Accessing Unreadable and Unwritable Entries
+</H3>
+<P>
+BStatable isn't thwarted by file permissions:  If you can construct a valid <A HREF="Entry.html#BEntry">BEntry</A> or <A HREF="Node.html#BNode">BNode</A> to an item, then you can invoke any of the info-getting BStatable functions on that object:
+<P>
+<UL>
+<LI>The BStatable functions aren't denied even if the node that you're looking at is read-protected.  However, you can only invoke the info-setting functions if the node allows writing.
+<P>
+<LI>Similarly, you can get <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> info for a locked node, but you won't be able to write the info (through functions such as <B><TT><A HREF="#SetOwner()">SetOwner()</A></TT></B>) unless your object holds the lock.  See <A HREF="Node.html#BNode">BNode</A> for more on locking.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Other%20Details"></A>Other Details
+</H3>
+<P>
+<B>You rarely set <TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A> information.  </TT></B>In practice, you rarely use BStatable's info-setting functions.  Setting information such as when a file was created, who owns it, or how big it is, is the responsibility of the system and the privilege of the user.   For example, when you <B><TT><A HREF="File.html#Write()">Write()</A></TT></B> to a <A HREF="File.html#BFile">BFile</A> object, the system automatically updates the size and modification date for the file.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>GetAccessTime()   see  <A HREF="#GetCreationTime()">GetCreationTime()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetCreationTime()"></A>GetCreationTime()
+, 
+<A NAME="SetCreationTime()"></A>SetCreationTime()
+, 
+<A NAME="GetModificationTime()"></A>GetModificationTime()
+, 
+<A NAME="SetModificationTime()"></A>SetModificationTime()
+, 
+<A NAME="GetAccessTime()"></A>GetAccessTime()
+, 
+<A NAME="SetAccessTime()"></A>SetAccessTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetCreationTime(</TT></B></FONT>time_t *<I><FONT  color=991122 face=HELVETICA>ctime</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetCreationTime(</TT></B></FONT>time_t <I><FONT  color=991122 face=HELVETICA>ctime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetModificationTime(</TT></B></FONT>time_t *<I><FONT  color=991122 face=HELVETICA>mtime</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetModificationTime(</TT></B></FONT>time_t <I><FONT  color=991122 face=HELVETICA>mtime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAccessTime(</TT></B></FONT>time_t *<I><FONT  color=991122 face=HELVETICA>atime</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetAccessTime(</TT></B></FONT>time_t <I><FONT  color=991122 face=HELVETICA>atime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Access time is currently unused. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+These function let you get and set the time at which the item was created, last modified, and last accessed (opened).  The measure of time is given as seconds since (the beginning of ) January 1, 1970.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The time quanta that <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> uses is <I>seconds</I>; the rest of the BeOS measures time in <I>microseconds</I> (<B><TT><A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B>).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  You tried to set a time field for a file on a read-only volume.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't get the necessary resources to complete the transaction.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The node doesn't exist (abstract entry).
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetGroup()   see  <A HREF="#GetOwner()">GetOwner()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetNodeRef()"></A>GetNodeRef()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetNodeRef(</TT></B></FONT>node_ref *<I><FONT  color=991122 face=HELVETICA>nref</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Copies the item's <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> structure into the <I><FONT  color=991122 face=HELVETICA>nr</I></FONT><I><FONT  color=991122 face=HELVETICA>ef</I></FONT> argument, which must be allocated.  
+<P>
+Typically, you use an node's <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> as a key to the Node Monitor by passing the <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> structure to the <B><TT><A HREF="NodeMonitor.html#watch_node()">watch_node()</A></TT></B> function.  The Node Monitor watches the node for specific changes; see "The Node Monitor" section of this chapter for details.
+<P>
+As a convenience, you can use a <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> structure to initialize  a <A HREF="Directory.html#BDirectory">BDirectory</A> object (through the constructor or <B><TT><A HREF="Directory.html#SetTo()">BDirectory::SetTo()</A></TT></B> function).   
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't get the necessary resources to complete the transaction.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The node doesn't exist (abstract entry).
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetModificationTime()   see  <A HREF="#GetCreationTime()">GetCreationTime()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetOwner()"></A>GetOwner()
+, 
+<A NAME="SetOwner()"></A>SetOwner()
+, 
+<A NAME="GetGroup()"></A>GetGroup()
+, 
+<A NAME="SetGroup()"></A>SetGroup()
+, 
+<A NAME="GetPermissions()"></A>GetPermissions()
+, 
+<A NAME="SetPermissions()"></A>SetPermissions()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetOwner(</TT></B></FONT>uid_t *<I><FONT  color=991122 face=HELVETICA>owner</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetOwner(</TT></B></FONT>uid_t <I><FONT  color=991122 face=HELVETICA>owner</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetGroup(</TT></B></FONT>gid_t *<I><FONT  color=991122 face=HELVETICA>group</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetGroup(</TT></B></FONT>gid_t <I><FONT  color=991122 face=HELVETICA>group</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetPermissions(</TT></B></FONT>mode_t *<I><FONT  color=991122 face=HELVETICA>perms</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetPermissions(</TT></B></FONT>mode_t <I><FONT  color=991122 face=HELVETICA>perms</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and get the owner, group, and read/write/execute permissions for the node:
+<P>
+<UL>
+<LI>The <I><FONT  color=991122 face=HELVETICA>owner</I></FONT> identifier encodes the identity of the user that "owns" the file.
+<P>
+<LI>The <I><FONT  color=991122 face=HELVETICA>group</I></FONT> identifier encodes the "group" that is permitted group access to the file (as declared by the permissions). 
+<P>
+<LI>The <I><FONT  color=991122 face=HELVETICA>permissions</I></FONT> value records nine "permission facts":  Whether the file can be read, written, and executed by the node's owner, by users in the node's group, and by everybody else (read/write/execute * owner/group/others = 9 items).
+<P>
+</UL>
+<P>
+The <B><TT>uid_t</TT></B>, <B><TT>gid_t</TT></B>, and <B><TT>mode_t</TT></B> types used here are standard POSIX types.  All three are 32-bit unsigned integers and are defined in <B>posix/sys/types.h</B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>owner</I></FONT> and <I><FONT  color=991122 face=HELVETICA>group</I></FONT> encodings must match values found in the system's user and group files (which are as currently unimplemented).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>permissions</I></FONT> value is a combination of the following bitfield constants (defined in <B>posix/sys/stat.h</B>): 
+<P>
+<UL>
+<LI><B><TT>S_IRUSR</TT></B> owner's read bit.
+<P>
+<LI><B><TT>S_IWUSR</TT></B> owner's write bit.
+<P>
+<LI><B><TT>S_IXUSR</TT></B> owner's execute bit.
+<P>
+<LI><B><TT>S_IRGRP</TT></B> group's read bit.
+<P>
+<LI><B><TT>S_IWGRP </TT></B>group's write bit.
+<P>
+<LI><B><TT>S_IXGRP </TT></B>group's execute bit.
+<P>
+<LI><B><TT>S_IROTH </TT></B>others' read bit.
+<P>
+<LI><B><TT>S_IWOTH </TT></B>others' write bit.
+<P>
+<LI><B><TT>S_IXOTH </TT></B>others' execute bit.
+<P>
+</UL>
+<P>
+For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Is a file readable by everybody? */
+&nbsp;&nbsp;&nbsp;mode_t perms;
+&nbsp;&nbsp;&nbsp;if (node.GetPermissions(&amp;perms) &lt; B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* handle the error... */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (perms &amp; S_ISROTH)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Yes it is
+&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// No it isn&gt;t</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  You tried to set permissions on a read-only volume.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The node doesn't exist (abstract entry).
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetPermissions()   see  <A HREF="#GetOwner()">GetOwner()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetSize()"></A>GetSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetSize(</TT></B></FONT>off_t *<I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Gets the size of the node's data portion (in bytes).  Only the "used" portions of the node's file blocks are counted;  the amount of storage the node actually requires (i.e. the number of blocks the node consumes) may be larger than the size given here.
+<P>
+The size measurement <I>doesn't</I> include the node's attributes.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't get the necessary resources to complete the transaction.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The node doesn't exist (abstract entry).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetStat()"></A>GetStat()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetStat(</TT></B></FONT>struct stat *<I><FONT  color=991122 face=HELVETICA>st</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetStat()</TT></B> returns the <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure for the node.  The structure is copied into the <I><FONT  color=991122 face=HELVETICA>st</I></FONT> argument, which must be allocated.  The <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure is described in <a href="#The%20stat%20Structure">"The stat Structure"</a>, below.  The BStatable object does <I>not</I> cache the <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure; every time you call <B><TT><A HREF="#GetStat()">GetStat()</A></TT></B>, fresh <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> information is retrieved.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't get the necessary resources to complete the transaction.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The node doesn't exist (abstract entry).
+<P>
+</UL>
+<P>
+<HR>
+<H3>IsDirectory()  see <A HREF="#IsFile()">IsFile()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsFile()"></A>IsFile()
+, 
+<A NAME="IsDirectory()"></A>IsDirectory()
+, 
+<A NAME="IsSymLink()"></A>IsSymLink()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsFile(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsDirectory(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsSymLink(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return <B><TT>true</TT></B> if the node is a plain file, a directory, or a symbolic link, respectively.
+<P>
+<HR>
+<H3>IsSymLink()  see <A HREF="#IsFile()">IsFile()</A></H3>
+<P>
+<HR>
+<H3>SetAccessTime()   see  <A HREF="#GetCreationTime()">GetCreationTime()</A></H3>
+<P>
+<HR>
+<H3>SetCreationTime()   see  <A HREF="#GetCreationTime()">GetCreationTime()</A></H3>
+<P>
+<HR>
+<H3>SetGroup()   see  <A HREF="#GetOwner()">GetOwner()</A></H3>
+<P>
+<HR>
+<H3>SetModificationTime()   see  <A HREF="#GetCreationTime()">GetCreationTime()</A></H3>
+<P>
+<HR>
+<H3>SetOwner()   see  <A HREF="#GetOwner()">GetOwner()</A></H3>
+<P>
+<HR>
+<H3>SetPermissions()   see  <A HREF="#GetOwner()">GetOwner()</A></H3>
+<P>
+<A NAME="22230:%20head1:%20The%20stat%20Structure"></A>
+<P>
+<HR>
+<H2>
+<A NAME="The%20stat%20Structure"></A><FONT SIZE=6>T</FONT>he stat <FONT SIZE=6>S</FONT>tructure
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/posix/sys/stat.h">posix/sys/stat.h</A>
+<P>
+The <B><TT>stat</TT></B> structure looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct stat {
+&nbsp;&nbsp;&nbsp;    dev_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_dev;
+&nbsp;&nbsp;&nbsp;    ino_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_ino;
+&nbsp;&nbsp;&nbsp;    mode_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_mode;
+&nbsp;&nbsp;&nbsp;    nlink_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_nlink; 
+&nbsp;&nbsp;&nbsp;    uid_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_uid;
+&nbsp;&nbsp;&nbsp;    gid_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_gid;
+&nbsp;&nbsp;&nbsp;    off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_size;
+&nbsp;&nbsp;&nbsp;    dev_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_rdev;
+&nbsp;&nbsp;&nbsp;    size_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_blksize;
+&nbsp;&nbsp;&nbsp;    time_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_atime; 
+&nbsp;&nbsp;&nbsp;    time_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_mtime;
+&nbsp;&nbsp;&nbsp;    time_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;st_ctime;
+&nbsp;&nbsp;&nbsp;} stat;</PRE>
+<P>
+And the fields are...
+<P>
+<UL>
+<LI><B><TT>st_dev</TT></B> identifies the node's device.
+<P>
+<LI><B><TT>st_ino </TT></B>is the node's "inode" number.
+<P>
+</UL>
+<P>
+By combining <B><TT>st_dev</TT></B> and <B><TT>st_ino</TT></B> you can roll your own <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;stat st;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (file.GetStat(&amp;st) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nref.dev = st.st_dev;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nref.node = st.st_ino;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Meanwhile...
+<P>
+<UL>
+<LI><B><TT>st_mode</TT></B> describes the node's flavor:  plain file, directory or symbolic link.  To test the field, pass it to the <B><TT>S_ISREG()</TT></B>, <B><TT>S_ISDIR()</TT></B>, and <B><TT>S_ISLNK()</TT></B> boolean macros:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;if (S_ISREG(st.st_mode))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* it&gt;s a "regular" file */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if (S_ISDIR(st.st_mode))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* it&gt;s a directory */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if (S_ISLNK(st.st_mode))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* it&gt;s a symbolic link */</PRE>
+<P>
+<UL>
+<LI><B><TT>st_nlink</TT></B> is the number of "hard links" that point to this node. 
+<P>
+<LI><B><TT>st_uid</TT></B> and <B><TT>st_gid</TT></B> are the user (owner) and group ids that were described in the <B><TT><A HREF="#GetOwner()">GetOwner()</A></TT></B> function.
+<P>
+<LI><B><TT>st_rdev</TT></B> is, well, no one really knows.  It's provided for System V compatibility (hold your applause), but it's unused.
+<P>
+<LI><B><TT>st_blksize</TT></B> is the "preferred block size" that's used during copying.   The <B><TT>cp</TT></B> command line program allocates buffers of this size when it's copying the file's data.
+<P>
+<LI><B><TT>st_atime</TT></B>, <B><TT>st_mtime</TT></B>, and <B><TT>st_ctime</TT></B> are the access, modification, and creation times in seconds since January 1, 1970.  Access time (<B><TT>st_atime</TT></B>) is currently unused.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,172 @@
+<HTML><HEAD><TITLE>The Interface Kit: BListItem:  Creating a Custom List Item</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BListItem:%20%20Creating%20a%20Custom%20List%20Item"></A>BListItem:  Creating a Custom List Item
+</H1>
+<P>
+<H6><A HREF="ListItem:  Creating a Custom List Item.summary.html"><i>Summary</i></A></H6>
+<P>
+Although much of the time all you need to draw in a list are strings (in which case you can use the <A HREF="StringItem.html#BStringItem">BStringItem</A> class),  from time-to-time you may need to display more than a simple text string&mdash;maybe you need to display multiple pieces of information per item, or maybe you just want to jazz up the display with some icons.
+<P>
+For example, let's say you need to let the user select a city from a list, but also need to display the part of the world that each city is in.  You could just use <A HREF="StringItem.html#BStringItem">BStringItem</A> objects with strings like "Chicago (USA)", but it might look nicer if you could lay out your list items in two colums, maybe with a splash of color:
+<P>
+<IMG SRC="art/custlistitem.gif" ALIGN="bottom">
+<P>
+To change the appearance of a list item, you override the <B><TT><A HREF="ListItem.html#DrawItem()">DrawItem()</A></TT></B> function to draw the item's contents however you want it to look.
+<P>
+The following sections define the class that creates these list items.
+<P>
+<HR>
+<H2>
+<A NAME="The%20CityItem%20Declaration"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>C</FONT>ity<FONT SIZE=6>I</FONT>tem <FONT SIZE=6>D</FONT>eclaration
+</H2>
+<P>
+The declaration for our "CityItem" class looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#include &lt;String.h>
+&nbsp;&nbsp;&nbsp;#include &lt;ListItem.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;class CityItem : public BListItem 
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CityItem(const char *city, int32 region = 0);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;virtual void DrawItem(BView *owner, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BRect frame, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool complete = false);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum { USA, ASIA, EUROPE, AUSTRALIA, OTHER };
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BString kCity;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 kRegion;
+&nbsp;&nbsp;&nbsp;};
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;const char *region_names[] = {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"USA", "Asia", "Eur.", "Aust.", "Other"
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+A CityItem object contains two pieces of data: a city name, and a region code.  The region code is used as an index into the array of region names.
+<P>
+<HR>
+<H2>
+<A NAME="The%20CityItem%20Definition"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>C</FONT>ity<FONT SIZE=6>I</FONT>tem <FONT SIZE=6>D</FONT>efinition
+</H2>
+<P>
+The constructor looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;CityItem::CityItem(const char *city, int32 region) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: BListItem()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kCity = city;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kRegion = region;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="ListItem.html#DrawItem()">DrawItem()</A></TT></B> function does the actual work of drawing the item.  <B><TT><A HREF="ListItem.html#DrawItem()">DrawItem()</A> </TT></B>receives three parameters:
+<P>
+<UL>
+<LI>A <A HREF="View.html#BView">BView</A> "owner"; this is the view that contains the BListItem.  All drawing calls you issue should be made through this BView.  For example:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;owner->DrawString(item_text);</PRE>
+<P>
+<UL>
+<LI>A <A HREF="Rect.html#BRect">BRect</A>, which is the rectangle in which the item should be drawn.
+<P>
+<LI>A <B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B>, which is <B><TT>true</TT></B> if the item needs to be erased and redrawn, or <B><TT>false</TT></B> if the item's contents can be safely redrawn without erasing the current contents.
+<P>
+</UL>
+<P>
+<B><TT><A HREF="ListItem.html#DrawItem()">DrawItem()</A></TT></B> begins by checking to see if the item is selected (by calling <B><TT><A HREF="MenuItem.html#IsSelected()">IsSelected()</A></TT></B>) or if a <I><FONT  color=991122 face=HELVETICA>complete</I></FONT> redraw is required.  In either of these cases, we want to redraw the background, to either the highlight color, or the owner's view color:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void CityItem::DrawItem(BView *owner, BRect frame, bool complete) 
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (IsSelected() || complete) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgb_color color;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (IsSelected()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color = kHighlight;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color = owner->ViewColor();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->SetHighColor(color);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->FillRect(frame);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Now we draw the text.  First, we move the owner view's pen so it's inset from the bottom left corner of the item's frame.  (In a real application, you would want to make the inset adjustments based on the font that's being used; see the <A HREF="Font.html#BFont">BFont</A> class for more information.):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->MovePenTo(frame.left+4, frame.bottom-2);</PRE>
+<P>
+If the item is enabled (selectable), we set the owner view's high color to a shade of medium red; if it's disabled, we use a lighter red color (the color definitions aren't shown).  Then we use <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B> to draw the region name:.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (IsEnabled()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->SetHighColor(kRedColor);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->SetHighColor(kDimRedColor);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->DrawString(region_names[kRegion]);</PRE>
+<P>
+Move the pen to the right column and draw the city name: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->MovePenTo(frame.left+38, frame.bottom-2);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (IsEnabled()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->SetHighColor(kBlackColor);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->SetHighColor(kMedGray);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;owner->DrawString(kCity.String());
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Using%20a%20CityItem%20Object"></A><FONT SIZE=6>U</FONT>sing a <FONT SIZE=6>C</FONT>ity<FONT SIZE=6>I</FONT>tem <FONT SIZE=6>O</FONT>bject
+</H2>
+<P>
+To use a CityItem object, simply construct a new object and pass it to <B><TT><A HREF="ListView.html#AddItem()">BListView::AddItem()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;listView->AddItem(new CityItem("Chicago", CityItem::USA));</PRE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

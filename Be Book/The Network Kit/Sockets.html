@@ -1,0 +1,928 @@
+<HTML><HEAD><TITLE>The Network Kit: Network Sockets</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Network Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Network%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Network Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Network%20Sockets"></A>Network Sockets
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kit/net/socket.h">be/kit/net/socket.h</A>
+<P>
+Library:  libnet.so
+<P>
+A socket is an entry onto a network.  To transmit data to another computer, you create a socket, tell it how to find the other computer, and then tell it to send.  To receive data, you create a socket, tell it which computer to listen to (in some cases), and then wait for data to come pouring in.
+<P>
+The socket story starts with the <B><TT><A HREF="#socket()">socket()</A></TT></B> function.  The set of functions you need to call after that depends on the type of socket you're creating (as explained in <B><TT><A HREF="#socket()">socket()</A></TT></B>).
+<P>
+<HR>
+<H2>
+<A NAME="Functions"></A><FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="socket()"></A>socket()
+, 
+<A NAME="closesocket()"></A>closesocket()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>socket(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>family</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>protocol</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>closesocket(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>socket() </TT></B>function returns a token (a non-negative integer) that represents the local end of a connection to another machine (0 is a valid socket token).  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Socket tokens are <I>not</I> file descriptors (this violates the BSD tradition).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Freshly returned, a socket token is abstract and unusable; to put the token to use, you have to pass it as an argument to other functions&mdash;such as <B><TT>bind() </TT></B>and <B><TT>connect()</TT></B>&mdash;that know how to establish a connection over the network.   The function's arguments, which are examined in detail in <a href="#The%20socket()%20Arguments">"The socket() Arguments"</a>, accept these values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Argument</TH>
+<TH>Acceptable Values</TH>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>family</I></FONT></TD>
+<TD><B><TT>AF_INET</TD>
+<TR>
+<TD></TT></B><I><FONT  color=991122 face=HELVETICA>type</I></FONT></TD>
+<TD><B><TT>SOCK_STREAM</TT></B>, <B><TT>SOCK_DGRAM</TD>
+<TR>
+<TD></TT></B><I><FONT  color=991122 face=HELVETICA>protocol</I></FONT></TD>
+<TD><B><TT>0, IPPROTO_TCP</TT></B>, <B><TT>IPPROTO_UDP</TT></B>, <B><TT>IPPROTO_ICMP</TD>
+</TABLE></TT></B>
+<P>
+The most typical socket calls are:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Create a stream TCP socket. */
+&nbsp;&nbsp;&nbsp;int tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Create a datagram UDP socket. */
+&nbsp;&nbsp;&nbsp;int udp_socket = socket(AF_INET, SOCK_DGRAM, 0);</PRE>
+<P>
+ICMP messages are normally sent through "raw" sockets; however, the Network Kit doesn't currently support raw sockets, so you should use a datagram socket instead:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Create a datagram icmp socket. */
+&nbsp;&nbsp;&nbsp;long icmp_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);</PRE>
+<P>
+<B><TT>closesocket()</TT></B> closes a socket's connection (if it's the type of socket that can hold a connection) and frees the resources that have been assigned to the socket.  When you're done with the sockets that you've created, you should pass each socket token to <B><TT>closesocket()</TT></B>.  No socket is exempt from the need to be closed.  This extends to sockets that are created for you by the <B><TT><A HREF="#accept()">accept()</A></TT></B> function.  
+<P>
+<A NAME="34648:%20head3:%20The%20socket()%20Arguments"></A>
+<P>
+<H4>
+<A NAME="The%20socket()%20Arguments"></A>The socket() Arguments
+</H4>
+<P>
+<B><TT>socket()</TT></B>'s three arguments, all of which take predefined constants as values, describe the type of communication the socket can handle:
+<P>
+<UL>
+<LI> <I><FONT  color=991122 face=HELVETICA>family</I></FONT> describes the network address format that the socket understands.  Currently, it must be <B><TT>AF_INET</TT></B> (the Internet address format).
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>type</I></FONT> describes the persistence of the connection that can be formed through this socket.  It must be either <B><TT>SOCK_STREAM</TT></B> or <B><TT>SOCK_DGRAM</TT></B>.  <B><TT>SOCK_STREAM</TT></B> means the connection (which is formed through a <B><TT><A HREF="#connect()">connect()</A></TT></B> or <B><TT><A HREF="#bind()">bind()</A></TT></B> call) remains open until told to close.  <B><TT>SOCK_DGRAM</TT></B> describes a <I>datagram</I> socket that's only open while data is being sent or received (typically through <B><TT><A HREF="#sendto()">sendto()</A></TT></B> and <B><TT><A HREF="#recvfrom()">recvfrom()</A></TT></B>).  It's closed at all other times.  Keep in mind that you still have to call <B><TT>closesocket()</TT></B> on a datagram socket when you're done with it.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>protocol</I></FONT> describes the messaging protocol, which is closely related to the socket type.  Although there are four acceptable values (0, <B><TT>IPPROTO_TCP</TT></B>, <B><TT>IPPROTO_UDP</TT></B>, and <B><TT>IPPROTO_ICMP</TT></B>), the only values that you should actually use are 0 or <B><TT>IPPROTO_ICMP</TT></B>.  0 tells the socket to choose the correct protocol based on the socket type:  If you set the <I><FONT  color=991122 face=HELVETICA>type</I></FONT> to <B><TT>SOCK_STREAM</TT></B>, then a <I><FONT  color=991122 face=HELVETICA>protocol</I></FONT> of 0 automatically sets the messaging protocol to <B><TT>IPPROTO_TCP</TT></B>.  Similarly, <B><TT>IPPROTO_UDP</TT></B> is the correct protocol for <B><TT>SOCK_DGRAM</TT></B>.  It's an error to ask for a "udp stream" or a "tcp datagram."
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="Sorts%20of%20Sockets"></A>Sorts of Sockets
+</H4>
+<P>
+There are only two socket type constants: <B><TT>SOCK_STREAM</TT></B> and <B><TT>SOCK_DGRAM</TT></B>.  However, if we look at the way sockets are used, we see that there are really five different categories of sockets, as illustrated below.
+<P>
+<IMG SRC="art/Sockets1.gif" ALIGN="bottom">
+<P>
+The labelled ovals represent individual computers that are attached to the network.  The solid circles represent individual sockets.  The numbers near the sockets are keys to the socket categories, which are: 
+<P>
+<B>1. </B>&nbsp;&nbsp;&nbsp;<B>The stream listener socket<I>. </B></I> A stream listener socket provides access to a service that's running on the "listener" machine (you might want to think of the machine as a "server.")  The listener socket waits for client machines to "call in" and ask to be served.  In order to listen for clients, the listener must call <B><TT><A HREF="#bind()">bind()</A></TT></B>, which "binds" the socket to an IP address and machine-specific port,<B><TT> </TT></B>and then <B><TT><A HREF="#listen()">listen()</A></TT></B>.  Thus primed, the socket waits for a client message to show up by sitting in an <B><TT><A HREF="#accept()">accept()</A></TT></B> call.
+<P>
+<B>2. </B>&nbsp;&nbsp;&nbsp;<B>The stream client socket</B>.  A stream client socket asks for service from a server machine by attempting to connect to the server's listener socket.  It does this through the <B><TT><A HREF="#connect()">connect()</A></TT></B> function.  A stream client can be bound (you can call<B><TT> bind()</TT></B> on it), but it's not mandatory.
+<P>
+<B>3. </B>&nbsp;&nbsp;&nbsp;<B>The "accept" socket</B>.  When a stream listener hears a client in an<B><TT> <A HREF="#accept()">accept()</A></TT></B> call, the function call creates yet another socket called the "accept" socket.  Accept sockets are valid sockets, just like those you create through <B><TT><A HREF="#socket()">socket()</A></TT></B>.  In particular, you have to remember to close accept sockets (through <B><TT><A HREF="#closesocket()">closesocket()</A></TT></B>) just as you would the sockets you explicitly create.  Note that you can't bind an accept socket&mdash;the socket is bound automatically by the system.
+<P>
+<B>4. </B>&nbsp;&nbsp;&nbsp;<B>The datagram receiver socket</B>.  A datagram receiver socket is sort of like a stream listener:  It calls <B><TT><A HREF="#bind()">bind()</A></TT></B> and waits for "senders" to send messages to it.  Unlike the stream listener, the datagram receiver doesn't call <B><TT><A HREF="#listen()">listen()</A></TT></B> or <B><TT><A HREF="#accept()">accept()</A></TT></B>.  Furthermore, when a datagram sender sends a message to the receiver, there's no ancillary socket created to handle the message (there's no UDP analog to the TCP accept socket).
+<P>
+<B>5. </B>&nbsp;&nbsp;&nbsp;<B>The datagram sender socket</B>.  A datagram sender is the simplest type of socket&mdash;all it has to do is identify a datagram receiver and send messages to it, through the <B><TT><A HREF="#sendto()">sendto()</A></TT></B> function.  Binding a datagram sender socket is optional.  
+<P>
+TCP communication is two-way.  Once the link between a client and the listener has been established (through <B><TT><A HREF="#bind()">bind()</A></TT></B>/<B><TT><A HREF="#listen()">listen()</A></TT></B>/<B><TT><A HREF="#accept()">accept()</A></TT></B> on the listener side, and <B><TT><A HREF="#connect()">connect()</A></TT></B> on the client side), the two machines can talk to each other through respective and complementary<B><TT> <A HREF="#send()">send()</A></TT></B> and <B><TT><A HREF="#recv()">recv()</A></TT></B> calls.
+<P>
+Communication along a UDP path, on the other hand, is one-way.  The datagram sender can send messages (through<B><TT> <A HREF="#sendto()">sendto()</A></TT></B>), and the datagram receiver can receive them (through <B><TT><A HREF="#recvfrom()">recvfrom()</A></TT></B>), but the receiver can't send message back to the sender.  However, you can simulate a two-way UDP conversation by binding both sockets.  This doesn't change the definition of the UDP path, or the capabilities of the two types of datagram sockets, it simply means that a bound datagram socket can act as a receiver (it can call <B><TT><A HREF="#recvfrom()">recvfrom()</A></TT></B>) or as a sender (it can call <B><TT><A HREF="#sendto()">sendto()</A></TT></B>).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+To be complete, it should be mentioned that datagram sockets can also invoke <B><TT><A HREF="#connect()">connect()</A></TT></B> and then pass messages through <B><TT><A HREF="#send()">send()</A></TT></B> and <B><TT><A HREF="#recv()">recv()</A></TT></B>.  The datagram use of these functions is a convenience; its advantages are explained in the description of the <B><TT><A HREF="#sendto()">sendto()</A></TT></B> function.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+Upon failure, <B><TT>socket()</TT></B> returns a negative value and sets <B><TT>errno</TT></B> to...
+<P>
+<UL>
+<LI><B><TT>EAFNOSUPPORT.,</TT></B><I><FONT  color=991122 face=HELVETICA>format</I></FONT> was other than <B><TT>AF_INET.
+<P>
+</TT></B><LI><B><TT>EPROTOTYPE.,</TT></B><I><FONT  color=991122 face=HELVETICA>type</I></FONT> and <I><FONT  color=991122 face=HELVETICA>protocol</I></FONT> mismatch. 
+<P>
+<LI><B><TT>EPROTONOSUPPORT.,</TT></B>Unrecognized <I><FONT  color=991122 face=HELVETICA>type</I></FONT> or <I><FONT  color=991122 face=HELVETICA>protocol</I></FONT> value.
+<P>
+</UL>
+<P>
+<B><TT>closesocket()</TT></B> returns a negative value if its argument is invalid.  
+<P>
+<HR>
+<H3>
+<A NAME="bind()"></A>bind()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>bind(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, const struct sockaddr *<I><FONT  color=991122 face=HELVETICA>interface</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>bind()</TT></B> function creates an association between a socket and an "interface," where an interface is a combination of an IP address and a port number.  Binding is, primarily, useful for receiving messgaes:  When a message sender (whether it's a stream client or a datagram sender) sends a message, it tags the message with an IP address and a port number.  The receiving machine&mdash;the machine with the tagged IP address&mdash;delivers the message to the socket that's bound to the tagged port.
+<P>
+The necessity of the bind operation depends on the type of socket; referring to the five categories of sockets enumerated in the<B><TT> <A HREF="#socket()">socket()</A></TT></B> function description (and illustrated in the charming diagram found there), the "do I need to bind?" question is answered thus:
+<P>
+<B>1. </B>&nbsp;&nbsp;&nbsp;<B>Stream listener sockets must be bound</B>.  Furthermore, after binding a listener socket, you must then call<B><TT> <A HREF="#listen()">listen()</A></TT></B> and, when a client calls, <B><TT><A HREF="#accept()">accept()</A></TT></B>.
+<P>
+<B>2. </B>&nbsp;&nbsp;&nbsp;<B>Stream client sockets can be bound</B>, but they don't have to be.  If you're going to bind a client socket, you should do so <I>before</I> you call <B><TT><A HREF="#connect()">connect()</A></TT></B>.  The advantages of binding a stream client escape me at the moment.  In any case, the client doesn't have to bind to the same port number as the listener&mdash;the listener's binding and the client's binding are utterly separate entities (let alone that they are on different machines).  However, the client does <I>connect</I> to the interface that the listener is bound to.
+<P>
+<B>3. </B>&nbsp;&nbsp;&nbsp;<B>Stream attach sockets must not be bound</B>.
+<P>
+<B>4. </B>&nbsp;&nbsp;&nbsp;<B>Datagram receiver sockets must be bound.
+<P>
+5. </B>&nbsp;&nbsp;&nbsp;<B>Datagram sender sockets don't <I>have to be bound</B></I>...but if you're going to turn around and use the socket as a receiver, then you'll have to bind it.
+<P>
+Once you've bound a socket, you can't unbind it.  If you no longer want the socket to be bound to its interface, the only thing you can do is close the socket (<B><TT><A HREF="#closesocket()">closesocket()</A></TT></B>) and start all over again.
+<P>
+Also, a particular interface can be bound by only one socket at a time and a single socket can only bind to one interface at a time.  If your socket needs to bind to more than one interface, you need to create more than one socket and bind each one separately.  An example of this is given later in this function description. 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The 1-to-1 binding differs with the BSD socket implementation, which expects a socket to be able to bind to more than one interface.  Consider it a bug that will be fixed in a subsequent release.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<H4>
+<A NAME="The%20bind()%20Arguments"></A>The bind() Arguments
+</H4>
+<P>
+<B><TT>bind()</TT></B>'s first argument is the socket that you're attempting to bind.  This is, typically, a socket of type <B><TT>SOCK_STREAM</TT></B>.  The <I><FONT  color=991122 face=HELVETICA>interface</I></FONT> argument is the address/port combination (or "interface") to which you're binding the socket.  The argument is typed as a <B><TT>sockaddr</TT></B> structure, but, in reality, you have to create and pass a <B><TT>sockaddr_in</TT></B> structure cast as a <B><TT>sockaddr</TT></B>.  The <B><TT>sockaddr_in</TT></B> structure is defined as:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct sockaddr_in {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unsigned short sin_family;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unsigned short sin_port;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct in_addr sin_addr;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char sin_zero[4];
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+<UL>
+<LI><B><TT>sin_family is the same as the address format constant that used to create the socket (the first argument to <A HREF="#socket()">socket()</A>).  Currently, it's always AF_INET.
+<P>
+</TT></B><LI><B><TT>sin_port</TT></B> is the port number that the socket will bind to, given in network byte order.  Valid port numbers are between 1 and 65535; numbers up to 1024 are reserved for services such as <B>ftp</B> and <B>telnet</B>.  If you're not implementing a standard service, you should choose a port number greater than 1024.  The actual value of the port number is meaningless, but keep in mind that the port number must be unique for a particular address; only one socket can be bound to a particular address/port combination.  
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, there's no system-defined mechanism for allowing a client/sender machine to ask a listener/receiver machine for its port numbers.  Therefore, when you create a networked application, you either have to hard-code the port numbers or, better yet, provide default port numbers that the user (or a system administrator) can easily change.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<UL>
+<LI><B><TT>sin_addr</TT></B> is an <B><TT>in_addr</TT></B> structure that stores, in its <B><TT>s_addr</TT></B> field, the IP address of the socket's machine.  As always, the address is in network byte order.  You can use an address of 0 to tell the binding mechanism to find an address for you.   By convention, binding to address 0 (which is conveniently symbolized by the <B><TT>INADDR_ANY</TT></B> address) means that you want to bind to <I>every</I> address by which your computer is known, including the "loopback" (address 127.0.0.1, or the constant <B><TT>INADDR_LOOPBACK</TT></B>).  
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The BeOS does not currently implement global binding.  When you bind to <B><TT>INADDR_ANY</TT></B>, the <B><TT>bind()</TT></B> function binds to the first available interface (where "availability" means the address/port combination is currently unbound).  Internet interfaces are considered before the loopback interface.  If you want to bind to all interfaces, you have to create a separate socket for each.  An example of this is given later.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<UL>
+<LI><B><TT>sin_zero</TT></B> is padding.  To be safe, you should fill it with zeros.
+<P>
+</UL>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>size</I></FONT> argument is the size, in bytes, of the second argument.  
+<P>
+If the <B><TT>bind()</TT></B> call is successful, the <I><FONT  color=991122 face=HELVETICA>interface</I></FONT> argument is set to contain the actual address that was used.  If the socket can't be bound, the function returns a negative value, and sets the global <B><TT>errno</TT></B> to <B><TT>EABDF</TT></B> if the <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> argument is invalid; for all other errors, <B><TT>errno</TT></B> is set to -1. 
+<P>
+The following example shows a typical use of the <B><TT>bind()</TT></B> function.  The example uses the fictitious <B><TT>gethostaddr()</TT></B> function that's defined in the description of the <B><TT>gethostname()</TT></B> function on page&nbsp;23.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct sockaddr_in sa;
+&nbsp;&nbsp;&nbsp;int sock;
+&nbsp;&nbsp;&nbsp;long host_addr;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Create the socket. */
+&nbsp;&nbsp;&nbsp;if ((sock = socket(AF_INET, SOCK_STREAM, 0)) &lt; 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* error */
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Set the address format for the imminent bind. */
+&nbsp;&nbsp;&nbsp;sa.sin_family = AF_INET;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* We&gt;ll choose an arbitrary port number translated to network byte order. */
+&nbsp;&nbsp;&nbsp;sa.sin_port = htonl(2125);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Get the address of the local machine. If the address can&gt;t
+&nbsp;&nbsp;&nbsp; * be found (the function looks it up based on the host name),
+&nbsp;&nbsp;&nbsp; * then we use address INADDR_ANY.
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;if ((host_addr = (ulong)gethostaddr()) == -1) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;host_addr = INADDR_ANY;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;sa.sin_addr.s_addr = host_addr;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Clear sin_zero. */
+&nbsp;&nbsp;&nbsp;memset(sa.sin_zero, 0, sizeof(sa.sin_zero));
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Bind the socket. */
+&nbsp;&nbsp;&nbsp;if (bind(sock, (struct sockaddr *)&amp;sa, sizeof(sa)) &lt; 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* error */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+As mentioned earlier, the bind-to-all-interfaces convention (by asking to bind to address 0) isn't currently implemented.  Thus, if the <B><TT>gethostaddr()</TT></B> call fails in the example, the socket will be bound to the first address by which the local computer is known.  
+<P>
+But let's say that you really do want to bind to all interfaces.  To do this, you have to create separate sockets for each interface, then call <B><TT>bind()</TT></B> on each one.  In the example below we create a series of sockets and then bind each one to an interface that specifies address 0. In doing this, we depend on the "first <I>available</I> interface" rule to find the next interface for us.  Keep in mind that a successful <B><TT>bind()</TT></B> rewrites the contents of the <B><TT>sockaddr</TT></B> argument (most importantly, it resets the 0 address component).  Thus, we have to reinitialize the structure each time through the loop:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Declare an array of sockets. */
+&nbsp;&nbsp;&nbsp;#define MAXSOCKETS
+&nbsp;&nbsp;&nbsp;int socks[MAXSOCKETS];
+&nbsp;&nbsp;&nbsp;int sockN;
+&nbsp;&nbsp;&nbsp;int bind_res;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct sockaddr_in sock_addr;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;for (sockN = 0; sockN &lt; MAXSOCKETS; sockN++) 
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(socks[sockN] = socket(AF_INET, SOCK_STREAM, 0));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (socks[sktr] &lt; 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;perror("socket");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;goto sock_error;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Initialize the structure. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa.sin_family = AF_INET;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa.sin_port = htonl(2125);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sa.sin_addr.s_addr = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memset(sa.sin_zero,0,sizeof(sa.sin_zero));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bind_res = bind(socks[sockN], 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(struct sockaddr *)&amp;sa, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sizeof(sa));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* A bind error means we&gt;ve run out of addresses. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (bind_res &lt; 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;closesocket(socks[sockN--]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break; 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Use the bound socket (listen, accept, recv/send). */
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;sock_error:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (;sockN >=0 sockN--)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;closesocket(socks[sockN]);</PRE>
+<P>
+To ask a socket about the address and port to which it is bound you use the <B><TT><A HREF="#getsockname()">getsockname()</A></TT></B> function, described later in this section.
+<P>
+<b>RETURN CODES</b>
+<P>
+Upon failure, <B><TT>bind()</TT></B> returns a negative value and sets <B><TT>errno</TT></B> to...
+<P>
+<UL>
+<LI><B><TT>EABDF. </TT></B> The <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> argument is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  All other errors. 
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="connect()"></A>connect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>connect(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, const struct sockaddr *<I><FONT  color=991122 face=HELVETICA>remote_interface</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>remote_size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The meaning of the <B><TT>connect()</TT></B> function depends on the type of socket that's passed as the first argument:
+<P>
+<UL>
+<LI>If it's a stream client, then <B><TT>connect()</TT></B> attempts to form a connection to the socket that's specified by <I><FONT  color=991122 face=HELVETICA>remote_interface</I></FONT>.  The remote socket must be a bound stream listener.  A client socket can only be connected to one listener at a time.   Note that you can't call <B><TT>connect()</TT></B> on a stream listener.
+<P>
+<LI>If it's a datagram socket (either a sender or a receiver), <B><TT>connect()</TT></B> simply caches the <I><FONT  color=991122 face=HELVETICA>remote_interface</I></FONT> information in anticipation of subsequent <B><TT><A HREF="#send()">send()</A></TT></B> and <B><TT><A HREF="#recv()">recv()</A></TT></B> calls.  By using <B><TT>connect()</TT></B>, a datagram avoids the fuss of filling in the remote information that's needed by the "normal" datagram message functions, <B><TT><A HREF="#sendto()">sendto()</A></TT></B> and <B><TT><A HREF="#recvfrom()">recvfrom()</A></TT></B>.  Note that a datagram may only call <B><TT><A HREF="#send()">send()</A></TT></B> and <B><TT><A HREF="#recv()">recv()</A></TT></B> if it has first called <B><TT>connect()</TT></B>. 
+<P>
+</UL>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>remote_interface</I></FONT> argument is a pointer to a <B><TT>sockaddr_in</TT></B> structure cast as a <B><TT>sockaddr</TT></B> pointer.  The <I><FONT  color=991122 face=HELVETICA>remote_size</I></FONT> value gives the size of <I><FONT  color=991122 face=HELVETICA>remote_interface</I></FONT>.  See the <B><TT><A HREF="#bind()">bind()</A></TT></B> function for a description of the <B><TT>sockaddr_in</TT></B> structure.
+<P>
+Currently, you can't disconnect a connected socket.  If you want to connect to a different listener, or reset a datagram's interface information, you have to close the socket and start over.
+<P>
+When you attempt to <B><TT>connect()</TT></B> a stream client, the listener must respond with an <B><TT><A HREF="#accept()">accept()</A></TT></B> call.  Having gone through this dance, the two sockets can then pass messages to each other through complementary <B><TT><A HREF="#send()">send()</A></TT></B> and <B><TT><A HREF="#recv()">recv()</A></TT></B> calls.  If the listener doesn't respond immediately to a client's attempt to connect, the client's <B><TT>connect()</TT></B> call will block.  If the listener doesn't respond within (about) a minute, the connection will time out.  If the listener's acceptance queue is full, the client will be refused and <B><TT>connect()</TT></B> will return immediately.
+<P>
+If the socket is in no-block mode (as set through <B><TT><A HREF="#setsockopt()">setsockopt()</A></TT></B>), and blocking would occur otherwise, connect() returns immediately with a result of <B><TT>EWOULDBLOCK</TT></B>. 
+<P>
+<b>RETURN CODES</b>
+<P>
+Upon failure,  <B><TT>connect()</TT></B> returns a negative number and sets <B><TT>errno</TT></B> to...
+<P>
+<UL>
+<LI><B><TT>EWOULDBLOCK.,</TT></B>The connection attempt would block.
+<P>
+<LI><B><TT>EISCONN.,</TT></B>The socket is already connected.
+<P>
+<LI><B><TT>ECONNREFUSED.,</TT></B>The listener rejected the connection.
+<P>
+<LI><B><TT>ETIMEDOUT.,</TT></B>The connection attempt timed out.
+<P>
+<LI><B><TT>ENETUNREACH.,</TT></B>The client can't get to the network.
+<P>
+<LI><B><TT>EBADF.,</TT></B>The <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> argument is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  All other errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="getpeername()"></A>getpeername()
+, 
+<A NAME="getsockname()"></A>getsockname()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>getpeername(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, struct sockaddr *<I><FONT  color=991122 face=HELVETICA>interface</I></FONT>, int *<I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>int </TT></B><B><TT><FONT  color=000022 size=+1>getsockname(int </TT></B></FONT><I><FONT  color=991122 face=HELVETICA>socket<B><TT>, struct sockaddr *</TT></B></I></FONT><I><FONT  color=991122 face=HELVETICA>interface<B><TT>, int *</TT></B></I></FONT><I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>getsockname()</TT></B> returns, by reference in <I><FONT  color=991122 face=HELVETICA>interface</I></FONT>, a <B><TT>sockaddr_in</TT></B> structure that contains the interface information for the bound socket given by <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>.
+<P>
+<B><TT>getpeername()</TT></B> returns, in the structure pointed to by the <I><FONT  color=991122 face=HELVETICA>interface</I></FONT> parameter, a <B><TT>sockaddr_in</TT></B> structure that describes the remote interface to which the <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> is connected.
+<P>
+In both cases, the <I><FONT  color=991122 face=HELVETICA>*size</I></FONT> argument gives the size of the<I><FONT  color=991122 face=HELVETICA> interface</I></FONT> structure; <I><FONT  color=991122 face=HELVETICA>*size</I></FONT> is reset, on the way out, to the size of the interface argument as it's passed back.  Note that the <B><TT>sockaddr_in</TT></B> pointer that you pass as the second argument must be cast as a pointer to a <B><TT>sockaddr</TT></B> structure:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct sockaddr_in interface;
+&nbsp;&nbsp;&nbsp;int size = sizeof(interface);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* We&gt;ll assume "sock" is a valid socket token. */
+&nbsp;&nbsp;&nbsp;if (getsockname(sock, (struct sockaddr*)&amp;interface, &amp;size) &lt; 0) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* error */</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+Upon failure, <B><TT>getsockname()</TT></B> and <B><TT>getpeername() </TT></B>return negative numbers and set <B><TT>errno</TT></B> to...
+<P>
+<UL>
+<LI><B><TT>EINVAL.,</TT></B>The *<I><FONT  color=991122 face=HELVETICA>size</I></FONT> value (going in) wasn't big enough.
+<P>
+<LI><B><TT>EBADF.,</TT></B>The <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> argument is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  All other errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="listen()"></A>listen()
+, 
+<A NAME="accept()"></A>accept()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>listen(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>acceptance_count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>accept(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, struct sockaddr *<I><FONT  color=991122 face=HELVETICA>client_interface</I></FONT>, int *<I><FONT  color=991122 face=HELVETICA>client_size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+After you've bound a stream listener socket to an interface (through <B><TT><A HREF="#bind()">bind()</A></TT></B>), you then tell the socket to start listening for clients that are trying to connect.  You then pass the socket to <B><TT>accept()</TT></B> which blocks until a client connects to the listener (the client does this by calling <B><TT><A HREF="#connect()">connect()</A></TT></B>, passing it a description of the interface to which the listener is bound).
+<P>
+When <B><TT>accept()</TT></B> returns, the value that it returns directly is a new socket token; this socket token represents an "accept" socket that was created as a proxy (on the local machine) for the client.  To receive a message from the client, or to send a message to the client, the listener must pass the accept socket to the respective stream messaging functions, <B><TT><A HREF="#recv()">recv()</A> </TT></B>and <B><TT><A HREF="#send()">send()</A></TT></B>.
+<P>
+A listener only needs to invoke <B><TT>listen()</TT></B> once; however, it can accept more than one client at a time.  Often, a listener will spawn an "accept" thread that loops over the <B><TT>accept()</TT></B> call.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Only stream listeners need to invoke <B><TT>listen()</TT></B> and <B><TT>accept()</TT></B>.  None of the other socket types (enumerated in the <B><TT><A HREF="#socket()">socket()</A></TT></B> description) need to call these functions.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>listen()</TT></B> takes two arguments:  The first is the socket that you want to have start listening.  The second is the length of the listener's "acceptance count."  This is the number of clients that the listener is willing to accept at a time.  If too many clients try to connect at the same time, the excess clients will be refused&mdash;the connection isn't automatically retried later.
+<P>
+After the listener starts listening, it must process the client connections within a certain amount of time, or the connection attempts will time out.
+<P>
+If <B><TT>listen()</TT></B> succeeds, the function returns 0; otherwise it returns a negative result and sets the global <B><TT>errno</TT></B> to a descriptive constant.  Currently, the only <B><TT>errno</TT></B> value that <B><TT>listen()</TT></B> uses, other than -1, is <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#EBADF">EBADF</A></TT></B>, which means the socket argument is invalid.
+<P>
+The arguments to <B><TT>accept()</TT></B> are the socket token of the listener (<I><FONT  color=991122 face=HELVETICA>socket</I></FONT>), a pointer to a<B><TT> sockaddr_in </TT></B>structure cast as a <B><TT>sockaddr</TT></B> structure (<I><FONT  color=991122 face=HELVETICA>client_interface</I></FONT>), and a pointer to an integer that gives the size of the <I><FONT  color=991122 face=HELVETICA>client_interface</I></FONT> argument (<I><FONT  color=991122 face=HELVETICA>client_size</I></FONT>).  
+<P>
+The <I><FONT  color=991122 face=HELVETICA>client_interface</I></FONT> structure returns interface information (IP address and port number) of the client that's attempting to connect.  See the <B><TT><A HREF="#bind()">bind()</A></TT></B> function for an examination of the <B><TT>sockaddr_in</TT></B> structure.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>*client_size</I></FONT> argument is reset to give the size of <I><FONT  color=991122 face=HELVETICA>client_interface</I></FONT> as it's passed back by the function.  
+<P>
+The value that <B><TT>accept()</TT></B> returns directly is a token that represents the accept socket.  After checking the token value (where a negative result indicates an error), you must cache the token so you can use it in subsequent <B><TT><A HREF="#send()">send()</A></TT></B> and <B><TT><A HREF="#recv()">recv()</A></TT></B> calls. 
+<P>
+When you're done talking to the client, remember to call <B><TT><A HREF="#closesocket()">closesocket()</A></TT></B> on the accept socket that <B><TT>accept()</TT></B> returned.  This frees a slot in the listener's acceptance queue, allowing a possibly frustrated client to connect to the listener.
+<P>
+<b>RETURN CODES</b>
+<P>
+Upon failure, <B><TT>listen()</TT></B> and <B><TT>accept()</TT></B> return &lt; 0 and set <B><TT>errno</TT></B> to...
+<P>
+<UL>
+<LI><B><TT>EBADF.,</TT></B>The <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> argument is invalid.
+<P>
+<LI><B><TT>EINVAL.  (accept() only) </TT></B>The listener socket isn't bound.
+<P>
+<LI><B><TT>EWOULDBLOCK.  (accept() only) </TT></B>The acceptance queue is full.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  All other errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="select()"></A>select()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>select(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket_range</I></FONT>, struct fd_set *<I><FONT  color=991122 face=HELVETICA>read_bits</I></FONT>, struct fd_set *<I><FONT  color=991122 face=HELVETICA>write_bits</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct fd_set *<I><FONT  color=991122 face=HELVETICA>exception_bits</I></FONT>, struct timeval *<I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>select()</TT></B> function returns information about selected sockets.  The <I><FONT  color=991122 face=HELVETICA>socket_range</I></FONT> argument tells the function how many sockets to check:  It checks socket numbers up to (<I><FONT  color=991122 face=HELVETICA>socket_range</I></FONT> - 1).  Traditionally, the <I><FONT  color=991122 face=HELVETICA>socket_range</I></FONT> argument is set to 32.
+<P>
+The <B><TT>fd_set</TT></B> structure that types the next three arguments is a 32-bit mask that encodes the sockets that you're interested in; this refines the range of sockets that was specified in the first argument.  You should use the <B><TT>FD_<I>OP() </TT></B></I>macros to manipulate the structures that you pass in:
+<P>
+<UL>
+<LI><B><TT>FD_ZERO(</TT></B><I><FONT  color=991122 face=HELVETICA>set<B><TT>)</TT></B></I></FONT> clears the mask given by <I><FONT  color=991122 face=HELVETICA>set</I></FONT>.
+<P>
+<LI><B><TT>FD_SET(</TT></B><I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, <I><FONT  color=991122 face=HELVETICA>set<B><TT>)</TT></B></I></FONT> adds a socket to the mask.
+<P>
+<LI><B><TT>FD_CLEAR(</TT></B><I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, <I><FONT  color=991122 face=HELVETICA>set<B><TT>)</TT></B></I></FONT> clears a socket from the mask.
+<P>
+<LI><B><TT>FD_ISSET(</TT></B><I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, <I><FONT  color=991122 face=HELVETICA>set<B><TT>)</TT></B></I></FONT> returns non-zero if the given socket is already in the mask.
+<P>
+</UL>
+<P>
+The function passes socket information back to you by resetting the three <B><TT>fd_set</TT></B> arguments.  The arguments themselves represent the types of information that you can check:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>read_bits</I></FONT> tells you if a socket is "ready to read."  In other words, it tells you if a socket has a in-coming message waiting to be read.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>write_bits</I></FONT> tells you if a socket is "ready to write."  
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>exception_bits</I></FONT> tells you if there's an exception pending on the socket.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, only <I><FONT  color=991122 face=HELVETICA>read_bits</I></FONT> is implemented.  You should pass <B><TT>NULL</TT></B> as the <I><FONT  color=991122 face=HELVETICA>write_bits</I></FONT> and <I><FONT  color=991122 face=HELVETICA>exception_bits</I></FONT> arguments.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>select()</TT></B> doesn't return until at least one of the <B><TT>fd_set</TT></B>-specified sockets is ready for one of the requested operations.  To avoid blocking forever, you can provide a time limit in the final argument, passed as a <B><TT>timeval </TT></B>structure.
+<P>
+In the following example, we check if a given datagram socket has a message waiting to be read.  The <B><TT>select()</TT></B> times out after two seconds:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;bool can_read_datagram(int s)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct timeval tv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct fd_set fds;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tv.tv_sec = 2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tv.tv_usec = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Initialize (clear) the socket mask. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FD_ZERO(&amp;fds);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Set the socket in the mask. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FD_SET(s, &amp;fds);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;select(32, &amp;fds, NULL, NULL, &amp;tv);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* If the socket is still set, then it&gt;s ready to read. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return FD_ISSET(s, &amp;fds);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+If <B><TT>select()</TT></B> fails, it returns -1; if the function times out, it returns 0.  Otherwise (i.e. if <I>any</I> of the selected sockets was found to be ready) it returns 1.
+<P>
+<HR>
+<H3>
+<A NAME="send()"></A>send()
+, 
+<A NAME="recv()"></A>recv()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>send(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+ssize_t<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>recv(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions are used to send data to a remote socket, and to receive data that was sent by a remote socket.  <B><TT>send()</TT></B> and <B><TT>recv()</TT></B> calls must be complementary:  after socket A sends to socket B, socket B needs to call <B><TT>recv()</TT></B> to pick up the data that A sent.  <B><TT>send()</TT></B> sends its data and returns immediately.  <B><TT>recv()</TT></B> will block until it has some data to return.
+<P>
+The <B><TT>send()</TT></B> and <B><TT>recv()</TT></B> functions can be called by stream or datagram sockets.  However, there are some differences between the way the functions work when used by these two types of socket:
+<P>
+<UL>
+<LI>For a stream listener and a stream client to transmit messages, the listener must have previously called <B><TT><A HREF="#bind()">bind()</A></TT></B>, <B><TT><A HREF="#listen()">listen()</A></TT></B>,<B><TT> <A HREF="#accept()">accept()</A></TT></B>, and the client must have called <B><TT><A HREF="#connect()">connect()</A></TT></B>.  Having been properly connected, the two sockets can send and receive as if they were peers.
+<P>
+For stream sockets, <B><TT>send()</TT></B> and <B><TT>recv()</TT></B> can both block:  <B><TT>send()</TT></B> blocks if the amount of data that's sent overwhelms the receiver's ability to read it, and <B><TT>recv()</TT></B> blocks if there's no message waiting to be read.  You can tell these functions to be non-blocking by setting the sending socket's no-block socket option (see <B><TT><A HREF="#setsockopt()">setsockopt()</A></TT></B>).
+<P>
+<LI>If you want to call <B><TT>send()</TT></B> or <B><TT>recv()</TT></B> through a datagram socket, you must first <B><TT><A HREF="#connect()">connect()</A></TT></B> the socket.  In addition, a receiving datagram socket must also be bound to an interface (through <B><TT><A HREF="#bind()">bind()</A></TT></B>).  See the <B><TT><A HREF="#connect()">connect()</A></TT></B> description for more information on what that function means to a datagram socket.  
+<P>
+Datagram sockets never block on <B><TT>send()</TT></B>, but they can block in a <B><TT>recv()</TT></B> call.  As with stream sockets, you can set a datagram socket to be non-blocking (for the <B><TT>recv()</TT></B>, as well as for <B><TT><A HREF="#recvfrom()">recvfrom()</A></TT></B>) through <B><TT><A HREF="#setsockopt()">setsockopt()</A></TT></B>.
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="The%20Arguments"></A>The Arguments
+</H4>
+<P>
+The arguments to <B><TT>send()</TT></B> and <B><TT>recv()</TT></B> are:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>socket</I></FONT> is, for datagrams and stream client sockets, the local socket token.  In other words, when a datagram or stream client wants to send or receive data, it passes its own socket token as the first argument.  The recipient of a <B><TT>send()</TT></B>, or the sender of a <B><TT>recv()</TT></B> is, for these sockets, already known:  It's the socket that's identified by the previous <B><TT><A HREF="#connect()">connect()</A></TT></B> call.  
+<P>
+For a stream listener, <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> is the "accept socket" that was previously returned by an <B><TT><A HREF="#accept()">accept()</A></TT></B> call.  A stream listener can send and receive data from more than one client at the same time (or, at least, in rapid succession).  
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>buf</I></FONT> is a pointer to the data that's being sent, or is used to hold a copy of the data that was received.  
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>size</I></FONT> is the allocated size of <I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, in bytes.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>flags</I></FONT> is currently unused.  For now, set it to 0.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+A successful <B><TT>send()</TT></B> returns the number of bytes that were sent; a successful <B><TT>recv() </TT></B>returns the number of bytes that were received.  Upon failure, the functions return negative numbers and set <B><TT>errno</TT></B> to...
+<P>
+<UL>
+<LI><B><TT>EWOULDBLOCK</TT></B>.  The call would block on a non-blocking socket.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#EINTR">EINTR</A></TT></B>.  The local socket was interrupted.
+<P>
+<LI><B><TT>ECONNRESET</TT></B>.  The remote socket disappeared (<B><TT>send()</TT></B> only).
+<P>
+<LI><B><TT>ENOTCONN</TT></B>.  The socket isn't connected.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#EBADF">EBADF</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> argument is invalid.
+<P>
+<LI><B><TT>EADDRINUSE</TT></B>.  The interface is busy (datagram sockets only).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  All other errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="sendto()"></A>sendto()
+, 
+<A NAME="recvfrom()"></A>recvfrom()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>sendto(</TT></B></FONT>int socket, const void *<I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; struct sockaddr *<I><FONT  color=991122 face=HELVETICA>to</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>toLen</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>recvfrom(</TT></B></FONT>int socket, void *<I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; struct sockaddr *<I><FONT  color=991122 face=HELVETICA>from</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>*</I></FONT><I><FONT  color=991122 face=HELVETICA>fromLen</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions are used by datagram sockets (only) to send and receive messages.  The functions encode all the information that's needed to find the recipient or the sender of the desired message, so you don't need to call <B><TT><A HREF="#connect()">connect()</A></TT></B> before invoking these functions.  However, a datagram socket that wants to receive messages must first call <B><TT><A HREF="#bind()">bind()</A></TT></B> (in order to fix itself to an interface that can be specified in a remote socket's <B><TT>sendto()</TT></B> call).
+<P>
+The four initial arguments to these function are similar to those for <B><TT><A HREF="#send()">send()</A></TT></B> and <B><TT><A HREF="#recv()">recv()</A></TT></B>; the additional arguments are the interface specifications:
+<P>
+<UL>
+<LI>For <B><TT>sendto()</TT></B>, the <I><FONT  color=991122 face=HELVETICA>to </I></FONT>argument is a<B><TT> sockaddr_in</TT></B> structure pointer (cast as a pointer to a <B><TT>sockaddr</TT></B> structure) that specifies the interface of the remote socket that you're sending to.  The <I><FONT  color=991122 face=HELVETICA>toLen</I></FONT> argument is the size of the <I><FONT  color=991122 face=HELVETICA>to</I></FONT> argument.
+<P>
+<LI>For <B><TT>recvfrom()</TT></B>, the <I>from</I> argument returns the interface for the remote socket that sent the message that <B><TT>recvfrom() </TT></B>received.  <I><FONT  color=991122 face=HELVETICA>*fromLen</I></FONT> is set to the size of the <I><FONT  color=991122 face=HELVETICA>from</I></FONT> structure.  As always, the interface structure is a <B><TT>sockaddr_in</TT></B> cast as a pointer to a <B><TT>sockaddr</TT></B>.
+<P>
+</UL>
+<P>
+<B><TT>sendto()</TT></B> never blocks. <B><TT> recvfrom()</TT></B>, on the other hand, will block until a message arrives, unless you set the socket to be non-blocking through the <B><TT><A HREF="#setsockopt()">setsockopt()</A></TT></B> function.
+<P>
+You can broadcast a message to all interfaces that can be found by setting <B><TT>sendto()</TT></B>'s target address to <B><TT>INADDR_BROADCAST</TT></B>.
+<P>
+As an alternative to these functions, you can call<B><TT> <A HREF="#connect()">connect()</A></TT></B> on a datagram socket and then call <B><TT><A HREF="#send()">send()</A></TT></B> and<B><TT> <A HREF="#recv()">recv()</A></TT></B>.  The <B><TT><A HREF="#connect()">connect()</A></TT></B> call caches the interface information provided in its arguments, and uses this information the subsequent<B><TT> send()</TT></B> and <B><TT><A HREF="#recv()">recv()</A></TT></B> calls to "fake" the analogous <B><TT>sendto()</TT></B> and <B><TT>recvfrom()</TT></B> invocations.  For sending, the implication is obvious: The target of the <B><TT><A HREF="#send()">send()</A></TT></B> is the interface supplied in the <B><TT><A HREF="#connect()">connect()</A></TT></B>.  The implication for receiving bears description:  when you <B><TT><A HREF="#connect()">connect()</A></TT></B> and then call <B><TT><A HREF="#recv()">recv()</A></TT></B> on a datagram socket, the socket will only accept messages from the interface given in the <B><TT><A HREF="#connect()">connect()</A></TT></B> call.
+<P>
+You can mix <B><TT>sendto()</TT></B>/<B><TT>recvfrom()</TT></B> calls with<B><TT> <A HREF="#send()">send()</A></TT></B>/<B><TT><A HREF="#recv()">recv()</A></TT></B>.  In other words, connecting a datagram socket doesn't prevent you from calling <B><TT>sendto()</TT></B> and <B><TT>recvfrom()</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+A successful <B><TT>sendto()</TT></B> returns the number of bytes that were sent; a successful <B><TT>recvfrom() </TT></B>returns the number of bytes that were received.  Upon failure, the functions return negative numbers and set <B><TT>errno</TT></B> to...
+<P>
+<UL>
+<LI><B><TT>EWOULDBLOCK</TT></B>.  The call would block on a non-blocking socket.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#EINTR">EINTR</A></TT></B>.  The local socket was interrupted.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#EBADF">EBADF</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> argument is invalid.
+<P>
+<LI><B><TT>EADDRNOTAVAIL</TT></B>.  The specified interface is unrecognized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  All other errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="setsockopt()"></A>setsockopt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>setsockopt(</TT></B></FONT>int <I><FONT  color=991122 face=HELVETICA>socket</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>level</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>option</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, uint <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>setsockopt()</TT></B> lets you set certain options that are associated with a socket.  Currently, the Network Kit only recognizes one option:  It lets you declare a socket to be blocking or non-blocking.  A blocking socket will block in a <B><TT><A HREF="#recv()">recv()</A></TT></B> or <B><TT><A HREF="#recvfrom()">recvfrom()</A></TT></B> call if there's no data to retrieve.
+<P>
+A blocking socket will block in a <B><TT><A HREF="#send()">send()</A></TT></B> or <B><TT><A HREF="#sendto()">sendto()</A></TT></B> call if the send would overrun the network's ability to keep up with the data.
+<P>
+A non-blocking socket returns immediately, even if it comes back empty-handed or is unable to send the data.
+<P>
+The function's arguments are:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>socket</I></FONT> is the socket that you're attempting to affect.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>level</I></FONT> is a constant that indicates where the option is enforced.  Currently, <I><FONT  color=991122 face=HELVETICA>level</I></FONT> should always be <B><TT>SOL_SOCKET</TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>option</I></FONT> is a constant that represents the option you're interested in.  The only option constant that does anything right now is <B><TT>SO_NONBLOCK</TT></B>.  (Two other constants&mdash;<B><TT>SO_REUSEADDR</TT></B> and <B><TT>SO_DEBUG</TT></B>&mdash;are recognized, but they aren't currently implemented.)
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>data</I></FONT> points to a buffer that's used to toggle or otherwise inform the option.  For  the <B><TT>SO_NONBLOCK</TT></B> option (and other boolean options), you fill the buffer with zeroes if you want to turn the option off (the socket will block), and non-zeros if you want to turn it on (the socket won't block).  In the case of a boolean option, a single byte of zero/non-zero will do.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>size</I></FONT> is the size of the <I><FONT  color=991122 face=HELVETICA>data</I></FONT> buffer.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+Upon failure, <B><TT>setsockopt()</TT></B> returns a negative number and sets <B><TT>errno</TT></B> to...
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#EINTR">EINTR</A></TT></B>.  The local socket was interrupted.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#EBADF">EBADF</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>socket</I></FONT> argument is invalid.
+<P>
+<LI><B><TT>ENOPROTOOPT</TT></B>.  Unknown <I><FONT  color=991122 face=HELVETICA>option</I></FONT>.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Network Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Network%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Network Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

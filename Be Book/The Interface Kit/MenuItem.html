@@ -1,0 +1,768 @@
+<HTML><HEAD><TITLE>The Interface Kit: BMenuItem</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMenuItem"></A>BMenuItem
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/MenuItem.h">be/interface/MenuItem.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="MenuItem.summary.html"><i>Summary</i></A></H6>
+<P>
+A BMenuItem object displays one item within a menu and contains the state associated with that item.  By default, menu items display text; a derived class can reimplement the <B><TT><A HREF="#Draw()">Draw()</A> </TT></B>and <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> hook functions to draw something else.
+<P>
+Each BMenuItem object can have its own invocation message and target.  A menu item needn't send any message&mdash;it can be used simply for its visual presence (see BSeparatorItem for an example).
+<P>
+Menu items can't be used outside of a menu; to add a BMenuItem to a <A HREF="Menu.html#BMenu">BMenu</A>, call <B><TT><A HREF="Menu.html#AddItem()">BMenu::AddItem()</A></TT></B>.  
+<P>
+<HR>
+<H3>
+<A NAME="Kinds%20of%20Items"></A>Kinds of Items
+</H3>
+<P>
+Some menu items set up the menu hierarchy by giving users access to submenus.  A submenu remains hidden until the user operates the item that controls it.
+<P>
+Other items accomplish specific actions.  When the user invokes the item, it sends a message to a target <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> and <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A>, usually the window where the menu at the root of the hierarchy (a <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> object) is displayed.  The action that the item initiates, or the state that it sets, depends entirely on the message and the target's response to it.
+<P>
+<HR>
+<H3>
+<A NAME="Shortcuts%20and%20Triggers"></A>Shortcuts and Triggers
+</H3>
+<P>
+Any menu item (except for those that control submenus) can be associated with a keyboard shortcut, a character the user can type in combination with a <B><U>Command</B></U> key (and possibly other modifiers) to invoke the item.  The shortcut character is displayed in the item to the right of the label. 
+<P>
+A shortcut works even when the item it invokes isn't visible on-screen.  It, therefore, has to be unique within the window (within the entire menu hierarchy).
+<P>
+Every menu item is also associated with a <I><FONT  color=991122 face=HELVETICA>trigger</I></FONT>, a character that the user can type (without the <B><U>Command</B></U> key) to invoke the item.  The trigger works only while the menu is both open on-screen and can be operated using the keyboard.  It therefore must be unique only within a particular branch of the menu hierarchy (within the menu).
+<P>
+The trigger is one of the characters that's displayed within the item&mdash;either the keyboard shortcut or a character in the label.  When it's possible for the trigger to invoke the item, the character is underlined.  Like shortcuts, triggers are case-insensitive.
+<P>
+For an item to have a keyboard shortcut, the application must explicitly assign one.  However, by default, the Interface Kit chooses and assigns triggers for all items.  The default choice can be altered by the <B><TT><A HREF="#SetTrigger()">SetTrigger()</A></TT></B> function.
+<P>
+<HR>
+<H3>
+<A NAME="Marked%20Items"></A>Marked Items
+</H3>
+<P>
+An item can also be marked (with a check mark drawn to the left of the label) in order to indicate that the state it sets is currently in effect.  Items are marked by the <B><TT><A HREF="#SetMarked()">SetMarked()</A></TT></B> function.  A menu can be set up so that items are automatically marked when they're selected and exactly one item is marked at all times.  (See <B><TT><A HREF="Menu.html#SetRadioMode()">SetRadioMode()</A></TT></B> in the <A HREF="Menu.html#BMenu">BMenu</A> class.)
+<P>
+<HR>
+<H3>
+<A NAME="Disabled%20Items"></A>Disabled Items
+</H3>
+<P>
+Items can also be enabled or disabled (by the <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> function).  A disabled item is drawn in muted tones to indicate that it doesn't work.  It can't be selected or invoked.  If the item controls a specific action, it won't post the message that initiates the action.  If it controls a submenu, it will still bring the submenu to the screen, but all the items in submenu will be disabled.  If an item in the submenu brings its own submenu to the screen, items in that submenu will also be disabled.  Disabling the superitem for a submenu in effect disables a whole branch of the menu hierarchy.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#Draw()">Draw()</A>
+<P>
+</TT></B>&nbsp;&nbsp;&nbsp;
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMenuItem()"></A>BMenuItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMenuItem(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>label</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <I><FONT  color=991122 face=HELVETICA>shortcut</I></FONT> = <FONT  face=HELVETICA>0</FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMenuItem(</TT></B></FONT><A HREF="Menu.html#BMenu">BMenu</A> *<I><FONT  color=991122 face=HELVETICA>submenu</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates a new BMenuItem and sets its <I><FONT  color=991122 face=HELVETICA>label</I></FONT>, its invocation <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, both of which can be <B><TT>NULL</TT></B>.  When the user invokes the menu item, <I><FONT  color=991122 face=HELVETICA>message</I></FONT> is copied and the following fields
+<P>
+Whenever the user invokes the item, the model message is copied and the copy is posted and marked for delivery to the target handler.  Three pieces of information are added to the copy before it's posted:<B>
+<P>
+</B><TABLE BORDER cellpadding=4>
+<TH><B>Data name</B></TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The time the item was invoked, as  measured by the number of microseconds since 12:00:00 AM January 1, 1970.</TD>
+<TR>
+<TD>"source"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINTER_TYPE">B_POINTER_TYPE</A></TT></B></TD>
+<TD>A pointer to the BMenuItem object.</TD>
+<TR>
+<TD>"index"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The index of the item, its ordinal position in the menu.  Indices begin at 0.</TD>
+</TABLE>
+<P>
+By default, the target of the message is the window that the contains the menu that the item is part of.  Use <B><TT><A HREF="ScrollBar.html#SetTarget()">SetTarget()</A></TT></B> to set a different target.
+<P>
+The constructor can also set a keyboard <I><FONT  color=991122 face=HELVETICA>shortcut</I></FONT> for the item.  The character that's passed as the <I><FONT  color=991122 face=HELVETICA>shortcut</I></FONT> parameter will be displayed to the right of the item's label.  Upper case characters are mapped to lower case characters; if you want the user to have to type an upper case character, you must include <B><TT><A HREF="misc.html#B_SHIFT_KEY">B_SHIFT_KEY</A></TT></B> in the modifers mask.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT> mask determines which modifier keys the user must hold down for the shortcut to work.  The mask can be formed by combining any of the modifiers constants, especially these:<B>
+<P>
+</B><TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_SHIFT_KEY">B_SHIFT_KEY</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_CONTROL_KEY">B_CONTROL_KEY</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_OPTION_KEY">B_OPTION_KEY</A></TT></B> </TD>
+</TABLE>
+<P>
+<B><TT><A HREF="misc.html#B_COMMAND_KEY">B_COMMAND_KEY</A></TT></B> is required for all keyboard shortcuts; it doesn't have to be explicitly included in the mask. 
+<P>
+If the BMenuItem is constructed to control a <I><FONT  color=991122 face=HELVETICA>submenu</I></FONT>, it can't take a shortcut and it typically doesn't post messages&mdash;its role is to bring up the submenu.  However, it can be assigned a model <I><FONT  color=991122 face=HELVETICA>message</I></FONT> if the application must take some collateral action when the submenu is opened.  The item's initial label will be taken from the name of the submenu.  It can be changed after construction by calling <B><TT><A HREF="#SetLabel()">SetLabel()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="~BMenuItem()"></A>~BMenuItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BMenuItem()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the item's label and its model <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object.  If the item controls a submenu, that menu and all its items are also freed.  Deleting a BMenuItem destroys the entire menu hierarchy under that item.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="ContentLocation()"></A>ContentLocation()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>ContentLocation(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the left top corner of the content area of the item, in the coordinate system of the <A HREF="Menu.html#BMenu">BMenu</A> to which it belongs.  The content area of an item is the area where it displays its label (or whatever graphic substitutes for the label).  It doesn't include the part of the item where a check mark or a keyboard shortcut could be displayed, nor the border and background around the content area.
+<P>
+You would need to call this function only if you're implementing a <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> function to draw the contents of the menu item.  The content rectangle can be calculated from the point returned by this function and the size specified by <B><TT><A HREF="#GetContentSize()">GetContentSize()</A></TT></B>.
+<P>
+If the item isn't part of a menu, the return value is indeterminate.
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+, 
+<A NAME="DrawContent()"></A>DrawContent()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawContent(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions draw the menu item and highlight it if it's currently selected.  They're called by the <B><TT><A HREF="#Draw()">Draw()</A></TT></B> function of the <A HREF="Menu.html#BMenu">BMenu</A> where the item is located whenever the menu is required to display itself; they don't need to be called from within application code.
+<P>
+However, they can both be overridden by derived classes that display something other than a textual label.  The <B><TT><A HREF="#Draw()">Draw()</A></TT></B> function is called first.  It draws the background for the entire item, then calls <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> to draw the label within the item's content area.  After <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> returns, it draws the check mark (if the item is currently marked) and the keyboard shortcut (if any).  It finishes by calling <B><TT><A HREF="#Highlight()">Highlight()</A></TT></B> if the item is currently selected.
+<P>
+Both functions draw by calling functions of the <A HREF="Menu.html#BMenu">BMenu</A> in which the item is located.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyItem::DrawContent()</PRE>
+<P>
+A derived class can override either <B><TT><A HREF="#Draw()">Draw()</A></TT></B>, if it needs to draw the entire item, or <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B>, if it needs to draw only within the content area.  A <B><TT><A HREF="#Draw()">Draw()</A></TT></B> function can find the frame rectangle it should draw within by calling the BMenuItem's <B><TT><A HREF="#Frame()">Frame()</A></TT></B> function; a <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> function can calculate the content area from the point returned by <B><TT><A HREF="#ContentLocation()">ContentLocation()</A></TT></B> and the dimensions provided by <B><TT><A HREF="#GetContentSize()">GetContentSize()</A></TT></B>.
+<P>
+When <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> is called, the pen is positioned to draw the item's label and the high color is appropriately set.  The high color may be a shade of gray, if the item is disabled, or black if it's enabled.  If some other distinction is used to distinguish disabled from enabled items, <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> should check the item's current state by calling <B><TT><A HREF="#IsEnabled()">IsEnabled()</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If a derived class implements its own <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> function, but still wants to draw a textual string, it should do so by assigning the string as the BMenuItem's label and calling the inherited version of <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B>, not by calling <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B>.  This preserves the BMenuItem's ability to display a trigger character in the string.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="#Highlight()">Highlight()</A></TT></B>, <B><TT><A HREF="#Frame()">Frame()</A></TT></B>, <B><TT><A HREF="#ContentLocation()">ContentLocation()</A></TT></B>, <B><TT><A HREF="#GetContentSize()">GetContentSize()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Frame()"></A>Frame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>Frame(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the rectangle that frames the entire menu item, in the coordinate system of the <A HREF="Menu.html#BMenu">BMenu</A> to which the item belongs.  If the item hasn't been added to a menu, the return value is indeterminate.
+<P>
+<B>See also:  <TT><A HREF="Menu.html#AddItem()">BMenu::AddItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetContentSize()"></A>GetContentSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>GetContentSize(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float *<I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Writes the size of the item's content area into the variables referred to by <I><FONT  color=991122 face=HELVETICA>width</I></FONT> and <I><FONT  color=991122 face=HELVETICA>height</I></FONT>.  The content area of an item is the area where its label (or whatever substitutes for the label) is drawn.
+<P>
+A <A HREF="Menu.html#BMenu">BMenu</A> calls <B><TT><A HREF="#GetContentSize()">GetContentSize()</A></TT></B> for each of its items as it arranges them in a column or a row; the function is not called for items in a matrix.  The information it provides helps determine where each item is located and the overall size of the menu.
+<P>
+<B><TT><A HREF="#GetContentSize()">GetContentSize()</A></TT></B> must report a size that's large enough to display the content of the item (and separate one item from another).  By default, it reports an area just large enough to display the item's label.  This area is calculated from the label and the BMenu's current font.
+<P>
+If you design a class derived from BMenuItem and implement your own <B><TT><A HREF="#Draw()">Draw()</A></TT></B> or <B><TT><A HREF="#DrawContent()">DrawContent()</A></TT></B> function, you should also implement a <B><TT><A HREF="#GetContentSize()">GetContentSize()</A></TT></B> function to report how much room will be needed to draw the item's contents.
+<P>
+<B>See also:  <TT><A HREF="#DrawContent()">DrawContent()</A></TT></B>, <B><TT><A HREF="#ContentLocation()">ContentLocation()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Highlight()"></A>Highlight()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Highlight(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>flag</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Highlights the menu item when <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> is <B><TT>true</TT></B>, and removes the highlighting when <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> is <B><TT>false</TT></B>.  Highlighting simply inverts all the colors in the item's frame rectangle (except for the check mark).
+<P>
+This function is called by the <B><TT><A HREF="#Draw()">Draw()</A></TT></B> function whenever the item is selected and needs to be drawn in its highlighted state.  There's no reason to call it yourself, unless you define your own version of <B><TT><A HREF="#Draw()">Draw()</A></TT></B>.  However, it can be reimplemented in a derived class, if items belonging to that class need to be highlighted in some way other than simple inversion.
+<P>
+<B>See also:  <TT><A HREF="#Draw()">Draw()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Invoke()"></A>Invoke()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Invoke(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="../The%20Application%20Kit/Invoker.html#BInvoker">BInvoker</A> version of <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> to ensure that only enabled menu items that are attached to a menu hierarchy can be invoked.  This function appropriately marks items when the user invokes them.  Before sending a message, it adds "when", "source", and "index" field to it, as explained under the BMenuItem constructor.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Invoker.html#Invoke()">BInvoker::Invoke()</A></TT></B> 
+<P>
+<HR>
+<H3>IsEnabled()   see <A HREF="#SetEnabled()">SetEnabled()</A></H3>
+<P>
+<HR>
+<H3>isMarked()   see <A HREF="#SetMarked()">SetMarked()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsSelected()"></A>IsSelected()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsSelected(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the menu item is currently selected, and <B><TT>false</TT></B> if not.  Selected items are highlighted.
+<P>
+<HR>
+<H3>Label()   see <A HREF="#SetLabel()">SetLabel()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Menu()"></A>Menu()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Menu.html#BMenu">BMenu</A> *<B><TT><FONT  color=000022 size=+1>Menu(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the menu where the item is located, or <B><TT>NULL</TT></B> if the item hasn't yet been added to a menu.
+<P>
+<B>See also:  <TT><A HREF="Menu.html#AddItem()">BMenu::AddItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetEnabled()"></A>SetEnabled()
+, 
+<A NAME="IsEnabled()"></A>IsEnabled()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetEnabled(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsEnabled(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> enables the BMenuItem if the <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> flag is <B><TT>true</TT></B>, disables it if <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> is <B><TT>false</TT></B>, and updates the item if it's visible on-screen.  If the item controls a submenu, this function calls the submenu's <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> virtual function, passing it the same flag.  This ensures that the submenu is enabled or disabled as well.
+<P>
+<B><TT><A HREF="#IsEnabled()">IsEnabled()</A></TT></B> returns <B><TT>true</TT></B> if the BMenuItem is enabled, its menu is enabled, and all menus above it in the hierarchy are enabled.  It returns <B><TT>false</TT></B> if the item is disabled or any objects above it in the menu hierarchy are disabled.
+<P>
+Items and menus are enabled by default.
+<P>
+When using these functions, keep in mind that:
+<P>
+<UL>
+<LI>Disabling a BMenuItem that controls a submenu serves to disable the entire menu hierarchy under the item.
+<P>
+<LI>Passing an argument of <B><TT>true</TT></B> to <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> is not sufficient to enable the item if it's located in a disabled branch of the menu hierarchy.  It can only undo a previous <B><TT><A HREF="#SetEnabled()">SetEnabled()</A></TT></B> call (with an argument of <B><TT>false</TT></B>) on the same item.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="Menu.html#SetEnabled()">BMenu::SetEnabled()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetLabel()"></A>SetLabel()
+, 
+<A NAME="Label()"></A>Label()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetLabel(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Label(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetLabel()">SetLabel()</A></TT></B> frees the item's current label and copies <I><FONT  color=991122 face=HELVETICA>string</I></FONT> to replace it.  If the menu is visible on-screen, it will be redisplayed with the item's new label.  If necessary, the menu will become wider (or narrower) so that it fits the new label.
+<P>
+The Interface Kit calls this virtual function to:
+<P>
+<UL>
+<LI>Set the initial label of an item that controls a submenu to the name of the submenu, and
+<P>
+<LI>Subsequently set the item's label to match the marked item in the submenu, if the submenu was set up to have this feature.
+<P>
+</UL>
+<P>
+<B><TT><A HREF="#Label()">Label()</A></TT></B> returns a pointer to the current label.
+<P>
+<B>See also:  <TT><A HREF="Menu.html#SetLabelFromMarked()">BMenu::SetLabelFromMarked()</A></TT></B>, the BMenuItem constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetMarked()"></A>SetMarked()
+, 
+<A NAME="IsMarked()"></A>IsMarked()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetMarked(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>flag</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsMarked(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetMarked()">SetMarked()</A></TT></B> adds a check mark to the left of the item label if <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> is <B><TT>true</TT></B>, or removes an existing mark if <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> is <B><TT>false</TT></B>.  If the menu is visible on-screen. it's redisplayed with or without the mark.
+<P>
+<B><TT><A HREF="#IsMarked()">IsMarked()</A></TT></B> returns whether the item is currently marked.
+<P>
+<B>See also:  <TT><A HREF="Menu.html#SetLabelFromMarked()">BMenu::SetLabelFromMarked()</A></TT></B>, <B><TT><A HREF="Menu.html#FindMarked()">BMenu::FindMarked()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetShortcut()"></A>SetShortcut()
+, 
+<A NAME="Shortcut()"></A>Shortcut()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetShortcut(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>shortcut</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+char <B><TT><FONT  color=000022 size=+1>Shortcut(</TT></B></FONT>uint32 *<I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetShortcut()">SetShortcut()</A></TT></B> sets the <I><FONT  color=991122 face=HELVETICA>shortcut</I></FONT> character that's displayed at the right edge of the menu item and the set of <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT> that are associated with the character.  These two arguments work just like the arguments passed to the BMenuItem constructor.  See the constructor for a more complete description. 
+<P>
+<B><TT><A HREF="#Shortcut()">Shortcut()</A></TT></B> returns the character that's used as the keyboard shortcut for invoking the item, and writes a mask of all the modifier keys the shortcut requires to the variable referred to by <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT>.  Since the Command key is required to operate the keyboard shortcut for any menu item, <B><TT><A HREF="misc.html#B_COMMAND_KEY">B_COMMAND_KEY</A></TT></B> will always be part of the <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT> mask.  The mask can also be tested against the <B><TT><A HREF="misc.html#B_CONTROL_KEY">B_CONTROL_KEY</A></TT></B>, <B><TT><A HREF="misc.html#B_OPTION_KEY">B_OPTION_KEY</A></TT></B>, and <B><TT><A HREF="misc.html#B_SHIFT_KEY">B_SHIFT_KEY</A></TT></B> constants.
+<P>
+The shortcut is initially set by the BMenuItem constructor.
+<P>
+<HR>
+<H3>
+<A NAME="SetTrigger()"></A>SetTrigger()
+, 
+<A NAME="Trigger()"></A>Trigger()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetTrigger(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>trigger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+char <B><TT><FONT  color=000022 size=+1>Trigger(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetTrigger()">SetTrigger()</A></TT></B> sets the <I><FONT  color=991122 face=HELVETICA>trigger</I></FONT> character that the user can type to invoke the item while the item's menu is open on-screen.  If a <I><FONT  color=991122 face=HELVETICA>trigger</I></FONT> is not set, the Interface Kit will select one for the item, so it's not necessary to call <B><TT><A HREF="#SetTrigger()">SetTrigger()</A></TT></B>.
+<P>
+The character passed to this function has to match a character displayed in the item&mdash;either the keyboard shortcut or a character in the label.  The case of the character doesn't matter; lowercase arguments will match uppercase characters in the item and uppercase arguments will match lowercase characters.  When the item can be invoked by its trigger, the trigger character is underlined.
+<P>
+If more than one character in the item matches the character passed, <B><TT><A HREF="#SetTrigger()">SetTrigger()</A></TT></B> tries first to mark the keyboard shortcut.  Failing that, it tries to mark an uppercase letter at the beginning of a word.  Failing that, it marks the first instance of the character in the label.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>trigger</I></FONT> doesn't match any characters in the item, the item won't have a trigger, not even one selected by the system.
+<P>
+<B><TT><A HREF="#Trigger()">Trigger()</A></TT></B> returns the character set by <B><TT><A HREF="#SetTrigger()">SetTrigger()</A></TT></B>, or <B><TT>NULL</TT></B> if <B><TT><A HREF="#SetTrigger()">SetTrigger()</A></TT></B> didn't succeed or if <B><TT><A HREF="#SetTrigger()">SetTrigger()</A></TT></B> was never called and the trigger is selected automatically.
+<P>
+<B>See also:  <TT><A HREF="Menu.html#SetTriggersEnabled()">BMenu::SetTriggersEnabled()</A></TT></B> 
+<P>
+<HR>
+<H3>Shortcut()   see <A HREF="#SetShortcut()">SetShortcut()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Submenu()"></A>Submenu()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Menu.html#BMenu">BMenu</A> *<B><TT><FONT  color=000022 size=+1>Submenu(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="Menu.html#BMenu">BMenu</A> object that the item controls, or <B><TT>NULL</TT></B> if the item doesn't control a submenu.
+<P>
+<B>See also:  </B>the BMenuItem constructor, the <A HREF="Menu.html#BMenu">BMenu</A> class
+<P>
+<HR>
+<H3>Trigger()   see <A HREF="#SetTrigger()">SetTrigger()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="TruncateLabel()"></A>TruncateLabel()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>TruncateLabel(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT>, char *<I><FONT  color=991122 face=HELVETICA>newLabel</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Removes characters from the middle of the item label and replaces them with an ellipsis.  This is done so that the label will fit within <I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT> coordinate units.  The shortened string is copied into the <I><FONT  color=991122 face=HELVETICA>newLabel</I></FONT> buffer.
+<P>
+This function is called by the BMenuItem when it draws the item's label, but only if it's necessary to fit a long item into a smaller space.  It can be reimplemented by derived classes to do a better job of shortening the string based on the actual content of the label.
+<P>
+Your version of <B><TT><A HREF="#TruncateLabel()">TruncateLabel()</A></TT></B> should be careful to not cut the trigger character from the string.
+<P>
+<B>See also:  <TT>BFont::GetTrunctatedStrings()</TT></B> 
+<P>
+<A NAME="36524:%20head1:%20Archived%20Fields"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="MenuField.html#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:<B>
+<P>
+</B><TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_label"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Text label of the menu item.</TD>
+<TR>
+<TD>"_disable"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if menu item is disabled.</TD>
+<TR>
+<TD>"_marked"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if menu item is marked.</TD>
+<TR>
+<TD>"_user_trig"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>User-defined trigger character.</TD>
+<TR>
+<TD>"_shortcut"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Shortcut character.</TD>
+<TR>
+<TD>"_mods"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Shortcut modifiers.</TD>
+<TR>
+<TD>"_msg"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>Model message for the item.</TD>
+<TR>
+<TD>"_submenu"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>Submenu  (only in deep copy).</TD>
+</TABLE>
+<P>
+Some of these fields may not be present if the setting they represent isn't used, or is the default value.  For example, if no shortcut key was defined, the "_shortcut" and "_mods" fields won't be found in the archive.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

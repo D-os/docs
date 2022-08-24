@@ -1,0 +1,81 @@
+<HTML><HEAD><TITLE>Drivers: Using Modules</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Using%20Modules"></A>Using Modules
+</H1>
+<P>
+Modules provide a means for multiple drivers to share common functionality; for example, if a variety of types of device might be accessed on the same bus, a module might be created to provide a common interface to the bus.
+<P>
+Your driver can access these modules via the kernel functions <B><TT>get_module()</TT></B> and <B><TT>put_module()</TT></B>, which obtain and release references to a specified module.  When you call <B><TT>get_module()</TT></B>, you obtain a structure that provides information about the module, plus pointers to the module's functions.  The module is defined in a header file provided by the module's author, similar to this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#define MY_MODULE_NAME "generic/mymodule/v1"
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct my_module_info {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;module_info module;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 (*function1)();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 (*function2)();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*configure)(int32 parameter, int32 value);
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+When you want to access the module's functions, you call <B><TT>get_module()</TT></B> to get a pointer to this structure from the kernel:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct my_module_info *minfo = NULL;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* get a pointer to the module */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;get_module(MY_MODULE_NAME, (module_info **) &amp;minfo);</PRE>
+<P>
+Once you've done this, you can call the module's functions through the structure:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;minfo->configure(0, 10);</PRE>
+<P>
+When you're done with the module, you should call <B><TT>put_module()</TT></B> to release it.  The kernel loads and unloads modules as needed, and properly calling <B><TT>put_module()</TT></B> lets the kernel do its job.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;put_module(MY_MODULE_NAME);</PRE>
+<P>
+If you want a better understanding of how modules work, see the <a href="writing_modules.html#Writing%20Modules">"Writing Modules"</a> section.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

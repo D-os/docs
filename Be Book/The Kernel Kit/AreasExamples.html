@@ -1,0 +1,347 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Area Examples</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Area%20Examples"></A>Area Examples
+</H1>
+<P>
+<a href="#Example%201:%20Creating%20and%20Writing%20into%20an%20Area">Example 1: Creating and Writing into an Area</a>
+<P>
+<a href="#Example%202:%20Reading%20a%20File%20into%20an%20Area">Example 2: Reading a File into an Area</a>
+<P>
+<a href="#Example%203:%20Accessing%20a%20Designated%20Area">Example 3: Accessing a Designated Area</a>
+<P>
+<a href="#Example%204:%20Cloning%20and%20Sharing%20an%20Area">Example 4: Cloning and Sharing an Area</a>
+<P>
+<a href="#Example%205:%20Cloning%20Addresses">Example 5: Cloning Addresses</a>
+<P>
+<A NAME="39332:%20head1:%20Example%201:%20Creating%20and%20Writing%20into%20an%20Area"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Example%201:%20%20Creating%20and%20Writing%20into%20an%20Area"></A><FONT SIZE=6>E</FONT>xample 1:  <FONT SIZE=6>C</FONT>reating and <FONT SIZE=6>W</FONT>riting into an <FONT SIZE=6>A</FONT>rea
+</H2>
+<P>
+As a simple example of area creation and usage, here we create a ten page area and fill half of it (with nonsense) by bumping a pointer:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;area_id my_area;
+&nbsp;&nbsp;&nbsp;char *area_addr, *ptr;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Create an area. */
+&nbsp;&nbsp;&nbsp;my_area = create_area("my area", /* name you give to the area */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(void *)&amp;area_addr,   /* returns the starting addr */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_ANY_ADDRESS,        /* area can start anywhere */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_PAGE_SIZE*10,       /* size in bytes */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_NO_LOCK,            /* Lock in RAM?  No. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_READ_AREA | B_WRITE_AREA); /* permissions */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* check for errors */
+&nbsp;&nbsp;&nbsp;if (my_area &lt; 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Something bad happenedn");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Set ptr to the beginning of the area. */
+&nbsp;&nbsp;&nbsp;ptr = area_addr;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Fill half the area (with random-ish data). */
+&nbsp;&nbsp;&nbsp;for (int i; i &lt; B_PAGE_SIZE*5; i++) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*ptr++ = system_time()%256;</PRE>
+<P>
+You can also <B><TT>memcpy()</TT></B> and <B><TT>strcpy()</TT></B> into the area:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Copy the first half of the area into the second half. */
+&nbsp;&nbsp;&nbsp;memcpy(ptr, area_addr, B_PAGE_SIZE*5);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Overwrite the beginning of the area. */
+&nbsp;&nbsp;&nbsp;strcpy(area_addr, "Hey, look where I am.");</PRE>
+<P>
+When we're all done, we delete the area:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;delete_area(my_area);</PRE>
+<P>
+<A NAME="15854:%20head1:%20Example%202:%20Reading%20a%20File%20into%20an%20Area"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Example%202:%20%20Reading%20a%20File%20into%20an%20Area"></A><FONT SIZE=6>E</FONT>xample 2:  <FONT SIZE=6>R</FONT>eading a <FONT SIZE=6>F</FONT>ile into an <FONT SIZE=6>A</FONT>rea
+</H2>
+<P>
+Here's a function that finds a file, opens it (implicit in the <A HREF="../The%20Storage%20Kit/File.html#BFile">BFile</A> constructor), and copies its contents into RAM:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#include &lt;File.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;area_id file_area;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;status_t file_reader(const char *pathname)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *area_addr;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BFile file(pathname, B_READ_ONLY);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((err=file.InitCheck()) != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%s: Can&gt;t find or open.n", pathname);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = file.GetSize(&amp;file_size);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err != B_OK || file_size == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%s:  Disappeared?  Empty?n", pathname);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Round the size up to the nearest page. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file_size = (((file_size-1)%B_PAGE_SIZE)+1)*B_PAGE_SIZE;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Make sure the size won&gt;t overflow a size_t spec. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (file_size >= ((1&lt;&lt;32)-1) ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%s: What'd you do?  Read Montana?n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_NO_MEMORY;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;file_area = create_area("File area", (void *)&amp;area_addr,   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_ANY_ADDRESS, file_size, B_FULL_LOCK, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_READ_AREA | B_WRITE_AREA); 
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Check create_area() errors, as in the last example. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Read the file; delete the area if there&gt;s an error. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((err=file.Read(area_addr, file_size)) &lt; B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%s: File read error.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete_area(file_area);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* The file is automatically closed when the stack-based
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * BFile is destroyed.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<A NAME="37290:%20head1:%20Example%203:%20Accessing%20a%20Designated%20Area"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Example%203:%20%20Accessing%20a%20Designated%20Area"></A><FONT SIZE=6>E</FONT>xample 3:  <FONT SIZE=6>A</FONT>ccessing a <FONT SIZE=6>D</FONT>esignated <FONT SIZE=6>A</FONT>rea
+</H2>
+<P>
+In the previous example, a local variable (<B><TT>area_addr</TT></B>) was used to capture the starting address of the newly-created area.  If some other function wants to access the area, it must "re-find" the starting address (and the length of the area, for boundary checking).  To do this, you call <B><TT><A HREF="Areas.html#get_area_info()">get_area_info()</A></TT></B>.  
+<P>
+In the following example, an area is passed in by name; the function, which will write its argument buffer to the area, calls <B><TT><A HREF="Areas.html#get_area_info()">get_area_info()</A></TT></B> to determine the start and extent of the area, and also to make sure that the area is part of this team.  If the area was created by some other team, the function could still write to it, but it would have to clone the area first (cloning is demonstrated in the next example). 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t write_to_area(const char *area_name, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *buf, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t len)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id area;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_info ai;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thread_id thread;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thread_info ti;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!area_name)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_BAD_VALUE;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area = find_area(area_name);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Did we find it? */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (area &lt; B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Couldn&gt;t find area %s.n", area_name); 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Get the info. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = get_area_info(area, &amp;ai);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err &lt; B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Couldn&gt;t get area info.n"); 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Get the team of the calling thread; to do this, we have
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * to look in the thread_info structure. 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = get_thread_info(find_thread(NULL), &amp;ti);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err &lt; B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Couldn&gt;t get thread info.n"); 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Compare this team to the area&gt;s team. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (ai.team != ti.team) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Foreign area.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_NOT_ALLOWED;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Make sure we&gt;re not going to overflow the area, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * and make sure this area can be written to.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (len > ai.size) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Buffer bigger than area.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_BAD_VALUE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!(ai.protection &amp; B_WRITE_AREA)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Can&gt;t write to this area.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_NOT_ALLOWED;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Now we can write. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memcpy(ai.address, buf, len);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+It's important that you only write to areas that were created or cloned within the calling team.  The starting address of a "foreign" area is usually meaningless within your own address space.
+<P>
+You don't <I>have</I> to check the area's protectection before writing to it (or reading from it).  The memory-accessing fucntions (<B><TT>memcpy()</TT></B>, in this example) will segfault if an invalid read or write is requested.
+<P>
+<A NAME="23484:%20head1:%20Example%204:%20Cloning%20and%20Sharing%20an%20Area"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Example%204:%20%20Cloning%20and%20Sharing%20an%20Area"></A><FONT SIZE=6>E</FONT>xample 4:  <FONT SIZE=6>C</FONT>loning and <FONT SIZE=6>S</FONT>haring an <FONT SIZE=6>A</FONT>rea
+</H2>
+<P>
+In the following example, a server and a client are set up to share a common area.  Here's the server:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Server side */
+&nbsp;&nbsp;&nbsp;class AServer
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t make_shared_area(size_t size);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id the_area;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *area_addr;
+&nbsp;&nbsp;&nbsp;};
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;status_t AServer::make_shared_area(size_t size)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* The size must be rounded to a page. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size = ((size % B_PAGE_SIZE)+1) * B_PAGE_SIZE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the_area = create_area("server area", (void *)&amp;area_addr
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_ANY_ADDRESS, size, B_NO_LOCK,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_READ_AREA|B_WRITE_AREA);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (the_area &lt; B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Couldn&gt;t create server arean");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return the_area;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+And here's the client:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Client side */
+&nbsp;&nbsp;&nbsp;class AClient 
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t make_shared_clone();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id the_area;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *area_addr;
+&nbsp;&nbsp;&nbsp;};
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;status_t AClient::make_shared_clone()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id src_area;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src_area = find_area("server area");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (src_area &lt; B_ERROR) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Couldn&gt;t find server area.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return src_area;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the_area = clone_area("client area", 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(void *)&amp;area_addr,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_ANY_ADDRESS, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_READ_AREA | B_WRITE_AREA,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src_area);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (the_area &lt; B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Couldn&gt;t create clone arean");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return the_area;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Notice that the area creator (the server in the example) doesn't have to designate the created area as sharable.  All areas are candidates for cloning. 
+<P>
+After it creates the cloned area, the client's <B><TT>area_id</TT></B> value (<B><TT>AClient::the_area</TT></B>) will be different from the server's (<B><TT>AServer::the_area</TT></B>).  Even though <B><TT>area_id</TT></B> numbers are global, the client should only refer to the server's <B><TT>area_id</TT></B> number in order to clone it.  After the clone, the client talks to the area through its own <B><TT>area_id</TT></B> (the value passed backed by <B><TT><A HREF="Areas.html#clone_area()">clone_area()</A></TT></B>).  
+<P>
+<A NAME="13429:%20head1:%20Example%205:%20Cloning%20Addresses"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Example%205:%20%20Cloning%20Addresses"></A><FONT SIZE=6>E</FONT>xample 5:  <FONT SIZE=6>C</FONT>loning <FONT SIZE=6>A</FONT>ddresses
+</H2>
+<P>
+It's sometimes useful for shared areas (in other words, a "source" and a clone) to begin at the same starting address.  For example, if a client's clone area starts at the same address as the server's original area, then the client and server can pass area-accessing pointers back and forth without having to translate the addresses.  Here we modify the previous example to do this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t AClient::make_shared_clone()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id src_area;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src_area = find_area("server area");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (src_area &lt; B_ERROR) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Couldn&gt;t find server area.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_BAD_VALUE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* This time, we specify the address that we want the
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * clone to start at.  The B_CLONE_ADDRESS constant
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * does this for us.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_addr = src_info.address;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the_area = clone_area("client area", 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(void *)&amp;area_addr,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_CLONE_ADDRESS, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_READ_AREA | B_WRITE_AREA,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src_area);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (the_area &lt; B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Couldn&gt;t create clone arean");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return the_area;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Of course, demanding that an area begin at a specific address can be too restrictive; if any of the memory within [area_addr, area_addr + src_info.size] is already allocated, the clone will fail.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

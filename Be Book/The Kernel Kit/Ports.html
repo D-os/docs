@@ -1,0 +1,598 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Ports</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Ports"></A>Ports
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/OS.h">be/kernel/OS.h</A>
+<P>
+Library:  libroot.so
+<P>
+A port is a system-wide message repository into which any thread can copy a buffer of data, and from which any thread can then retrieve the buffer.  This repository is implemented as a first-in/first-out message queue:  A port stores its messages in the order in which they're received, and it relinquishes them in the order in which they're stored.  Each port has its own message queue.
+<P>
+Ports are largely subsumed by the Application Kit's <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> class (and relatives).  The two features of ports that you can't get at the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> level are:
+<P>
+<UL>
+<LI>Ports let you set the length of the message queue.
+<P>
+<LI>Ports can be used in C code (as opposed to C++).
+<P>
+</UL>
+<P>
+For most applications, these are inessential additions.  
+<P>
+For more information on ports, see <a href="PortConcepts.html#Port%20Concepts">"Port Concepts"</a>.
+<P>
+<HR>
+<H2>
+<A NAME="Port%20Functions"></A><FONT SIZE=6>P</FONT>ort <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="create_port()"></A>create_port()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+port_id<B><TT><FONT  color=000022 size=+1> create_port(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>queue_length</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new port and returns its <B><TT>port_id</TT></B> number.  The port's name is set to <I><FONT  color=991122 face=HELVETICA>name</I></FONT> and the length of its message queue is set to <I><FONT  color=991122 face=HELVETICA>queue_length</I></FONT>.  Neither the name nor the queue length can be changed once they're set.  The name shouldn't exceed <B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A> </TT></B>(32) characters.  
+<P>
+In setting the length of a port's message queue, you're telling it how many messages it can hold at a time.  When the queue is filled&mdash;when it's holding <I><FONT  color=991122 face=HELVETICA>queue_length</I></FONT> messages&mdash;subsequent invocations of <B><TT><A HREF="#write_port()">write_port()</A></TT></B> (on that port) block until room is made in the queue (through calls to <B><TT><A HREF="#read_port()">read_port()</A></TT></B>) for the additional messages.   Once the queue length is set by <B><TT>create_port()</TT></B>, it can't be changed.
+<P>
+This function sets the owner of the port to be the team of the calling thread.  Ownership can subsequently be transferred through the <B><TT><A HREF="#set_port_owner()">set_port_owner()</A></TT></B> function.  When a port's owner dies (when all the threads in the team are dead), the port is automatically deleted.  If you want to delete a port prior to its owner's death, use the <B><TT><A HREF="#delete_port()">delete_port()</A> </TT></B>function.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>queue_length</I></FONT> is too big or less than zero.  
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_PORTS">B_NO_MORE_PORTS</A></TT></B>.  The system couldn't allocate another port.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="close_port()"></A>close_port()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>close_port(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Closes the <I><FONT  color=991122 face=HELVETICA>port</I></FONT> so no more messages can be written to it.  After you close a port, you can call <B><TT><A HREF="#read_port()">read_port()</A></TT></B> on it, but a <B><TT><A HREF="#write_port()">write_port()</A></TT></B> call will return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  You can't reopen a closed port; you call this function so you can read through a port's unread messages prior to deleting the port, while ensuring that no new messages will show up.  After you've read the messages, you should call <B><TT><A HREF="#delete_port()">delete_port()</A></TT></B> on <I><FONT  color=991122 face=HELVETICA>port</I></FONT>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> is now closed.  
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> doesn't identify an open port.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="delete_port()"></A>delete_port()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>delete_port(port_id</TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>port</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the given port.  The port's message queue doesn't have to be empty&mdash;you can delete a port that's holding unread messages.  Threads that are blocked in <B><TT><A HREF="#read_port()">read_port()</A></TT></B> or <B><TT><A HREF="#write_port()">write_port()</A></TT></B> calls on the port are automatically unblocked (and return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SEM_ID">B_BAD_SEM_ID</A></TT></B>).
+<P>
+The thread that calls <B><TT>delete_port()</TT></B> doesn't have to be a member of the team that owns the port; any thread can delete any port.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT>B_OK. </TT></B> The port was deleted.  
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> isn't a valid port.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="find_port()"></A>find_port()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+port_id <B><TT><FONT  color=000022 size=+1>find_port(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>port_name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the <B><TT>port_id</TT></B> of the named port.  port_name should be no longer than 32 characters (<B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A></TT></B>).
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port_name</I></FONT> doesn't name an existing port.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_port_info()"></A>get_port_info()
+, 
+<A NAME="get_next_port_info()"></A>get_next_port_info()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_port_info(port_id</TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>port</I></FONT>, <B><TT><A HREF="#port_info">port_info</A></TT></B> <I><FONT  color=991122 face=HELVETICA>*info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_next_port_info(<A HREF="Threads.html#team_id">team_id</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>*cookie</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port_info <I><FONT  color=991122 face=HELVETICA>*info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Copies information about a particular port into the <B><TT>port_info</TT></B> structure designated by<I><FONT  color=991122 face=HELVETICA> info</I></FONT>.  The first version of the function designates the port directly, by <B><TT>port_id</TT></B>.  
+<P>
+The <B><TT><A HREF="#get_next_port_info()">get_next_port_info()</A></TT></B> version lets you step through the list of a team's ports through iterated calls on the function.  The <I><FONT  color=991122 face=HELVETICA>team</I></FONT> argument identifies the team you want to look at; a <I><FONT  color=991122 face=HELVETICA>team</I></FONT> value of 0 means the team of the calling thread.  The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> argument is a placemark; you set it to 0 on your first call, and let the function do the rest.  The function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> when there are no more ports to visit:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Get the port_info for every port in this team. */
+&nbsp;&nbsp;&nbsp;port_info info;
+&nbsp;&nbsp;&nbsp;int32 cookie = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (get_next_port_info(0, &amp;cookie, &amp;info) == B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+The information in the <B><TT>port_info</TT></B> structure is guaranteed to be internally consistent, but the structure as a whole should be consider to be out-of-date as soon as you receive it.  It provides a picture of a port as it exists just before the info-retrieving function returns.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The port was found; <I><FONT  color=991122 face=HELVETICA>info</I></FONT> contains valid information.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> doesn't identify an existing port, <I><FONT  color=991122 face=HELVETICA>team</I></FONT> doesn't identify an existing team, or there are no more ports to visit.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="port_buffer_size()"></A>port_buffer_size()
+, 
+<A NAME="port_buffer_size_etc()"></A>port_buffer_size_etc()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>port_buffer_size(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>port_buffer_size_etc(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions return the length (in bytes) of the message buffer that's at the head of <I><FONT  color=991122 face=HELVETICA>port</I></FONT>'s message queue.  You call this function in order to allocate a sufficiently large buffer in which to retrieve the message data.  
+<P>
+The <B><TT>port_buffer_size()</TT></B> function blocks if the port is currently empty.  It unblocks when a <B><TT><A HREF="#write_port()">write_port()</A> </TT></B>call gives this function a buffer to measure (even if the buffer is 0 bytes long), or when the port is deleted.
+<P>
+The <B><TT>port_buffer_size_etc()</TT></B> function lets you set a limit on the amount of time the function will wait for a message to show up.  To set the limit, you pass <B><TT><A HREF="Semaphores.html#B_TIMEOUT">B_TIMEOUT</A></TT></B> as the flags argument, and set <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> to the amount of time, in microseconds, that you're willing to wait.  
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> doesn't identify an existing port, or the port was deleted while the function was blocked.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> limit expired.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_WOULD_BLOCK">B_WOULD_BLOCK</A></TT></B>.  You asked for a <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> of 0, but there are no messages in the queue.  
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#read_port()">read_port()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="port_count()"></A>port_count()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>port_count(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the number of messages that are currently in <I><FONT  color=991122 face=HELVETICA>port</I></FONT>'s message queue.  This is the number of messages that have been written to the port through calls to <B><TT><A HREF="#write_port()">write_port()</A></TT></B> but that haven't yet been picked up through corresponding <B><TT><A HREF="#read_port()">read_port()</A></TT></B> calls.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function is provided mostly as a convenience and a semi-accurate debugging tool.  The value that it returns is inherently undependable:  There's no guarantee that additional <B><TT><A HREF="#read_port()">read_port()</A></TT></B> or <B><TT><A HREF="#write_port()">write_port()</A></TT></B> calls won't change the count as this function is returning.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> doesn't identify an existing port.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#get_port_info()">get_port_info()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="read_port()"></A>read_port()
+, 
+<A NAME="read_port_etc()"></A>read_port_etc()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>read_port(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>msg_code</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>read_port_etc(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>msg_code</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions remove the message at the head of <I><FONT  color=991122 face=HELVETICA>port</I></FONT>'s message queue and copy the messages's contents into the <I><FONT  color=991122 face=HELVETICA>msg_code</I></FONT> and <I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT> arguments.  The size of the <I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT> buffer, in bytes, is given by <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT>.  It's up to the caller to ensure that the message buffer is large enough to accommodate the message that's being read.  If you want a hint about the message's size, you should call <B><TT><A HREF="#port_buffer_size()">port_buffer_size()</A></TT></B> before calling this function.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>port</I></FONT>'s message queue is empty when you call<B><TT> read_port()</TT></B>, the function will block.  It returns when some other thread writes a message to the port through <B><TT><A HREF="#write_port()">write_port()</A></TT></B>.  A blocked read is also unblocked if the port is deleted. 
+<P>
+The <B><TT>read_port_etc()</TT></B> function lets you set a limit on the amount of time the function will wait for a message to show up.  To set the limit, you pass <B><TT><A HREF="Semaphores.html#B_TIMEOUT">B_TIMEOUT</A></TT></B> as the flags argument, and set <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> to the amount of time, in microseconds, that you're willing to wait. 
+<P>
+<b>RETURN CODES</b>
+<P>
+A successful call returns the number of bytes that were written into the <I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT> argument.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> doesn't identify an existing port, or the port was deleted while the function was blocked.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> limit expired.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_WOULD_BLOCK">B_WOULD_BLOCK</A></TT></B>.  You asked for a <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> of 0, but there are no messages in the queue.  
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#write_port()">write_port()</A></TT></B>, <B><TT><A HREF="#port_buffer_size()">port_buffer_size()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="set_port_owner()"></A>set_port_owner()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_port_owner(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT>, team_id <I><FONT  color=991122 face=HELVETICA>team</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Transfers ownership of the designated port to <I><FONT  color=991122 face=HELVETICA>team</I></FONT>.  A port can only be owned by one team at a time; by setting a port's owner, you remove it from its current owner.
+<P>
+There are no restrictions on who can own a port, or on who can transfer ownership.  In other words, the thread that calls <B><TT>set_port_owner()</TT></B> needn't be part of the team that currently owns the port, nor must you only assign ports to the team that owns the calling thread (although these two are the most likely scenarios).
+<P>
+Port ownership is meaningful for one reason:  When a team dies (when all its threads are dead), the ports that are owned by that team are freed.  Ownership, otherwise, has no significance&mdash;it carries no special privileges or obligations.  
+<P>
+To discover a port's owner, use the <B><TT><A HREF="#get_port_info()">get_port_info()</A></TT></B> function.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Ownership was successfully transferred.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> doesn't identify a valid port.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TEAM_ID">B_BAD_TEAM_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>team</I></FONT> doesn't identify a valid team.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#get_port_info()">get_port_info()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="write_port()"></A>write_port()
+, 
+<A NAME="write_port_etc()"></A>write_port_etc()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>write_port(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>msg_code</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>write_port_etc(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>port</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>msg_code</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>buffer_size</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions place a message at the tail of <I><FONT  color=991122 face=HELVETICA>port</I></FONT>'s message queue.  The message consists of <I><FONT  color=991122 face=HELVETICA>msg_code</I></FONT> and <I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT>: 
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>msg_code</I></FONT> holds the "message code."  This is a mask, flag, or other predictable value that gives a general representation of the message.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>msg_buffer</I></FONT> is a pointer to a buffer that can be used to supply additional information.  You pass the length of the buffer, in bytes, as the value of the<I><FONT  color=991122 face=HELVETICA> buffer_size</I></FONT> argument.  The buffer can be arbitrarily long.  
+<P>
+</UL>
+<P>
+If the port's queue is full when you call <B><TT><A HREF="#write_port()">write_port()</A></TT></B>, the function will block.  It returns when a <B><TT><A HREF="#read_port()">read_port()</A></TT></B> call frees a slot in the queue for the new message.  A blocked <B><TT>write_port()</TT></B> will also return if the target port is deleted or closed.
+<P>
+The <B><TT>write_port_etc()</TT></B> function lets you set a limit on the amount of time the function will wait for a free queue slot.  To set the limit, you pass <B><TT><A HREF="Semaphores.html#B_TIMEOUT">B_TIMEOUT</A></TT></B> as the flags argument, and set <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> to the amount of time, in microseconds, that you're willing to wait. 
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The port was successully written to.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>port</I></FONT> doesn't identify an open port, or the port was deleted while the function was blocked.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> limit expired.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_WOULD_BLOCK">B_WOULD_BLOCK</A></TT></B>.  You asked for a <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> of 0, but there are no free slots in the message queue.  
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#read_port()">read_port()</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Port%20Structures%20and%20Constants"></A><FONT SIZE=6>P</FONT>ort <FONT SIZE=6>S</FONT>tructures and <FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="port_info"></A>port_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port_id port;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id team;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char name[<B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A></TT></B>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 capacity;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 queue_count;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 total_count;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>port_info
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The port_info structure provides information about a port.  You retrieve one of these structures through<B><TT> <A HREF="#get_port_info()">get_port_info()</A></TT></B> or <B><TT><A HREF="#get_next_port_info()">get_next_port_info()</A></TT></B>.
+<P>
+<UL>
+<LI>port.  The <B><TT>port_id</TT></B> number of the port.
+<P>
+<LI>team.  The<B><TT> <A HREF="Threads.html#team_id">team_id</A></TT></B> of the port's owner.
+<P>
+<LI>name.  The name assigned to the port.  
+<P>
+<LI>capacity.  The length of the port's message queue. 
+<P>
+<LI>queue_count.  The number of messages currently in the queue.
+<P>
+<LI>total_count.  The total number of message that have been read from the port.
+<P>
+</UL>
+<P>
+Note that the total_count number doesn't include the messages that are currently in the queue.  
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,584 @@
+<HTML><HEAD><TITLE>The Interface Kit: BStatusBar</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BStatusBar"></A>BStatusBar
+</H1>
+<P>
+Derived from:  public <A HREF="View.html#BView">BView</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/StatusBar.h">be/interface/StatusBar.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="StatusBar.summary.html"><i>Summary</i></A></H6>
+<P>
+A BStatusBar is a cosmetic object that graphically indicates the progress of an operation.  It displays a horizontal bar that's filled with color from left to right as operation is progresses.
+<P>
+The label and text are abutted and aligned at the left of the bar; the trailing text and trailing label are abutted and aligned at the right of the bar.
+<P>
+The texts can change each time the bar is updated.  The label and trailing label are set by the constructor and remain constant throughout the display, or until the object is reset for another operation.
+<P>
+To set the amount that the status bar is filled, you can call <B><TT><A HREF="#Update()">Update()</A></TT></B>, which lets you add a delta to the current value.  The "filling" itself reflects the ratio (<B><TT>current_value</TT></B>)/(<B><TT>max_value</TT></B>), where <B><TT>max_value</TT></B> is 100.0 by default, but can be reset through <B><TT><A HREF="#SetMaxValue()">SetMaxValue()</A></TT></B>.  The minimum value of the bar is always 0.0.
+<P>
+You can call <B><TT><A HREF="#Update()">Update()</A></TT></B> directly, or invoke it indirectly (and asynchronously) by sending a <B><TT><A HREF="../Messages/GeneralMessages.html#B_UPDATE_STATUS_BAR">B_UPDATE_STATUS_BAR</A></TT></B> message to the BStatusBar.
+<P>
+The <B><TT><A HREF="#Reset()">Reset()</A></TT></B> function, which empties the bar can also be invoked through a message (<B><TT>B_RESET_STATUS_BAR)</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BStatusBar()"></A>BStatusBar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BStatusBar(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>label</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>trailingLabel</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BStatusBar(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BStatusBar with a <I><FONT  color=991122 face=HELVETICA>label</I></FONT> and a <I><FONT  color=991122 face=HELVETICA>trailingLabel</I></FONT>, which can both be <B><TT>NULL</TT></B>.  The <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> rectangle is used for its origin and width only; when the BStatusBar is attached to a window, it will be resized to a height that precisely accommodates its parts.  The <I><FONT  color=991122 face=HELVETICA>name</I></FONT> argument is passed on to the <A HREF="View.html#BView">BView</A> constructor.  
+<P>
+The object is given a <B><TT><A HREF="ViewGeneral.html#B_WILL_DRAW">B_WILL_DRAW</A></TT></B> flag and a resizing mode that keeps it glued to the left and top sides of its parent.
+<P>
+The default font of the BStatusBar is the system plain font, and the default color of the bar is blue (50, 150, 255).  It's initial value is 0.0, the minimum, and its default maximum value is 100.0.
+<P>
+<B>See also:  <TT><A HREF="#SetMaxValue()">SetMaxValue()</A></TT></B>, <B><TT><A HREF="#SetBarColor()">SetBarColor()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BStatusBar()"></A>~BStatusBar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BStatusBar()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the labels and the text.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BStatusBar object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> doesn't contain data for an BStatusBar object, this function returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B>, then adds the bar color, bar height, current value, and maximum value to the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, along with the current text, trailing text, label, and trailing label.
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Resizes the frame rectangle to accommodate the object's graphical parts.  The width isn't altered.
+<P>
+This function also sets the view and low colors of the BStatusBar to match the background view color of its new parent.
+<P>
+<HR>
+<H3>BarColor()   see <A HREF="#SetBarColor()">SetBarColor()</A></H3>
+<P>
+<HR>
+<H3>BarHeight()   see <A HREF="#SetBarHeight()">SetBarHeight()</A></H3>
+<P>
+<HR>
+<H3>CurrentValue()   see <A HREF="#SetMaxValue()">SetMaxValue()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the bar, labels, and text.
+<P>
+<HR>
+<H3>
+<A NAME="Label()"></A>Label()
+, 
+<A NAME="TrailingLabel()"></A>TrailingLabel()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Label(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>TrailingLabel(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return pointers to the object's label and trailing label.  The returned strings belong to the BStatusBar object and should not be altered.  They can be set only on construction or when all values are reset.
+<P>
+<B>See also:  <TT><A HREF="#Reset()">Reset()</A></TT></B> 
+<P>
+<HR>
+<H3>MaxValue()   see <A HREF="#SetMaxValue()">SetMaxValue()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MessageReceived()"></A>MessageReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MessageReceived(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Responds to <B><TT><A HREF="../Messages/GeneralMessages.html#B_UPDATE_STATUS_BAR">B_UPDATE_STATUS_BAR</A></TT></B> and <B><TT><A HREF="../Messages/GeneralMessages.html#B_RESET_STATUS_BAR">B_RESET_STATUS_BAR</A></TT></B> messages by calling the <B><TT><A HREF="#Update()">Update()</A></TT></B> and <B><TT><A HREF="#Reset()">Reset()</A></TT></B> functions.  Each message contains data that can be passed as arguments to the functions.
+<P>
+<B>See also:  <TT>BView::MessageReceived()</TT></B>, <B><TT><A HREF="#Update()">Update()</A></TT></B>, <B><TT><A HREF="#Reset()">Reset()</A></TT></B>, "BStatusBar Messages" in the <B>Message Protocols</B> appendix
+<P>
+<HR>
+<H3>
+<A NAME="Reset()"></A>Reset()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Reset(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>label</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, const char *<I><FONT  color=991122 face=HELVETICA>trailingLabel</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Empties the status bar, sets its current value to 0.0 and its maximum value to 100.0, deletes and erases the text and trailing text, and replaces the label and trailing label with copies of the strings passed as arguments.  If either argument is <B><TT>NULL</TT></B>, the label or trailing label will also be deleted and erased.
+<P>
+This gets the BStatusBar ready to be reused for another operation.  For example, if several large files are being downloaded, the BStatusBar could be reset for each one.
+<P>
+You can call this function indirectly (and asynchronously) through a <B><TT><A HREF="../Messages/GeneralMessages.html#B_RESET_STATUS_BAR">B_RESET_STATUS_BAR</A></TT></B> message.  If the message has an entry named "label" containing a string (<B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>), the string will be passed to the function as the first argument.  If there's a string in an entry named "trailing_label", it will be passed as the second argument.  If either entry is absent, the value for the corresponding argument will be <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#SetText()">SetText()</A></TT></B>, <B><TT><A HREF="#Update()">Update()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetBarColor()"></A>SetBarColor()
+, 
+<A NAME="BarColor()"></A>BarColor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetBarColor(</TT></B></FONT>rgb_color <I><FONT  color=991122 face=HELVETICA>color</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+rgb_color <B><TT><FONT  color=000022 size=+1>BarColor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the color that fills the bar to show how much of an operation has been completed.  The default bar color is blue (50, 150, 255).
+<P>
+<HR>
+<H3>
+<A NAME="SetBarHeight()"></A>SetBarHeight()
+, 
+<A NAME="BarHeight()"></A>BarHeight()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetBarHeight(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>BarHeight(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the height of the bar itself, minus the text and labels.  The default height is 16.0 coordinate units.  The frame rectangle is adjusted to accommodate the new height, and the object is redrawn.
+<P>
+<HR>
+<H3>
+<A NAME="SetMaxValue()"></A>SetMaxValue()
+, 
+<A NAME="MaxValue()"></A>MaxValue()
+, 
+<A NAME="CurrentValue()"></A>CurrentValue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetMaxValue(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>max</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>MaxValue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>CurrentValue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetMaxValue()">SetMaxValue()</A></TT></B> sets the maximum value of the <A HREF="#BStatusBar">BStatusBar</A>, which by default is 100.0.  <B><TT><A HREF="#MaxValue()">MaxValue()</A></TT></B> returns the current maximum.  The minimum value is 0.0 and cannot be changed.
+<P>
+<B><TT><A HREF="#CurrentValue()">CurrentValue()</A></TT></B> returns the current value of the BStatusBar.  The current value is set by <B><TT><A HREF="#Update()">Update()</A></TT></B> and reset to 0.0 by <B><TT><A HREF="#Reset()">Reset()</A></TT></B>.  
+<P>
+The amount of "filling" in the status bar reflects the ratio <B><TT>CurrentValue()</TT></B>/<B><TT>MaxValue()</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#Update()">Update()</A></TT></B>, <B><TT><A HREF="#Reset()">Reset()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetText()"></A>SetText()
+, 
+<A NAME="SetTrailingText()"></A>SetTrailingText()
+, 
+<A NAME="Text()"></A>Text()
+, 
+<A NAME="TrailingText()"></A>TrailingText()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetText(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetTrailingText(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Text(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>TrailingText(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These <B><TT>SetText()</TT></B> and <B><TT>SetTrailingText() </TT></B>functions erase the previous text or trailing text and replace them with copies of the <I><FONT  color=991122 face=HELVETICA>string</I></FONT> argument. <I><FONT  color=991122 face=HELVETICA> string</I></FONT> can be <B><TT>NULL</TT></B>.  The view is automatically redrawn.  
+<P>
+<B><TT><A HREF="#Text()">Text()</A></TT></B> and <B><TT><A HREF="#TrailingText()">TrailingText()</A></TT></B> return pointers to the current text strings.
+<P>
+<HR>
+<H3>SetText())</H3>
+<P>
+<HR>
+<H3>TrailingLabel()   see <A HREF="MenuField.html#SetLabel()">SetLabel()</A></H3>
+<P>
+<HR>
+<H3>TrailingText()   see <A HREF="#SetText()">SetText()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Update()"></A>Update()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Update(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>delta</I></FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>text</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>trailingText</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Update()</TT></B> updates the BStatusBar by adding <I><FONT  color=991122 face=HELVETICA>delta</I></FONT> to its current value and resetting its text and trailing text.  Passing <B><TT>NULL</TT></B> for the <I><FONT  color=991122 face=HELVETICA>text</I></FONT> or <I><FONT  color=991122 face=HELVETICA>trailingText</I></FONT> argument retains the existing string(s).  The status bar is automatically redrawn.
+<P>
+You can call <B><TT>Update()</TT></B> indirectly through a <B><TT><A HREF="../Messages/GeneralMessages.html#B_UPDATE_STATUS_BAR">B_UPDATE_STATUS_BAR</A></TT></B> message that contains the following fields, which correspond to the function's arguments:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type</TH>
+<TR>
+<TD>"delta"</TD>
+<TD>B_FLOAT_TYPE</TD>
+<TR>
+<TD>"text"</TD>
+<TD>B_STRING_TYPE</TD>
+<TR>
+<TD>"trailing text"</TD>
+<TD>B_STRING_TYPE</TD>
+</TABLE>
+  
+<P>
+To pass a <B><TT>NULL</TT></B> string through this message, simply don't add the "text" or "trailing text" field.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_high"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Status bar height.</TD>
+<TR>
+<TD>"_bcolor"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Status bar color.</TD>
+<TR>
+<TD>"_val"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Current value.</TD>
+<TR>
+<TD>"_max"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>Maximum value.</TD>
+<TR>
+<TD>"_text"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Status bar text.</TD>
+<TR>
+<TD>"_ttext"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Trailing text.</TD>
+<TR>
+<TD>"_label"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Status bar label.</TD>
+<TR>
+<TD>"_tlabel"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Trailing text label.</TD>
+</TABLE>
+<P>
+Some of these fields may not be present if the setting they represent isn't used, or is the default value.  For example, if there is no trailing text, the "_ttext" field won't be found in the archive.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

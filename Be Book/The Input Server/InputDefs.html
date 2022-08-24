@@ -1,0 +1,298 @@
+<HTML><HEAD><TITLE>The Input Server: Input Server Structures and Constants</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Input%20Server%20Structures%20and%20Constants"></A>Input Server Structures and Constants
+</H1>
+<P>
+<HR>
+<H2>
+<A NAME="Structures"></A><FONT SIZE=6>S</FONT>tructures
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="input_device_ref"></A>input_device_ref
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/add-ons/input_server/InputServerDevice.h">be/add-ons/input_server/InputServerDevice.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>input_device_ref</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *name;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input_device_type type;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *cookie;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT><A HREF="#input_device_ref">input_device_ref</A></TT></B> structure is used to identify specific devices that a <A HREF="InputServerDevice.html#BInputServerDevice">BInputServerDevice</A> manages.  To tell the Input Server about the devices your object manages, you create an array of these structures and pass them in a <B><TT><A HREF="InputServerDevice.html#RegisterDevices()">BInputServerDevice::RegisterDevices()</A></TT></B> call.
+<P>
+The fields are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD>const char *<B><TT>name</TT></B></TD>
+<TD>An arbitrary&mdash;but preferably human-readable&mdash;name that you invent.  Although the name is used as an identifier (in <B><TT><A HREF="InputDevice.html#Control()">Control()</A></TT></B> calls), you should choose a name that's "UI-suitable" (e.g. "ADB Mouse", or "USB Keyboard").</TD>
+<TR>
+<TD>input_device_type <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#type">type</A></TT></B> </TD>
+<TD>This is either <B><TT><A HREF="#B_POINTING_DEVICE">B_POINTING_DEVICE</A></TT></B> (i.e. mice), <B><TT><A HREF="#B_KEYBOARD_DEVICE">B_KEYBOARD_DEVICE</A></TT></B>, or <B><TT><A HREF="#B_UNDEFINED_DEVICE">B_UNDEFINED_DEVICE</A></TT></B>, where the last of these is a catchall for anything that isn't a mouse or a keyboard.</TD>
+<TR>
+<TD>void *<B><TT><A HREF="../Drivers/kernelAPI.html#open_device_iterator">cookie</A></TT></B></TD>
+<TD>This is an arbitrary piece of data that you can associate with the device.  Use it to conveniently store some cogent piece of data (such as *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>), or to more specifically identify the device (such as the pathname of the driver it corresponds to), and so on.</TD>
+</TABLE>
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Device%20Types"></A>Device Types
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Input.h">be/interface/Input.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>
+<A NAME="Device%20Types"></A>B_POINTING_DEVICE
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>
+<A NAME="Device%20Types"></A>B_KEYBOARD_DEVICE
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>
+<A NAME="Device%20Types"></A>B_UNDEFINED_DEVICE
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These constants represent the different types of input devices; they're used when defining an <B><TT><A HREF="#input_device_ref">input_device_ref</A></TT></B> structure, and when sending control messages through a <A HREF="InputDevice.html#BInputDevice">BInputDevice</A> object.
+<P>
+<UL>
+<LI><B><TT><A HREF="#B_POINTING_DEVICE">B_POINTING_DEVICE</A></TT></B> signifies devices, such as mice and tablets, that are used to control the cursor.  
+<P>
+<LI><B><TT><A HREF="#B_KEYBOARD_DEVICE">B_KEYBOARD_DEVICE</A></TT></B> signifies keyboards.
+<P>
+<LI><B><TT><A HREF="#B_UNDEFINED_DEVICE">B_UNDEFINED_DEVICE</A></TT></B> is anything that isn't a pointer or keyboard.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Note that there is no "joystick device"&mdash;the Input Server doesn't currently handle joysticks.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Input"></A>Input
+, 
+<A NAME="Method"></A>Method
+, 
+<A NAME="Operations"></A>Operations
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Input.h">be/interface/Input.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+enum <B><TT><FONT  color=000022 size=+1>input_method_op</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_INPUT_METHOD_STARTED</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_INPUT_METHOD_STOPPED</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_INPUT_METHOD_CHANGED</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_INPUT_METHOD_LOCATION_REQUEST
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Input"></A>Input
+, 
+<A NAME="Device"></A>Device
+, 
+<A NAME="Notifications"></A>Notifications
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Input.h">be/interface/Input.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+enum <B><TT><FONT  color=000022 size=+1>input_device_notification</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_INPUT_DEVICE_ADDED</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_INPUT_DEVICE_STARTED</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_INPUT_DEVICE_STOPPED</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_INPUT_DEVICE_REMOVED
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Input"></A>Input
+, 
+<A NAME="Device"></A>Device
+, 
+<A NAME="Control"></A>Control
+, 
+<A NAME="Messages"></A>Messages
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/add-ons/input_server/InputServerDevice.h">be/add-ons/input_server/InputServerDevice.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>B_KEY_MAP_CHANGED
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>B_KEY_LOCKS_CHANGED
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>B_KEY_REPEAT_DELAY_CHANGED
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>B_KEY_REPEAT_RATE_CHANGED
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>B_MOUSE_TYPE_CHANGED
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>B_MOUSE_MAP_CHANGED
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>B_MOUSE_SPEED_CHANGED
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>B_CLICK_SPEED_CHANGED
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These constants are used in the <B><TT><A HREF="InputServerDevice.html#Control()">BInputServerDevice::Control()</A></TT></B> function to tell a <A HREF="InputServerDevice.html#BInputServerDevice">BInputServerDevice</A> that a change to a device parameter has been requested.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,3014 @@
+<HTML><HEAD><TITLE>The Media Kit: BMediaRoster</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMediaRoster"></A>BMediaRoster
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaRoster.h">be/media/MediaRoster.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="MediaRoster.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMediaRoster class comprises the functionality that applications that use the Media Kit can access.
+<P>
+An application can only have a single instance of the BMediaRoster class, which is accessed by calling the static member function <B><TT><A HREF="#BMediaRoster::Roster()">BMediaRoster::Roster()</A></TT></B>, which creates the media roster, establishes the connection to the Media Server, then returns a pointer to the roster.
+<P>
+The creation of the roster object is thread protected, so you can safely call <B><TT><A HREF="#BMediaRoster::Roster()">BMediaRoster::Roster()</A></TT></B> from multiple threads without synchronization, and both threads will safely get the same instance.  The cost of this synchronization is low enough that there's no need to cache the returned pointer, but it's perfectly safe to do so if you wish:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMediaRoster *gMediaRoster;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;int main(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BApplication app("application/x-vnd.me-myself");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gMediaRoster = BMediaRoster::Roster(&amp;err);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!gMediaRoster || (err != B_OK)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* the Media Server appears to be dead -- handle that here */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* The Media Server connection is in place -- enjoy! */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 0;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Because BMediaRoster is derived from <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A>, you should create your <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> before calling <B><TT><A HREF="#BMediaRoster::Roster()">BMediaRoster::Roster()</A></TT></B>, although the <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> doesn't have to be running yet.
+<P>
+You should never delete the BMediaRoster returned to you by <B><TT><A HREF="#BMediaRoster::Roster()">BMediaRoster::Roster()</A></TT></B>.  Also, you can't derive a class from BMediaRoster.
+<P>
+If you want to receive notifications from the Media Server when specific changes occur, such as nodes coming online or going offline, for example, you can register to receive such notifications by calling <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Playing%20Media%20from%20Disk"></A><FONT SIZE=6>P</FONT>laying <FONT SIZE=6>M</FONT>edia from <FONT SIZE=6>D</FONT>isk
+</H2>
+<P>
+To play a media file from disk, you would follow the following steps:
+<P>
+<LI>Create an entry_ref that refers to the file to be played.
+<P>
+<LI>Call <B><TT><A HREF="#SniffRef()">SniffRef()</A></TT></B> to obtain a dormant_node_info reference to the node that is best capable of playing back the media file.
+<P>
+<LI>Call <B><TT><A HREF="#InstantiateDormantNode()">InstantiateDormantNode()</A></TT></B> to instantiate the node; this returns a media_node that you can use for other BMediaRoster calls.
+<P>
+<LI>Use <B><TT><A HREF="#SetRefFor()">SetRefFor()</A></TT></B> to pass the entry_ref of the file to be played to the node.
+<P>
+<LI>Call <B><TT>GetFreeOutputs()</TT></B> to obtain a media_output structure describing an available output on the producer node.  This structure contains a media_source you can pass to <B><TT><A HREF="#Connect()">Connect()</A></TT></B> as the source of the media data.
+<P>
+<LI>The media_output structure returned by <B><TT><A HREF="#GetFreeOutputsFor()">GetFreeOutputsFor()</A></TT></B> contains a media_format field that indicates the general type of media data contained by the media file; if you don't already know what type of data you're playing back (audio or video or whatever), this will let you determine what you'll be playing.
+<P>
+<LI>You can use this value to determine what type of destination is needed to output the data (for example, <B><TT>B_MEDIA_RAW_AUDIO</TT></B> would go to an audio output, and <B><TT>B_MEDIA_RAW_VIDEO</TT></B> would go to a video output).
+<P>
+<LI>Call <B><TT><A HREF="#GetAudioMixer()">GetAudioMixer()</A></TT></B> to get a media_node for the default audio mixer (if the media data is audio), or <B><TT><A HREF="#GetVideoOutput()">GetVideoOutput()</A></TT></B> to get a media_node for the default video output (if the media data is video).
+<P>
+<LI>Use <B><TT><A HREF="#GetFreeInputsFor()">GetFreeInputsFor()</A></TT></B> to obtain a media_input structure describing an available input on the consumer node (the audio mixer or video output); this structure contains a media_destination you can pass to <B><TT><A HREF="#Connect()">Connect()</A></TT></B>.
+<P>
+<LI>Call <B><TT><A HREF="#Connect()">Connect()</A></TT></B> to connect the source to the destination.
+<P>
+<LI>Next, you need to set the time source for the media file's node.  Normally you'll set this to the preferred time source.  The audio mixer or video output is already slaved to an appropriate time source.
+<P>
+<LI>Finally, you can use <B><TT><A HREF="#StartNode()">StartNode()</A></TT></B> to start the producer, consumer, and time source.  The media file should begin playing back.
+<P>
+</UL>
+<P>
+Let's look at actual sample code that does this.  This example is particular to playing movie files; in particular, it assumes that the video is encoded (<B><TT>B_MEDIA_ENCODED_VIDEO</TT></B>) and that the audio is in a raw audio format (<B><TT>B_MEDIA_RAW_AUDIO</TT></B>).  However, it demonstrates the principles of playing both encoded and raw media formats, and you can easily extrapolate from it any type of playback you need.  First it's necessary to identify an appropriate node to handle the file, and to instantiate the node and configure it for the file we want to play:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;duration;
+&nbsp;&nbsp;&nbsp;media_node&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeSourceNode;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;media_node&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mediaFileNode;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;media_output&nbsp;&nbsp;&nbsp;fileNodeOutput;
+&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fileOutputCount;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;media_output&nbsp;&nbsp;&nbsp;fileAudioOutput;
+&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fileAudioCount;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;media_node&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;codecNode;
+&nbsp;&nbsp;&nbsp;media_output&nbsp;&nbsp;&nbsp;codecOutput;
+&nbsp;&nbsp;&nbsp;media_input&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;codecInput;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;media_node&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;videoNode;
+&nbsp;&nbsp;&nbsp;media_input&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;videoInput;
+&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;videoInputCount;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;media_node&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;audioNode;
+&nbsp;&nbsp;&nbsp;media_input&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;audioInput;
+&nbsp;&nbsp;&nbsp;int32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;audioInputCount;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;dormant_node_info nodeInfo;
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;playingFlag = false;
+&nbsp;&nbsp;&nbsp;roster = BMediaRoster::Roster();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;initStatus = roster->SniffRef(*ref, 0, &amp;nodeInfo);
+&nbsp;&nbsp;&nbsp;if (initStatus) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;initStatus = roster->InstantiateDormantNode(nodeInfo, &amp;mediaFileNode);
+&nbsp;&nbsp;&nbsp;if (initStatus) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;roster->SetRefFor(mediaFileNode, *ref, false, &amp;duration);
+&nbsp;&nbsp;&nbsp;if ((err = Setup()) != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Error %08lX in Setup()n", err);
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Start();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This code begins by obtaining a pointer to the media roster.  It then calls <B><TT><A HREF="#SniffRef()">SniffRef()</A></TT></B> to get a <B><TT><A HREF="MediaAddOn.html#dormant_node_info">dormant_node_info</A></TT></B> structure describing the best-suited node for reading the media data from the file specified by <B><TT>ref</TT></B>.
+<P>
+Once a <B><TT><A HREF="MediaAddOn.html#dormant_node_info">dormant_node_info</A></TT></B> structure has been filled out, the <B><TT><A HREF="#InstantiateDormantNode()">InstantiateDormantNode()</A></TT></B> function is called to instantiate a node to handle the file.  A dormant node is a node whose code resides in an add-on, instead of within the application itself.  The <B><TT>nodeInfo</TT></B> structure is passed into the function, and on return, the <B><TT>mediaFileNode</TT></B> has been set up for the appropriate node.
+<P>
+Since the media_node <B><TT>mediaFileNode</TT></B> is a file handling node, the <B><TT><A HREF="#SetRefFor()">SetRefFor()</A></TT></B> function is then called to tell the newly-instantiated file handler node what file it should handle.  The inputs here are:
+<P>
+<UL>
+<LI><B><TT>mediaFileNode</TT></B> is the node whose file reference is to be set.
+<P>
+<LI><B><TT>ref</TT></B> is the file that the node should reference.
+<P>
+<LI><B><TT>false</TT></B> indicates that the file must already exist.  If this flag were true, and the file indicated by ref were nonexistent, the node would create a new file.  Since we're playing a file, we don't want to do that.
+<P>
+<LI><B><TT>duration</TT></B> is a bigtime_t variable that will receive the duration of the media file, in microseconds.
+<P>
+</UL>
+<P>
+Once this has been accomplished, it's time to instantiate the other nodes needed to perform the media playback.  Note that your code should check the error results from each of these calls and only proceed if <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> is returned.
+<P>
+The <B><TT>Setup()</TT></B> and <B><TT>Start()</TT></B> functions used in the example above are given below.  <B><TT>Setup()</TT></B> actually sets up the connections and instantiates the various other nodes (such as codecs and output nodes) required to play back the media data.  Let's take a look at <B><TT>Setup()</TT></B> next:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t MediaPlayer::Setup(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format tryFormat;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dormant_node_info nodeInfo;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 nodeCount;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetAudioMixer(&amp;audioNode);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetVideoOutput(&amp;videoNode);</PRE>
+<P>
+First, <B><TT><A HREF="#GetAudioMixer()">GetAudioMixer()</A></TT></B> and <B><TT><A HREF="#GetVideoOutput()">GetVideoOutput()</A></TT></B> are called to obtain an audio mixer node and a video output node.  The nodes returned by this function are based on the user's preferences in the Audio and Video preference applications.  By default, video is output to a simple video output consumer that creates a window to contain the video display.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The VideoConsumer node will be available with R4.5; it's not provided in R4.  In addition, there are no video producer nodes in R4; media add-ons for a variety of movie file formats will also be available beginning with R4.5.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetTimeSource(&amp;timeSourceNode);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b_timesource = roster->MakeTimeSourceFor(timeSourceNode);</PRE>
+<P>
+This code obtains a media_node for the preferred time source, and then creates a <A HREF="TimeSource.html#BTimeSource">BTimeSource</A> object that refers to the same node; we'll need to be able to make some <A HREF="TimeSource.html#BTimeSource">BTimeSource</A> calls to obtain some specific timing information later.
+<P>
+A time source is a node that can be used to synchronize other nodes.  By default, nodes are slaved to the system time source, which is the computer&gt;s internal clock.  However, this time source, while very precise, isn&gt;t good for synchronizing media data, since its concept of time has nothing to do with actual media being performed.  For this reason, you typically will want to change nodes&gt; time sources to the preferred time source.
+<P>
+You can think of a media node (represented by the <B><TT><A HREF="misc_api.html#media_node">media_node</A></TT></B> structure) as a component in a home theater system you might have at home.  It has inputs for audio and video (possibly multiple inputs for each), and outputs to pass that audio and video along to other components in the system.  To use the component, you have to connect wires from the outputs of some other components into the component&gt;s inputs, and the outputs into the inputs of other components.
+<P>
+The Media Kit works the same way.  We need to locate audio outputs from the <B><TT>mediaFileNode</TT></B> and find corresponding audio inputs on the <B><TT>audioNode</TT></B>.  This is analogous to choosing an audio output from your new DVD player and matching it to an audio input jack on your stereo receiver.  Since you can&gt;t use ports that are already in use, we call <B><TT><A HREF="#GetFreeOutputsFor()">GetFreeOutputsFor()</A></TT></B> to find free output ports on the <B><TT>mediaFileNode</TT></B>, and <B><TT><A HREF="#GetFreeInputsFor()">GetFreeInputsFor()</A></TT></B> to locate free input ports on the <B><TT>audioNode</TT></B>.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetFreeOutputsFor(mediaFileNode, &amp;fileAudioOutput, 1,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;fileAudioCount, B_MEDIA_RAW_AUDIO);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetFreeInputsFor(audioNode, &amp;audioInput, fileAudioCount,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;audioInputCount, B_MEDIA_RAW_AUDIO);</PRE>
+<P>
+We only want a single audio connection between the two nodes (a single connection can carry stereo sound), and the connection is of type <B><TT>B_MEDIA_RAW_AUDIO</TT></B>.  On return, <B><TT>fileAudioOutput</TT></B> and <B><TT>audioInput</TT></B> describe the output from the <B><TT>mediaFlieNode</TT></B> and the input into the <B><TT>audioNode</TT></B> that will eventually be connected to play the movie&gt;s sound.
+<P>
+We likewise have to find a video output from the <B><TT>mediaFileNode</TT></B> and an input into the <B><TT>videoNode</TT></B>.  In this case, though, we expect the video output from the <B><TT>mediaFileNode</TT></B> to be encoded, and the <B><TT>videoNode</TT></B> will want to receive raw, uncompressed video.  We&gt;ll work that out in a minute; for now, let&gt;s just find the two ports:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetFreeOutputsFor(mediaFileNode, &amp;fileNodeOutput, 1,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;fileOutputCount, B_MEDIA_ENCODED_VIDEO)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetFreeInputsFor(videoNode, &amp;videoInput, fileOutputCount,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;videoInputCount, B_MEDIA_RAW_VIDEO);</PRE>
+<P>
+The problem we have now is that the <B><TT>mediaFileNode</TT></B> is outputting video that&gt;s encoded somehow (like in Cinepak format, for instance).  The <B><TT>videoNode</TT></B>, on the other hand, wants to display raw video.  Another node must be placed between these to decode the video (much like having an adapter to convert PAL video into NTSC, for example).  This node will be the codec that handles decompressing the video into raw form.
+<P>
+We need to locate a codec node that can handle the video format being output by the <B><TT>mediaFileNode</TT></B>.  This is accomplished like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nodeCount = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetDormantNodes(&amp;nodeInfo, &amp;nodeCount,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;fileNodeOutput.format);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!nodeCount) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return -1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This call to <B><TT><A HREF="#GetDormantNodes()">GetDormantNodes()</A></TT></B> looks for a dormant node that can handle the media format specified by the <B><TT>mediaFileNode</TT></B>&gt;s output <B><TT><A HREF="misc_api.html#media_format">media_format</A></TT></B> structure.  Information about the node is returned in <B><TT>nodeInfo</TT></B>.  <B><TT>nodeCount</TT></B> indicates the number of matching nodes that were found.  If it&gt;s zero, an error is returned.
+<P>
+Note that in real life you should ask for several nodes, and search through them, looking at the formats until you find one that best meets your needs.
+<P>
+Then we use <B><TT><A HREF="#InstantiateDormantNode()">InstantiateDormantNode()</A></TT></B> to instantiate the codec node, and locate inputs into the node (that accept encoded video) and outputs from the node (that output raw video):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->InstantiateDormantNode(nodeInfo, &amp;codecNode);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetFreeInputsFor(codecNode, &amp;codecInput, 1, &amp;nodeCount, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_MEDIA_ENCODED_VIDEO);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetFreeOutputsFor(codecNode, &amp;codecOutput, 1,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;nodeCount, B_MEDIA_RAW_VIDEO);</PRE>
+<P>
+Now we&gt;re ready to start connecting these nodes together.  If we were setting up a home theater system, right about now we&gt;d be getting rug burns on our knees and skinned knuckles on our hands, trying to reach behind the entertainment center to run wires.  The Media Kit is way easier than that, and doesn&gt;t involve salespeople telling you to get expensive gold-plated cables.
+<P>
+We begin by connecting the file node&gt;s video output to the codec&gt;s input:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tryFormat = fileNodeOutput.format;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->Connect(fileNodeOutput.source, codecInput.destination,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;tryFormat, &amp;fileNodeOutput, &amp;codecInput);</PRE>
+<P>
+<B><TT>tryFormat</TT></B> indicates the format of the encoded video that will be output by the <B><TT>mediaFileNode</TT></B>.  <B><TT><A HREF="#Connect()">Connect()</A></TT></B>, in essense, runs a wire between the output from the media node&gt;s video output (<B><TT>fileNodeOutput</TT></B>) to the codec node&gt;s input.
+<P>
+You may wonder what&gt;s up with the <B><TT>fileNodeOutput.source</TT></B> and <B><TT>codecInput.destination</TT></B> structures.  These <B><TT><A HREF="misc_api.html#media_source">media_source</A></TT></B> and <B><TT><A HREF="misc_api.html#media_destination">media_destination</A></TT></B> structures are simplified descriptors of the two ends of the connection.  They contain only the data absolutely needed for the Media Kit to establish the connection.  This saves some time when issuing the <B><TT><A HREF="#Connect()">Connect()</A></TT></B> call (and time is money, especially in the media business).
+<P>
+Next it&gt;s necessary to connect the codec to the video output node.  This begins by setting up <B><TT>tryFormat</TT></B> to describe raw video of the same width and height as the encoded video being fed into the codec, then calling <B><TT><A HREF="#Connect()">Connect()</A></TT></B> to establish the connection:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tryFormat.type = B_MEDIA_RAW_VIDEO;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tryFormat.u.raw_video = media_raw_video_format::wildcard;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tryFormat.u.raw_video.display.line_width =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;codecInput.format.u.encoded_video.output.display.line_width;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tryFormat.u.raw_video.display.line_count =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;codecInput.format.u.encoded_video.output.display.line_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->Connect(codecOutput.source, videoInput.destination,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;tryFormat, &amp;codecOutput, &amp;videoInput);
+&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+Now we connect the audio from the media file to the audio mixer node.  We just copy the <B><TT><A HREF="misc_api.html#media_format">media_format</A></TT></B> from the file&gt;s audio output, since both ends of the connection should exactly match.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tryFormat = fileAudioOutput.format;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->Connect(fileAudioOutput.source, audioInput.destination,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;tryFormat, &amp;fileAudioOutput, &amp;audioInput);</PRE>
+<P>
+The last step of configuring the connections is to ensure that all the nodes are slaved to the preferred time source.  This will keep them synchronized with the preferred time source (and by association, with each other):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->SetTimeSourceFor(mediaFileNode.node, timeSourceNode.node);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->SetTimeSourceFor(videoNode.node, timeSourceNode.node);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->SetTimeSourceFor(codecOutput.node.node,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeSourceNode.node);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->SetTimeSourceFor(audioNode.node, timeSourceNode.node);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Finally, we return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> to the caller.  Note that this code should be enhanced to check the results of each BMediaRoster call, and to return the result code if it's not <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  This has been left out of this example for brevity.
+<P>
+The <B><TT>Start()</TT></B> function actually starts the movie playback.  Starting playback involves starting, one at a time, all the nodes involved in playing back the audio.  This includes the audio mixer (<B><TT>audioNode</TT></B>), the media file&gt;s node (<B><TT>mediaFileNode</TT></B>), the codec, and the video node.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t MediaPlayer::Start(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->GetStartLatencyFor(timeSourceNode, &amp;startTime);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;startTime += b_timesource->PerformanceTimeFor(BTimeSource::RealTime()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 1000000 / 50);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->StartNode(mediaFileNode, startTime);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->StartNode(codecNode, startTime);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->StartNode(videoNode, startTime);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Because there&gt;s lag time between starting each of these nodes, we pick a time a few moments in the future for playback to begin, and schedule each node to start playing at that time.  So we begin by computing that time in the future.
+<P>
+The <B><TT><A HREF="TimeSource.html#RealTime()">BTimeSource::RealTime()</A></TT></B> static member function is called to obtain the current real system time.  We add a fiftieth of a second to that time, and convert it into performance time units.  This is the time at which the performance of the movie will begin (basically a fiftieth of a second from "now").  This value is saved in <B><TT>startTime</TT></B>.  These are added to the value returned by <B><TT><A HREF="#GetStartLatencyFor()">GetStartLatencyFor()</A></TT></B>, which returns the time required to actually start the time source and all the nodes slaved to it.
+<P>
+Then we simply call <B><TT><A HREF="#BMediaRoster::StartNode()">BMediaRoster::StartNode()</A></TT></B> for each node, specifying <B><TT>startTime</TT></B> as the performance time at which playback should begin.
+<P>
+Again, error handling should be added to actually return the error code from these functions.
+<P>
+Stopping playback of the movie is even simpler:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->StopNode(mediaFileNode, 0, true);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->StopNode(codecNode, 0, true);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->StopNode(videoNode, 0, true);</PRE>
+<P>
+This tells the media file, video codec, and video output nodes to stop immediately.  If we wanted them to stop together at some time in the future, we could compute an appropriate performance time and pass that instead of 0.  In this case, we would need to specify false for the last argument; when this value is true, <B><TT><A HREF="#StopNode()">StopNode()</A></TT></B> stops the node immediately.  We could use this ability to schedule all three nodes to stop at the same time, so that video and audio playback would halt simultaneously.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Note that we don't stop the audio mixer node.  You should never stop the mixer node, because other applications are probably using it.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Once you're done playing the movie, and have stopped playback, you should disconnect the nodes from each other:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->Disconnect(mediaFileNode.node, fileNodeOutput.source,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; codecNode.node, codecInput.destination);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->Disconnect(codecNode.node, codecOutput.source,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; videoNode.node, videoInput.destination);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = roster->Disconnect(mediaFileNode.node, fileAudioOutput.source,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; audioNode.node, audioInput.destination);
+&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+This will close out the connections between the media file node and the video codec, the codec and the video output, and between the file node and the audio mixer.  You should always stop playback before disconnecting; although nodes aren't allowed to crash if you disconnect them while running, their behavior isn't specified, and may not be what you expect.
+<P>
+Once the connections are severed, you should release any dormant nodes you instantiated.  This includes not only nodes instantiated using <B><TT><A HREF="MediaAddOn.html#InstantiateNodeFor()">InstantiateNodeFor()</A></TT></B>, but also default nodes (those obtained using functions like <B><TT><A HREF="#GetAudioInput()">GetAudioInput()</A></TT></B> and <B><TT><A HREF="#GetVideoOutput()">GetVideoOutput()</A></TT></B>, for example):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roster->ReleaseNode(codecNode);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roster->ReleaseNode(mediaFileNode);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roster->ReleaseNode(videoNode);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roster->ReleaseNode(audioNode);</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you want to play audio, you may find it much easier to use the BSound and <A HREF="SoundPlayer.html#BSoundPlayer">BSoundPlayer</A> classes to do so.  As of R4.5, there are no Be-provided nodes for producing audio from a disk file.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Detecting%20When%20Playback%20Is%20Complete"></A>Detecting When Playback Is Complete
+</H3>
+<P>
+There isn't a Media Kit function that can directly tell you whether or not the media has reached the end of the data during playback.  However, the following easy-to-implement code can do the job for you:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;bigtime_t currentTime;
+&nbsp;&nbsp;&nbsp;bool isPlaying = true;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;currentTime = b_timesource->PerformanceTimeFor(BTimeSource::RealTime());
+&nbsp;&nbsp;&nbsp;if (currentTime >= startTime+duration) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;isPlaying = false;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This works by obtaining the time source's performance time and comparing it to the time at which playback of the movie was begun plus the movie's duration (both of which were saved when we initially set up and began playback of the movie, as seen in the code in the previous section above).
+<P>
+If the current performance time is equal to or greater than the sum of the starting time and the movie's duration, then playback is finished, and we set <B><TT>isPlaying</TT></B> to <B><TT>false</TT></B>; otherwise, this value remains <B><TT>true</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Using%20BMediaRoster%20Functions%20from%20Nodes"></A>Using BMediaRoster Functions from Nodes
+</H3>
+<P>
+You can issue BMediaRoster function calls from within your own node, however, as a general rule, you shouldn't call BMediaRoster functions from within your control thread, or while the control thread is blocked.  Many BMediaRoster functions use synchronous turnarounds, and will deadlock in this situation.  You should assume, for safety's sake, that all BMediaRoster functions will deadlock if used in these cases.
+<P>
+For example, if you have an application that's playing video into a window, and you call StopNode() from the window's MessageReceived() function, a deadlock would occur if the video player node blocks waiting on the window to be unlocked, and the StopNode() function is keeping the window locked while it waits for the video producer node, which is blocked waiting on the consumer node, and so forth.  Deadlock results, and that's a bad thing.
+<P>
+Instead, you should consider creating a seperate <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> that manages your nodes.  Future versions of the Media Kit will provide convenience classes to do some of this for you.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMediaRoster()"></A>BMediaRoster()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BMediaRoster()">BMediaRoster()</A></TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+You never construct a BMediaRoster yourself.  Instead, use the static  <B><TT><A HREF="#Roster()">Roster()</A></TT></B> function to obtain an instance of the BMediaRoster class that you can use.
+<P>
+<HR>
+<H3>
+<A NAME="~BMediaRoster"></A>~BMediaRoster
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BMediaRoster()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+You never delete a BMediaRoster yourself.  Just let it go away automatically when your application shuts down.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AudioBufferSizeFor()"></A>AudioBufferSizeFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>AudioBufferSizeFor(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>channelCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>sampleFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <I><FONT  color=991122 face=HELVETICA>frameRate</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bus_type <I><FONT  color=991122 face=HELVETICA>busKind</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>AudioBufferSizeFor()</TT></B> returns the size, in bytes, that the Media Kit recommends for audio data with <I><FONT  color=991122 face=HELVETICA>channelCount</I></FONT> channels, with the specified <I><FONT  color=991122 face=HELVETICA>sampleFormat</I></FONT> and <I><FONT  color=991122 face=HELVETICA>frameRate</I></FONT>.
+<P>
+The busKind argument is a bus_type value (see <B>drivers/config_manager.h</B>) indicating the type of bus the data is moving across.  Specify <B><TT>B_UNKNOWN_BUS</TT></B> if you don't know.
+<P>
+<HR>
+<H3>
+<A NAME="Connect()"></A>Connect()
+, 
+<A NAME="Disconnect()"></A>Disconnect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Connect(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_output *<I><FONT  color=991122 face=HELVETICA>outOutput</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_input *<I><FONT  color=991122 face=HELVETICA>outInput</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Connect(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_output *<I><FONT  color=991122 face=HELVETICA>outOutput</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_input *<I><FONT  color=991122 face=HELVETICA>outInput</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>inFlags</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>_reserved</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Disconnect(</TT></B></FONT>media_node_id <I><FONT  color=991122 face=HELVETICA>sourceNode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node_id <I><FONT  color=991122 face=HELVETICA>destinationNode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Connect()</TT></B> negotiates a connection from the <I><FONT  color=991122 face=HELVETICA>source</I></FONT> to the <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, using the media format specified in <I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT> as a basis for the negotiation; <I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT> is changed to the negotiated format before this call returns.  This describes the format of media data that will flow across the connection.
+<P>
+The actual connection is returned as an output and an input in <I><FONT  color=991122 face=HELVETICA>outOutput</I></FONT> and <I><FONT  color=991122 face=HELVETICA>outInput</I></FONT>.  These two structures contain the data format as interpreted by the source and destination.  There may be differences among these formats if wildcard fields were used in the original format.
+<P>
+The second form of <B><TT>Connect()</TT></B> lets you specify connect flags.  Currently the only possible flag is <B><TT>B_CONNECT_MUTED</TT></B>, which indicates that the connection should be muted on creation.
+<P>
+The actual media_source and media_destination used for the connection may vary from those passed into <B><TT>Connect()</TT></B> if the <I><FONT  color=991122 face=HELVETICA>source</I></FONT> or the <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> creates new sources or destinations for each connection request; the <I><FONT  color=991122 face=HELVETICA>outOutput</I></FONT> and <I><FONT  color=991122 face=HELVETICA>outInput</I></FONT> structures contain the actual media_source and media_destination values resulting from the call.
+<P>
+For more detailed information on the use of wildcards in format negotiation, see <B><TT>media_audio_format::wildcard</TT></B> and <B><TT>media_video_format::wildcard</TT></B>.  A media_format with a type of <B><TT>B_MEDIA_UNKNOWN_TYPE</TT></B> matches any media class and format, although without specific knowledge of the source and destination, this will rarely result in a useful connection.
+<P>
+<B><TT>Disconnect()</TT></B> breaks the connection established between <I><FONT  color=991122 face=HELVETICA>source</I></FONT> and <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, which must belong to the nodes <I><FONT  color=991122 face=HELVETICA>sourceNode</I></FONT> and <I><FONT  color=991122 face=HELVETICA>destinationNode</I></FONT>, repectively.
+<P>
+The result of breaking a connection that's currently running is undefined, but is not permitted to crash.  Your application should stop both nodes involved in a connection prior to disconnecting them.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error terminating the connection.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The connection couldn't be made.
+<P>
+<LI>Other errors.  The nodes that are being connected may return other error codes as they see fit.
+<P>
+</UL>
+<P>
+<HR>
+<H3>CurrentRoster() see <A HREF="#Roster()">Roster()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetAllInputsFor()"></A>GetAllInputsFor()
+, 
+<A NAME="GetAllOutputsFor()"></A>GetAllOutputsFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAllInputsFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_input *<I><FONT  color=991122 face=HELVETICA>outInputs</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>bufNumInputs
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>outTotalCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAllOutputsFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_output *<I><FONT  color=991122 face=HELVETICA>outOutputs</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>bufNumOutputs
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>outTotalCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetAllInputsFor()</TT></B> fills the array of media_input structures specified by <I><FONT  color=991122 face=HELVETICA>outInputs</I></FONT> with information about all inputs belonging to <I><FONT  color=991122 face=HELVETICA>node</I></FONT>; the number of elements that <I><FONT  color=991122 face=HELVETICA>outInputs</I></FONT> can hold is passed in <I><FONT  color=991122 face=HELVETICA>bufNumInputs</I></FONT>.
+<P>
+Similarly, <B><TT>GetAllOutputsFor()</TT></B> fills the array <I><FONT  color=991122 face=HELVETICA>outOutputs</I></FONT> with information about all outputs from the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT>.
+<P>
+Both functions return the number of elements actually returned in the buffer in <I><FONT  color=991122 face=HELVETICA>outTotalCount</I></FONT>.  If this number is less than the number you requested, your buffer was too small to receive all the results of the query.  In this case, you might want to resize your array and try again.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The node isn't of the correct type for the call you issued.
+<P>
+<LI>Other errors.  An error occurred communicating with the producer or with the Media Server.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetAllOutputsFor() see <A HREF="#GetAllInputsFor()">GetAllInputsFor()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetAudioInput()"></A>GetAudioInput()
+, 
+<A NAME="GetVideoInput()"></A>GetVideoInput()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAudioInput(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetVideoInput(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions return the nodes designated by the user as the preferred nodes for audio and video input.  You can then query the returned node, hook into it, and manipulate it, using the reference returned in <I><FONT  color=991122 face=HELVETICA>outNode</I></FONT>.
+<P>
+Once your application has finished using these nodes (and they've been stopped and disconnected), you should release them by calling <B><TT><A HREF="#ReleaseNode()">ReleaseNode()</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error locating the default input node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The default node couldn't be identified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetAudioMixer() see <A HREF="#GetAudioOutput()">GetAudioOutput()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetAudioOutput()"></A>GetAudioOutput()
+, 
+<A NAME="GetVideoOutput()"></A>GetVideoOutput()
+, 
+<A NAME="GetAudioMixer()"></A>GetAudioMixer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAudioOutput(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAudioOutput(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>outInputID
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>outInputName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetVideoOutput(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAudioMixer(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions return the nodes designated by the user as the preferred nodes for audio and video output.  You can then query the returned node, hook into it, and manipulate it, using the reference returned in <I><FONT  color=991122 face=HELVETICA>outNode</I></FONT>.
+<P>
+The second form of GetAudioOutput() returns additional information, including the input ID of the input used for audio output, and the input's name.
+<P>
+You should usually use <B><TT><A HREF="#GetAudioMixer()">GetAudioMixer()</A></TT></B> when getting a node for playing audio instead of using the <B><TT><A HREF="#GetAudioOutput()">GetAudioOutput()</A></TT></B> function.  <B><TT><A HREF="#GetAudioOutput()">GetAudioOutput()</A></TT></B> returns the lower-level node for audio output, which you would typically only need access to if you wanted to do some form of processing on all audio data being played in the system (such as a level meter).
+<P>
+The <B><TT><A HREF="#GetAudioMixer()">GetAudioMixer()</A></TT></B> function returns a reference to the audio mixer, which will perform audio mixing, format conversion, and sample rate conversion for you, then pass along the audio to the output node.
+<P>
+Once your application has finished using these nodes (and they've been stopped and disconnected), you should release them by calling <B><TT><A HREF="#ReleaseNode()">ReleaseNode()</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error locating the default input node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The default node couldn't be identified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetConnectedInputsFor()"></A>GetConnectedInputsFor()
+, 
+<A NAME="GetFreeInputsFor()"></A>GetFreeInputsFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetConnectedInputsFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_input *<I><FONT  color=991122 face=HELVETICA>outActiveInputsList</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>numListInputs
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>outNumInputs</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFreeInputsFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_input *<I><FONT  color=991122 face=HELVETICA>outFreeInputsList</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>numListInputs
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>outNumInputs</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_type <I><FONT  color=991122 face=HELVETICA>filterType</I></FONT> = <FONT  face=HELVETICA>B_MEDIA_UNKNOWN_TYPE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetConnectedInputsFor()</TT></B> fills the array of media_input structures specified by <I><FONT  color=991122 face=HELVETICA>outActiveInputsList</I></FONT> with information about all inputs belonging to <I><FONT  color=991122 face=HELVETICA>node</I></FONT> that are currently connected to some output; the number of elements that <I><FONT  color=991122 face=HELVETICA>outActiveInputsList</I></FONT> can hold is passed in <I><FONT  color=991122 face=HELVETICA>numListInputs</I></FONT>.
+<P>
+Similarly, <B><TT>GetFreeInputsFor()</TT></B> fills the array <I><FONT  color=991122 face=HELVETICA>outFreeInputsList</I></FONT> with information about all inputs that are still available in the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT>.  Specifying a <I><FONT  color=991122 face=HELVETICA>filterType</I></FONT> other than <B><TT>B_MEDIA_NO_TYPE</TT></B> lets you obtain a list of inputs for a specific media type (or for inputs that can handle any media type).  This is especially useful if you're only interested in a list of accepted media types your application supports.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Even though a node may report that a specific number of free inputs are available, it is possible that a node might create more inputs on demand.  There is no way to know if this might happen, so <B><TT>GetFreeInputsFor()</TT></B> may not tell you whether or not a node can accept all the connections you'd like to make.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Both functions return the number of elements actually returned in the buffer in <I><FONT  color=991122 face=HELVETICA>outNumInputs</I></FONT>.  If this number is less than <I><FONT  color=991122 face=HELVETICA>numListInputs</I></FONT>, your buffer was too small to receive all the results of the query.  In this case, you might want to resize your array and try again.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error cloning the node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The requested node couldn't be cloned.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetConnectedOutputsFor()"></A>GetConnectedOutputsFor()
+, 
+<A NAME="GetFreeOutputsFor()"></A>GetFreeOutputsFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetConnectedOutputsFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_output *<I><FONT  color=991122 face=HELVETICA>outActiveOutputsList</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>numListOutputs
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>outNumOutputs</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFreeOutputsFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_output *<I><FONT  color=991122 face=HELVETICA>outFreeOutputsList</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>numListOutputs
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>outNumOutputs</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_type <I><FONT  color=991122 face=HELVETICA>filterType</I></FONT> = <FONT  face=HELVETICA>B_MEDIA_UNKNOWN_TYPE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetConnectedOutputsFor()</TT></B> fills the array of media_output structures specified by <I><FONT  color=991122 face=HELVETICA>outActiveOutputsList</I></FONT> with information about all outputs belonging to <I><FONT  color=991122 face=HELVETICA>node</I></FONT> that are currently connected to some input; the number of elements that <I><FONT  color=991122 face=HELVETICA>outActiveOutputsList</I></FONT> can hold is passed in <I><FONT  color=991122 face=HELVETICA>numListOutputs</I></FONT>.
+<P>
+Similarly, <B><TT>GetFreeOutputsFor()</TT></B> fills the array <I><FONT  color=991122 face=HELVETICA>outFreeOutputsList</I></FONT> with information about all outputs that are still available in the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT>.  Specifying a <I><FONT  color=991122 face=HELVETICA>filterType</I></FONT> other than <B><TT>B_MEDIA_UNKNOWN_TYPE</TT></B> lets you obtain a list of outputs for a specific media type (or for outputs that can handle any media type).  This is especially useful if you're only interested in a list of accepted media types your application supports.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Even though a node may report that a specific number of free outputs are available, it is possible that a node might create more outputs on demand.  There is no way to know if this might happen, so <B><TT>GetFreeOutputsFor()</TT></B> may not tell you whether or not a node can accept all the connections you'd like to make.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Both functions return the number of elements actually returned in the buffer in <I><FONT  color=991122 face=HELVETICA>outNumOutputs</I></FONT>.  If this number is less than <I><FONT  color=991122 face=HELVETICA>numListOutputs</I></FONT>, your buffer was too small to receive all the results of the query.  In this case, you might want to resize your array and try again.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The node isn't a buffer producer.
+<P>
+<LI>Other errors.  An error occurred communicating with the producer or with the Media Server.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetDormantFlavorInfoFor()"></A>GetDormantFlavorInfoFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetDormantFlavorInfoFor(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>inDormantNode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>dormant_flavor_info *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>outFlavor</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function returns, in <I><FONT  color=991122 face=HELVETICA>outFlavor</I></FONT>, information describing the dormant flavors supported by the dormant node <I><FONT  color=991122 face=HELVETICA>inDormantNode</I></FONT>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI>Messaging errors.  An error occurred communicating with the Media Server.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetDormantNodes()"></A>GetDormantNodes()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetDormantNodes(</TT></B></FONT>dormant_node_info *<I><FONT  color=991122 face=HELVETICA>outDormantNodeList</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>inOutNumNodes</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_format *<I><FONT  color=991122 face=HELVETICA>hasInputFormat</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_format *<I><FONT  color=991122 face=HELVETICA>hasOutputFormat </I></FONT>= <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *<I><FONT  color=991122 face=HELVETICA>name </I></FONT>= <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint64 <I><FONT  color=991122 face=HELVETICA>requireKinds</I></FONT> = 0,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint64 <I><FONT  color=991122 face=HELVETICA>denyKinds</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Queries dormant nodes (those nodes that live in add-ons, rather than in the application) and returns those who match the specified inputs.  If <I><FONT  color=991122 face=HELVETICA>hasInputFormat</I></FONT> isn't <B><TT>NULL</TT></B>, the node has to be a <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> and have an input format compatible with the format described in <I><FONT  color=991122 face=HELVETICA>hasInputFormat</I></FONT>.  Likewise, if <I><FONT  color=991122 face=HELVETICA>hasOutputFormat</I></FONT> isn't <B><TT>NULL</TT></B>, the node has to be a <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> that's compatible with the format described in <I><FONT  color=991122 face=HELVETICA>hasOutputFormat</I></FONT>.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>name</I></FONT> isn't <B><TT>NULL</TT></B>, the node has to have a name that equals <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, or, if the last character of <I><FONT  color=991122 face=HELVETICA>name</I></FONT> is an asterisk ("*"), a name whose initial characters match <I><FONT  color=991122 face=HELVETICA>name</I></FONT> up to, but not including, the asterisk.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>requireKinds</I></FONT> and <I><FONT  color=991122 face=HELVETICA>denyKinds</I></FONT> arguments specifiy, respectively, the kinds that must be supported, and the kinds that must not be supported by the returned nodes.
+<P>
+Matching nodes are returned in <I><FONT  color=991122 face=HELVETICA>outDormantNodeList</I></FONT>.  You should pass the size of the <I><FONT  color=991122 face=HELVETICA>outDormantNodeList</I></FONT> array (the number of elements that the array can hold) in <I><FONT  color=991122 face=HELVETICA>inOutNumNodes</I></FONT>; when this function returns, the value in <I><FONT  color=991122 face=HELVETICA>inOutNumNodes</I></FONT> will be changed to the actual number of matching nodes found, unless an error occurs.
+<P>
+Nodes you obtain using <B><TT>GetDormantNodes()</TT></B> must be released when you're done using them.  To do this, be sure they're stopped and disconnected, then call <B><TT><A HREF="#ReleaseNode()">ReleaseNode()</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error cloning the node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The requested node couldn't be cloned.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetFileFormatsFor()"></A>GetFileFormatsFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFileFormatsFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>fileInterface</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_file_format *<I><FONT  color=991122 face=HELVETICA>outFormatList</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>inOutFormatCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given a <A HREF="FileInterface.html#BFileInterface">BFileInterface</A> node in <I><FONT  color=991122 face=HELVETICA>fileInterface</I></FONT>, returns information about the file formats the file interface can deal with in the array <I><FONT  color=991122 face=HELVETICA>outFormatList</I></FONT>.  On entry, <I><FONT  color=991122 face=HELVETICA>inOutFormatCount</I></FONT> points to the number of media_file_format structures that can fit in the array specified by <I><FONT  color=991122 face=HELVETICA>outFormatList</I></FONT>.  Upon return, it will contain the actual number of formats returned, unless <B><TT>GetFileFormatsFor()</TT></B> returns an error.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the set mode request.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The requested node couldn't be cloned.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetFormatFor()"></A>GetFormatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFormatFor(</TT></B></FONT>const media_output &amp;<I><FONT  color=991122 face=HELVETICA>output</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_format *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFormatFor(</TT></B></FONT>const media_input &amp;<I><FONT  color=991122 face=HELVETICA>input</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_format *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFormatFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>media_format *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>quality</I></FONT> = <FONT  face=HELVETICA>B_MEDIA_ANY_QUALITY</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetFormatFor()</TT></B> returns the media_format being used by the given object, which may be a media_output, a media_input, or a media_node.  Pass in <I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT> a pointer to a media_format object to be filled out with the object's format.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> currently must be zero.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  You can't pass <B><TT>NULL</TT></B> for <I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The node isn't of the correct type for the given request.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_SOURCE">B_MEDIA_BAD_SOURCE</A></TT></B>.  The node's media_source is invalid.
+<P>
+<LI>Messaging errors.  An error occurred communicating with the Media Server.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetFreeInputsFor() see <A HREF="#GetConnectedInputsFor()">GetConnectedInputsFor()</A></H3>
+<P>
+<HR>
+<H3>GetFreeOutputsFor() see <A HREF="#GetConnectedOutputsFor()">GetConnectedOutputsFor()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetInitialLatencyFor()"></A>GetInitialLatencyFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetInitialLatencyFor(</TT></B></FONT>media_node &amp;<I><FONT  color=991122 face=HELVETICA>producer</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t *<I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT>, uint32 *<I><FONT  color=991122 face=HELVETICA>outFlags</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns, in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT>, the additional amount of time in microseconds the specified <I><FONT  color=991122 face=HELVETICA>producer</I></FONT> node requires in order to synchronize to a signal.  For example, a TV capture card that's started while the capture is in the middle of a field will have to wait until the next field begins before actually starting to produce buffers.
+<P>
+<I><FONT  color=991122 face=HELVETICA>outFlags</I></FONT> is set to the flags returned by the producer.  Currently there aren't any flags defined, so this will be returned as zero for now.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT> was specified as <B><TT>NULL</TT></B>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>producer</I></FONT> isn't a valid node.
+<P>
+<LI>Port errors.  An error occurred communicating with the <I><FONT  color=991122 face=HELVETICA>producer</I></FONT>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetInstancesFor()"></A>GetInstancesFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetInstancesFor(</TT></B></FONT>media_addon_id <I><FONT  color=991122 face=HELVETICA>addon</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>flavor</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node_id *<I><FONT  color=991122 face=HELVETICA>outID</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>ioCount</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given the specified <I><FONT  color=991122 face=HELVETICA>addon</I></FONT> ID and <I><FONT  color=991122 face=HELVETICA>flavor</I></FONT>, this function fills the <I><FONT  color=991122 face=HELVETICA>outID</I></FONT> list with up to <I><FONT  color=991122 face=HELVETICA>ioCount</I></FONT> node IDs that were derived from the specified add-on.  If you specify zero for <I><FONT  color=991122 face=HELVETICA>ioCount</I></FONT>, one node ID will be returned.  On return, <I><FONT  color=991122 face=HELVETICA>ioCount</I></FONT> is changed to indicate how many nodes have been returned in the list.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI>Port errors.  Communication with the Media Server failed.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetLatencyFor()"></A>GetLatencyFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetLatencyFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>producer</I></FONT>, bigtime_t *<I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Reports in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT> the maximum latency found downstream from the specified <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A>, <I><FONT  color=991122 face=HELVETICA>producer</I></FONT>, given the current connections.
+<P>
+If an error occurs, the value in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT> is unreliable.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No errors.
+<P>
+<UL>
+<LI>Other errors.  Unable to get the latency.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetLiveNodes()"></A>GetLiveNodes()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetLiveNodes(</TT></B></FONT>live_node_info *<I><FONT  color=991122 face=HELVETICA>outLiveNodeList</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>ioTotalCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_format *<I><FONT  color=991122 face=HELVETICA>hasInput</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_format *<I><FONT  color=991122 face=HELVETICA>hasOutput</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint64 <I><FONT  color=991122 face=HELVETICA>nodeKinds</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Queries the Media Server for a list of all currently active nodes (whether they're running or not), and fills the array specified by <I><FONT  color=991122 face=HELVETICA>outLiveNodeList</I></FONT> with information about the nodes.  The size of the array should be specified&mdash;in terms of how many elements it can contain&mdash;by the <I><FONT  color=991122 face=HELVETICA>ioTotalCount</I></FONT> argument; the actual number of entries in the returned list will be stored in <I><FONT  color=991122 face=HELVETICA>ioTotalCount</I></FONT> before the call returns.
+<P>
+An active node is a node that is preloaded by the system and is always available for use, as opposed to a dormant node, which resides in an add-on and is only loaded when instantiated using <B><TT><A HREF="#InstantiateDormantNode()">InstantiateDormantNode()</A></TT></B>.
+<P>
+You can obtain a more specific result list by specifying one or more of the <I><FONT  color=991122 face=HELVETICA>hasInput</I></FONT>, <I><FONT  color=991122 face=HELVETICA>hasOutput</I></FONT>, <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>nodeKinds</I></FONT> arguments.  <I><FONT  color=991122 face=HELVETICA>hasInput</I></FONT> and <I><FONT  color=991122 face=HELVETICA>hasOutput</I></FONT> let you restrict the resulting list to containing nodes that accept as input (or output) the specified format.
+<P>
+You should always specify 0 for <I><FONT  color=991122 face=HELVETICA>nodeKinds</I></FONT>; this parameter is currently not used.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No errors.
+<P>
+<UL>
+<LI>Other errors.  Unable to get the list of live nodes.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetNodeAttributesFor()"></A>GetNodeAttributesFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>GetNodeAttributesFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node_attributes *<I><FONT  color=991122 face=HELVETICA>outArray</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>inMaxCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Fills the array <I><FONT  color=991122 face=HELVETICA>outArray</I></FONT> with up to <I><FONT  color=991122 face=HELVETICA>inMaxCount</I></FONT> attributes of the given <I><FONT  color=991122 face=HELVETICA>node</I></FONT>.  Returns the number of attributes returned. If the result is less than zero, an error occurred.
+<P>
+&lt;&lt;&lt;more on node attributes>>>
+<P>
+<HR>
+<H3>
+<A NAME="GetNodeFor()"></A>GetNodeFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetNodeFor(</TT></B></FONT>media_node_id <I><FONT  color=991122 face=HELVETICA>nodeID</I></FONT>, media_node *<I><FONT  color=991122 face=HELVETICA>clonedNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given a <I><FONT  color=991122 face=HELVETICA>node</I></FONT> specified by node_id, <B><TT>GetNodeFor()</TT></B> returns in <I><FONT  color=991122 face=HELVETICA>clonedNode</I></FONT> a media_node reference to a clone of the node.  You can then use the <I><FONT  color=991122 face=HELVETICA>clonedNode</I></FONT> to query the node for available inputs, outputs, and so forth.
+<P>
+Once your application has finished using the returned node (and it's been stopped and disconnected), you should release it by calling <B><TT><A HREF="#ReleaseNode()">ReleaseNode()</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error cloning the node.
+<P>
+<UL>
+<LI><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> errors.  The requested node couldn't be cloned.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetParameterWebFor()"></A>GetParameterWebFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetParameterWebFor(</TT></B></FONT>const media_node &amp; <I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> **<I><FONT  color=991122 face=HELVETICA>outWeb</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Instantiates a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> that describes the internal layout of a specific controllable node and stores a pointer to the <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> in <I><FONT  color=991122 face=HELVETICA>outWeb</I></FONT>.  You can then walk the various BParameters within the web to figure out what there is to control, and to present a user interface to the node's parameters.  Delete the web pointed to by <I><FONT  color=991122 face=HELVETICA>outWeb</I></FONT> when you're done with it.
+<P>
+Note that the <B><TT><A HREF="#StartControlPanel()">StartControlPanel()</A></TT></B> function provides an easy, painless way to automatically present user interface for configuring nodes.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error obtaining the BParameterWeb.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The requested node is invalid.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#StartControlPanel()">StartControlPanel()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="GetReadFileFormatListFor()"></A>GetReadFileFormatListFor()
+, 
+<A NAME="GetWriteFileFormatListFor()"></A>GetWriteFileFormatListFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetReadFileFormatList(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>inNode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_file_format *<I><FONT  color=991122 face=HELVETICA>outReadFormats</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>inReadCount</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>outReadCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetWriteFileFormatList(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>inNode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_file_format *<I><FONT  color=991122 face=HELVETICA>outWriteFormats</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>inWriteCount</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>outWriteCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These two functions return lists of file formats that the dormant node described by <I><FONT  color=991122 face=HELVETICA>inNode</I></FONT> can read or write.
+<P>
+<B><TT>GetReadFileFormatList()</TT></B> returns in the array specified by <I><FONT  color=991122 face=HELVETICA>outReadFormats</I></FONT> a list of file formats the node can read.  Specify in <I><FONT  color=991122 face=HELVETICA>inReadCount</I></FONT> the number of formats that can be held by the <I><FONT  color=991122 face=HELVETICA>outReadFormats</I></FONT> array.  On exit, <I><FONT  color=991122 face=HELVETICA>outReadCount</I></FONT> indicates how many formats are being returned in the array.
+<P>
+GetWriteFileFormatList() returns in the array specified by <I><FONT  color=991122 face=HELVETICA>outWriteFormats</I></FONT> a list of file formats the node can write.  Specify in <I><FONT  color=991122 face=HELVETICA>inWriteCount</I></FONT> the number of formats that can be held by the <I><FONT  color=991122 face=HELVETICA>outWriteFormats</I></FONT> array.  On exit, <I><FONT  color=991122 face=HELVETICA>outWriteCount</I></FONT> indicates how many formats are being returned in the array.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The list was returned without error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  outReadFormats or outWriteFormats is NULL.
+<P>
+<LI><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> errors.  An error occurred communicating with the Media Server.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetRealtimeFlags()"></A>GetRealtimeFlags()
+, 
+<A NAME="SetRealtimeFlags()"></A>SetRealtimeFlags()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetRealtimeFlags(</TT></B></FONT>uint32 *<I><FONT  color=991122 face=HELVETICA>outEnabled</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetRealtimeFlags(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>inEnabled</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetRealtimeFlags()</TT></B> returns flags that the Media Server uses to determine whether or not memory needs to be locked down.  <B><TT>SetRealtimeFlags()</TT></B> sets these flags, and is generally only called by the Media preference application.
+<P>
+Any or all of these flags can be set, in combination.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MEDIA_REALTIME_ALLOCATOR</TT></B></TD>
+<TD>When set, rtm_alloc() will return locked memory.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_REALTIME_AUDIO</TT></B></TD>
+<TD>Audio add-ons in the Media Server are locked in memory, and should lock their thread stacks using <B><TT>media_init_realtime_thread()</TT></B>.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_REALTIME_VIDEO</TT></B></TD>
+<TD>Video add-ons are locked in memory, and should lock their thread stacks using <B><TT>media_init_realtime_thread()</TT></B>.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_REALTIME_ANYKIND</TT></B></TD>
+<TD>All Media add-ons are locked in memory, and should lock their thread stacks using <B><TT>media_init_realtime_thread()</TT></B>.</TD>
+</TABLE>
+<P>
+See the <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> overview for a discussion of realtime allocation and thread stack locking.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI>Other errors.  Unable to set or retrieve the realtime flags.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetRefFor() see <A HREF="#SetRefFor()">SetRefFor()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetStartLatencyFor()"></A>GetStartLatencyFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetStartLatencyFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT>, bigtime_t *<I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Reports in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT> the maximum latency found downstream from the time source specified by <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT>, given the current connections.
+<P>
+If an error occurs, the value in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT> is unreliable.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No errors.
+<P>
+<UL>
+<LI>Other errors.  Unable to get the latency.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetSystemTimeSource()"></A>GetSystemTimeSource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetSystemTimeSource(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>clonedTimeSource</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function returns, in <I><FONT  color=991122 face=HELVETICA>clonedTimeSource</I></FONT>, a reference to a clone of the system time source.  The system time source is the fallback time source used when no other source is available; its time is derived from the <B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B> real-time clock.  As such, it's quite accurate, but has no relevant relationship to the timing of the hardware devices being used for media input and output.  Thus it's not a good choice for a master clock&mdash;but it's there if nothing else is available.
+<P>
+By default, new nodes are slaved to the system time source.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error cloning the node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The time source couldn't be cloned.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetTimeSource()"></A>GetTimeSource()
+, 
+<A NAME="MakeTimeSourceFor()"></A>MakeTimeSourceFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetTimeSource(</TT></B></FONT>media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="TimeSource.html#BTimeSource">BTimeSource</A> *<B><TT><FONT  color=000022 size=+1>MakeTimeSourceFor(</TT></B></FONT>media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetTimeSource()</TT></B> returns, in <I><FONT  color=991122 face=HELVETICA>outNode</I></FONT>, the preferred master clock to which other nodes can be slaved.  By slaving all nodes to a single master clock, good synchronization can be ensured.
+<P>
+Typically, the preferred master clock will be the same node as the default audio output (assuming that the audio output node is also a <A HREF="TimeSource.html#BTimeSource">BTimeSource</A>, which should be the case).  The sound circuitry's DAC is then used as a timing reference.  Although this may be less accurate than the system clock (as defined by the global <B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B> function), glitch-free audio performance is best ensured by using the audio output to synchronize media operations.
+<P>
+By default, nodes are slaved to the system time source (see <B><TT><A HREF="#GetSystemTimeSource()">GetSystemTimeSource()</A> </TT></B>above).  Usually you'll want to use this function to obtain a more accurate time source, then slave your nodes to it:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;media_node timeSource;
+&nbsp;&nbsp;&nbsp;roster->GetTimeSource(&amp;media_node);
+&nbsp;&nbsp;&nbsp;roster->SetTimeSourceFor(myNode, timeSource.node);</PRE>
+<P>
+This will slave the previously-created node <B><TT>myNode</TT></B> to the preferred time source.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The time source's reference count isn't incremented by <B><TT>GetTimeSource()</TT></B>.  You should never call <B><TT><A HREF="#ReleaseNode()">ReleaseNode()</A></TT></B> on a node returned by <B><TT>GetTimeSource()</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>MakeTimeSourceFor()</TT></B> returns a <A HREF="TimeSource.html#BTimeSource">BTimeSource</A> object corresponding to the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT>'s time source.  This object can then be used to issue <A HREF="TimeSource.html#BTimeSource">BTimeSource</A> calls to determine and adjust timing issues (for instance, to determine the current performance time).  When you're done with the <A HREF="TimeSource.html#BTimeSource">BTimeSource</A>, you should call <B><TT><A HREF="MediaNode.html#Release()">BMediaNode::Release()</A></TT></B> on it.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error locating the default input node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The default node couldn't be identified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetVideoInput() see <A HREF="#GetAudioInput()">GetAudioInput()</A></H3>
+<P>
+<HR>
+<H3>GetVideoOutput() see <A HREF="#GetAudioOutput()">GetAudioOutput()</A></H3>
+<P>
+<HR>
+<H3>GetWriteFileFormatListFor() see <A HREF="#GetReadFileFormatListFor()">GetReadFileFormatListFor()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="InstantiateDormantNode()"></A>InstantiateDormantNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InstantiateDormantNode(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>inInfo</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InstantiateDormantNode(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>inInfo</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions instantiate a node from an add-on, given the information specified in the dormant_node_info structure:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct dormant_node_info {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dormant_node_info();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~dormant_node_info();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_addon_id addon;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 flavor_id;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char name[B_MEDIA_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char reserved[128];
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>addon</I></FONT> field should be filled out to contain the add-on ID of the add-on from which the node should be instantiated, and the <I><FONT  color=991122 face=HELVETICA>flavor_id</I></FONT> should be the flavor ID number the node should be instantiated to process.  Typically you'll use a function such as <B><TT><A HREF="#GetDormantNodes()">GetDormantNodes()</A></TT></B> to find a <B><TT><A HREF="MediaAddOn.html#dormant_node_info">dormant_node_info</A></TT></B> structure that describes a suitable node.
+<P>
+When you're done using the node, and have stopped and disconnected it, you should always call <B><TT><A HREF="#ReleaseNode()">ReleaseNode()</A></TT></B> to let the Media Server know you're finished with it.  This lets the Media Server track whether or not the node's add-on can be unloaded, based on the number of applications still using it.
+<P>
+The difference between these two functions is that the second form lets you specify flags controlling how the node is instantiated.  The <B><TT>B_FLAVOR_IS_GLOBAL</TT></B> flag<B><TT> </TT></B>instantiates the node in the Media Add-on Server's memory space, while the <B><TT>B_FLAVOR_IS_LOCAL</TT></B> flag instantiates the node in your application's memory.  Using <B><TT>B_FLAVOR_IS_LOCAL</TT></B> protects other applications&mdash;not to mention the Media Server&mdash;from being derailed if the node crashes.  Whenever possible, you should instantiate nodes locally.  You should only use <B><TT>B_FLAVOR_IS_GLOBAL</TT></B> if you need the node to stay around after your application exits.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error instantiating the node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The requested node couldn't be instantiated.
+<P>
+</UL>
+<P>
+<HR>
+<H3>MakeTimeSourceFor() see <A HREF="#GetTimeSource()">GetTimeSource()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MediaFlags()"></A>MediaFlags()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static ssize_t <B><TT><FONT  color=000022 size=+1>MediaFlags(</TT></B></FONT>media_flags <I><FONT  color=991122 face=HELVETICA>flag</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>bufferSize</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Asks the Media Server about its support for specific features and capabilities.
+<P>
+The specified <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> will be filled with the data indicating the value of the specified flag.  If the <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> is too small (as indicated by <I><FONT  color=991122 face=HELVETICA>bufferSize</I></FONT>), only the first <I><FONT  color=991122 face=HELVETICA>bufferSize</I></FONT> bytes of the result data will be stored in the buffer, but no error will occur.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MEDIA_FLAGS_VERSION</TT></B></TD>
+<TD>Returns the Media Kit version as an int32 value.</TD>
+</TABLE>
+<P>
+If the result is negative, an error occurred, or the Media Server isn't running.
+<P>
+<HR>
+<H3>
+<A NAME="NodeIDFor()"></A>NodeIDFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+media_node_id <B><TT><FONT  color=000022 size=+1>NodeIDFor(</TT></B></FONT>port_id <I><FONT  color=991122 face=HELVETICA>sourceOrDestinationPort</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given a source or destination port, this function returns the corresponding node's ID number.
+<P>
+<HR>
+<H3>
+<A NAME="PrerollNode()"></A>PrerollNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>PrerollNode(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calling <B><TT>PrerollNode()</TT></B> sends a preroll message to the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT>; the node's <B><TT><A HREF="MediaNode.html#Preroll()">Preroll()</A></TT></B> hook function will be called.  When that hook returns, <B><TT>PrerollNode()</TT></B> will also return.  A node that's been prerolled should respond very quickly to a <B><TT><A HREF="#StartNode()">StartNode()</A></TT></B> call, because the time-consuming setup operations should have been done already by the <B><TT><A HREF="MediaNode.html#Preroll()">Preroll()</A></TT></B> hook.
+<P>
+While it's not mandatory for an application to call <B><TT>PrerollNode()</TT></B> before calling <B><TT><A HREF="#StartNode()">StartNode()</A></TT></B>, it's recommended, because doing so may improve real-time performance once the node is started.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the set mode request.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The requested node couldn't be cloned.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="RegisterNode()"></A>RegisterNode()
+, 
+<A NAME="UnregisterNode()"></A>UnregisterNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RegisterNode(</TT></B></FONT><A HREF="MediaNode.html#BMediaNode">BMediaNode</A> *<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>UnregisterNode(</TT></B></FONT><A HREF="MediaNode.html#BMediaNode">BMediaNode</A> *<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>RegisterNode()</TT></B> registers an object of a class derived from <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> with the media roster and assigns it a node_id.  This function should be called once a BMediaNode-derived object is fully-constructed and before any attempt is made to connect the node to some other participant in the Media Server.
+<P>
+<B><TT>RegisterNode()</TT></B> is called automatically for nodes instantiated from add-ons, but your application will have to call it for any nodes it creates itself.
+<P>
+If you create your own subclass of <A HREF="MediaNode.html#BMediaNode">BMediaNode</A>, its constructor can call <B><TT>RegisterNode()</TT></B> itself just before returning (it must be the last thing the constructor does).
+<P>
+<B><TT>UnregisterNode()</TT></B> unregisters a node from the Media Server.  It's called automatically by the <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> destructor, but it might be convenient to call it sometime before you delete your node instance, depending on your implementation and circumstances.
+<P>
+These functions are generally only used if you're creating your own node class.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the seek request.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> specified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="ReleaseNode()"></A>ReleaseNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReleaseNode(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Releases the specified node, which has previously been obtained by using the <B><TT><A HREF="#InstantiateDormantNode()">InstantiateDormantNode()</A></TT></B>, <B><TT><A HREF="#GetNodeFor()">GetNodeFor()</A></TT></B>, or default node functions (such as <B><TT>GetVideoNode()</TT></B> or <B><TT><A HREF="#GetAudioMixer()">GetAudioMixer()</A></TT></B>).
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error releasing the node.
+<P>
+<UL>
+<LI><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> errors.  The node couldn't be released.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="RollNode()"></A>RollNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RollNode(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>startPerformanceTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>stopPerformanceTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>atMediaTime</I></FONT> = <FONT  face=HELVETICA>-B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Atomically queues a start and stop for the given node.  The node will start playing at the performance time indicated by <I><FONT  color=991122 face=HELVETICA>startPerformanceTime</I></FONT>, and will stop playing at the performance time indicated by <I><FONT  color=991122 face=HELVETICA>stopPerformanceTime</I></FONT>.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>atMediaTime</I></FONT> argument is given, a seek to that media time is also queued.
+<P>
+This function is especially useful for the offline rendering case (the <B><TT><A HREF="MediaNode.html#B_OFFLINE">B_OFFLINE</A></TT></B> run mode).  It lets you render a certain time range without accidentally going too far; if you queue up a start and stop using <B><TT><A HREF="MediaNode.html#Start()">Start()</A></TT></B> and <B><TT><A HREF="MediaNode.html#Stop()">Stop()</A></TT></B>, the node may have already rendered past your desired stop time before your <B><TT><A HREF="MediaNode.html#Stop()">Stop()</A></TT></B> call occurs.  <B><TT>RollNode()</TT></B> avoids that problem.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The node isn't valid.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Roster()"></A>Roster()
+, 
+<A NAME="CurrentRoster()"></A>CurrentRoster()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static BMediaRoster *<B><TT><FONT  color=000022 size=+1>Roster(</TT></B></FONT>status_t *<I><FONT  color=991122 face=HELVETICA>outError</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+static BMediaRoster *<B><TT><FONT  color=000022 size=+1>CurrentRoster(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Roster()</TT></B> returns a pointer to the default BMediaRoster instance, or creates the BMediaRoster instance if it doesn't exist yet, then returns a pointer to it.  If you don't want to create the roster if it doesn't already exist, use the <B><TT>CurrentRoster()</TT></B> function (it returns <B><TT>NULL</TT></B> if there's no roster).
+<P>
+Since <B><TT>CurrentRoster()</TT></B> doesn't create a media roster, you obviously must use <B><TT>Roster()</TT></B> at least once in your application to create one.
+<P>
+These static member functions should be called by explicit scope, and never by dereference; this is how you get the BMediaRoster through which all other media roster functions are called.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMediaRoster *r = BMediaRoster::Roster();
+&nbsp;&nbsp;&nbsp;status_t err = r->GetFreeOutputsFor(some_node, some_array, 3, &amp;n);</PRE>
+<P>
+On return, <I><FONT  color=991122 face=HELVETICA>outError</I></FONT> is set to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the default BMediaRoster was successfully returned, or a negative error code if something went wrong (for example, if the Media Server isn't running).  If <I><FONT  color=991122 face=HELVETICA>outError</I></FONT> is <B><TT>NULL</TT></B>, no error code is returned.
+<P>
+In any case, <B><TT>Roster()</TT></B> returns <B><TT>NULL</TT></B> if an error occurs.
+<P>
+<HR>
+<H3>
+<A NAME="SeekNode()"></A>SeekNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SeekNode(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>newMediaTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT> a request that it change its playing location to the media time <I><FONT  color=991122 face=HELVETICA>newMediaTime</I></FONT> once the performance time <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT> is reached.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>node</I></FONT> isn't running, the seek request is processed immediately, and the <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT> argument is ignored.
+<P>
+The error returned by this function only indicates whether or not the request was sent successfully; the node may later run into problems trying to perform the seek operation.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If the node is a time source, and you want to operate on the time source aspect of the node (to seek all slaved nodes), you should call <B><TT><A HREF="#SeekTimeSource()">SeekTimeSource()</A></TT></B> instead.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the seek request.
+<P>
+<UL>
+<LI>Other errors, depending on the node.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#StartNode()">StartNode()</A></TT></B>, <B><TT><A HREF="#StopNode()">StopNode()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="SeekTimeSource()"></A>SeekTimeSource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SeekTimeSource(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>newPerformanceTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends the specified <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT> a request that it change the performance time it outputs to its slaved nodes to the time <I><FONT  color=991122 face=HELVETICA>newPerformanceTime</I></FONT> once the performance time <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT> is reached.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT> isn't running, the seek request is processed immediately, and the <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT> argument is ignored.
+<P>
+The error returned by this function only indicates whether or not the request was sent successfully; the node may later run into problems trying to perform the seek operation.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the seek request.
+<P>
+<UL>
+<LI>Other errors, depending on the node.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#StartTimeSource()">StartTimeSource()</A></TT></B>, <B><TT><A HREF="#StopTimeSource()">StopTimeSource()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="SetAudioInput()"></A>SetAudioInput()
+, 
+<A NAME="SetVideoInput()"></A>SetVideoInput()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetAudioInput(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>defaultNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetAudioInput(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>defaultNodeInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetVideoInput(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>defaultNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetVideoInput(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>defaultNodeInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set the preferred nodes for audio and video input.  If the specified node isn't capable of being the system default, an error will be returned (for example, nodes defined by an application can't be the system default&mdash;only nodes defined by Media Kit add-ons can be system defaults).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In general, you shouldn't call these functions unless you're writing software that reimplements the functionality of the BeOS Audio or Video preference panels.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error setting the default input node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The default node couldn't be changed.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetAudioOutput()"></A>SetAudioOutput()
+, 
+<A NAME="SetVideoOutput()"></A>SetVideoOutput()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetAudioOutput(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>defaultNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetAudioOutput(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>defaultNodeInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetAudioOutput(</TT></B></FONT>const media_input &amp;<I><FONT  color=991122 face=HELVETICA>inputToOutput</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetVideoOutput(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>defaultNode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetVideoOutput(</TT></B></FONT>const dormant_node_info &amp;<I><FONT  color=991122 face=HELVETICA>defaultNodeInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set the preferred nodes for audio and video output.  If the specified node isn't capable of being the system default, an error will be returned (for example, nodes defined by an application can't be the system default&mdash;only nodes defined by Media Kit add-ons can be system defaults).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In general, you shouldn't call these functions unless you're writing software that reimplements the functionality of the BeOS Audio or Video preference panels.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error setting the default input node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The default node couldn't be changed.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetProducerRate()"></A>SetProducerRate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetProducerRate(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>numerator</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>demominator</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is called to tell the producer to resample the data rate by the specified factor.  Specifying a value of 1 (ie, <I><FONT  color=991122 face=HELVETICA>numerator</I></FONT>/<I><FONT  color=991122 face=HELVETICA>denominator</I></FONT> = 1) indicates that the data should be output at the same playback rate that it comes into the node at.  The format of the data should be unchanged.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Nodes are not required to support this mechanism for controlling their data rate, so this call may have no effect.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI>Other errors.  Returned by <B><TT><A HREF="BufferProducer.html#SetPlayRate()">BBufferProducer::SetPlayRate()</A></TT></B>.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="BufferProducer.html#SetPlayRate()">BBufferProducer::SetPlayRate()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="SetProducerRunModeDelay()"></A>SetProducerRunModeDelay()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetProducerRunModeDelay(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>delay</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="MediaNode.html#run_mode">BMediaNode::run_mode</A> <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> = <FONT  face=HELVETICA>B_RECORDING</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the run mode for the given producer node to mode.  Also sets the specified delay to be added to each buffer sent by the producer.  This function should only be called for <B><TT><A HREF="MediaNode.html#B_RECORDING">B_RECORDING</A></TT></B> mode; it's provided to compensate when you connect a node that's in recording mode to a node that isn't.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>. The <I><FONT  color=991122 face=HELVETICA>node</I></FONT> is invalid.
+<P>
+<LI>Port errors.  An error occurred communicating with the Media Server.
+<P>
+</UL>
+<P>
+<HR>
+<H3>SetRealtimeFlags() see <A HREF="#GetRealtimeFlags()">GetRealtimeFlags()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetRefFor()"></A>SetRefFor()
+, 
+<A NAME="GetRefFor()"></A>GetRefFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetRefFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>fileInterface</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>file</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>createAndTruncate</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t *<I><FONT  color=991122 face=HELVETICA>outDuration</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t Get<B><TT><FONT  color=000022 size=+1>RefFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>fileInterface</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref *<I><FONT  color=991122 face=HELVETICA>outFile</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/StorageKit.html#BMimeType">BMimeType</A> *<I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetRefFor()</TT></B> tells the <A HREF="FileInterface.html#BFileInterface">BFileInterface</A> <I><FONT  color=991122 face=HELVETICA>fileInterface</I></FONT> to work on the file whose entry_ref is specified by <I><FONT  color=991122 face=HELVETICA>file</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>createAndTruncate</I></FONT> is <B><TT>true</TT></B>, any previous file with that reference is deleted and the file will be prepared for new output.  If <I><FONT  color=991122 face=HELVETICA>createAndTruncate</I></FONT> is <B><TT>false</TT></B>, <I><FONT  color=991122 face=HELVETICA>outDuration</I></FONT> will, on return, contain the duration of the performance data found in the file.
+<P>
+<B><TT>GetRefFor()</TT></B> fills out the specified entry_ref, <I><FONT  color=991122 face=HELVETICA>outFile</I></FONT>, to reference the file with which the specified <I><FONT  color=991122 face=HELVETICA>fileInterface</I></FONT> node is working.  If <I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT> isn't <B><TT>NULL</TT></B>, it'll contain a <A HREF="../Release%20Notes/StorageKit.html#BMimeType">BMimeType</A> object describing the file's type, unless an error occurs.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The specified node doesn't exist, or isn't a file interface.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetRunModeNode()"></A>SetRunModeNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetRunModeNode(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="MediaNode.html#run_mode">BMediaNode::run_mode</A> <I><FONT  color=991122 face=HELVETICA>newMode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT> a request that it change its policy for handling situations where it falls behind during real-time processing.
+<P>
+The error returned by this function only indicates whether or not the request was sent successfully.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the set mode request.
+<P>
+<UL>
+<LI><B><TT>B_BAD_NODE</TT></B>.  The specified node is invalid.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetTimeSourceFor()"></A>SetTimeSourceFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTimeSourceFor(</TT></B></FONT>media_node_id <I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node_id <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Tells the specified node to slave its timing to <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT>.  Once this is done, the node will receive its notion of the passage of time from <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT>.  As such, it will pause whenever <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT> is stopped, and so forth.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+By default, nodes are slaved to the system time source, so you only need to call this function if you need to slave a node to a different time source.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The <I><FONT  color=991122 face=HELVETICA>node</I></FONT> will take whatever precautions are necessary to remain faithful to the notion of time presented by <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT> without causing glitches in the presentation of its media.  For example, if a sound card node has a DAC that drifts from <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT>, it might try to fix the problem by varying the sampling rate slightly, or by dropping or doubling buffers occasionally.  This is why you should usually use the preferred time source&mdash;rather than the system time source&mdash;as your master time source.  The preferred time source will usually be derived directly from the DAC being used to produce the media output.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> errors.  Unable to set the time source.
+<P>
+</UL>
+<P>
+<HR>
+<H3>SetVideoInput() see <A HREF="#SetAudioInput()">SetAudioInput()</A></H3>
+<P>
+<HR>
+<H3>SetVideoOutput() see <A HREF="#SetAudioOutput()">SetAudioOutput()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SniffRef()"></A>SniffRef()
+, 
+<A NAME="SniffRefFor()"></A>SniffRefFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SniffRef(</TT></B></FONT>const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>file</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint64 <I><FONT  color=991122 face=HELVETICA>requireNodeKinds</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dormant_node_info *<I><FONT  color=991122 face=HELVETICA>outNode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/StorageKit.html#BMimeType">BMimeType</A> <I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SniffRefFor(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>fileInterface</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>file</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/StorageKit.html#BMimeType">BMimeType</A> <I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float *<I><FONT  color=991122 face=HELVETICA>outCapability</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SniffRef()</TT></B> asks all <A HREF="MediaAddOn.html#BMediaAddOn">BMediaAddOn</A> instances that satisfy the <I><FONT  color=991122 face=HELVETICA>requireNodeKinds</I></FONT> restraint to identify the <I><FONT  color=991122 face=HELVETICA>file</I></FONT>.  The <I><FONT  color=991122 face=HELVETICA>requireNodeKinds</I></FONT> argument should contain flags composited from the <B><TT><A HREF="MediaNode.html#node_kind">node_kind</A></TT></B> constants.
+<P>
+The node that returns the greatest <I><FONT  color=991122 face=HELVETICA>outCapability</I></FONT> value will be chosen, and a reference to it put in <I><FONT  color=991122 face=HELVETICA>outNode</I></FONT>.  The MIME type of the file will be put into <I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT>.
+<P>
+In simpler terms: <B><TT>SniffRef()</TT></B> returns the node that can best handle the media data in the specified file.
+<P>
+<B><TT>SniffRefFor()</TT></B>, on the other hand, asks the specified <I><FONT  color=991122 face=HELVETICA>fileInterface</I></FONT> node to examine the <I><FONT  color=991122 face=HELVETICA>file</I></FONT>.  If the node recognizes the file, the MIME type of the file is stored in the buffer <I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT>, and the node's capability to handle the file is returned in <I><FONT  color=991122 face=HELVETICA>outCapability</I></FONT>.
+<P>
+If the node doesn't recognize the file, an error is returned.  If the node recognizes the file format but finds no recognizable data within the file, <I><FONT  color=991122 face=HELVETICA>outCapability</I></FONT> is set to 0.0 and no error is returned.
+<P>
+In either case, the higher the <I><FONT  color=991122 face=HELVETICA>outCapability</I></FONT> value returned, the more appropriate the node is for handling the media data in the file.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the set mode request.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The specified node is invalid, or isn't a file interface.
+<P>
+</UL>
+<P>
+<HR>
+<H3>SniffRefFor() see <A HREF="#SniffRef()">SniffRef()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="StartControlPanel()"></A>StartControlPanel()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartControlPanel(</TT></B></FONT>const media_node <I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> *<I><FONT  color=991122 face=HELVETICA>outMessenger</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Tells the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT> to start its custom control panel, which is started outside your application.  There's no way to tell when the user has closed the control panel, other than by indirectly detecting possible changes to the node, such as a renegotiation of the format of data being output by the node.
+<P>
+If a <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> is provided as input to <B><TT>StartControlPanel()</TT></B>, the function returns in <I><FONT  color=991122 face=HELVETICA>outMessenger</I></FONT> a BMessneger that can be used to communicate with the control panel.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error starting the control panel.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The specified node is invalid.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="StartNode()"></A>StartNode()
+, 
+<A NAME="StopNode()"></A>StopNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartNode(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopNode(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>immediate</I></FONT> = <B><TT>false</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>StartNode()</TT></B> sends the specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT> a request to start streaming data at the performance time specified by the <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT> argument, according to that node's time source.
+<P>
+By default, nodes are in a stopped state upon creation, so you have to call <B><TT>StartNode()</TT></B> once you have a reference to it before anything will happen.  Starting a node that's already running has no effect.
+<P>
+<B><TT>StopNode()</TT></B> sends node a request to stop streaming data once the specified performance time  <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT> is reached, according to that node's time source.  Stopping a node that's already stopped has no effect.  If <I><FONT  color=991122 face=HELVETICA>immediate</I></FONT> is <B><TT>true</TT></B>, the node is instructed to stop immediately and the <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT> argument is ignored; if <I><FONT  color=991122 face=HELVETICA>immediate</I></FONT> is <B><TT>false</TT></B>, the node is stopped at the specified performance time.
+<P>
+In either case, the requested change will occur at the time specified by <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If the node is a time source, and you want to operate on the time source aspect of the node (to start or stop all slaved nodes), you should call <B><TT>SeekTimeSource()</TT></B> instead.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The error returned by these functions only indicates whether or not the request was sent successfully; the node may later run into problems trying to start or stop its media and you won't know it based on the result of these functions.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>StopNode()</TT></B> will deadlock if called from a node's control thread or while the control thread is blocked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the start or stop request.
+<P>
+<UL>
+<LI>Other errors, depending on the node.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#SeekNode()">SeekNode()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="StartTimeSource()"></A>StartTimeSource()
+, 
+<A NAME="StopTimeSource()"></A>StopTimeSource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartTimeSource(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopTimeSource(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>immediate</I></FONT> = <B><TT>false</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>StartTimeSource()</TT></B> sends the specified <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT> a request to start running at the real time specified by the <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT> argument.
+<P>
+<B><TT>StopTimeSource()</TT></B> sends node a request to stop the specified <I><FONT  color=991122 face=HELVETICA>timeSource</I></FONT> once the specified real time  <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT> is reached.   Stopping a time source that's already stopped has no effect.  If <I><FONT  color=991122 face=HELVETICA>immediate</I></FONT> is <B><TT>true</TT></B>, the time source is instructed to stop immediately and the <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT> argument is ignored; if <I><FONT  color=991122 face=HELVETICA>immediate</I></FONT> is <B><TT>false</TT></B>, the time source is stopped at the specified real time.
+<P>
+In either case, the requested change will occur at the time specified by <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT>.
+<P>
+The error returned by these functions only indicates whether or not the request was sent successfully; the node may later run into problems trying to start or stop and you won't know it based on the result of these functions.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error sending the start or stop request.
+<P>
+<UL>
+<LI>Other errors, depending on the node.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#SeekTimeSource()">SeekTimeSource()</A></TT></B>
+<P>
+<A NAME="StartWatching()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="StartWatching()"></A>StartWatching()
+, 
+<A NAME="StopWatching()"></A>StopWatching()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT>const <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> &amp;<I><FONT  color=991122 face=HELVETICA>notifyHandler</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT>const <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> &amp;<I><FONT  color=991122 face=HELVETICA>notifyHandler</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>notificationType</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT>const <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> &amp;<I><FONT  color=991122 face=HELVETICA>notifyHandler</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>notificationType</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT>const <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> &amp;<I><FONT  color=991122 face=HELVETICA>notifyHandler</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT>const <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> &amp;<I><FONT  color=991122 face=HELVETICA>notifyHandler</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>notificationType</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT>const <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> &amp;<I><FONT  color=991122 face=HELVETICA>notifyHandler</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_node &amp;node,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>notificationType</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>StartWatching()</TT></B> registers the specified <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> or <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> as a recipient of notification messages from the Media Server.  <B><TT>StopWatching() </TT></B>cancels this registration so that no further notifications will be sent.
+<P>
+If you're only interested in a particular notification type, you can specify that code in the <I><FONT  color=991122 face=HELVETICA>notificationType</I></FONT> argument.  If you don't specify a notification type, <B><TT><A HREF="messages.html#Notification%20Messages">B_MEDIA_WILDCARD</A></TT></B> is assumed; this matches all notification types.  You can also specify that you want to watch a specific <I><FONT  color=991122 face=HELVETICA>node</I></FONT>; if you don't specify a node, you'll receive notifications for all nodes.
+<P>
+Events are sent to registered BHandlers and BLoopers when certain events happen, such as nodes being created or deleted, or connections being made or broken.
+<P>
+See <a href="messages.html#Notification%20Messages">"Notification Messages"</a> for a list of the notifications you can receive, and the formats of the corresponding messages.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Although the Media Server will automatically cancel notifications to BHandlers and BLoopers that go away without explicitly calling <B><TT>StopWatching()</TT></B>, this detection is expensive and may briefly interrupt the media system, so you should always call <B><TT>StopWatching()</TT></B> before allowing a <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> or <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> to go away.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error cloning the node.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The requested node couldn't be cloned.
+<P>
+</UL>
+<P>
+<HR>
+<H3>StopNode() see <A HREF="#StartNode()">StartNode()</A></H3>
+<P>
+<HR>
+<H3>StopWatching() see <A HREF="#StartWatching()">StartWatching()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SyncToNode()"></A>SyncToNode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SyncNode(</TT></B></FONT>const media_node &amp;<I><FONT  color=991122 face=HELVETICA>node</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> = <FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If you want to detect the arrival of a specific performance time on a given node, you can do that by calling <B><TT>SyncToNode()</TT></B>.  Specify the node you want to monitor in <I><FONT  color=991122 face=HELVETICA>node</I></FONT>, and the time you want to be notified of in <I><FONT  color=991122 face=HELVETICA>atPerformanceTime</I></FONT>.  You can, optionally, specify a <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT>; if the sync hasn't occurred in <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> microseconds, the request will time out.
+<P>
+This function doesn't return until either the specified performance time arrives, or the sync operation times out.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  All's well.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_NODE">B_MEDIA_BAD_NODE</A></TT></B>.  The specified <I><FONT  color=991122 face=HELVETICA>node</I></FONT> is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.  The request timed out.
+<P>
+<LI>Port errors.  An error occurred communicating with the Media Server.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="connect_flags"></A>connect_flags
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaRoster.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_CONNECT_MUTED</TT></B></TD>
+<TD>The connection should be muted on creation.</TD>
+</TABLE>
+<P>
+<UL>
+<LI>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,625 @@
+<HTML><HEAD><TITLE>Drivers: Constants and Defined Types</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Constants%20and%20Defined%20Types"></A>Constants and Defined Types
+</H1>
+<P>
+This section covers constants and types defined for use by kernel drivers and modules.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Current%20Driver%20API%20Version"></A>Current Driver API Version
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/Drivers.h>">&lt;drivers/Drivers.h></A>
+<P>
+The <B><TT>B_CUR_DRIVER_API_VERSION</TT></B> constant indicates what version of the driver API your driver will be built to.
+<P>
+<B>See also:  </B><a href="writing_drivers.html#Symbols%20Drivers%20Export">"Symbols Drivers Export"</a>
+<P>
+<HR>
+<H3>
+<A NAME="Driver%20Control%20Opcodes"></A>Driver Control Opcodes
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/Drivers.h>">&lt;drivers/Drivers.h></A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>Constant</TD>
+<TD>Meaning</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_DEVICE_SIZE"></A>B_GET_DEVICE_SIZE
+</TT></B> </TD>
+<TD>Returns a size_t indicating the device size in bytes.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SET_DEVICE_SIZE"></A>B_SET_DEVICE_SIZE
+</TT></B></TD>
+<TD>Sets the device size to the value pointed to by <I><FONT  color=991122 face=HELVETICA>data</I></FONT>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SET_NONBLOCKING_IO"></A>B_SET_NONBLOCKING_IO
+</TT></B></TD>
+<TD>Sets the device to use nonblocking I/O.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SET_BLOCKING_IO"></A>B_SET_BLOCKING_IO
+</TT></B></TD>
+<TD>Sets the device to use blocking I/O.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_READ_STATUS"></A>B_GET_READ_STATUS
+</TT></B></TD>
+<TD>Returns <TT>
+<A NAME="Driver%20Control%20Opcodes"></A>true
+</TT> if the device can read without blocking, otherwise <TT>
+<A NAME="Driver%20Control%20Opcodes"></A>false
+</TT>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_WRITE_STATUS"></A>B_GET_WRITE_STATUS
+</TT></B></TD>
+<TD>Returns <TT>
+<A NAME="Driver%20Control%20Opcodes"></A>true
+</TT> if the device can write without blocking, otherwise <TT>
+<A NAME="Driver%20Control%20Opcodes"></A>false
+</TT>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_GEOMETRY"></A>B_GET_GEOMETRY
+</TT></B></TD>
+<TD>Fills out the specified device_geometry structure to describe the device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_DRIVER_FOR_DEVICE"></A>B_GET_DRIVER_FOR_DEVICE
+</TT></B></TD>
+<TD>Returns the path of the driver executable handling the device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_PARTITION_INFO"></A>B_GET_PARTITION_INFO
+</TT></B> </TD>
+<TD>Returns a partition_info structure for the device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SET_PARTITION"></A>B_SET_PARTITION
+</TT></B></TD>
+<TD>Creates a user-defined partition. <I><FONT  color=991122 face=HELVETICA>data</I></FONT> points to a partition_info structure.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FORMAT_DEVICE"></A>B_FORMAT_DEVICE
+</TT></B></TD>
+<TD>Formats the device.  <I><FONT  color=991122 face=HELVETICA>data</I></FONT> should point to a boolean value.  If this is <TT>
+<A NAME="Driver%20Control%20Opcodes"></A>true
+</TT>, the device is formatted low-level.  If it's <TT>
+<A NAME="Driver%20Control%20Opcodes"></A>false
+</TT>, &lt;&lt;&lt;unclear>>></TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EJECT_DEVICE"></A>B_EJECT_DEVICE
+</TT></B></TD>
+<TD>Ejects the device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_ICON"></A>B_GET_ICON
+</TT></B></TD>
+<TD>Fills out the specified device_icon structure to describe the device's icon.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_BIOS_GEOMETRY"></A>B_GET_BIOS_GEOMETRY
+</TT></B></TD>
+<TD>Fills out a device_geometry structure to describe the device as the BIOS sees it.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_MEDIA_STATUS"></A>B_GET_MEDIA_STATUS
+</TT></B></TD>
+<TD>Gets the status of the media in the device by placing a status_t at the location pointed to by <I><FONT  color=991122 face=HELVETICA>data</I></FONT>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LOAD_MEDIA"></A>B_LOAD_MEDIA
+</TT></B></TD>
+<TD>Loads the media, if this is supported.  &lt;&lt;&lt;what does that mean?>>></TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_BIOS_DRIVE_ID"></A>B_GET_BIOS_DRIVE_ID
+</TT></B></TD>
+<TD>Returns the BIOS ID for the device.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SET_UNINTERRUPTABLE_IO"></A>B_SET_UNINTERRUPTABLE_IO
+</TT></B></TD>
+<TD>Prevents control-C from interrupting I/O.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SET_INTERRUPTABLE_IO"></A>B_SET_INTERRUPTABLE_IO
+</TT></B></TD>
+<TD>Allows control-C to interrupt I/O.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FLUSH_DRIVE_CACHE"></A>B_FLUSH_DRIVE_CACHE
+</TT></B></TD>
+<TD>Flushes the drive's cache.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_NEXT_OPEN_DEVICE"></A>B_GET_NEXT_OPEN_DEVICE
+</TT></B></TD>
+<TD>Iterates through open devices; data points to an <TT>
+<A NAME="Driver%20Control%20Opcodes"></A>open_device_iterator
+</TT>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ADD_FIXED_DRIVER"></A>B_ADD_FIXED_DRIVER
+</TT></B></TD>
+<TD>For internal use only.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_REMOVE_FIXED_DRIVER"></A>B_REMOVE_FIXED_DRIVER
+</TT></B></TD>
+<TD>For internal use only.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_AUDIO_DRIVER_BASE"></A>B_AUDIO_DRIVER_BASE
+</TT></B></TD>
+<TD>Base for codes in audio_driver.h.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MIDI_DRIVER_BASE"></A>B_MIDI_DRIVER_BASE
+</TT></B></TD>
+<TD>Base for codes in midi_driver.h.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_JOYSTICK_DRIVER_BASE"></A>B_JOYSTICK_DRIVER_BASE
+</TT></B></TD>
+<TD>Base for codes in joystick.h.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GRAPHIC_DRIVER_BASE"></A>B_GRAPHIC_DRIVER_BASE
+</TT></B></TD>
+<TD>Base for codes in graphic_driver.h.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DEVICE_OP_CODES_END"></A>B_DEVICE_OP_CODES_END
+</TT></B></TD>
+<TD>End of Be-defined control IDs.</TD>
+</TABLE>
+<P>
+<B><TT>B_GET_MEDIA_STATUS</TT></B> can return the following values:
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="device_geometry"></A>device_geometry
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/Drivers.h>">&lt;drivers/Drivers.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>bytes_per_sector
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>sectors_per_track
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>cylinder_count
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>head_count
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>device_type
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>removable
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>read_only
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>write_once
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_geometry"></A>device_geometry
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The device_geometry structure is returned by the <B><TT><A HREF="#B_GET_GEOMETRY">B_GET_GEOMETRY</A></TT></B> driver control function.  Its fields are:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>bytes_per_sector</I></FONT> indicates how many bytes each sector of the disk contains.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>sectors_per_track</I></FONT> indicates how many sectors each disk track contains.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>cylinder_count</I></FONT> indicates the number of cylinders the disk contains.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>head_count</I></FONT> indicates how many heads the disk has.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>device_type</I></FONT> specifies the type of device; there's a list of device type definitions below.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>removable</I></FONT> is <B><TT>true</TT></B> if the device's media can be removed from the drive, and is <B><TT>false</TT></B> otherwise.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>read_only</I></FONT> is <B><TT>true</TT></B> if the media is read-only (such as CD-ROM), or <B><TT>false</TT></B> if the media can be both read from and written .
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>write_once</I></FONT> is <B><TT>true</TT></B> if the media can only be written to once (such as CD-recordable), or <B><TT>false</TT></B> if there's no limit to the number of times the media can be written to.
+<P>
+</UL>
+<P>
+If you need to compute the total size of the device in bytes, you can obtain this figure using the following simple formula:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;disk_size = geometry.cylinder_count * geometry.sectors_per_track *
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;geometry.head_count * geometry.bytes_per_sector;</PRE>
+<P>
+The device type returned in <I><FONT  color=991122 face=HELVETICA>device_type</I></FONT> is:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B>Constant</B></TD>
+<TD>Meaning</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DISK"></A>B_DISK
+</TT></B> </TD>
+<TD>Hard disk, floppy disk, etc.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TAPE"></A>B_TAPE
+</TT></B></TD>
+<TD>Tape drive</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PRINTER"></A>B_PRINTER
+</TT></B> </TD>
+<TD>Printer</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CPU"></A>B_CPU
+</TT></B></TD>
+<TD>CPU device</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WORM"></A>B_WORM
+</TT></B> </TD>
+<TD>Write-once, read-many device (like CD-recordable)</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CD"></A>B_CD
+</TT></B></TD>
+<TD>CD-ROM</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SCANNER"></A>B_SCANNER
+</TT></B></TD>
+<TD>Scanner</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTICAL"></A>B_OPTICAL
+</TT></B></TD>
+<TD>Optical device</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_JUKEBOX"></A>B_JUKEBOX
+</TT></B></TD>
+<TD>Jukebox device</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NETWORK"></A>B_NETWORK
+</TT></B></TD>
+<TD>Network device</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="device_hooks"></A>device_hooks
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/Drivers.h>">&lt;drivers/Drivers.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_open_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>open
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_close_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>close
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_free_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>free
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_control_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>control
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_read_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>read
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_write_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>write
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_select_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>select
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_deselect_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>deselect
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_readv_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>readv
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_writev_hook <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>writev
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_hooks"></A>device_hooks
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure is used by device drivers to export their function hooks to the kernel.
+<P>
+<HR>
+<H3>
+<A NAME="device_icon"></A>device_icon
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/Drivers.h>">&lt;drivers/Drivers.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_icon"></A>icon_size
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT><FONT  color=000022 size=+1>
+<A NAME="device_icon"></A>icon_data
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>
+<A NAME="device_icon"></A>device_icon
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+When you want to obtain an icon for a specific device, call <B><TT>ioctl()</TT></B> on the open device, specifying the <B><TT><A HREF="#B_GET_ICON">B_GET_ICON</A></TT></B> opcode.  Pass in data a pointer to a device_icon structure in which <I><FONT  color=991122 face=HELVETICA>icon_size</I></FONT> indicates the size of icon you want and <I><FONT  color=991122 face=HELVETICA>icon_data</I></FONT> points to a buffer large enough to receive the icon's data.
+<P>
+icon_size can be either B_MINI_ICON, in which case the buffer pointed to by icon_data should be large enough to receive a 16x16 8-bit bitmap (256-byte), or B_LARGE_ICON, in which case the buffer should be large enough to receive a 32x32 8-bit bitmap (1024-byte).  The most obvious way to set up this buffer would be to create a <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> of the appropriate size and color depth and use its buffer, like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BBitmap bits(BRect(0, 0, B_MINI_ICON-1, B_MINI_ICON-1, 0, B_CMAP8));
+&nbsp;&nbsp;&nbsp;device_icon iconrec;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;iconrec.icon_size = B_MINI_ICON;
+&nbsp;&nbsp;&nbsp;iconrec.icon_data = bits.Bits();
+&nbsp;&nbsp;&nbsp;status_t err = ioctl(dev_fd, B_GET_ICON, &amp;iconrec);
+&nbsp;&nbsp;&nbsp;if (err == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* enjoy the icon */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;view->DrawBitmap(bits);
+&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* I don't like icons anyway */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="driver_path"></A>driver_path
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/Drivers.h>">&lt;drivers/Drivers.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef char <B><TT><FONT  color=000022 size=+1>
+<A NAME="driver_path"></A>driver_path
+</TT></B></FONT>[256];
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Used by the <B><TT><A HREF="#B_GET_DRIVER_FOR_DEVICE">B_GET_DRIVER_FOR_DEVICE</A></TT></B> control function to return the pathname of the specified device.
+<P>
+<HR>
+<H3>
+<A NAME="open_device_iterator"></A>open_device_iterator
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/Drivers.h>">&lt;drivers/Drivers.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="open_device_iterator"></A>cookie
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>
+<A NAME="open_device_iterator"></A>device
+</TT></B></FONT>[256];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>
+<A NAME="open_device_iterator"></A>open_device_iterator
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Used by the <B><TT><A HREF="#B_GET_NEXT_OPEN_DEVICE">B_GET_NEXT_OPEN_DEVICE</A></TT></B> control function.  The first time you call this function, your open_device_iterator should have <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> initialized to 0.  Then just keep calling it over and over; each time you'll get the name of the next open device.  When an error is returned, you're done.
+<P>
+<HR>
+<H3>
+<A NAME="partition_info"></A>partition_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;drivers/Drivers.h>">&lt;drivers/Drivers.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t <B><TT><FONT  color=000022 size=+1>
+<A NAME="partition_info"></A>offset
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t <B><TT><FONT  color=000022 size=+1>
+<A NAME="partition_info"></A>size
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="partition_info"></A>logical_block_size
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="partition_info"></A>session
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="partition_info"></A>partition
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>
+<A NAME="partition_info"></A>device
+</TT></B></FONT>[256];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>
+<A NAME="partition_info"></A>partition_info
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The partition_info structure describes a disk partition, and is used by the <B><TT><A HREF="#B_GET_PARTITION_INFO">B_GET_PARTITION_INFO</A></TT></B> and <B><TT><A HREF="#B_SET_PARTITION">B_SET_PARTITION</A></TT></B> control commands.
+<P>
+The fields are:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>offset</I></FONT> is the offset, in bytes, from the beginning of the disk to the beginning of the partition.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>size</I></FONT> is the size, in bytes, of the partition.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>logical_block_size</I></FONT> is the block size with which the file system was written to the partition.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>session</I></FONT> and <I><FONT  color=991122 face=HELVETICA>partition</I></FONT> are the session and partition ID numbers for the partition.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>device</I></FONT> is the pathname of the physical device on which the partition is located.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

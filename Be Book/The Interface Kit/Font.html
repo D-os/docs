@@ -1,0 +1,1576 @@
+<HTML><HEAD><TITLE>The Interface Kit: BFont</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BFont"></A>BFont
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Font.h">be/interface/Font.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Font.summary.html"><i>Summary</i></A></H6>
+<P>
+A BFont object records a set of font attributes, such as the font's family, style, size, and so on.  You can set most of these attributes to modify the font and then use the object to set the font of a BView.  A BView's font determines how the characters that it draws (with the <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B> and <B><TT><A HREF="ViewDrawing.html#DrawChar()">DrawChar()</A></TT></B> functions) will be rendered.
+<P>
+A BFont object can perform calculations based on the metrics of the particular font it represents.  For example, it can tell you how much screen real estate it needs to display a given line of text.
+<P>
+To find which fonts are currently installed on the system, call <B><TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> and <B><TT><A HREF="functions.html#get_font_style()">get_font_style()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Using%20a%20BFont%20Object"></A>Using a BFont Object
+</H3>
+<P>
+A BFont object by itself doesn't do anything.  To be able to draw characters in the font, the object must be passed to BView's <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B> function (or BTextView's <B><TT><A HREF="TextView.html#SetFontAndColor()">SetFontAndColor()</A></TT></B>).
+<P>
+A BFont object is always a full representation of a font; all attributes are always set.  However, you can choose which of these attributes will modify a BView's current font by passing a mask to <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B> (or <B><TT><A HREF="TextView.html#SetFontAndColor()">SetFontAndColor()</A></TT></B>).  For example, this code sets only the font shear and spacing:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BFont font;
+&nbsp;&nbsp;&nbsp;font.SetShear(60.0);
+&nbsp;&nbsp;&nbsp;font.SetSpacing(B_CHAR_SPACING);
+&nbsp;&nbsp;&nbsp;myView->SetFont(&amp;font, B_FONT_SHEAR | B_FONT_SPACING);</PRE>
+<P>
+Alternatively, the BView's font could have been modified and reset as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BFont font;
+&nbsp;&nbsp;&nbsp;myView->GetFont(&amp;font);
+&nbsp;&nbsp;&nbsp;font.SetShear(60.0);
+&nbsp;&nbsp;&nbsp;font.SetSpacing(B_CHAR_SPACING);
+&nbsp;&nbsp;&nbsp;myView->SetFont(&amp;font);</PRE>
+<P>
+Notice that we had to explicitly reset the view's font (through <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B>) after changing the font's attributes.
+<P>
+<HR>
+<H3>
+<A NAME="System%20Fonts"></A>System Fonts
+</H3>
+<P>
+The Interface Kit constructs three BFont objects (plain, bold, and fixed)for each application when the application starts up.  The values of these fonts are set by the user through the FontPanel preferences application.  You can get to these objects through global pointers :
+<P>
+const BFont *<B><TT>
+<A NAME="be_plain_font"></A>be_plain_font
+<br>
+</TT></B>The font that's used to display most gadgets in the user interface, such as check box labels and menu items.  All <A HREF="Control.html#BControl">BControl</A> objects use this font.
+<P>
+const BFont *<B><TT>
+<A NAME="be_bold_font"></A>be_bold_font
+<br>
+</TT></B>The font that's used to display window titles and <A HREF="Box.html#BBox">BBox</A> labels. 
+<P>
+const BFont *<B><TT>
+<A NAME="be_fixed_font"></A>be_fixed_font
+<br>
+</TT></B>The font that's used to display fixed-width characters.
+<P>
+The global fonts are <B><TT>const</TT></B> objects that can't be modified by your application, and aren't updated by the system, even if the user changes their definitions while your app is running.  The new values take effect the next time your application is launched.
+<P>
+To use a system font in a view, simply call <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myView->SetFont(be_bold_font);</PRE>
+<P>
+If you want to modify some attributes of a system font, you have to make a copy of it first (and modify the copy):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BFont font(be_bold_font);
+&nbsp;&nbsp;&nbsp;font.SetSize(13.0);
+&nbsp;&nbsp;&nbsp;myView->SetFont(&amp;font);</PRE>
+<P>
+Applications should respect the user's choices and base all font choices on these three system fonts, rather than hard-code font names into the application.  You should not try to predict the fonts that will be installed on the user's machine.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor"></A><FONT SIZE=6>C</FONT>onstructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BFont()"></A>BFont()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BFont(</TT></B></FONT>const BFont &amp;<I><FONT  color=991122 face=HELVETICA>font</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BFont(</TT></B></FONT>const BFont *<I><FONT  color=991122 face=HELVETICA>font</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BFont(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the new BFont object as a copy of another <I><FONT  color=991122 face=HELVETICA>font</I></FONT>.  If no font is specified, <B><TT><A HREF="#be_plain_font">be_plain_font</A></TT></B> is used.
+<P>
+The system BFont objects, including <B><TT><A HREF="#be_plain_font">be_plain_font</A></TT></B>, are initialized only when you create a <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> object for your application.  Therefore, the default settings of BFont objects constructed before the <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> object will be invalid.
+<P>
+<B>See also:  <TT>BView::SetFont()</TT></B>, <B><TT><A HREF="TextView.html#SetFontAndColor()">BTextView::SetFontAndColor()</A></TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Blocks()"></A>Blocks()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+unicode_block <B><TT><FONT  color=000022 size=+1>Blocks(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a unicode_block object that identifies which Unicode blocks the font supports.  You can then use the <B><TT>unicode_block::Includes()</TT></B> function to determine if specific blocks are supported.
+<P>
+<HR>
+<H3>
+<A NAME="BoundingBox()"></A>BoundingBox()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>BoundingBox(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a <A HREF="Rect.html#BRect">BRect</A> that can enclose the entire font in its current style and size.
+<P>
+<HR>
+<H3>CountTuned()   see <A HREF="#GetTunedInfo()">GetTunedInfo()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Direction()"></A>Direction()
+, 
+<A NAME="font_direction"></A>font_direction
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+font_direction <B><TT><FONT  color=000022 size=+1>Direction(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+enum <B><TT><FONT  color=000022 size=+1>font_direction</TT></B></FONT> {}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>Direction()</TT></B> returns a <B><TT>font_direction</TT></B> constant that describes the direction in which the object's text is meant to be read:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_FONT_LEFT_TO_RIGHT</TD>
+<TR>
+<TD>B_FONT_RIGHT_TO_LEFT</TD>
+</TABLE></TT></B>
+<P>
+This is an inherent property of the font and cannot be set.
+<P>
+The direction of the font affects the direction in which <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B> draws the characters in a string, but not the direction in which it moves the pen.
+<P>
+<B>See also:  <TT>BView::DrawString()</TT></B> 
+<P>
+<HR>
+<H3>Encoding()   see <A HREF="#SetEncoding()">SetEncoding()</A></H3>
+<P>
+<HR>
+<H3>Face()   see <A HREF="#SetFace()">SetFace()</A></H3>
+<P>
+<HR>
+<H3>FamilyAndStyle()   see <A HREF="#SetFamilyAndStyle()">SetFamilyAndStyle()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="FileFormat()"></A>FileFormat()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+font_file_format <B><TT><FONT  color=000022 size=+1>FileFormat(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the file format of the font (ie, whether it's a PostScript or TrueType font).
+<P>
+<HR>
+<H3>Flags()   see <A HREF="#SetFlags()">SetFlags()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetBoundingBoxesAsGlyphs()"></A>GetBoundingBoxesAsGlyphs()
+, 
+<A NAME="GetBoundingBoxesAsString()"></A>GetBoundingBoxesAsString()
+, 
+<A NAME="GetBoundingBoxesForStrings()"></A>GetBoundingBoxesForStrings()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetBoundingBoxesAsGlyphs(</TT></B></FONT>const char <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>[], int32 <I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font_metric_mode <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>boundingBoxArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetBoundingBoxesAsString(</TT></B></FONT>const char <I><FONT  color=991122 face=HELVETICA>string</I></FONT>[], int32 <I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font_metric_mode <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta *<I><FONT  color=991122 face=HELVETICA>delta</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>boundingBoxArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetBoundingBoxesForStrings(</TT></B></FONT>const char <I><FONT  color=991122 face=HELVETICA>*stringArray</I></FONT>[], int32 <I><FONT  color=991122 face=HELVETICA>numStrings</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font_metric_mode <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta *<I><FONT  color=991122 face=HELVETICA>deltas</I></FONT>[],
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>boundingBoxArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetBoundingBoxesAsGlyphs()</TT></B> returns an array of <A HREF="Rect.html#BRect">BRect</A> objects indicating the bounding rectangles of all the characters in an array.  Each <A HREF="Rect.html#BRect">BRect</A> returned corresponds to one character's glyph.
+<P>
+<B><TT>GetBoundingBoxesAsString()</TT></B> returns an array of <A HREF="Rect.html#BRect">BRect</A> objects indicating the bounding rectangles of each character in a <I><FONT  color=991122 face=HELVETICA>string</I></FONT>.
+<P>
+<B><TT>GetBoundingBoxesForStrings()</TT></B> returns an array of <A HREF="Rect.html#BRect">BRect</A> objects indicating the bounding rectangles for an array of strings, one <A HREF="Rect.html#BRect">BRect</A> per string.  These rectangles enclose the entire string they represent.
+<P>
+In all cases, the <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> indicates whether the rectangles should be returned in the screen's metric (<B><TT>B_SCREEN_METRIC</TT></B>), or in printing metrics (<B><TT>B_PRINTING_METRIC</TT></B>).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>delta</I></FONT> argument for <B><TT>GetBoundingBoxesAsString()</TT></B> and the <I><FONT  color=991122 face=HELVETICA>deltas</I></FONT> argument for <B><TT>GetBoundingBoxesForStrings()</TT></B> indicate escapement deltas that should be applied when making the bounding box calculations.  This lets you indicate that the characters should be closer together or further apart than normal, for example.
+<P>
+<HR>
+<H3>
+<A NAME="GetEscapements()"></A>GetEscapements()
+, 
+<A NAME="escapement_delta"></A>escapement_delta
+, 
+<A NAME="GetEdges()"></A>GetEdges()
+, 
+<A NAME="edge_info"></A>edge_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetEscapements(</TT></B></FONT>const&nbsp;char&nbsp;<I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float&nbsp;<I><FONT  color=991122 face=HELVETICA>escapementArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetEscapements(</TT></B></FONT>const&nbsp;char <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta&nbsp;*<I><FONT  color=991122 face=HELVETICA>delta</I></FONT>, float&nbsp;<I><FONT  color=991122 face=HELVETICA>escapementArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetEscapements(</TT></B></FONT>const&nbsp;char <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta&nbsp;*<I><FONT  color=991122 face=HELVETICA>delta</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>escapementArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetEscapements(</TT></B></FONT>const&nbsp;char <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta&nbsp;*<I><FONT  color=991122 face=HELVETICA>delta</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>escapementArray</I></FONT>[],
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>offsetArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>escapement_delta</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>nonspace</FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>space</FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetEdges(</TT></B></FONT>const&nbsp;char <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;edge_info&nbsp;<I><FONT  color=991122 face=HELVETICA>edgeArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>edge_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>left</FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>right</FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These two functions provide the information required to precisely position characters on the screen or printed page.  For each character passed in the <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>, they write information about the horizontal dimension of the character into the <I><FONT  color=991122 face=HELVETICA>escapementArray</I></FONT> or the <I><FONT  color=991122 face=HELVETICA>edgeArray</I></FONT>.  Both functions provide this information in "escapement units" that yield standard coordinate units (72.0 per inch) when multiplied by the font size.
+<P>
+<B><TT>GetEscapements()</TT></B> and <B><TT><A HREF="#GetEdges()">GetEdges()</A></TT></B> expect the character array they're passed to contain at least <I><FONT  color=991122 face=HELVETICA>numChar</I></FONT> characters; neither function checks the <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT> for a null terminator.  Because the array may hold multibyte characters (in <B><TT><A HREF="misc.html#B_UNICODE_UTF8">B_UNICODE_UTF8</A></TT></B> encoding), the number of bytes in the array may  be greater than the number of characters specified.  The <I><FONT  color=991122 face=HELVETICA>escapementArray</I></FONT> and <I><FONT  color=991122 face=HELVETICA>edgeArray</I></FONT> should be long enough to hold an output value for every input character.
+<P>
+You can optionally request that escapement information be returned as an array of <A HREF="Point.html#BPoint">BPoint</A> objects.
+<P>
+<H4>
+<A NAME="Escapements"></A>Escapements
+</H4>
+<P>
+A character's escapement measures the amount of horizontal space it requires.  It includes the space needed to display  the character itself, plus some extra room on the left and right edges to separate the character from its neighbors.  The illustration below shows the approximate escapements for the letters 'l' and 'p'; the escapement for each character is the distance between the vertical lines:
+<P>
+<IMG SRC="art/Font1.gif" ALIGN="bottom">
+<P>
+<B><TT>GetEscapements()</TT></B> measures the same space that functions such as <B><TT><A HREF="#StringWidth()">StringWidth()</A></TT></B> and BTextView's <B><TT><A HREF="TextView.html#LineWidth()">LineWidth()</A></TT></B> do, but it measures each character individually and records its width in per-point-size escapement units.  To translate the escapement value to the width of the character, you must multiply by the point size of the font:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;float width = escapementArray[i] * font.Size();</PRE>
+<P>
+Because of rounding errors, there may be some difference between the value returned by <B><TT><A HREF="#StringWidth()">StringWidth()</A></TT></B> and the width calculated from the individual escapements of the characters in the string.
+<P>
+The versions of <B><TT>GetEscapements()</TT></B> that use BPoints for the escapement value use the <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>escapementArray</I></FONT> to indicate a vector by which the pen is moved after drawing a character (this lets the escapement indicate both an X and a Y adjustment; the Y might need to be adjusted if the font is rotated, for example).  The <I><FONT  color=991122 face=HELVETICA>offsetArray</I></FONT> is applied by the dynamic spacing in order to improve the relative position of the character's width with relation to another character, without altering the width.
+<P>
+The escapement value is scalable if the spacing mode of the font is <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B>.  In other words, given <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> and the same set of font characteristics, <B><TT>GetEscapements()</TT></B> will report the same measurement for a character regardless of the font size.  You can cache one value per character and use it for all font sizes.  For the other spacing modes, the reported escapement depends on the font size and therefore can't be scaled.
+<P>
+For most spacing modes, a character has a constant escapement in all contexts; it depends only on the font.  However, for <B><TT>B_STRING_SPACING</TT></B>, each character's escapement is also contextually dependent on the string it's in.  To find the escapement of a character within a particular string, you must pass the entire string in the input <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>.
+<P>
+In the <B><TT>B_BITMAP_SPACING</TT></B> and <B><TT><A HREF="misc.html#B_FIXED_SPACING">B_FIXED_SPACING</A></TT></B> modes, all characters have integral widths (without a fractional part).  For these modes, multiplying an escapement by the font size should yield an integral value.  In <B><TT><A HREF="misc.html#B_FIXED_SPACING">B_FIXED_SPACING</A></TT></B> mode, all characters have the same escapement.
+<P>
+If a <I><FONT  color=991122 face=HELVETICA>delta</I></FONT> argument is provided, <B><TT><A HREF="#GetEscapements()">GetEscapements()</A></TT></B> will adjust the escapements it reports so that, after multiplying by the font size, the character widths will include the specified increments.  An <B><TT>escapement_delta</TT></B> structure contains two values:
+<P>
+float <B><TT>nonspace
+<br>
+</TT></B>The amount to add to the width of each character with a visible glyph.
+<P>
+float <B><TT>space
+<br>
+</TT></B>The amount to add to each whitespace character (characters like <B><TT><A HREF="misc.html#B_TAB">B_TAB</A></TT></B> and <B><TT><A HREF="misc.html#B_SPACE">B_SPACE</A></TT></B> with an escapement but no visible glyph).
+<P>
+A similar argument can be passed to BView's <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B> to adjust the spacing of the characters as they're drawn.
+<P>
+<H4>
+<A NAME="Edges"></A>Edges
+</H4>
+<P>
+Edge values measure how far a character outline is inset from its left and right escapement boundaries.  <B><TT>GetEdges()</TT></B> places the edge values into an array of <B><TT><A HREF="#edge_info">edge_info</A></TT></B> structures.  Each structure has a <B><TT>left</TT></B> and a <B><TT>right</TT></B> data member, as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT>left</TT></B>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT>right</TT></B>;
+&nbsp;&nbsp;&nbsp;} <B><TT>edge_info</TT></B> </PRE>
+<P>
+Edge values, like escapements, are stated in per-point-size units that need to be multiplied by the font size.
+<P>
+The illustration below shows typical character edges.  As in the illustration above, the solid vertical lines mark escapement boundaries.  The dotted lines mark off the part of each escapement that's an edge, the distance between the character outline and the escapement boundary: 
+<P>
+This is the normal case.  The left edge is a positive value measured rightward from the left escapement boundary.  The right edge is a negative value measured leftward from the right escapement boundary.
+<P>
+However, if the characters of a font overlap, the left edge can be a negative value and the right edge can be positive.  This is illustrated below:
+<P>
+Note that the italic '<I>l</I>' extends beyond its escapement to the right, and that the '<I>p</I>' begins before its escapement to the left.  In this case, instead of separating the adjacent characters, the edges determine how much they overlap.
+<P>
+Edge values are specific to each character and depend on nothing but the character and the font.  They don't take into account any contextual information; for example, the right edge for italic '<I>l</I>' would be the same no matter what letter followed.  Edge values therefore aren't sufficient to decide how character pairs can be kerned.  Kerning is contextually dependent on the combination of two particular characters.
+<P>
+<B>See also:  <TT><A HREF="#StringWidth()">StringWidth()</A></TT></B>, <B><TT><A HREF="#SetSpacing()">SetSpacing()</A></TT></B> 
+<P>
+<HR>
+<H3>GetFamilyAndStyle()   see <A HREF="#SetFamilyAndStyle()">SetFamilyAndStyle()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetGlyphShapes()"></A>GetGlyphShapes()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetGlyphShapes(</TT></B></FONT>const char <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>[], int32 <I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Shape.html#BShape">BShape</A> *<I><FONT  color=991122 face=HELVETICA>glyphShapeArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Given an array of characters, <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>, which contains <I><FONT  color=991122 face=HELVETICA>numChars</I></FONT> characters, and an array of <A HREF="Shape.html#BShape">BShape</A> objects, <I><FONT  color=991122 face=HELVETICA>glyphShapeArray</I></FONT>, this function makes each element in the <I><FONT  color=991122 face=HELVETICA>glyphShapeArray</I></FONT> describe the shape of the corresponding glyph in the <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>.
+<P>
+This lets you create <A HREF="Shape.html#BShape">BShape</A> objects in the shape of the outline of a font.  You can then manipulate these BShapes to do interesting text effects.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <I><FONT  color=991122 face=HELVETICA>glyphShapeArray</I></FONT> must contain already-allocated <A HREF="Shape.html#BShape">BShape</A> objects.  They will be cleared by this function before the glyphs' shapes are constructed into them, but the objects must already exist.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Fonts are drawn one pixel above the logical baseline; this affects <A HREF="Shape.html#BShape">BShape</A> objects derived from fonts, too.  The fonts are also one pixel above the baseline in the BShapes this function returns.  If you want to apply a transform to these shapes, be sure to remove the offset before applying the transform, then add the offset back to the points before drawing the shape, or you won't get the expected results.
+<P>
+<HR>
+<H3>
+<A NAME="GetHasGlyphs()"></A>GetHasGlyphs()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetHasGlyphs(</TT></B></FONT>const char <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT>[], int32 <I><FONT  color=991122 face=HELVETICA>numChars</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>hasArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Given an array of characters in <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT> (of which there are <I><FONT  color=991122 face=HELVETICA>numChars</I></FONT> members), this function fills out the array of booleans specified by <I><FONT  color=991122 face=HELVETICA>hasArray</I></FONT> such that each entry in <I><FONT  color=991122 face=HELVETICA>hasArray</I></FONT> is <B><TT>true</TT></B> if the corresponding character in <I><FONT  color=991122 face=HELVETICA>charArray</I></FONT> has a glyph in the font, and <B><TT>false</TT></B> if the character doesn't have a glyph.
+<P>
+This way, you can determine if you can use one or more characters without the user seeing "no glyph" symbols.
+<P>
+<HR>
+<H3>
+<A NAME="GetHeight()"></A>GetHeight()
+, 
+<A NAME="font_height"></A>font_height
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetHeight(</TT></B></FONT>font_height *<I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>font_height</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>ascent</FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>descent</FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>leading</FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetHeight()</TT></B> writes the three components that determine the height of the font into the structure that the <I><FONT  color=991122 face=HELVETICA>height</I></FONT> argument refers to.  A <B><TT><A HREF="#font_height">font_height</A></TT></B> structure has the following fields:
+<P>
+float <B><TT>
+<A NAME="ascent"></A>ascent
+<br>
+</TT></B>How far characters can ascend above the baseline.
+<P>
+float <B><TT>
+<A NAME="descent"></A>descent
+<br>
+</TT></B>How far characters can descend below the baseline.
+<P>
+float <B><TT>
+<A NAME="leading"></A>leading
+<br>
+</TT></B>How much space separates lines (the distance between the descent of the line above and the ascent of the line below).
+<P>
+If you need to round the font height, or any of its components, to an integral value (to figure the spacing between lines of text on-screen, for example), you should always round them up to reduce the amount of vertical character overlap.
+<P>
+<B>See also:  <TT>BView::GetFontHeight()</TT></B> 
+<P>
+<HR>
+<H3>GetStringWidths()   see <A HREF="#StringWidth()">StringWidth()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetTruncatedStrings()"></A>GetTruncatedStrings()
+, 
+<A NAME="TruncateString()"></A>TruncateString()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetTruncatedStrings(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>inputStringArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numStrings</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>mode</I></FONT>, float&nbsp;<I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>truncatedStringArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetTruncatedStrings(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>inputStringArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numStrings</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>mode</I></FONT>, float&nbsp;<I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Support%20Kit/String.html#BString">BString</A> <I><FONT  color=991122 face=HELVETICA>truncatedStringArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>TruncateString(</TT></B></FONT><A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>inOutString</I></FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>mode</I></FONT>, float&nbsp;<I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#GetTruncatedStrings()">GetTruncatedStrings()</A></TT></B> Ttruncates a set of strings so that each one (and an ellipsis to show where the string was cut) will fit into the <I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT> horizontal space.  This function is useful for shortening long strings that are displayed to the user&mdash;for showing path names in a list, for example.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>numStrings</I></FONT> argument states how many strings in the <I><FONT  color=991122 face=HELVETICA>inputStringArray</I></FONT> should be shortened.  The <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> argument states where the string should be cut.  It can be:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_TRUNCATE_BEGINNING</TT></B></TD>
+<TD>Cut from the beginning of the string until it fits within the specified width.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_TRUNCATE_MIDDLE">B_TRUNCATE_MIDDLE</A></TT></B></TD>
+<TD>Cut from the middle of the string.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_TRUNCATE_END">B_TRUNCATE_END</A></TT></B></TD>
+<TD>Cut from the end of the string.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_TRUNCATE_SMART">B_TRUNCATE_SMART</A></TT></B></TD>
+<TD>Cut anywhere, but do so intelligently, so that all the strings remain different after being cut.  For example, if a set of similar path names are passed in the <I><FONT  color=991122 face=HELVETICA>inputStringArray</I></FONT>, this mode would attempt to cut from the identical parts of the path names and preserve the parts that are different.  This mode also pays attention to word boundaries, separators, punctuation, and the like.  However, it's not implemented for the current release.</TD>
+</TABLE>
+<P>
+Each output string is written to the <I><FONT  color=991122 face=HELVETICA>truncatedStringArray</I></FONT>&mdash;into memory that the caller must provide&mdash;at an index that matches the index of the full string in the <I><FONT  color=991122 face=HELVETICA>inputStringArray</I></FONT>.  The <I><FONT  color=991122 face=HELVETICA>truncatedStringArray</I></FONT> is a list of pointers to string buffers.  Each buffer should be allocated separately and should be at least 3 bytes longer than the matching input string.  The 3 bytes allow for the worst-case scenario:  <B><TT><A HREF="#GetTruncatedStrings()">GetTruncatedStrings()</A></TT></B> cuts a one-byte character from the input string and replaces it with an ellipsis character, which takes three bytes in UTF-8 encoding, for a net gain of 2 bytes.  It then adds a null terminator for the third byte.
+<P>
+<B><TT><A HREF="#TruncateString()">TruncateString()</A></TT></B> truncates the <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> <I><FONT  color=991122 face=HELVETICA>inOutString</I></FONT> to be no longer than the width specified by <I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT>, using the given truncation <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>.
+<P>
+The output strings are null-terminated.  The input strings should likewise be null-terminated.  
+<P>
+<B>See also:  <TT><A HREF="#StringWidth()">StringWidth()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetTunedInfo()"></A>GetTunedInfo()
+, 
+<A NAME="CountTuned()"></A>CountTuned()
+, 
+<A NAME="tuned_font_info"></A>tuned_font_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetTunedInfo(</TT></B></FONT>int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, tuned_font_info&nbsp;*<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountTuned(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>tuned_font_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>size</FONT>; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>shear</FONT>; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <FONT  face=HELVETICA>rotation</FONT>; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <FONT  face=HELVETICA>flags</FONT>; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <FONT  face=HELVETICA>face</FONT>; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}  
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions are used to get information about fonts that have been "tuned" to look good when displayed on-screen.  A tuned font is a set of character bitmaps, originally produced from the standard outline font and then modified so that the characters are well proportioned and spaced when displayed at the low resolution of the screen (1 pixel per point).
+<P>
+Because it's a bitmap font, a tuned font captures a specific configuration of font attributes, including size, style, shear, and rotation.  A tuned font is a counterpart to an outline font with the same settings.  If a BView's current font has a tuned counterpart, <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B> automatically chooses it when drawing on-screen.  Tuned fonts are not used for printing.
+<P>
+<B><TT><A HREF="#CountTuned()">CountTuned()</A></TT></B> returns how many tuned fonts there are for the family and style represented by the BFont object.  <B><TT><A HREF="#GetTunedInfo()">GetTunedInfo()</A></TT></B> writes information about the tuned font at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> into the structure the <I><FONT  color=991122 face=HELVETICA>info</I></FONT> argument refers to.  Indices begin at&nbsp;0 and count only tuned fonts for the BFont's family and style.  
+<P>
+With this information, you can set the BFont to values that match those of a tuned font.  When a <A HREF="View.html#BView">BView</A> draws to the screen, it picks a tuned font if there's one that corresponds to its current font in all respects.
+<P>
+<B>See also:  <TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="IsFixed()"></A>IsFixed()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsFixed(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the font is fixed; <B><TT>false</TT></B> otherwise.
+<P>
+<HR>
+<H3>
+<A NAME="IsFullAndHalfFixed()"></A>IsFullAndHalfFixed()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsFullAndHalfFixed(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This function is not yet supported.
+<P>
+<HR>
+<H3>
+<A NAME="PrintToStream()"></A>PrintToStream()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>PrintToStream(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Writes the following information about the font to the standard output (on a single line):
+<P>
+<UL>
+<LI><I>family</I> <I> 
+<P>
+</I><LI><I>style</I> <I> 
+<P>
+</I><LI><I>size</I> (in points)<I>  
+<P>
+</I><LI><I>shear</I> (in degrees)<I>  
+<P>
+</I><LI><I>rotation</I> (in degrees)<I>  
+<P>
+</I><LI><I>ascent</I> <I> 
+<P>
+</I><LI><I>descent</I> 
+<P>
+<LI><I>leading</I> 
+<P>
+</UL>
+<P>
+<HR>
+<H3>Rotation()   see <A HREF="#SetRotation()">SetRotation()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetEncoding()"></A>SetEncoding()
+, 
+<A NAME="Encoding()"></A>Encoding()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetEncoding(</TT></B></FONT>uint8 <I><FONT  color=991122 face=HELVETICA>encoding</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+uint8 <B><TT><FONT  color=000022 size=+1>Encoding(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the encoding that maps character values to characters.  The following encodings are supported:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_UNICODE_UTF8">B_UNICODE_UTF8</A></TT></B> (UTF-8)</TD>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_6">B_ISO_8859_6</A></TT></B> (Latin/Arabic)</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_1">B_ISO_8859_1</A></TT></B> (Latin 1)</TD>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_7">B_ISO_8859_7</A></TT></B> (Latin/Greek)</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_2">B_ISO_8859_2</A></TT></B> (Latin 2)</TD>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_8">B_ISO_8859_8</A></TT></B> (Latin/Hebrew)</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_3">B_ISO_8859_3</A></TT></B> (Latin 3)</TD>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_9">B_ISO_8859_9</A></TT></B> (Latin 5)</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_4">B_ISO_8859_4</A></TT></B> (Latin 4)</TD>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_10">B_ISO_8859_10</A></TT></B> (Latin 6)</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ISO_8859_5">B_ISO_8859_5</A></TT></B> (Latin/Cyrillic) </TD>
+<TD><B><TT>B_MACINTOSH_ROMAN</TT></B> </TD>
+</TABLE>
+<P>
+UTF-8 is an 8-bit encoding for Unicode and is part of the Unicode standard.  It matches ASCII values for all 7-bit character codes, but uses multibyte characters for values over 127.  The other encodings take only a single byte to represent a character; they therefore necessarily encompass a far smaller set of characters.  Most of them represent standards in the ISO/IEC 8859 family of character codes that extend the ASCII set.  <B><TT>B_MACINTOSH_ROMAN</TT></B> stands for the standard encoding used by the Mac OS.
+<P>
+The encoding affects both input and output functions of the BView.  It determines how <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B> interprets the character values it's passed and also how <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> encodes character values for the keys the user pressed.
+<P>
+UTF-8 is the preferred encoding and the one that's most compatible with objects defined in the software kits.  For example, a <A HREF="TextView.html#BTextView">BTextView</A> expects all text it takes from the clipboard or from a dragged and dropped message to be UTF-8 encoded.  If it isn't, the results are not defined.  The more that applications stick with UTF-8 encoding, the more freely they'll be able to exchange data.
+<P>
+<B>See also:  </B>&nbsp;<a href="#Character%20Encoding%20on%20page48">"Character Encoding" on page48</a> of this chapter, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#convert_to_utf8()">convert_to_utf8()</A></TT></B>, <B><TT>BView::DrawString()</TT></B>, <B><TT>BView::KeyDown()</TT></B> 
+<P>
+<A NAME="SetFace()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="SetFace()"></A>SetFace()
+, 
+<A NAME="Face()"></A>Face()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetFace(</TT></B></FONT>uint16 <I><FONT  color=991122 face=HELVETICA>face</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+uint16 <B><TT><FONT  color=000022 size=+1>Face(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return a mask that record secondary characteristics of the font, such as whether characters are underlined or drawn in outline.  The values that form the <I><FONT  color=991122 face=HELVETICA>face</I></FONT> mask are:
+<P>
+<B><TT>B_ITALIC_FACE
+<br>
+</TT></B>Characters are drawn italicized.
+<P>
+<B><TT>B_UNDERSCORE_FACE
+<br>
+</TT></B>Characters are drawn underlined.
+<P>
+<B><TT>B_NEGATIVE_FACE
+<br>
+</TT></B>Characters are drawn in the low color, while the background is drawn in the high color.
+<P>
+<B><TT>B_OUTLINED_FACE
+<br>
+</TT></B>Characters are drawn hollow, with a line around their border, but unfilled.
+<P>
+<B><TT>B_STRIKEOUT_FACE
+<br>
+</TT></B>Characters are drawn "struck-out," with a line drawn horizontally through the middle.
+<P>
+<B><TT>B_BOLD_FACE
+<br>
+</TT></B>Characters are drawn in boldface.
+<P>
+<B><TT>B_REGULAR_FACE
+<br>
+</TT></B>Characters are drawn normally.
+<P>
+<HR>
+<H3>
+<A NAME="SetFamilyAndFace()"></A>SetFamilyAndFace()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetFamilyAndFace(</TT></B></FONT>const font_family family, uint16 <I><FONT  color=991122 face=HELVETICA>face</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the family and face of the font.  The <I><FONT  color=991122 face=HELVETICA>family</I></FONT> passed to this function must be one of the families enumerated by the <B><TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> global function and <I><FONT  color=991122 face=HELVETICA>face</I></FONT> must be a combination of the face values described under <B><TT><A HREF="#SetFace()">SetFace()</A></TT></B> &nbsp;<a href="#on%20page125">on page125</a>.  If the <I><FONT  color=991122 face=HELVETICA>family</I></FONT> is <B><TT>NULL</TT></B>, <B><TT><A HREF="#SetFamilyAndFace()">SetFamilyAndFace()</A></TT></B> sets only the face.
+<P>
+<HR>
+<H3>
+<A NAME="SetFamilyAndStyle()"></A>SetFamilyAndStyle()
+, 
+<A NAME="GetFamilyAndStyle()"></A>GetFamilyAndStyle()
+, 
+<A NAME="FamilyAndStyle()"></A>FamilyAndStyle()
+, 
+<A NAME="font_family"></A>font_family
+, 
+<A NAME="font_style"></A>font_style
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetFamilyAndStyle(</TT></B></FONT>const font_family <I><FONT  color=991122 face=HELVETICA>family</I></FONT>, const font_style <I><FONT  color=991122 face=HELVETICA>style</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetFamilyAndStyle(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>code</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetFamilyAndStyle(</TT></B></FONT>font_family *<I><FONT  color=991122 face=HELVETICA>family</I></FONT>, font_style *<I><FONT  color=991122 face=HELVETICA>style</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>FamilyAndStyle(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+typedef char <B><TT><FONT  color=000022 size=+1>font_family[B_FONT_FAMILY_LENGTH + 1</TT></B></FONT><B><TT><FONT  color=000022 size=+1>]
+<P>
+</TT></B></FONT>
+<TR><TD>
+typedef char <B><TT><FONT  color=000022 size=+1>font_style[B_FONT_STYLE_LENGTH + 1</TT></B></FONT><B><TT><FONT  color=000022 size=+1>]
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetFamilyAndStyle()">SetFamilyAndStyle()</A></TT></B> sets the family and style of the font.  The <I><FONT  color=991122 face=HELVETICA>family</I></FONT> passed to this function must be one of the families enumerated by the <B><TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> global function and <I><FONT  color=991122 face=HELVETICA>style</I></FONT> must be one of the styles associated with that family, as reported by <B><TT><A HREF="functions.html#get_font_style()">get_font_style()</A></TT></B>.  If the <I><FONT  color=991122 face=HELVETICA>family</I></FONT> is <B><TT>NULL</TT></B>, <B><TT><A HREF="#SetFamilyAndStyle()">SetFamilyAndStyle()</A></TT></B> sets only the style; if <I><FONT  color=991122 face=HELVETICA>style</I></FONT> is <B><TT>NULL</TT></B>, it sets only the family.
+<P>
+<B><TT><A HREF="#GetFamilyAndStyle()">GetFamilyAndStyle()</A></TT></B> writes the names of the current family and style into the <B><TT>font_value</TT></B> and <B><TT><A HREF="#font_style">font_style</A></TT></B> variables provided.
+<P>
+Internally, the BFont class encodes each family and style combination as a unique integer.  <B><TT><A HREF="#FamilyAndStyle()">FamilyAndStyle()</A></TT></B> returns that code, which can then be passed to <B><TT><A HREF="#SetFamilyAndStyle()">SetFamilyAndStyle()</A></TT></B> to set another BFont object.  The integer code is not persistent; its meaning may change when the list of installed fonts changes and when the machine is rebooted.
+<P>
+<B>See also:  <TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetFlags()"></A>SetFlags()
+, 
+<A NAME="Flags()"></A>Flags()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetFlags(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>Flags(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return a mask that records various behaviors of the font.  There are two flags: <B><TT>B_DISABLE_ANTIALIASING</TT></B>, which turns off all antialiasing for characters displayed in the font, and <B><TT>B_FORCE_ANTIALIASING</TT></B>, which forces all font rendering to be anti-aliased.  The default mask has antialiasing turned on.
+<P>
+<HR>
+<H3>
+<A NAME="SetRotation()"></A>SetRotation()
+, 
+<A NAME="Rotation()"></A>Rotation()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetRotation(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>rotation</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Rotation(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the rotation of the baseline for characters displayed in the font.  The baseline rotates counterclockwise from an axis on the left side of the character.  The default (horizontal) baseline is at 0 &deg;.  For example, this code
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BFont font;
+&nbsp;&nbsp;&nbsp;font.SetRotation(45.0);
+&nbsp;&nbsp;&nbsp;myView->SetFont(&amp;font, B_FONT_ROTATION);
+&nbsp;&nbsp;&nbsp;myView->DrawString("to the northeast");</PRE>
+<P>
+would draw a string that extended upwards and to the right.
+<P>
+Rotation is not supported by some Interface Kit classes, including BTextView.
+<P>
+<HR>
+<H3>
+<A NAME="SetShear()"></A>SetShear()
+, 
+<A NAME="Shear()"></A>Shear()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetShear(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>shear</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Shear(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the angle at which characters are drawn relative to the baseline.  The default (perpendicular) shear for all font styles, including oblique and italic ones, is 90.0 &deg;.  The shear is measured counterclockwise and can be adjusted within the range 45.0 &deg; (slanted to the right) through 135.0 &deg; (slanted to the left).  If the <I><FONT  color=991122 face=HELVETICA>shear</I></FONT> passed falls outside this range, it will be adjusted to the closest value within range.
+<P>
+<HR>
+<H3>
+<A NAME="SetSize()"></A>SetSize()
+, 
+<A NAME="Size()"></A>Size()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSize(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Size(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the size of the font in points.  Valid sizes range from less than 1.0 point through 10,000 points.
+<P>
+<B>See also:  <TT>BView::SetSize()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetSpacing()"></A>SetSpacing()
+, 
+<A NAME="Spacing()"></A>Spacing()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSpacing(</TT></B></FONT>uint8 <I><FONT  color=991122 face=HELVETICA>spacing</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+uint8 <B><TT><FONT  color=000022 size=+1>Spacing(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the mode that determines how characters are horizontally spaced relative to each other when they're drawn.  The mode also affects the width or "escapement" of each character as reported by <B><TT><A HREF="#GetEscapements()">GetEscapements()</A></TT></B>.
+<P>
+There are four <I><FONT  color=991122 face=HELVETICA>spacing</I></FONT> modes: 
+<P>
+<B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> 
+<br>
+Positions each character according to its own inherent width, without adjustment.  This produces good results on high-resolution devices like printers, and is the best mode to use for printing.  However, when character widths are rounded for the screen, the results are generally poor.  Characters are not well-separated and can collide or overlap at small font sizes.
+<P>
+<B><TT>B_STRING_SPACING</TT></B> 
+<br>
+Keeps the string at the same width as it would have for <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B>, but optimizes the position of each character within that space.  The position of a character depends on the surrounding characters and the overall width of the string.  Collisions are unlikely in this mode, but because the width of the string constrains what can be done, characters may touch each other.
+<P>
+This mode is preferred when it's important to have the screen match the printed page&mdash;for example, to have lines break on-screen where they will break when the display is printed.  As the user types new characters into a line of text, the application must redraw the entire line to add each character.  The characters in the line may therefore appear to "jiggle" or jump around as new ones are added.  New optimal positions are calculated for each character as the width and composition of the string changes.
+<P>
+<B><TT>B_BITMAP_SPACING</TT></B> 
+<br>
+Calculates the width of each character according to its bitmap appearance on-screen.  The widths are chosen for optimal spacing, so that characters never collide and rarely touch.  This mode increases the <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> width of a string if necessary to keep characters separated.  (For a small-sized bold font, it may increase the string width substantially.) 
+<P>
+In this mode, the spacing between characters is regular and not contextually dependent.  Character widths are integral values.  This is the best mode for drawing small amounts of text in the user interface; it's the mode that <A HREF="TextView.html#BTextView">BTextView</A> objects use and it works for both proportional and fixed-width fonts.  However, the spacing of text shown on-screen won't correspond to the spacing when the text is printed in <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> mode.
+<P>
+<B><TT><A HREF="misc.html#B_FIXED_SPACING">B_FIXED_SPACING</A></TT></B> 
+<br>
+Positions characters according to a constant, integral width.  This mode can only be used with fixed-width fonts (fonts with the <B><TT><A HREF="misc.html#B_IS_FIXED">B_IS_FIXED</A></TT></B> flag set); trying to use <B><TT><A HREF="misc.html#B_FIXED_SPACING">B_FIXED_SPACING</A></TT></B> on other fonts will result in <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> being used by default.  All characters have the same escapement.
+<P>
+The <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> mode is the preferred mode for printing.  It's also somewhat faster than <B><TT>B_STRING_SPACING</TT></B> or <B><TT>B_BITMAP_SPACING</TT></B>.  In all modes other than <B><TT>B_STRING_SPACING</TT></B>, it's possible to change the character displayed at the end of a string by erasing it and drawing a new character.  However, in <B><TT>B_STRING_SPACING</TT></B> mode, it's necessary to erase the entire string and redraw it.  The longer the string, the better the results.
+<P>
+The <B><TT>B_STRING_SPACING</TT></B> and <B><TT>B_BITMAP_SPACING</TT></B> modes are relevant only for font sizes in a range of about 7.0 points to 18.0 points.  Above that range, <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> achieves reasonable results on-screen and may be used even where one of the other two modes is specified.  Below that range, the screen resolution isn't great enough for the different modes to produce significantly different results, so again <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> is used.
+<P>
+In addition, <B><TT><A HREF="misc.html#B_CHAR_SPACING">B_CHAR_SPACING</A></TT></B> is always used for rotated or sheared text and when antialiasing is disabled.
+<P>
+<B>See also:  <TT>BView::DrawString()</TT></B>, <B><TT><A HREF="#GetEscapements()">GetEscapements()</A></TT></B> 
+<P>
+<HR>
+<H3>Shear()   see <A HREF="#SetShear()">SetShear()</A></H3>
+<P>
+<HR>
+<H3>Size()   see <A HREF="#SetSize()">SetSize()</A></H3>
+<P>
+<HR>
+<H3>Spacing()   see <A HREF="#SetSpacing()">SetSpacing()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="StringWidth()"></A>StringWidth()
+, 
+<A NAME="GetStringWidths()"></A>GetStringWidths()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>StringWidth(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>StringWidth(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>length</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetStringWidths(</TT></B></FONT>const&nbsp;char *<I><FONT  color=991122 face=HELVETICA>stringArray</I></FONT>[], const&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>lengthArray</I></FONT>[], int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numStrings</I></FONT>, float&nbsp;<I><FONT  color=991122 face=HELVETICA>widthArray</I></FONT>[]<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#StringWidth()">StringWidth()</A></TT></B> returns how much room is required to draw a <I><FONT  color=991122 face=HELVETICA>string</I></FONT> in the font.  It measures the characters encoded in <I><FONT  color=991122 face=HELVETICA>length</I></FONT> bytes of the string&mdash;or, if no <I><FONT  color=991122 face=HELVETICA>length</I></FONT> is specified, the entire string up to the null character, '0', which terminates it.  The return value totals the width of all the characters in coordinate units; it's the length of the baseline required to draw the string.
+<P>
+<B><TT>GetStringWidth()</TT></B> provides the same information for a group of strings.  It works its way through the <I><FONT  color=991122 face=HELVETICA>stringArray</I></FONT> looking at a total of <I><FONT  color=991122 face=HELVETICA>numStrings</I></FONT>.  For each string, it gets the length at the corresponding index from the <I><FONT  color=991122 face=HELVETICA>lengthArray</I></FONT> and places the width of the string in the <I><FONT  color=991122 face=HELVETICA>widthArray</I></FONT> at the same index.
+<P>
+These functions take all the attributes of the font&mdash;including family, style, size, and spacing&mdash;into account.
+<P>
+<B>See also:  <TT>BView::StringWidth()</TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BFont&amp; <B><TT><FONT  color=000022 size=+1>operator =(</TT></B></FONT>const BFont&amp;<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Assigns one BFont object to another.  After the assignment, the two objects are identical to each other and do not share any data.
+<P>
+<HR>
+<H3>
+<A NAME="=="></A>==
+ (equality), 
+<A NAME="!="></A>!=
+ (inequality)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>operator ==(</TT></B></FONT>const BFont&amp;<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>operator !=(</TT></B></FONT>const BFont&amp;<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These operators test whether two BFont objects are identical in all respects.  If all settable font attributes are the same in both objects, they're equal.  If not, they're unequal.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="font_metric_mode"></A>font_metric_mode
+</H3>
+<P>
+Declared in:  &lt;be/interface/Font.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_SCREEN_METRIC</TT></B></TD>
+<TD>The screen metric.</TD>
+<TR>
+<TD><B><TT>B_PRINTING_METRIC</TT></B></TD>
+<TD>The printing metric.</TD>
+</TABLE>
+<P>
+The font_metric_mode constants above indicate whether a font calculation should be done with the screen or the printer in mind.
+<P>
+<HR>
+<H3>
+<A NAME="font_file_format"></A>font_file_format
+</H3>
+<P>
+Declared in:  &lt;be/interface/Font.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_TRUETYPE_WINDOWS</TT></B></TD>
+<TD>Microsoft Windows format TrueType font.</TD>
+<TR>
+<TD><B><TT>B_POSTSCRIPT_TYPE1_WINDOWS</TT></B></TD>
+<TD>Microsoft Windows format PostScript Type 1 font.</TD>
+</TABLE>
+<P>
+The font_file_format constants are used to specify what type of file a font was loaded from.  Currently, only Microsoft Windows-format TrueType and PostScript Type 1 fonts are supported.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="unicode_block"></A>unicode_block
+</H3>
+<P>
+&lt;be/interface/Font.h>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;class unicode_block {
+&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inline unicode_block();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inline unicode_block(uint64 block2, uint64 block1);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inline bool Includes(const unicode_block &amp;block) const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inline unicode_block operator&amp;(const unicode_block &amp;block) const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inline unicode_block operator|(const unicode_block &amp;block) const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inline unicode_block &amp;operator=(const unicode_block &amp;block);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inline unicode_block operator==(const unicode_block &amp;block) const;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inline unicode_block operator!=(const unicode_block &amp;block) const;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fData[2];
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+The unicode_block class describes the ranges of Unicode characters a font supports.  You can get a unicode_block object for a font by calling the <B><TT><A HREF="#Blocks()">Blocks()</A></TT></B> function.  Once you have this, you can check to see if a particular block is supported, or compare it to another block to see if it's inclusive, equal, unequal, and so forth.
+<P>
+In general, you won't instantiate a unicode_block object on your own.
+<P>
+The <B><TT>unicode_block::Includes()</TT></B> function lets you determine if another block is a subset of the unicode_block object.
+<P>
+There are a number of predefined Unicode blocks, as follows:
+<P>
+<UL>
+<LI><B><TT>B_BASIC_LATIN_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_LATIN1_SUPPLEMENT_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_LATIN_EXTENDED_A_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_LATIN_EXTENDED_B_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_IPA_EXTENSIONS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_SPACING_MODIFIER_LETTERS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_COMBINING_DIACRITICAL_MARKS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_BASIC_GREEK_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_GREEK_SYMBOLS_AND_COPTIC_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CYRILLIC_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ARMENIAN_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_BASIC_HEBREW_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_HEBREW_EXTENDED_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_BASIC_ARABIC_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ARABIC_EXTENDED_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_DEVANAGARI_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_BENGALI_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_GURMUKHI_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_GUJARATI_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ORIYA_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_TAMIL_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_TELUGU_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_KANNADA_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_MALAYALAM_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_THAI_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_LAO_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_BASIC_GEORGIAN_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_GEORGIAN_EXTENDED_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_HANGUL_JAMO_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_LATIN_EXTENDED_ADDITIONAL_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_GREEK_EXTENDED_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_GENERAL_PUNCTUATION_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_SUPERSCRIPTS_AND_SUBSCRIPTS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CURRENCY_SYMBOLS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_COMBINING_MARKS_FOR_SYMBOLS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_LETTERLIKE_SYMBOLS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_NUMBER_FORMS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ARROWS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_MATHEMATICAL_OPERATORS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_MISCELLANEOUS_TECHNICAL_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CONTROL_PICTURES_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_OPTICAL_CHARACTER_RECOGNITION_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ENCLOSED_ALPHANUMERICS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_BOX_DRAWING_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_BLOCK_ELEMENTS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_GEOMETRIC_SHAPES_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_MISCELLANEOUS_SYMBOLS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_DINGBATS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CJK_SYMBOLS_AND_PUNCTUATION_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_HIRAGANA_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_KATAKANA_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_BOPOMOFO_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_HANGUL_COMPATIBILITY_JAMO_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CJK_MISCELLANEOUS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ENCLOSED_CJK_LETTERS_AND_MONTHS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CJK_COMPATIBILITY_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_HANGUL_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_HIGH_SURROGATES_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_LOW_SURROGATES_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CJK_UNIFIED_IDEOGRAPHS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_PRIVATE_USE_AREA_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CJK_COMPATIBILITY_IDEOGRAPHS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ALPHABETIC_PRESENTATION_FORMS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ARABIC_PRESENTATION_FORMS_A_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_COMBINING_HALF_MARKS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_CJK_COMPATIBILITY_FORMS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_SMALL_FORM_VARIANTS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_ARABIC_PRESENTATION_FORMS_B_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_HALFWIDTH_AND_FULLWIDTH_FORMS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_SPECIALS_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B><LI><B><TT>B_TIBETAN_BLOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<P>
+</TT></B></UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,310 @@
+<HTML><HEAD><TITLE>The Media Kit: BFileInterface</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BFileInterface"></A>BFileInterface
+</H1>
+<P>
+Derived from:  <A HREF="MediaNode.html#BMediaNode">BMediaNode</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/FileInterface.h">be/media/FileInterface.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="FileInterface.summary.html"><i>Summary</i></A></H6>
+<P>
+A node that can read data from, or write data to, a disk file should derive from BFileInterface in order to allow applications to easily specify what file the node should work with.  The node will then be called upon by the Media Server to try to identify, and possibly work with, unknown files.
+<P>
+Your node can't just derive from BFileInterface; it must also derive from at least one of <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> and <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A>, depending on its needs.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<LI><B><TT><A HREF="#DisposeFileFormatCookie()">DisposeFileFormatCookie()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#GetDuration()">GetDuration()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#GetNextFileFormat()">GetNextFileFormat()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#GetRef()">GetRef()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#HandleMessage()">HandleMessage()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#SetRef()">SetRef()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#SniffRef()">SniffRef()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor"></A><FONT SIZE=6>C</FONT>onstructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BFileInterface()"></A>BFileInterface()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BFileInterface(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Constructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="DisposeFileFormatCookie()"></A>DisposeFileFormatCookie()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DisposeFileFormatCookie(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This function must be implemented to dispose of a <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> used for iterating over file formats your node supports.  If the cookie is a reference to a data block, you should free it; otherwise, you can just return without doing anything.
+<P>
+<HR>
+<H3>
+<A NAME="HandleMessage()"></A>HandleMessage()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>HandleMessage(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implement this function to handle messages that arrive on your control port; see <B><TT><A HREF="MediaNode.html#HandleMessage()">BMediaNode::HandleMessage()</A></TT></B> for details.
+<P>
+<HR>
+<H3>
+<A NAME="GetDuration()"></A>GetDuration()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetDuration(</TT></B></FONT>bigtime_t *<I><FONT  color=991122 face=HELVETICA>outDuration</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implement this function to return in <I><FONT  color=991122 face=HELVETICA>outDuration</I></FONT> the duration, in microseconds of the media data in the file currently being worked on.
+<P>
+If there is no file in use, or the file isn't valid, return a negative error code; otherwise, return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="GetNextFileFormat()"></A>GetNextFileFormat()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetNextFileFormat(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_file_format *<I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The first time this function is called, <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> will be 0.  Return information about the first file format you support in <I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT> and set cookie to some meaningful (non-zero) value that you can use to track where you are in the list of formats you support, then return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+On successive calls to <B><TT>GetNextFileFormat()</TT></B>, you should return successive file format information and change <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> as necessary to remember where you are in the list.  Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> each time you successfully return information about a file format.
+<P>
+Once you run out of formats, return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="GetRef()"></A>GetRef()
+, 
+<A NAME="SetRef()"></A>SetRef()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetRef(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>outRef</I></FONT>, <A HREF="../Release%20Notes/StorageKit.html#BMimeType">BMimeType</A> *<I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetRef(</TT></B></FONT>const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>create</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t *<I><FONT  color=991122 face=HELVETICA>outDuration</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implement <B><TT>GetRef()</TT></B> function to return, in <I><FONT  color=991122 face=HELVETICA>outRef</I></FONT>, the entry_ref of the file with which the node is currently working.  You should also return the MIME type of the file in <I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT>.
+<P>
+When an application or other client wants your node to use a specific file, the <B><TT>SetRef()</TT></B> function will be called.  The file to be used is specified by <I><FONT  color=991122 face=HELVETICA>file</I></FONT>, which may or may not exist.  If <I><FONT  color=991122 face=HELVETICA>create</I></FONT> is <B><TT>true</TT></B>, you should create a new file (erasing an existing file, if one's already there), initialize the file for writing, then store 0 in <I><FONT  color=991122 face=HELVETICA>outDuration</I></FONT>.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>create</I></FONT> is false, you should open the existing file and put the actual running time of the file into <I><FONT  color=991122 face=HELVETICA>outDuration</I></FONT>.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if successful; otherwise, return a negative error code, as appropriate.  If you forget to implement these functions, they'll always return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<HR>
+<H3>SetRef() see <A HREF="#GetRef()">GetRef()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SniffRef()"></A>SniffRef()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SniffRef(</TT></B></FONT>const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, char *<I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float *<I><FONT  color=991122 face=HELVETICA>outQuality</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+When the system (or an application program) finds an unknown file, it can call <A HREF="MediaRoster.html#BMediaRoster">BMediaRoster</A> to try to identify the file.  Your node's <B><TT>SniffRef()</TT></B> function will be called so your node can look at the file.
+<P>
+Inspect the file referenced by <I><FONT  color=991122 face=HELVETICA>file</I></FONT>.  If you can handle the format, set <I><FONT  color=991122 face=HELVETICA>outMimeType</I></FONT> to the MIME type of the file format (the buffer is 256 bytes long), and set <I><FONT  color=991122 face=HELVETICA>outQuality</I></FONT> to indicate how well you can process the file (where 0.0 means you can't handle it at all and 1.0 means the file format is a privately-owned format that your application handles perfectly).
+<P>
+If you know how to identify the file, but not how to play or record it, return 0.0 for <I><FONT  color=991122 face=HELVETICA>outQuality</I></FONT>.
+<P>
+If you know how to decode only some parts of the file, but not all of them, set outQuality to 0.4 or to 0.6 if you can handle both audio and video contained in the file, but not other forms of media data that are present.
+<P>
+Set <I><FONT  color=991122 face=HELVETICA>outQuality</I></FONT> to 0.9 if you can handle the format very well, but it's a publicly-defined format whose specifications you don't control.  You should only return an <I><FONT  color=991122 face=HELVETICA>outQuality</I></FONT> value of 1.0 if the file format specifications are in your control and you implement them perfectly.
+<P>
+Interpolate between these values to give the best estimate you can of your ability to handle the file, so selection of the most suitable node can be made.  For instance, if your node does low-quality but high-speed processing of an audio format, you might subtract a little bit from the <I><FONT  color=991122 face=HELVETICA>outQuality</I></FONT> value you might otherwise return.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if you successfully sniff the file and have something to say about its contents; otherwise return an appropriate error code.  If you don't know the file format at all, you should return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_NO_HANDLER">B_MEDIA_NO_HANDLER</A></TT></B>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

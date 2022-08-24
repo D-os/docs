@@ -1,0 +1,246 @@
+<HTML><HEAD><TITLE>The Input Server: Input Server Messages</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Input%20Server%20Messages"></A>Input Server Messages
+</H1>
+<P>
+This section describes the messages that your Input Server objects are expected to create and send, and that they're expected to respond to. 
+<P>
+<A NAME="24926:%20head1:%20Input%20Device%20Event%20Messages"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Input%20Device%20Event%20Messages"></A><FONT SIZE=6>I</FONT>nput <FONT SIZE=6>D</FONT>evice <FONT SIZE=6>E</FONT>vent <FONT SIZE=6>M</FONT>essages
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/AppDefs.h">be/app/AppDefs.h</A>
+<P>
+This section lists the event messages that a <A HREF="InputServerDevice.html#BInputServerDevice">BInputServerDevice</A> is expected to create and send through its <B><TT><A HREF="InputServerDevice.html#EnqueueMessage()">EnqueueMessage()</A></TT></B> function.  The primary documentation for these messages is in the System Messages appendix (click on an item in the lists below to be taken to a specific definition).
+<P>
+<HR>
+<H3>
+<A NAME="Pointing%20Device%20Event%20Messages"></A>Pointing Device Event Messages
+</H3>
+<P>
+<B><TT><A HREF="../Messages/GeneralMessages.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A>
+<br>
+B_MOUSE_UP
+<br>
+B_MOUSE_MOVED</TT></B>
+<P>
+Note that a pointing device isn't expected to send the <B><TT>B_MOUSE_ENTER_EXIT</TT></B> message.
+<P>
+<HR>
+<H3>
+<A NAME="Keyboard%20Device%20Event%20Messages"></A>Keyboard Device Event Messages
+</H3>
+<P>
+<B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A>
+<br>
+B_UNMAPPED_KEY_DOWN
+<br>
+B_KEY_UP
+<br>
+B_UMAPPED_KEY_UP
+<br>
+B_MODIFIERS_CHANGED
+<P>
+</TT></B><A NAME="23268:%20head1:%20Input%20Device%20Control%20Messages"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Input%20Device%20Control%20Messages"></A><FONT SIZE=6>I</FONT>nput <FONT SIZE=6>D</FONT>evice <FONT SIZE=6>C</FONT>ontrol <FONT SIZE=6>M</FONT>essages
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/add-ons/input_server/InputServerDevice.h">be/add-ons/input_server/InputServerDevice.h</A>
+<P>
+This section lists the control messages that are defined by the BeOS for pointing and keyboard devices.  These are messages that appear in the <B><TT><A HREF="InputServerDevice.html#Control()">BInputServerDevice::Control()</A></TT></B> function.  Each control message is identified by the value that appears as the <I><FONT  color=991122 face=HELVETICA>command </I></FONT>argument in the <B><TT><A HREF="InputDevice.html#Control()">Control()</A></TT></B> function.  None of the Be-defined control messages use the additional <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument.
+<P>
+Control messages are used to notify input devices of downstream requests.  For example, when the user changes the mouse speed, a <B><TT><A HREF="#B_MOUSE_SPEED_CHANGED">B_MOUSE_SPEED_CHANGED</A></TT></B> command is sent back upstream.  It's expected that an input device that receives this message will tune subsequent event messages that it generates to match the requested mouse speed. 
+<P>
+The messages listed below are defined by the BeOS; you can send custom control messages back upstream through the <B><TT>BInput::Control()</TT></B> function.  Of course, this is only effective if you install a custom input device that can handle the messages.
+<P>
+Note that the Be-defined control messages ask a device to set parameters (such as mouse speed), but they never ask a device for the value of a parameter.  For example, a pointing device is never asked what the mouse speed is.  This is because the Input Server maintains the state of the keyboard and pointing device environments and can answer these requests itself.  
+<P>
+Furthermore, the Be-defined control messages don't contain the value of the parameter that's being set.  For example, the <B><TT><A HREF="#B_MOUSE_SPEED_CHANGED">B_MOUSE_SPEED_CHANGED</A> </TT></B>message doesn't contain the requested mouse speed.  The input device must ask the Input Server for the new value through a global function (<B><TT><A HREF="InputFunctions.html#get_mouse_speed()">get_mouse_speed()</A></TT></B>, in this case).  The functions that correspond to the messages are listed in the descriptions below.
+<P>
+<HR>
+<H3>
+<A NAME="Pointing%20Device%20Control%20Messages"></A>Pointing Device Control Messages
+</H3>
+<P>
+<HR>
+<H3>
+<A NAME="B_CLICK_SPEED_CHANGED"></A>B_CLICK_SPEED_CHANGED
+</H3>
+<P>
+Requests that the receiver change the mouse double-click speed to the value retrieved through <B><TT><A HREF="InputFunctions.html#get_click_speed()">get_click_speed()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="B_MOUSE_MAP_CHANGED"></A>B_MOUSE_MAP_CHANGED
+</H3>
+<P>
+Requests that the receiver change the mouse map (the correspondence between physical mouse buttons and the <B><TT><A HREF="InputFunctions.html#B_PRIMARY_MOUSE_BUTTON">B_PRIMARY_MOUSE_BUTTON</A></TT></B>, et. al., constants) to the  map retrieved through <B><TT><A HREF="InputFunctions.html#get_mouse_map()">get_mouse_map()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="B_MOUSE_SPEED_CHANGED"></A>B_MOUSE_SPEED_CHANGED
+</H3>
+<P>
+Requests that the receiver change the mouse speed to the value retrieved through <B><TT><A HREF="InputFunctions.html#get_mouse_speed()">get_mouse_speed()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="B_MOUSE_TYPE_CHANGED"></A>B_MOUSE_TYPE_CHANGED
+</H3>
+<P>
+Requests that the receiver change the mouse type (the number of buttons) to the type retrieved through <B><TT><A HREF="InputFunctions.html#get_mouse_type()">get_mouse_type()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Keyboard%20Device%20Control%20Messages"></A>Keyboard Device Control Messages
+</H3>
+<P>
+<HR>
+<H3>
+<A NAME="B_KEY_LOCKS_CHANGED"></A>B_KEY_LOCKS_CHANGED
+</H3>
+<P>
+Requests that the receiver change the state of the locked keys (caps lock, num lock, etc.).  To get the desired state of the locking keys, read the states out of the key map returned by <B><TT><A HREF="InputFunctions.html#get_key_map()">get_key_map()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="B_KEY_MAP_CHANGED"></A>B_KEY_MAP_CHANGED
+</H3>
+<P>
+Requests that the receiver change the keyboard's key map&mdash;the mapping between physical keys and the character codes they generate.  The new key map is returned by <B><TT><A HREF="InputFunctions.html#get_key_map()">get_key_map()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="B_KEY_REPEAT_DELAY_CHANGED"></A>B_KEY_REPEAT_DELAY_CHANGED
+</H3>
+<P>
+Requests that the receiver change the delay before a held key starts generating repeated characters to the value retrieved through <B><TT><A HREF="InputFunctions.html#get_key_repeat_delay()">get_key_repeat_delay()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="B_KEY_REPEAT_RATE_CHANGED"></A>B_KEY_REPEAT_RATE_CHANGED
+</H3>
+<P>
+Requests that the receiver change the speed at which a held key generates repeated characters to the value retrieved through <B><TT><A HREF="InputFunctions.html#get_key_repeat_rate()">get_key_repeat_rate()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Device%20Monitoring"></A><FONT SIZE=6>D</FONT>evice <FONT SIZE=6>M</FONT>onitoring
+</H2>
+<P>
+The <B><TT><A HREF="InputDevice.html#watch_input_devices()">watch_input_devices()</A></TT></B> function lets you ask the Input Server to send you a message when a device starts or stops, or when the set of registered devices changes.  These "device monitoring" notifications are sent to the target specified in the function.  The command constant is always <B><TT><A HREF="../Messages/GeneralMessages.html#B_INPUT_DEVICES_CHANGED">B_INPUT_DEVICES_CHANGED</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>be:opcode</I></FONT> field will be one of:
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_DEVICE_ADDED"></A>B_INPUT_DEVICE_ADDED
+</H3>
+<P>
+An input device has been added to the system.
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_DEVICE_REMOVED"></A>B_INPUT_DEVICE_REMOVED
+</H3>
+<P>
+An input device has been removed from the system.
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_DEVICE_STARTED"></A>B_INPUT_DEVICE_STARTED
+</H3>
+<P>
+An input device has been started.
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_DEVICE_STOPPED"></A>B_INPUT_DEVICE_STOPPED
+</H3>
+<P>
+An input device has been stopped.
+<P>
+<HR>
+<H2>
+<A NAME="Input%20Method%20Events"></A><FONT SIZE=6>I</FONT>nput <FONT SIZE=6>M</FONT>ethod <FONT SIZE=6>E</FONT>vents
+</H2>
+<P>
+Active input methods send input method events (<B><TT><A HREF="../Messages/GeneralMessages.html#B_INPUT_METHOD_EVENT">B_INPUT_METHOD_EVENT</A></TT></B> messages) downstream to application views to help integrate the method&gt;s work with the view&gt;s display.  Inside each <B><TT><A HREF="../Messages/GeneralMessages.html#B_INPUT_METHOD_EVENT">B_INPUT_METHOD_EVENT</A></TT></B> message is a <I><FONT  color=991122 face=HELVETICA>be:opcode</I></FONT> field indicating the type of input method event:
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_METHOD_CHANGED"></A>B_INPUT_METHOD_CHANGED
+</H3>
+<P>
+Sent whenever the user changes the text during an input transaction.
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_METHOD_LOCATION_REQUEST"></A>B_INPUT_METHOD_LOCATION_REQUEST
+</H3>
+<P>
+Sent whenever the input method needs to know the on-screen locations of characters in the input transaction.
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_METHOD_STARTED"></A>B_INPUT_METHOD_STARTED
+</H3>
+<P>
+Sent when a new input transaction is beginning.
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_METHOD_STOPPED"></A>B_INPUT_METHOD_STOPPED
+</H3>
+<P>
+Sent when an input transaction is completed.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

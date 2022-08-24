@@ -1,0 +1,157 @@
+<HTML><HEAD><TITLE>The Translation Kit: Default Media Formats</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Default%20Media%20Formats"></A>Default Media Formats
+</H1>
+<P>
+This section describes the default media formats for each of the media groups defined by the Translation Kit.
+<P>
+<HR>
+<H3>
+<A NAME="B_TRANSLATOR_BITMAP"></A>B_TRANSLATOR_BITMAP
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/translation/TranslatorFormats.h">be/translation/TranslatorFormats.h</A>
+<P>
+struct <B><TT>
+<A NAME="TranslatorBitmap"></A>TranslatorBitmap
+</TT></B> {
+<br>
+&nbsp;&nbsp;&nbsp;int32 <B><TT>
+<A NAME="magic"></A>magic
+</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;<A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <B><TT>
+<A NAME="bounds"></A>bounds
+</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;uint32 <B><TT>
+<A NAME="rowBytes"></A>rowBytes
+</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;color_space <B><TT>
+<A NAME="colors"></A>colors
+</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;uint32 <B><TT>
+<A NAME="dataSize"></A>dataSize
+</TT></B>;
+<br>
+}
+<P>
+<B><TT>TranslatorBitmap</TT></B> holds the header information for a translator bitmap.  <B><TT>magic</TT></B> should always be set to <B><TT>B_TRANSLATOR_BITMAP</TT></B>.  The uncompressed image data immediately follows the header in the stream.   This image data should be precisely <B><TT>dataSize</TT></B> bytes long.
+<P>
+All data in the header is stored in big endian format.  The data is stored in either big- or little- endian format, depending on the value of the <B><TT>colors</TT></B> field.
+<P>
+<HR>
+<H3>
+<A NAME="B_TRANSLATOR_PICTURE"></A>B_TRANSLATOR_PICTURE
+</H3>
+<P>
+Streams in this format are stored as <B><TT>BPicture::Flatten()</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="B_TRANSLATOR_TEXT"></A>B_TRANSLATOR_TEXT
+</H3>
+<P>
+This is a plain ASCII text file.
+<P>
+<HR>
+<H3>
+<A NAME="B_TRANSLATOR_SOUND"></A>B_TRANSLATOR_SOUND
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/translation/TranslatorFormats.h">be/translation/TranslatorFormats.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>TranslatorSound</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>magic</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>channels</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>sampleFreq</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>numFrames</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+TranslatorSound holds the header information for the default sound format.  <B><TT>magic</TT></B> should always be set to <B><TT><A HREF="#B_TRANSLATOR_SOUND">B_TRANSLATOR_SOUND</A></TT></B>.  The raw sound data stored in 16 bit linear format, left channel first, immediately follows the header.  The data in both the header and the stream are stored in big endian format.
+<P>
+<HR>
+<H3>
+<A NAME="B_TRANSLATOR_MIDI"></A>B_TRANSLATOR_MIDI
+</H3>
+<P>
+This is a standard type 1 MIDI file, as read by and written to the <A HREF="../The%20Midi%20Kit/MidiStore.html#BMidiStore">BMidiStore</A> class.
+<P>
+<HR>
+<H3>
+<A NAME="B_TRANSLATOR_MEDIA"></A>B_TRANSLATOR_MEDIA
+</H3>
+<P>
+As of this writing, a standard for this format has not been finalized, although it will be in a future release.
+<P>
+<HR>
+<H3>
+<A NAME="B_TRANSLATOR_NONE"></A>B_TRANSLATOR_NONE
+</H3>
+<P>
+Obviously, there is no standard format for the no media type.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

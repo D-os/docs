@@ -1,0 +1,1455 @@
+<HTML><HEAD><TITLE>The Media Kit: BBufferProducer</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BBufferProducer"></A>BBufferProducer
+</H1>
+<P>
+Derived from:  virtual <A HREF="MediaNode.html#BMediaNode">BMediaNode</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/BufferProducer.h">be/media/BufferProducer.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="BufferProducer.summary.html"><i>Summary</i></A></H6>
+<P>
+A BBufferProducer is a <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> that emits buffers containing media data that other nodes (BBufferConsumers in particular) will receive and, potentially, process.  If your node wants to emit buffers, it must be derived from BBufferProducer and override the hook functions to implement the BBufferProducer protocol.
+<P>
+<A NAME="Video%20Clipping"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Video%20Clipping"></A><FONT SIZE=6>V</FONT>ideo <FONT SIZE=6>C</FONT>lipping
+</H2>
+<P>
+Currently, the only video clipping format supported by the Media Kit is <B><TT>B_CLIP_SHORT_RUNS</TT></B>, although there is a function in this class for converting between this format and BRegions.
+<P>
+This format begins with a header, consisting of two int16 values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>
+</UL>
+<I><FONT  color=991122 face=HELVETICA>offsetX</I></FONT></TD>
+<TD>X offset for all following coordinates.</TD>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>offsetY</I></FONT></TD>
+<TD>Y offset for all following coordinates.</TD>
+</TABLE>
+<P>
+These values indicate the offset for the X and Y coordinates indicated throughout the rest of the clipping data.
+<P>
+The remainder of the clipping data consists of entries indicating each line of video data, as follows:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><I><FONT  color=991122 face=HELVETICA>numShorts</I></FONT></TD>
+<TD>The number of values in the <I><FONT  color=991122 face=HELVETICA>coordList</I></FONT>.  Always an even number.  If negative, repeats the previous entry |<I><FONT  color=991122 face=HELVETICA>numShorts</I></FONT>| times.</TD>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>coordList...</I></FONT></TD>
+<TD>List of coordinates.  Even entries are left-edge X coordinates, odd entries are right-edge X coordinates.</TD>
+</TABLE>
+<P>
+The clipping data contains one of these entries for each time the clipping information changes.
+<P>
+For example, if the clipping is a rectangle with the left edge at 100, top edge at 50, right edge at 300, and bottom edge at 200, the clipping data for a 640x480 display might be:
+<P>
+header
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+offsetX: 0
+<br>
+offsetY: 50
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+entry 1
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+numShorts: 2
+<br>
+coordList: 100, 300
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+entry 2
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+numShorts: -150
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+entry 3
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+numShorts: 2
+<br>
+coordList: 0, 639
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+entry 4
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+numShorts: -280
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The header indicates that the clipping data begins at row 50.
+<P>
+The first entry indicates that clipping should span from column 100 to column 300 on the first row of clipping (row 50).  The second entry says to repeat this 150 times.
+<P>
+Entry 3 indicates that clipping from that point on should be from column 0 to column 639 (the entire width of the display).  Entry 4 causes this to repeat 280 times, to the bottom of the display.
+<P>
+<HR>
+<H2>
+<A NAME="Seek%20Tags"></A><FONT SIZE=6>S</FONT>eek <FONT SIZE=6>T</FONT>ags
+</H2>
+<P>
+In order to support media formats that don't provide timing information in their outer encapsulation layer, or to provide enhanced seeking performance for media formats that support key frames, the Media Kit supports the concept of seek tags.  Producers that know their data doesn't have timing information, or that can provide enhanced seeking using special tags, should put a tag in the <B><TT>user_data</TT></B> field of the buffer headers it sends.  This tag can contain any data the producer wants.
+<P>
+Consumers that can derive good timing information from these packets after decoding them should then choose appropriate seek points (usually key frames) and cache the performance time and tag values of the first buffer that arrives at that seek point.
+<P>
+Producers that can't seek without help from the decoder can then query the consumer by calling <B><TT><A HREF="#FindSeekTag()">FindSeekTag()</A></TT></B>.  This causes the consumer's <B><TT><A HREF="BufferConsumer.html#SeekTagRequested()">SeekTagRequested()</A></TT></B> function to be called.  This returns the seek tag and time that are closest to the requested time.  The producer can then use this information  locate the appropriate point in the media data.
+<P>
+The easiest way to use this is to use the file offset as the tag data, but any value that makes sense to the producer can be used, since the consumer just saves a copy of the data and passes it back without looking at it.
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>
+<P>
+Time&nbsp;&nbsp;&nbsp;Seek Tag</TD>
+<TR>
+<TD>0.0 seconds&nbsp;&nbsp;&nbsp;0</TD>
+<TR>
+<TD>0.1 seconds&nbsp;&nbsp;&nbsp;&lt;none></TD>
+<TR>
+<TD>0.2 seconds&nbsp;&nbsp;&nbsp;2</TD>
+<TR>
+<TD>0.3 seconds&nbsp;&nbsp;&nbsp;&lt;none></TD>
+</TABLE>
+<P>
+In this simple example, we have four buffers, two of which have seek tags recorded (at 0.0 seconds and 0.3 seconds).  If the producer is seeking to 0.2 seconds, it would call <B><TT><A HREF="#FindSeekTag()">FindSeekTag()</A></TT></B>, like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;media_seek_tag tag;
+&nbsp;&nbsp;&nbsp;bigtime_t time;
+&nbsp;&nbsp;&nbsp;FindSeekTag(&amp;destination, 0.2*1000000, &amp;tag, &amp;time);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* now we can use the tag to seek */</PRE>
+<P>
+If the tag contains a file offset, we can simply seek to that offset in the file and we're ready to go.
+<P>
+In this example, the returned tag is "2" and the time is 0.2 seconds, because there's a seek tag located precisely at the requested time.  However, if we look for a seek tag for 0.1 seconds, we get a returned tag of "0" and a time of 0.0 seconds, because that's the closest matching tag to the requested time.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<UL>
+<LI><B><TT><A HREF="#AdditionalBufferRequested()">AdditionalBufferRequested()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#Connect()">Connect()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#Disconnect()">Disconnect()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#DisposeOutputCookie()">DisposeOutputCookie()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#EnableOutput()">EnableOutput()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#FormatChangeRequested()">FormatChangeRequested()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#FormatProposal()">FormatProposal()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#FormatSuggestionRequested()">FormatSuggestionRequested()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#GetLatency()">GetLatency()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#GetNextOutput()">GetNextOutput()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#HandleMessage()">HandleMessage()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#LatencyChanged()">LatencyChanged()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#LateNoticeReceived()">LateNoticeReceived()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#PrepareToConnect()">PrepareToConnect()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#SetBufferGroup()">SetBufferGroup()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#SetPlayRate()">SetPlayRate()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#VideoClippingChanged()">VideoClippingChanged()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor"></A><FONT SIZE=6>C</FONT>onstructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BBufferProducer()"></A>BBufferProducer()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+explicit <B><TT><FONT  color=000022 size=+1>BBufferProducer(</TT></B></FONT>media_type <I><FONT  color=991122 face=HELVETICA>producerType</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Constructs the BBufferProducer object.  The <I><FONT  color=991122 face=HELVETICA>producerType</I></FONT> specifies the type of media data that will be output by the node.
+<P>
+If the node will produce more than one type of data, your BBufferProducer subclass should set the kind to the default (which is a wildcard value).
+<P>
+If your node has additional latency on startup, you should call <B><TT><A HREF="#SetInitialLatency()">SetInitialLatency()</A></TT></B> to record this information.  This might be the case if the buffers your node produces are created from an input signal which refreshes infrequently, such as a television signal.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In BeOS Release 4.5.2 and earlier, the <I><FONT  color=991122 face=HELVETICA>producerType</I></FONT> has a default value; it no longer does, and you'll have to specify the media type yourself.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AdditionalBufferRequested()"></A>AdditionalBufferRequested()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>AdditionalBufferRequested(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_buffer_id <I><FONT  color=991122 face=HELVETICA>previousBufferID</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>previousTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_seek_tag *<I><FONT  color=991122 face=HELVETICA>previousTag</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+When a consumer calls <B><TT><A HREF="BufferConsumer.html#RequestAdditionalBuffer()">BBufferConsumer::RequestAdditionalBuffer()</A></TT></B>, this function is called as a result.  Its job is to call <B><TT><A HREF="#SendBuffer()">SendBuffer()</A></TT></B> to immediately send the next buffer to the consumer.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>previousBufferID</I></FONT>, <I><FONT  color=991122 face=HELVETICA>previousTime</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>previousTag</I></FONT> arguments identify the last buffer the consumer received.  Your node should respond by sending the next buffer after the one described.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <I><FONT  color=991122 face=HELVETICA>previousTag</I></FONT> may be <B><TT>NULL</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if all is well; otherwise return an appropriate error code.
+<P>
+<HR>
+<H3>
+<A NAME="ChangeFormat()"></A>ChangeFormat()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ChangeFormat(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>newFormat</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Informs the <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> that the data flowing between <I><FONT  color=991122 face=HELVETICA>source</I></FONT> and <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> is immediately changing to the format specified by <I><FONT  color=991122 face=HELVETICA>newFormat</I></FONT>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+You must never call <B><TT><A HREF="#SendBuffer()">SendBuffer()</A></TT></B> while this call is pending.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The format change request has been sent without error.
+<P>
+<UL>
+<LI><B><TT>B_MEDIA_CHANGE_IN_PROGRESS</TT></B>.  A mutual exclusion error has occurred with <B><TT><A HREF="#SendBuffer()">SendBuffer()</A></TT></B>; <B><TT>ChangeFormat()</TT></B> and <B><TT><A HREF="#SendBuffer()">SendBuffer()</A></TT></B> can't both be running at the same time.
+<P>
+<LI>Other errors.  You may receive other errors if the consumer doesn't agree with the new format you're requesting.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="ClipDataToRegion()"></A>ClipDataToRegion()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>ClipDataToRegion(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>format</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>byteCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *<I><FONT  color=991122 face=HELVETICA>clipData</I></FONT>, <A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> *<I><FONT  color=991122 face=HELVETICA>region</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given <I><FONT  color=991122 face=HELVETICA>byteCount</I></FONT> bytes of clipping data <I><FONT  color=991122 face=HELVETICA>clipDatain</I></FONT> the specified <I><FONT  color=991122 face=HELVETICA>format</I></FONT>, makes the specified <I><FONT  color=991122 face=HELVETICA>region</I></FONT> match the clipping region.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>region</I></FONT> you specify must already exist.
+<P>
+The only format currently supported is <B><TT>B_CLIP_SHORT_RUNS</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The clip data was converted without error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_CLIP_FORMAT">B_MEDIA_BAD_CLIP_FORMAT</A></TT></B>.  The specified clip format is invalid.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="BufferConsumer.html#RegionToClipData()">BBufferConsumer::RegionToClipData()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="Connect()"></A>Connect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Connect(</TT></B></FONT>status_t status, const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_format &amp;<I><FONT  color=991122 face=HELVETICA>format</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *<I><FONT  color=991122 face=HELVETICA>ioName</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implement this hook function to establish a connection between the source and the destination.  The format negotiation is already complete by the time <B><TT>Connect()</TT></B> is called, so you have to accept the specified <I><FONT  color=991122 face=HELVETICA>format</I></FONT>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>status</I></FONT> argument indicates whether or not the connection actually took place; this is the result code returned by the <B><TT><A HREF="BufferConsumer.html#Connected()">BBufferConsumer::Connected()</A></TT></B> function or an error code indicating an error that has occurred during other preparation for the connection.
+<P>
+If status isn't <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>, you should release the media_source that was reserved for this connection by <B><TT><A HREF="#PrepareToConnect()">PrepareToConnect()</A></TT></B>; this lets it be used by other connection attempts.
+<P>
+On entry, <I><FONT  color=991122 face=HELVETICA>ioName</I></FONT> contains the connection name specified by the consumer (this may be different from the name specified by the <B><TT><A HREF="#BBufferProducer::PrepareToConnect()">BBufferProducer::PrepareToConnect()</A> </TT></B>function).  On return, <I><FONT  color=991122 face=HELVETICA>ioName</I></FONT> should point to a name for the connection; if the name really matters to you, copy the name you want the connection to have back into <I><FONT  color=991122 face=HELVETICA>ioName</I></FONT>; otherwise, you can leave it alone.
+<P>
+<HR>
+<H3>
+<A NAME="Disconnect()"></A>Disconnect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Disconnect(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Your implementation of <B><TT>Disconnect()</TT></B> should terminate the connection between the specified <I><FONT  color=991122 face=HELVETICA>source</I></FONT> and <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>. Once you return from this function, you shouldn't send any further buffers on the connection.
+<P>
+If a <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> has been specified for your producer (via the <B><TT><A HREF="#SetBufferGroup()">SetBufferGroup()</A></TT></B> function), you should delete it here.
+<P>
+<HR>
+<H3>
+<A NAME="DisposeOutputCookie()"></A>DisposeOutputCookie()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>DisposeOutputCookie(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Once a client has finished iterating through your outputs via <B><TT><A HREF="#GetNextOutput()">GetNextOutput()</A></TT></B> calls, it will call this function with the last value you returned as a <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>.  This gives you the opportunity to dispose of any memory you may have allocated for the iteration process.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the cookie is successfully disposed of (or if nothing needs to be done); otherwise, return an appropriate error code.
+<P>
+<HR>
+<H3>
+<A NAME="EnableOutput()"></A>EnableOutput()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>EnableOutput(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>whichOutput</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>_depreciated_</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook function is called when a consumer's <B><TT><A HREF="BufferConsumer.html#SetOutputEnabled()">SetOutputEnabled()</A></TT></B> function is called.  This indicates whether or not the output specified by <I><FONT  color=991122 face=HELVETICA>whichOutput</I></FONT> needs to be sent buffers.  You must implement this function so that you don't send buffers to outputs that don't need them.  The <I><FONT  color=991122 face=HELVETICA>_depreciated_</I></FONT> argument is no longer used.
+<P>
+By default, output is enabled.
+<P>
+<HR>
+<H3>
+<A NAME="FindLatencyFor()"></A>FindLatencyFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindLatencyFor(</TT></B></FONT>const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>forDestination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t *<I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node_id *<I><FONT  color=991122 face=HELVETICA>outTimeSource</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetLatencyFor()</TT></B> returns the latency introduced by sending data to the destination <I><FONT  color=991122 face=HELVETICA>forDestination</I></FONT>. On return, the latency will be stored in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT>, and the time source used by <I><FONT  color=991122 face=HELVETICA>forDestination</I></FONT> will be available in <I><FONT  color=991122 face=HELVETICA>outTimeSource</I></FONT> (unless an error is returned, in which case these values are undetermined).
+<P>
+The latency of sending a buffer from one time source to another should always be assumed to be zero, since there may be no relationship between the progress of time of two different time sources.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The latency was returned without error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_DESTINATION">B_MEDIA_BAD_DESTINATION</A></TT></B>.  The destination is invalid.
+<P>
+<LI>Port errors.  The request couldn't be sent to the destination.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="FindSeekTag()"></A>FindSeekTag()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindSeekTag(</TT></B></FONT>const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>forDestination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>inTargetTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_seek_tag *<I><FONT  color=991122 face=HELVETICA>outTag</I></FONT>, bigtime_t *<I><FONT  color=991122 face=HELVETICA>outTaggedTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 *<I><FONT  color=991122 face=HELVETICA>outFlags</I></FONT> = <FONT  face=HELVETICA>0</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>inFlags</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+In order to improve seek performance, the Media Kit provides the concept of <B>seek tags</B>.  These are special tags that identify easily-located points in media data (such as key frames in Cinepak video).  The <B><TT>FindSeekTag()</TT></B> function asks the consumer specified by <I><FONT  color=991122 face=HELVETICA>forDestination</I></FONT> for the nearest seek tag to the time specified by <I><FONT  color=991122 face=HELVETICA>inTargetTime</I></FONT>, and returns the tag in <I><FONT  color=991122 face=HELVETICA>outTag</I></FONT> and the time corresponding to that tag in <I><FONT  color=991122 face=HELVETICA>outTaggedTime</I></FONT>.  On return, <I><FONT  color=991122 face=HELVETICA>outFlags</I></FONT> (if the pointer isn't  <B><TT>NULL</TT></B>) contains flags giving further details about the tag.
+<P>
+There are currently no defined values for <I><FONT  color=991122 face=HELVETICA>inFlags</I></FONT> or <I><FONT  color=991122 face=HELVETICA>outFlags</I></FONT>.
+<P>
+<b>RETURN CODES</b>
+<P>
+B_OK.  No error.
+<P>
+<UL>
+<LI>Port errors.  An error occurred communicating with the Media Server.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="FormatChangeRequested()"></A>FormatChangeRequested()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>FormatChangeRequested(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;destination,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>_depreciated_</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implement <B><TT>FormatChangeRequested()</TT></B> to change the format of the media data flowing from the given <I><FONT  color=991122 face=HELVETICA>source</I></FONT> to the specified <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> to the format specified by <I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>.  If there are wildcards specified in <I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>, fill them in to match the format you prefer before returning from this call.  You should ignore the <I><FONT  color=991122 face=HELVETICA>_depreciated_</I></FONT> argument; it's no longer used.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+This call is issued synchronously by the destination, so you can't ask it if the format is acceptable.  Fortunately, since the destination issued the request, you can safely assume that it's fine.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the change request is processed successfully; otherwise, return an appropriate error code.
+<P>
+<B>See also:  <TT><A HREF="#FormatSuggestionRequested()">FormatSuggestionRequested()</A></TT></B>,<B><TT> <A HREF="#FormatProposal()">FormatProposal()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="FormatProposal()"></A>FormatProposal()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>FormatProposal(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>output</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Your BBufferProducer should implement this function to verify that the proposed media_format is suitable for the specified <I><FONT  color=991122 face=HELVETICA>output</I></FONT>.  If any fields in the <I><FONT  color=991122 face=HELVETICA>format</I></FONT> are wildcards, and you have a specific requirement, adjust those fields to match your requirements before returning.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the proposed <I><FONT  color=991122 face=HELVETICA>format</I></FONT> is acceptable; once you've done so, the Media Kit will assume that any connection request made on <I><FONT  color=991122 face=HELVETICA>output</I></FONT> with the specified format (after any changes you may have made) will succeed.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>output</I></FONT> isn't available, return <B><TT>B_BAD_SOURCE</TT></B>.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>format</I></FONT> isn't reasonable, return <B><TT>B_BAD_MEDIA_FORMAT</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="FormatSuggestionRequested()"></A>FormatSuggestionRequested()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>FormatSuggestionRequested(</TT></B></FONT>media_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>quality</I></FONT>, media_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+You must implement <B><TT>FormatSuggestionRequested()</TT></B> to return fill the buffer pointed to by <I><FONT  color=991122 face=HELVETICA>format</I></FONT> that your producer is capable of emitting that meets the desired <I><FONT  color=991122 face=HELVETICA>type</I></FONT> and <I><FONT  color=991122 face=HELVETICA>quality</I></FONT> requirements.
+<P>
+If your producer can work with a range of possible formats, let the <I><FONT  color=991122 face=HELVETICA>quality</I></FONT> argument guide your selection.  For example, you might choose to use 10 fps for previews, and 60 fps interlaced 640x480 for full-quality video.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>type</I></FONT> is a media class that your producer doesn't want to work with, return <B><TT>B_BAD_MEDIA_FORMAT</TT></B>.  If you're preapared to accept a wide range of values for some specific field, set that field to the wildcard value (see <B><TT>media_audio_format::wildcard()</TT></B> and <B><TT>media_video_format::wildcard()</TT></B> for more information.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the <I><FONT  color=991122 face=HELVETICA>format</I></FONT> is successfully returned.
+<P>
+<HR>
+<H3>
+<A NAME="GetLatency()"></A>GetLatency()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetLatency(</TT></B></FONT>bigtime_t *<I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implement this hook function to store, in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT>, the total amount of latency your BBufferProducer incurs from receiving a buffer of data until it reaches its ultimate destination.
+<P>
+Call <B><TT><A HREF="#FindLatencyFor()">FindLatencyFor()</A></TT></B> on whatever outputs the data is being forwarded to, add your own latency to the largest of those values, and return that value.
+<P>
+The default implementation of <B><TT>GetLatency()</TT></B> finds the maximum latency of your currently-available outputs by iterating over them, and returns that value in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT>; therefore, your implementation of this function may simply need to call the inherited version of this function, then add your own processing latency to the returned value.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The latency has been returned successfully.
+<P>
+<UL>
+<LI>Other errors.  Unable to calculate the latency.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetNextOutput()"></A>GetNextOutput()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetNextOutput(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, media_output *<I><FONT  color=991122 face=HELVETICA>outOutput</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implement this function to return information about your available outputs.  The first time it's called for a new iteration loop, the value pointed to by <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> will be 0.  Each time <B><TT>GetNextOutput()</TT></B> is called, you should set it to some value that makes sense to you so you can keep track of where in the iteration process the client is, but never set it to 0.
+<P>
+For each call to <B><TT>GetNextOutput()</TT></B>, including the first, you should return one of your outputs that the client hasn't seen during the iteration loop in <I><FONT  color=991122 face=HELVETICA>outOutput</I></FONT>.
+<P>
+Once all outputs have been reported, you should return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="HandleMessage()"></A>HandleMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>HandleMessage(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+When your node derived from BBufferProducer receives a message on its control port, you should handle it yourself if you know how, or dispatch to each ancestor class in turn (starting with <B><TT><A HREF="#BBufferProducer::HandleMessage()">BBufferProducer::HandleMessage()</A></TT></B>) until one of the <B><TT><A HREF="#HandleMessage()">HandleMessage()</A></TT></B> implementations returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If none of the inherited implementations of this function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>, you should pass the message to <B><TT><A HREF="MediaNode.html#HandleBadMessage()">BMediaNode::HandleBadMessage()</A></TT></B> to be dealt with.
+<P>
+Your port-listening thread should call <B><TT>HandleMessage()</TT></B> to dispatch the received data.
+<P>
+<B>See also:  <TT><A HREF="MediaNode.html#HandleMessage()">BMediaNode::HandleMessage()</A></TT></B>, &nbsp;<a href="Intro.html#About%20Multiple%20Virtual%20Inheritance%20on%20page21">"About Multiple Virtual Inheritance" on page21</a>
+<P>
+<HR>
+<H3>
+<A NAME="LatencyChanged()"></A>LatencyChanged()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>LatencyChanged(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>newLatency</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook function is called when a <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> that's receiving data from you determines that its latency has changed.  It will call its <B><TT><A HREF="BufferConsumer.html#SendLatencyChange()">BBufferConsumer::SendLatencyChange()</A></TT></B> function, and in response, the Media Server will call your <B><TT>LatencyChanged()</TT></B> function.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>source</I></FONT> argument indicates your output that's involved in the connection, and <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> specifies the input on the consumer to which the connection is linked.  <I><FONT  color=991122 face=HELVETICA>newLatency</I></FONT> is the consumer's new latency.  The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> are currently unused.
+<P>
+Override this function to implement whatever functionality you need to adjust your own latency calculations to keep the data flowing smoothly.
+<P>
+<HR>
+<H3>
+<A NAME="LateNoticeReceived()"></A>LateNoticeReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>LateNoticeReceived(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>whichSource</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>howLate</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook function is called when a <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> that's receiving data from you  determines that data is arriving late (when the <B><TT>BBufferConsumer::NotifyLateProducer()</TT></B> function is called); the exact degree to which your buffers are late is specified by the <I><FONT  color=991122 face=HELVETICA>howLate</I></FONT> argument. Your implementation of this function should take whatever steps are necessary to correct the problem, either by asking nodes upstream from you to deliver buffers earlier, dropping buffers, or other appropriate actions, depending on the current run mode.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT> argument specifies the performance time at which the notification was sent.
+<P>
+<B>See also:  <TT><A HREF="MediaNode.html#RunMode()">BMediaNode::RunMode()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="PrepareToConnect()"></A>PrepareToConnect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>PrepareToConnect(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>whichSource</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>whichDestination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_source *<I><FONT  color=991122 face=HELVETICA>outSource</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *<I><FONT  color=991122 face=HELVETICA>outName</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT>PrepareToConnect()</TT></B> hook is called before a new connection between the source <I><FONT  color=991122 face=HELVETICA>whichSource</I></FONT> and the destination <I><FONT  color=991122 face=HELVETICA>whichDestination</I></FONT> is established, in order to give your producer one last chance to specialize any wildcards that remain in the <I><FONT  color=991122 face=HELVETICA>format</I></FONT> (although by this point there shouldn't be any, you should check anyway).  
+<P>
+Your implementation should, additionally, return in <I><FONT  color=991122 face=HELVETICA>outSource</I></FONT> the source to be used for the connection, and should fill the <I><FONT  color=991122 face=HELVETICA>outName</I></FONT> buffer with the name the connection will be given; the consumer will see this in the <B><TT>outInput->name</TT></B> argument specified to <B><TT><A HREF="BufferConsumer.html#Connected()">BBufferConsumer::Connected()</A></TT></B>.  If your node doesn't care what the name is, you can leave the <I><FONT  color=991122 face=HELVETICA>outName</I></FONT> untouched.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Your <B><TT>Connect()</TT></B> function may return a different media_source value in <I><FONT  color=991122 face=HELVETICA>outOutput</I></FONT>'s <I><FONT  color=991122 face=HELVETICA>source</I></FONT> field than the one specified as the source argument to this function. One reason you might do this is if you implement one media_source to accept connection requests, then create a new media_source to actually handle each connection.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the connection process should proceed, or an appropriate error code if something's wrong.
+<P>
+If you return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>, the consumer's <B><TT><A HREF="BufferConsumer.html#Connected()">Connected()</A></TT></B> function will be called, to let it know that a new connection is being established.  Finally, the producer's <B><TT><A HREF="#Connect()">Connect()</A></TT></B> function is called to complete the exchange.
+<P>
+<B>See also:  <TT><A HREF="BufferConsumer.html#Connected()">BBufferConsumer::Connected()</A></TT></B>, <B><TT><A HREF="#Connect()">Connect()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="ProducerType()"></A>ProducerType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+media_type <B><TT><FONT  color=000022 size=+1>ProducerType(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the media_type of the media data produced by the node.
+<P>
+<HR>
+<H3>
+<A NAME="ProposeFormatChange()"></A>ProposeFormatChange()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ProposeFormatChange(</TT></B></FONT>media_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;<I><FONT  color=991122 face=HELVETICA>forDestination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Call this function to determine whether or not the destination <I><FONT  color=991122 face=HELVETICA>forDestination</I></FONT> is prepared to accept buffers in the specified <I><FONT  color=991122 face=HELVETICA>format</I></FONT>. This function can be especially useful if you want to test various formats to select the best compatible format during a hookup request in which the requested format contains wildcards.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The proposed format is acceptable to the destination.
+<P>
+<UL>
+<LI>Other errors.  The proposed format is unacceptable, or an error occurred in querying the destination node.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SendBuffer()"></A>SendBuffer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendBuffer(</TT></B></FONT><A HREF="Buffer.html#BBuffer">BBuffer</A> *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Call this function to send a <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> of media data to the specified <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, which must already be connected to one of your outputs.  This is how your BBufferProducer object will send data downstream to BBufferConsumers to which it's connected.
+<P>
+It's your responsibility to ensure that the buffer's header and the data contained in the buffer itself are valid, although <B><TT>SendBuffer()</TT></B> will automatically fill out the following header fields for you:
+<P>
+<UL>
+<LI>buffer
+<P>
+<LI>for_id
+<P>
+<LI>change_tag
+<P>
+</UL>
+<P>
+In particular, be sure that if you're outputting video buffers you set the <B><TT>media_video_buffer</TT></B> to describe the video properly.  If you don't, things will go badly for you.
+<P>
+You can obtain a buffer to fill and send by calling <B><TT>BBufferConsumer::RequestBuffer()</TT></B> on a <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> that you own (and that's okay to use for buffers going to the specified <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>).
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The buffer was sent without error.
+<P>
+<UL>
+<LI>Port errors.  An error occurred sending the buffer.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SendDataStatus()"></A>SendDataStatus()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendDataStatus(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>status</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_destination &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>atTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Call this function to inform the specified destination whether or not there's data available from your producer node.  Specify the appropriate status flag as the <I><FONT  color=991122 face=HELVETICA>status</I></FONT> argument, and the time at which the status takes effect as the <I><FONT  color=991122 face=HELVETICA>atTime</I></FONT> argument.
+<P>
+Possible values for the <I><FONT  color=991122 face=HELVETICA>status</I></FONT> argument are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_DATA_NOT_AVAILABLE</TT></B></TD>
+<TD>There aren't any buffers ready for the destination.</TD>
+<TR>
+<TD><B><TT>B_DATA_AVAILABLE</TT></B></TD>
+<TD>There are buffers ready for the destination.</TD>
+<TR>
+<TD><B><TT>B_PRODUCER_STOPPED</TT></B></TD>
+<TD>The producer has stopped.</TD>
+</TABLE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The status update was sent without error.
+<P>
+<UL>
+<LI>Port errors.  The status update couldn't be delivered.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetBufferGroup()"></A>SetBufferGroup()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetBufferGroup(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>forSource</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> *<I><FONT  color=991122 face=HELVETICA>group</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+When a client wants a specific <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> to be used for a given output <I><FONT  color=991122 face=HELVETICA>forSource</I></FONT>, it will call this function. You should remember the <I><FONT  color=991122 face=HELVETICA>group</I></FONT> and use it for all requests for buffers to send on the output <I><FONT  color=991122 face=HELVETICA>forSource</I></FONT> (and for no other outputs, unless the client explicitly requests you do so by calling <B><TT>SetBufferGroup()</TT></B> for another output source).
+<P>
+If your BBufferProducer goes away, or the connection is broken, delete the <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> object.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>group</I></FONT> is <B><TT>NULL</TT></B>, you should use whatever <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A> you wish after disposing of the previous group.
+<P>
+It's okay to pass <I><FONT  color=991122 face=HELVETICA>group</I></FONT> on to another node upstream from your BBufferProducer if your BBufferProducer only passes along buffers it receives in its processing loop; in that case, you're not really the owner of the <A HREF="BufferGroup.html#BBufferGroup">BBufferGroup</A>, unless you pass <B><TT>true</TT></B> for <I><FONT  color=991122 face=HELVETICA>willReclaim</I></FONT> in the call to <B><TT>BMediaRoster::SetOutputBuffers()</TT></B>.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the buffer group is set without incident; otherwise, return an appropriate error code.
+<P>
+<HR>
+<H3>
+<A NAME="SetInitialLatency()"></A>SetInitialLatency()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetInitialLatency(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>initialLatency</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+If your node has additional startup latency imposed by the signal from which its buffers are constructed, you should call <B><TT>SetInitialLatency()</TT></B> to specify the maximum possible latency that can be added by this delay.  <I><FONT  color=991122 face=HELVETICA>initialLatency</I></FONT> should be the maximum latency, in microseconds, that might occur.
+<P>
+One situation in which this occurs is for TV capture card nodes.  An NTSC television signal broadcasts a new field about every sixtieth of a second, which means that if your node is started partway through one field being received, you might have to wait as long as a sixtieth of a second for the first complete frame to arrive.  So the maximum latency in this situation is a sixtieth of a second.
+<P>
+Setting the initial latency correctly can prevent consumers from having problems synchronizing with your node, and can improve performance.
+<P>
+<I><FONT  color=991122 face=HELVETICA>flags</I></FONT> should be 0 for now; there are no values defined yet.
+<P>
+<HR>
+<H3>
+<A NAME="SetPlayRate()"></A>SetPlayRate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetPlayRate(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>numerator</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>denominator</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This function is called to tell the producer to resample the data rate by the specified factor.  Specifying a value of 1 (ie, <I><FONT  color=991122 face=HELVETICA>numerator</I></FONT>/<I><FONT  color=991122 face=HELVETICA>denominator</I></FONT> = 1) indicates that the data should be output at the same playback rate that it comes into the node at.  The format of the data should be unchanged.
+<P>
+For example, if you're playing a sound at 48 kHz, and you receive a call to <B><TT>SetPlayRate()</TT></B> with a numerator of 2 and a demoninator of 1 (double speed), you should resample so that you move twice as fast through the source data while keeping the output rate constant.  You might do this by doing a brute-force resample to 24 kHz (which would result in twice the data rate) or do time-compression (which would retain the pitch).
+<P>
+As another example, if you're playing video at 30 frames per second, and your <B><TT>SetPlayRate()</TT></B> function is called with a ratio of 1:2 specified (half speed), you should continue sending 30 frames per second, but you need to arrange for the playback to look like half-speed.  A reasonable way to do this would be to send each frame twice (re-time-stamped and buffered internally, if necessary), which would result in the desired half-speed appearance.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the sampling rate is changed; otherwise, return an error.  It's okay to return an error if you don't support varying sampling rates&mdash;the Media Kit won't hold that against you.
+<P>
+<HR>
+<H3>
+<A NAME="VideoClippingChanged()"></A>VideoClippingChanged()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>VideoClippingChanged(</TT></B></FONT>const media_source &amp;<I><FONT  color=991122 face=HELVETICA>forSource</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 <I><FONT  color=991122 face=HELVETICA>numShorts</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 *<I><FONT  color=991122 face=HELVETICA>clipData</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_video_display_info &amp;<I><FONT  color=991122 face=HELVETICA>display</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>outFromChangeTag</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This hook function is called when a client wants your BBufferProducer to output video data clipped to a particular region. Your producer must remember this clipping region and apply it to all video data you produce, without altering any bytes outside the region in any buffers sent through the source <I><FONT  color=991122 face=HELVETICA>forSource</I></FONT>.
+<P>
+Before your implementation of <B><TT>VideoClippingChanged()</TT></B> returns, you should set the value pointed to by <I><FONT  color=991122 face=HELVETICA>outFromChangeTag</I></FONT> to the change tag value at which the clipping will take effect, so the client will know what buffers it can expect to have the requested clipping. This can be done easily by adding the following line to your implementation:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;*outFromChangeTag = UpdateChangeTag();</PRE>
+<P>
+You can use the <B><TT><A HREF="#ClipDataToRegion()">ClipDataToRegion()</A></TT></B> function to convert the data in <I><FONT  color=991122 face=HELVETICA>clipData</I></FONT> into an actual <A HREF="../Release%20Notes/InterfaceKit.html#BRegion">BRegion</A> if that's a better format for you to work with. If you do, keep in mind that <I><FONT  color=991122 face=HELVETICA>numShorts</I></FONT> is the actual number of int16 values in the array specified by <I><FONT  color=991122 face=HELVETICA>clipData</I></FONT>, while <B><TT><A HREF="#ClipDataToRegion()">ClipDataToRegion()</A></TT></B> requires the number of <B>bytes</B> of data in the array; be sure to multiply <I><FONT  color=991122 face=HELVETICA>numShorts</I></FONT> by sizeof(int16).
+<P>
+The media_video_display_info structure referred to by display indicates the format of the video display onto which the video is being displayed; this lets you know what color space, screen size, and so forth is in use on the video display, so your producer can render properly.  <B><TT>VideoClippingChanged()</TT></B> is called not only when clipping changes, but when the configuration of the display changes as well.  Your producer must abide by this starting at the specified change count.
+<P>
+See &nbsp;<a href="#Video%20Clipping%20on%20page85">"Video Clipping" on page85</a> for information on the format of the clip data.
+<P>
+<B>See also:  <TT><A HREF="#ClipDataToRegion()">ClipDataToRegion()</A></TT></B>, <B><TT><A HREF="BufferConsumer.html#RegionToClipData()">BBufferConsumer::RegionToClipData()</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Clipping%20Data%20Formats"></A>Clipping Data Formats
+</H3>
+<P>
+Declared in:  &lt;be/media/BufferProducer.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_CLIP_SHORT_RUNS</TT></B></TD>
+<TD>Clipping is encoded using runs of shorts.</TD>
+</TABLE>
+<P>
+<a href="#Video%20Clipping%20on%20page85">"Video Clipping" on page85</a>
+<P>
+<HR>
+<H3>
+<A NAME="This"></A>This
+, 
+<A NAME="value"></A>value
+, 
+<A NAME="defines"></A>defines
+, 
+<A NAME="the"></A>the
+, 
+<A NAME="only"></A>only
+, 
+<A NAME="clipping"></A>clipping
+, 
+<A NAME="format"></A>format
+, 
+<A NAME="currently"></A>currently
+, 
+<A NAME="supported"></A>supported
+, 
+<A NAME="by"></A>by
+, 
+<A NAME="BBufferProducer."></A>BBufferProducer.
+, 
+<A NAME="Note"></A>Note
+, 
+<A NAME="that"></A>that
+, 
+<A NAME="because"></A>because
+, 
+<A NAME="this"></A>this
+, 
+<A NAME="constant"></A>constant
+, 
+<A NAME="is"></A>is
+, 
+<A NAME="a"></A>a
+, 
+<A NAME="member"></A>member
+, 
+<A NAME="of"></A>of
+, 
+<A NAME="the"></A>the
+, 
+<A NAME="BBufferProducer"></A>BBufferProducer
+, 
+<A NAME="class"></A>class
+, 
+<A NAME="if"></A>if
+, 
+<A NAME="you"></A>you
+, 
+<A NAME="need"></A>need
+, 
+<A NAME="to"></A>to
+, 
+<A NAME="access"></A>access
+, 
+<A NAME="it"></A>it
+, 
+<A NAME="from"></A>from
+, 
+<A NAME="other"></A>other
+, 
+<A NAME="classes"></A>classes
+, 
+<A NAME="you"></A>you
+, 
+<A NAME="must"></A>must
+, 
+<A NAME="code"></A>code
+, 
+<A NAME="it"></A>it
+, 
+<A NAME="as"></A>as
+, 
+<A NAME="BBufferProducer::B_CLIP_SHORT_RUNS."></A>BBufferProducer::B_CLIP_SHORT_RUNS.
+, 
+<A NAME="See"></A>See
+, 
+<A NAME="&nbsp;"></A>&nbsp;
+, 
+<A NAME="for"></A>for
+, 
+<A NAME="a"></A>a
+, 
+<A NAME="description"></A>description
+, 
+<A NAME="of"></A>of
+, 
+<A NAME="this"></A>this
+, 
+<A NAME="format."></A>format.
+</H3>
+<P>
+<A NAME="suggestion_quality"></A>
+<P>
+<HR>
+<H3>
+<A NAME="suggestion_quality"></A>suggestion_quality
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/BufferProducer.h">be/media/BufferProducer.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><TT>
+<A NAME="suggestion_quality"></A>B_ANY_QUALITY
+</TT></TD>
+<TD>Any quality.</TD>
+<TR>
+<TD><TT>
+<A NAME="suggestion_quality"></A>B_LOW_QUALITY
+</TT></TD>
+<TD>A low quality level (10).</TD>
+<TR>
+<TD><TT>
+<A NAME="suggestion_quality"></A>B_MEDIUM_QUALITY
+</TT></TD>
+<TD>Medium quality level (50).</TD>
+<TR>
+<TD><TT>
+<A NAME="suggestion_quality"></A>B_HIGH_QUALITY
+</TT></TD>
+<TD>High quality level (100).</TD>
+</TABLE>
+<P>
+Quality values you can use when you don't want to have to come up with one on your own.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,918 @@
+<HTML><HEAD><TITLE>The Translation Kit: BTranslatorRoster</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BTranslatorRoster"></A>BTranslatorRoster
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/translation/TranslatorRoster.h">be/translation/TranslatorRoster.h</A>
+<P>
+Library:  libtranslation.so
+<P>
+<H6><A HREF="TranslatorRoster.summary.html"><i>Summary</i></A></H6>
+<P>
+BTranslatorRoster is the main mechanism through which applications interact with the Translation Kit.  An application using the Translation Kit doesn't need to worry about explicitly loading or calling add-ons; BTranslatorRoster transparently handles all the niggling details.  The class provides four categories of service: initialization, information, translation, and configuration.
+<P>
+<HR>
+<H3>
+<A NAME="Initialization"></A>Initialization
+</H3>
+<P>
+You can create an empty BTranslatorRoster (one which has no translators loaded) by instantiating it in the usual fashion:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BTranslatorRoster *roster = new BTranslatorRoster;</PRE>
+<P>
+You can then load translators to the newly-created BTranslatorRoster with the <B><TT><A HREF="#AddTranslators()">AddTranslators()</A></TT></B> method (all paths must be absolute):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;// load all translators in a given directory
+&nbsp;&nbsp;&nbsp;roster->AddTranslators("/boot/home/config/add-ons/viewer/");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;// load a specific translator
+&nbsp;&nbsp;&nbsp;roster->AddTranslators("/system/add-ons/Translators/photos");</PRE>
+<P>
+More commonly, you want a BTranslatorRoster with the default translators (those in <B>/boot/home/config/add-ons/Translators</B>, <B>/boot/home/config/add-ons/Datatypes</B>, and <B>/system/add-ons/Translators</B>).  The static member <B><TT><A HREF="#Default()">Default()</A></TT></B> returns just such a beast:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BTranslatorRoster *roster = BTranslatorRoster::Default();</PRE>
+<P>
+However, not all BTranslatorRosters are created equal: the object returned by <B><TT><A HREF="#Default()">Default()</A></TT></B> is global to the application and controlled by BTranslatorRoster.  As a result, you should never <B><TT>delete</TT></B> it.  Additionally, if you want to load additional translators, you're better off creating a new instance of BTranslatorRoster rather than using the default one:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BTranslatorRoster *roster = new BTranslatorRoster;
+&nbsp;&nbsp;&nbsp;roster->AddTranslators(NULL); // load default translators
+&nbsp;&nbsp;&nbsp;roster->AddTranslators(...);  // load additional translators</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="Information"></A>Information
+</H3>
+<P>
+Applications typically ask the following questions of the Translation Kit:
+<P>
+<B>1. </B>&nbsp;&nbsp;&nbsp;Which translators are installed?
+<P>
+<B>2. </B>&nbsp;&nbsp;&nbsp;Which translations can a particular translator carry out?
+<P>
+<B>3. </B>&nbsp;&nbsp;&nbsp;Which translator is best suited for handling my conversion?
+<P>
+An application can determine the installed translators by calling <B><TT><A HREF="#GetAllTranslators()">GetAllTranslators()</A></TT></B>.  <B><TT><A HREF="#GetAllTranslators()">GetAllTranslators()</A></TT></B> returns an array of translator_id values for the installed translators.  A translator_id is an application-wide value assigned by BTranslatorRoster identifying a specific translator.  The following snippet prints out the names of the default translators:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BTranslatorRoster *roster = BTranslatorRoster::Default();
+&nbsp;&nbsp;&nbsp;int32 num_translators, i;
+&nbsp;&nbsp;&nbsp;translator_id *translators;
+&nbsp;&nbsp;&nbsp;const char *translator_name, *translator_info;
+&nbsp;&nbsp;&nbsp;int32 translator_version;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;roster->GetAllTranslators(&amp;translators, &amp;num_translators);
+&nbsp;&nbsp;&nbsp;for (i=0;i&lt;num_translators;i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roster->GetTranslatorInfo(translators[i], &amp;translator_name, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;translator_info, &amp;translator_version);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%s: %s (%.2f)n", translator_name, translator_info, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;translator_version/100.);
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;delete [] translators; // clean up our droppings</PRE>
+<P>
+The translator_id is very valuable; it can be used to query BTranslatorRoster for specific information about a translator's capabilities.  This information comes in two nearly identical flavors: translation_format and translator_info.  They are defined in <B>&lt;be/translation/TranslationDefs.h></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct <B><TT>
+<A NAME="translation_format"></A>translation_format
+</TT></B> {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 group;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float  quality;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float  capability;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char   MIME[251];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char   name[251];
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct <B><TT>
+<A NAME="translator_info"></A>translator_info
+</TT></B> {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32        type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;translator_id translator;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32        group;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float         quality;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float         capability;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char          name[251];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char          MIME[251];
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The common fields:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>group</I></FONT>.  Defines the type of media the format represents, i.e. bitmap image, sound, or video.  Constants for common media types can be found in <B>&lt;be/translation/TranslatorFormats.h></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>type</I></FONT>.  Type constant defining the specific data format.  For example, the type constant for tiff bitmaps differs from the constant for jpeg bitmaps.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>quality</I></FONT>.  Ability of the format to represent data of its media group.  This value ranges from a low of 0.0 (utter inability) to a high of 1.0 (encodes all relevant information).
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>capability</I></FONT>.  Ability of translator to decode the format.  As with the quality, the value ranges from 0.0 (unable to decode) to 1.0 (can decode all variants and extensions).
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>MIME</I></FONT>.  MIME type of the format.  This is a more reliable indicator of the data format than the <I><FONT  color=991122 face=HELVETICA>type</I></FONT> field for those formats that have standard MIME names.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  Human-readable C string describing the format.  May include information about the translator as well.
+<P>
+</UL>
+<P>
+Additionally, translator_info defines an additional field:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>translator</I></FONT>.  translator_id for the translator associated with the structure.
+<P>
+</UL>
+<P>
+To find the media formats supported by a particular translator, call <B><TT><A HREF="#GetInputFormats()">GetInputFormats()</A></TT></B> or <B><TT><A HREF="#GetOutputFormats()">GetOutputFormats()</A></TT></B> as appropriate.  These methods return a list of the supported input or output formats in an array of translation_format.
+<P>
+Many times, however, you don't really care about individual translators; you just want the translator best suited for handling your media stream.  In these cases, you can just call <B><TT><A HREF="#Identify()">Identify()</A></TT></B> on the BPositionIO.  BTranslatorRoster will then return, in a translator_info, the translator most suited for carrying out the translation.  If you are instead interested in finding all the translators capable of handling the data in your stream, use <B><TT><A HREF="#GetTranslators()">GetTranslators()</A></TT></B> instead.
+<P>
+Note that some translators do not publish their input and output formats.  In these cases, <B><TT><A HREF="#GetInputFormats()">GetInputFormats()</A></TT></B> and <B><TT><A HREF="#GetOutputFormats()">GetOutputFormats()</A></TT></B> return an empty list of formats.  The only way to tell if such a translator supports a particular input or output format is to pass it to <B><TT><A HREF="#Identify()">Identify()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Translation"></A>Translation
+</H3>
+<P>
+Although the function of BTranslatorRoster is to provide translation services, carrying out the translation is simple.  All it requires are the input and output <B><TT>BPositionIO</TT></B> streams and the type constant for the desired output.  In the simplest case, if you know the type constant you want to convert the data into, you can let the BTranslatorRoster decide which translator to use:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPositionIO *in = ..., *out = ...;
+&nbsp;&nbsp;&nbsp;BTranslatorRoster *roster = BTranslatorRoster::Default();
+&nbsp;&nbsp;&nbsp;uint32 desired_format_constant = ...;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;roster->Translate(in, NULL, NULL, out, desired_format_constant);</PRE>
+<P>
+Sometimes, however, you'd like the services of a specific translator.  In these cases, you can use the alternate form of <B><TT><A HREF="#Translate()">Translate()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPositionIO *in = ..., *out = ...;
+&nbsp;&nbsp;&nbsp;BTranslatorRoster *roster = BTranslatorRoster::Default();
+&nbsp;&nbsp;&nbsp;uint32 desired_format_constant = ...;
+&nbsp;&nbsp;&nbsp;translator_id desired_translator_id = ...;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;roster->Translate(desired_translator_id, in, NULL, NULL, out, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;desired_format_constant);</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The Translation Kit won't chain translators for you.  If you want to translate from GIF to PNG, you either need a translator that can convert GIF to PNG, or you need to perform two translations: one from GIF to an interchange format, then another from that format to PNG.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Configuration"></A>Configuration
+</H3>
+<P>
+BTranslatorRoster provides two mechanisms for configuring the behavior of translators: <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> and <B><TT>MakeConfiguationView()</TT></B>.
+<P>
+<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> is a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> that can be passed to most BTranslatorRoster members.  It is used by the application to communicate format-specific information to the translator.  For example, it could be used to ask a video translator to only translate the first 15 frames of the movie.  The <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> field is also used by the translator to communicate information back to the application.  The translator may use it, for example, to tell the application that it is returning a greyscale image.
+<P>
+A translator need not support any particular extension and there is no way for an application to tell if a translator supports any extensions.
+<P>
+A set of standard <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> messages can be found in <B>&lt;be/translation/TranslatorFormats.h></B> and are explained below:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Name</TH>
+<TH>Type</TH>
+<TH>Direction</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_HEADER_ONLY</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B></TD>
+<TD>app to translator</TD>
+<TD>Only output header if true</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_DATA_ONLY</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B></TD>
+<TD>app to translator</TD>
+<TD>Only output data if true</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_COMMENT</TT></B></TD>
+<TD><B><TT>string</TT></B></TD>
+<TD>n/a</TD>
+<TD>Text comment about data.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_TIME</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B></TD>
+<TD>app to translator</TD>
+<TD>If one exists, it specifies a single instant in time.  If two exist, they specify a range in time.  Time is measured in microseconds.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_FRAME</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></TD>
+<TD>app to translator</TD>
+<TD>Same as kTimeExtension, except the unit of time is frames.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_BITMAP_RECT</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A></TT></B></TD>
+<TD>app to translator</TD>
+<TD>Specifies subsection of a bitmap.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_BITMAP_COLOR_SPACE</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></TD>
+<TD>both</TD>
+<TD>Specifies desired/actual color space of bitmap.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_SOUND_CHANNEL</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></TD>
+<TD>app to translator</TD>
+<TD>Only output specified channel of sound.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_SOUND_MONO</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B></TD>
+<TD>app to translator</TD>
+<TD>Mix all audio channels to a single mono channel if true.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_SOUND_MARKER</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></TD>
+<TD>both</TD>
+<TD>Specifies markers in sound data.  Units are in frames. "1" specifies marker between first sample of last channel and second sample of first channel.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSLATOR_EX"></A>B_TRANSLATOR_EX
+T_SOUND_LOOP</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></TD>
+<TD>both</TD>
+<TD>If there is one value, loop from the end of the sample to the loop point. If there are two values, loop from the second value to the first. If there are more than two values, then there is a release loop.</TD>
+</TABLE>
+<P>
+BTranslatorRoster contains two methods to facilitate configuration of translators.  The first method, <B><TT><A HREF="#MakeConfigurationView()">MakeConfigurationView()</A></TT></B>, instructs the translator to create a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> in which configuration options may be changed.  It is the responsibility of the application calling <B><TT><A HREF="#MakeConfigurationView()">MakeConfigurationView()</A></TT></B> to attach the view to a BWindow.  The second method, <B><TT><A HREF="#GetConfigurationMessage()">GetConfigurationMessage()</A></TT></B>, fills in a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> with the current settings for a specified translator. This <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> can then be passed to <B><TT><A HREF="#Translate()">Translate()</A></TT></B> to request a translation with the settings contained within.
+<P>
+<HR>
+<H3>
+<A NAME="Example"></A>Example
+</H3>
+<P>
+The task of translating data often boils down to finding the right type constant.  The following function will print the format type constants associated with a MIME string given a BTranslatorRoster:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void find_constant(BTranslatorRoster *roster, const char *mime)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;translator_id *translators;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 num_translators;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roster->GetAllTranslators(&amp;translators, &amp;num_translators);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (int32 i=0;i&lt;num_translators;i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const translation_format *fmts;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 num_fmts;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roster->GetOutputFormats(translators[i], &amp;fmts, &amp;num_fmts);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (int32 j=0;j&lt;num_fmts;j++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!strcasecmp(fmts[j].MIME, mime))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("match: %s type %8.8x (%4.4s)n", 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fmts[j].name, fmts[j].type, &amp;fmts[j].type);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BTranslatorRoster()"></A>BTranslatorRoster()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BTranslatorRoster()">BTranslatorRoster()</A>
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BTranslatorRoster(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>model</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new container for translators. The no-argument constructor creates an empty container.  The <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> constructor loads all the translators from the directories specified in the "be:translator_path" named fields in <I><FONT  color=991122 face=HELVETICA>model</I></FONT>.
+<P>
+If you just want to load the translators from the standard directories, you can instead use the static member <B><TT><A HREF="#Default()">Default()</A></TT></B> described below.
+<P>
+<B>See also:  <TT><A HREF="#Default()">Default()</A></TT></B> static function, <B><TT><A HREF="#AddTranslators()">AddTranslators()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="~BTranslatorRoster()"></A>~BTranslatorRoster()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BTranslatorRoster()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Unloads any translators that were loaded and frees all memory allocated by the BTranslatorRoster.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Default()"></A>Default()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BTranslatorRoster *<B><TT><FONT  color=000022 size=+1>Default()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This returns a BTranslatorRoster loaded with the default set of translators, loaded from the colon-deliminated list of files and directories found in the environment variable <B><TT>TRANSLATORS</TT></B>. If no such variable exists, the translators are loaded from the default locations  <B>/boot/home/config/add-ons/Translators</B>, <B>/boot/home/config/add-ons/Datatypes</B>, and <B>/system/add-ons/Translators</B>.
+<P>
+The instance of BTranslatorRoster returned by this function is global to the application and should not be deleted.  Although you can add translators to the returned <A HREF="#BTranslatorRoster">BTranslatorRoster</A>, this is not recommended.  It's better to use a new instance of the class.
+<P>
+<B>See also:  <TT><A HREF="#AddTranslators()">AddTranslators()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BTranslatorRoster *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>from</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a new BTranslatorRoster object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> doesn't contain data for a BTranslatorRoster object, <B><TT>Instantiate()</TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="Version()"></A>Version()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Version(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>outCurVersion</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>outMinVersion</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>inAppVersion</I></FONT> = <FONT  face=HELVETICA>B_TRANSLATION_CURRENT_VERSION</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets <I><FONT  color=991122 face=HELVETICA>outCurVersion</I></FONT> to the Translation Kit protocol version number and <I><FONT  color=991122 face=HELVETICA>outMinVersion</I></FONT> to the minimum protocol version number supported.  Returns a human-readable string containing version information.  Currently, <I><FONT  color=991122 face=HELVETICA>inAppVersion</I></FONT> must be <B><TT>B_TRANSLATION_CURRENT_VERSION</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddTranslators()"></A>AddTranslators()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>AddTranslators(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>load_path</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Loads all the translators located in the colon-deliminated list of files and directories found in <I><FONT  color=991122 face=HELVETICA>load_path</I></FONT>.  All specified paths must be absolute.  If <I><FONT  color=991122 face=HELVETICA>load_path</I></FONT> is <B><TT>NULL</TT></B>, it loads the translators from the locations specified in the <B><TT>TRANSLATORS</TT></B> environment variable.  If the environment variable is not defined, then it loads all the files in the default directories   <B>/boot/home/config/add-ons/Translators</B>, <B>/boot/home/config/add-ons/Datatypes</B>, and <B>/system/add-ons/Translators</B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Identification of <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> was successful.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. Error parsing <I><FONT  color=991122 face=HELVETICA>load_path</I></FONT>.
+<P>
+<LI>Anything else. Error loading add-ons.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#Default()">Default()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>into</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Archives the BTranslatorRoster by recording its loaded add-ons in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>into</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="GetAllTranslators()"></A>GetAllTranslators()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetAllTranslators(</TT></B></FONT>translator_id **<I><FONT  color=991122 face=HELVETICA>outList</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>outCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns, in <I><FONT  color=991122 face=HELVETICA>outList</I></FONT>, an array of all the translators loaded by the BTranslationRoster.  The number of elements in the array is placed in <I><FONT  color=991122 face=HELVETICA>outCount</I></FONT>.  The application assumes responsibility for deallocating the array.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Success.
+<P>
+<LI><B><TT>B_NOT_INITIALIZED</TT></B>. Internal Translation Kit error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. <I><FONT  color=991122 face=HELVETICA>outList</I></FONT> or <I><FONT  color=991122 face=HELVETICA>outCount</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#Identify()">Identify()</A></TT></B>, <B><TT><A HREF="#GetTranslators()">GetTranslators()</A></TT></B>, <B><TT><A HREF="#GetAllTranslators()">GetAllTranslators()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="GetConfigurationMessage()"></A>GetConfigurationMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetConfigurationMessage(</TT></B></FONT>translator_id <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Saves the current configuration information for translator <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT> in <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>.  This information may be flattened, unflattened, and passed to <B><TT><A HREF="#Translate()">Translate()</A></TT></B> to configure it.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Success.
+<P>
+<LI><B><TT>B_NO_TRANSLATOR</TT></B>. <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT> not a valid translator_id.
+<P>
+<LI><B><TT>B_NOT_INITIALIZED</TT></B>. Internal Translation Kit error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+<LI>Anything else. Error passed on from add-on.
+<P>
+</UL>
+<P>
+<B>See also:  <TT>GetConfigurationView()</TT></B>, <B><TT><A HREF="#Translate()">Translate()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="GetInputFormats()"></A>GetInputFormats()
+, 
+<A NAME="GetOutputFormats()"></A>GetOutputFormats()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetInputFormats(</TT></B></FONT>translator_id <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const translation_format **<I><FONT  color=991122 face=HELVETICA>outFormats</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>outNumFormats</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetOutputFormats(</TT></B></FONT>translator_id <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const translation_format **<I><FONT  color=991122 face=HELVETICA>outFormats</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>outNumFormats</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns an array of the published accepted input or output formats for translator <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>outNumFormats</I></FONT> is filled with the number of elements in the array.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Success.
+<P>
+<LI><B><TT>B_NO_TRANSLATOR</TT></B>. <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT> not a valid translator_id.
+<P>
+<LI><B><TT>B_NOT_INITIALIZED</TT></B>. Internal Translation Kit error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. <I><FONT  color=991122 face=HELVETICA>outFormats</I></FONT> or <I><FONT  color=991122 face=HELVETICA>outNumFormats</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#GetTranslatorInfo()">GetTranslatorInfo()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="GetTranslatorInfo()"></A>GetTranslatorInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetTranslatorInfo(</TT></B></FONT>translator_id <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT>, const char **<I><FONT  color=991122 face=HELVETICA>outName</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char **<I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>outVersion</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns public information about translator <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT>.  Sets <I><FONT  color=991122 face=HELVETICA>outName</I></FONT> with a short description of the translator, <I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT> with a longer description, and <I><FONT  color=991122 face=HELVETICA>outVersion</I></FONT> with the translator's version number.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Success.
+<P>
+<LI><B><TT>B_NO_TRANSLATOR</TT></B>. <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT> not a valid translator_id.
+<P>
+<LI><B><TT>B_NOT_INITIALIZED</TT></B>. Internal Translation Kit error.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#GetInputFormats()">GetInputFormats()</A></TT></B>, <B><TT><A HREF="#GetOutputFormats()">GetOutputFormats()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="GetTranslators()"></A>GetTranslators()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetTranslators(</TT></B></FONT>BPositionIO *<I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;translator_info **<I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>outNumInfo</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>inHintType</I></FONT> = <FONT  face=HELVETICA>0</FONT>, const char *<I><FONT  color=991122 face=HELVETICA>inHintMIME</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>inWantType</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Identifies the media in <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, returning an array of valid formats and translators equipped to handle them in outInfo.  <I><FONT  color=991122 face=HELVETICA>outNumInfo</I></FONT> holds the number of elements in the array.  If <I><FONT  color=991122 face=HELVETICA>inHintType</I></FONT> or <I><FONT  color=991122 face=HELVETICA>inHintMIME</I></FONT> is specified, only those translators that can accept data of the specified type are searched.  If <I><FONT  color=991122 face=HELVETICA>inWantType</I></FONT> is specified, only those translators that can output data of that type are searched.  <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> offers an opportunity for the application to specify additional configuration information to the add-ons.  The application assumes responsibility for deallocating the array.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Identification of <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> was successful.
+<P>
+<LI><B><TT>B_NO_TRANSLATOR</TT></B>. No suitable translators found.
+<P>
+<LI><B><TT>B_NOT_INITIALIZED</TT></B>. Internal Translation Kit error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, <I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>, or <I><FONT  color=991122 face=HELVETICA>outNumInfo</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+<LI>Anything else. Error operating on <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#Identify()">Identify()</A></TT></B>, <B><TT> <A HREF="#GetAllTranslators()">GetAllTranslators()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Identify()"></A>Identify()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Identify(</TT></B></FONT>BPositionIO *<I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;translator_info *<I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>inHintType</I></FONT> = <FONT  face=HELVETICA>0</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>inHintMIME</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>inWantType</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Identifies the media in <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, returning a best guess of the format and the translator best equipped to handle it in <I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>inHintType</I></FONT> or <I><FONT  color=991122 face=HELVETICA>inHintMIME</I></FONT> is specified, only those translators that can accept data of the specified type are searched.  If <I><FONT  color=991122 face=HELVETICA>inWantType</I></FONT> is specified, only those translators that can output data of that type are searched.  <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> offers an opportunity for the application to specify additional configuration information to the add-ons.
+<P>
+If more than one translator can identify <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, then the one with the highest <I><FONT  color=991122 face=HELVETICA>quality*capability</I></FONT> is returned.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Identification of <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> was successful.
+<P>
+<LI><B><TT>B_NO_TRANSLATOR</TT></B>. No suitable translator found.
+<P>
+<LI><B><TT>B_NOT_INITIALIZED</TT></B>. Internal Translation Kit error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> or <I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+<LI>Anything else. Error operating on <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#GetTranslators()">GetTranslators()</A></TT></B>, <B><TT> <A HREF="#GetAllTranslators()">GetAllTranslators()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MakeConfigurationView()"></A>MakeConfigurationView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>MakeConfigurationView(</TT></B></FONT>translator_id <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> **<I><FONT  color=991122 face=HELVETICA>outView</I></FONT>, <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>outExtent</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns, in <I><FONT  color=991122 face=HELVETICA>outView</I></FONT>, a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> containing controls to configure translator <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT>.  It is the application's responsibility to attach the <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> to a BWindow.  The initial size of the <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> is given in <I><FONT  color=991122 face=HELVETICA>outExtent</I></FONT> but may be resized by the application.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Success.
+<P>
+<LI><B><TT>B_NO_TRANSLATOR</TT></B>. <I><FONT  color=991122 face=HELVETICA>forTranslator</I></FONT> not a valid translator_id.
+<P>
+<LI><B><TT>B_NOT_INITIALIZED</TT></B>. Internal Translation Kit error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. <I><FONT  color=991122 face=HELVETICA>outView</I></FONT> or <I><FONT  color=991122 face=HELVETICA>outExtent</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+<LI>Anything else. Error passed on from add-on.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#GetConfigurationMessage()">GetConfigurationMessage()</A></TT></B>, <B><TT><A HREF="#Translate()">Translate()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="Translate()"></A>Translate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Translate(</TT></B></FONT>BPositionIO *<I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, const translator_info *<I><FONT  color=991122 face=HELVETICA>inInfo</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, BPositionIO *<I><FONT  color=991122 face=HELVETICA>outDestination</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>inWantOutType</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>inHintType</I></FONT> = <FONT  face=HELVETICA>0</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>inHintMIME</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Translate(</TT></B></FONT>translator_id <I><FONT  color=991122 face=HELVETICA>inTranslator</I></FONT>, BPositionIO *<I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, BPositionIO *<I><FONT  color=991122 face=HELVETICA>outDestination</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>inWantOutType</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These two functions carry out data conversion, converting the data in <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> to type <I><FONT  color=991122 face=HELVETICA>inWantoutType</I></FONT> and placing the resulting output in <I><FONT  color=991122 face=HELVETICA>outDestination</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>inInfo</I></FONT> should always contain either the output of an <B><TT><A HREF="#Identify()">Identify()</A></TT></B> call or <B><TT>NULL</TT></B>.  The translation uses the translator identified by <I><FONT  color=991122 face=HELVETICA>inInfo->infoTranslator</I></FONT> or <I><FONT  color=991122 face=HELVETICA>inTranslator</I></FONT> as appropriate.  If <I><FONT  color=991122 face=HELVETICA>inInfo</I></FONT> is <B><TT>NULL</TT></B>, <B><TT>Translate()</TT></B> will call first <B><TT><A HREF="#Identify()">Identify()</A></TT></B> to discover the format of the input stream.  <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, if it is not <B><TT>NULL</TT></B>, provides a communication path between the translator and the application.  <I><FONT  color=991122 face=HELVETICA>inHintType</I></FONT> and <I><FONT  color=991122 face=HELVETICA>inHintMIME</I></FONT>, if provided, are passed as hints to the translator.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Success.
+<P>
+<LI><B><TT>B_NO_TRANSLATOR</TT></B>. No suitable translators found.
+<P>
+<LI><B><TT>B_NOT_INITIALIZED</TT></B>. Internal Translation Kit error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> or <I><FONT  color=991122 face=HELVETICA>outSource</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+<LI>Anything else. Error passed on from add-on.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following field to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"be:translator_path"
+<br>
+(array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The location of the Translation Kit add-on (one field per add-on).</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

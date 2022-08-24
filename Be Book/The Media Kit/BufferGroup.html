@@ -1,0 +1,603 @@
+<HTML><HEAD><TITLE>The Media Kit: BBufferGroup</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BBufferGroup"></A>BBufferGroup
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/BufferGroup.h">be/media/BufferGroup.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="BufferGroup.summary.html"><i>Summary</i></A></H6>
+<P>
+A BBufferGroup serves as a repository for BBuffers, and can be used to pass those buffers to another node for its use when sending data.  It must also be used by your <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> to acquire BBuffers to put data that you produce into before you send the buffer on to its destination.
+<P>
+You can create a new BBufferGroup by simply calling:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;new BBufferGroup;</PRE>
+<P>
+If you pass in some arguments describing what sort of buffers you want, and how many of them, the group will even create the BBuffers for you.  This is how you'll usually use <A HREF="#BBufferGroup">BBufferGroup</A>, from within your <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> subclass' constructor so you'll know there are buffers ready and waiting when it's time to start sending data.  A possible exception is if your node is a filter that simply processes buffers it receives and passes them along.
+<P>
+A BBufferGroup instance runs a thread that reclaims BBuffers whose <B><TT><A HREF="Buffer.html#Recycle()">Recycle()</A> </TT></B>function has been called.  If the group is temporarily out of free buffers, a request for a buffer may block until one is available, or until the request times out, if a timeout is specified when the request is made.
+<P>
+<HR>
+<H2>
+<A NAME="Using%20BBitmaps%20as%20Buffers"></A><FONT SIZE=6>U</FONT>sing <FONT SIZE=6>B</FONT><FONT SIZE=6>B</FONT>itmaps as <FONT SIZE=6>B</FONT>uffers
+</H2>
+<P>
+If you're doing video processing, you might want your buffers to be BBitmaps.  Here's how you can accomplish this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BBufferGroup *my_group = new BBufferGroup;
+&nbsp;&nbsp;&nbsp;BBitmap *my_bitmap = new BBitmap(BRect(0,0,639,479), B_BITMAP_IS_AREA,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_RGB32, 640*4);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (!my_bitmap->IsValid()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;area_info bm_info;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (get_area_info(my_bitmap->Area(), &amp;bm_info) != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;buffer_clone_info bc_info;
+&nbsp;&nbsp;&nbsp;bc_info.area = bm_info.area;
+&nbsp;&nbsp;&nbsp;bc_info.offset = ((char *) my_bitmap->Bits())-((char *) bm_info.address);
+&nbsp;&nbsp;&nbsp;bc_info.size = my_bitmap->BitsLength();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;BBuffer *out_buffer = NULL;
+&nbsp;&nbsp;&nbsp;status_t err = my_group->AddBuffer(bc_info, &amp;out_buffer);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* out_buffer is now set to use the BBitmap's memory */</PRE>
+<P>
+This code takes advantage of the <B><TT>B_BITMAP_IS_AREA</TT></B> flag when creating the bitmap.  This forces the bitmap to be in a memory area of its very own, which you can then use when creating the BBuffer.
+<P>
+If you need to do real-time accesses to the <A HREF="Buffer.html#BBuffer">BBuffer</A>, you should lock it down.  In addition, if you use DMA, you'll need to specify for the buffer to be contiguous (you can do this using the <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> constructor, specifying the contiguous flag).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Before deleting any BBitmaps used in this way, be sure the buffer group has been deleted first and (if <B><TT><A HREF="BufferConsumer.html#SetOutputBuffersFor()">SetOutputBuffersFor()</A></TT></B> has been used) all buffers have been reclaimed.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BBufferGroup()"></A>BBufferGroup()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BBufferGroup(</TT></B></FONT>size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>numBuffers</I></FONT> = 3,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>placement</I></FONT> = <FONT  face=HELVETICA>B_ANY_ADDRESS</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>lock</I></FONT> = <FONT  face=HELVETICA>B_FULL_LOCK</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BBufferGroup(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BBufferGroup(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>numBuffers</I></FONT>, const buffer_id *<I><FONT  color=991122 face=HELVETICA>bufferList</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The first form of the constructor creates a BBufferGroup with some number of BBuffers already allocated by the group.  These buffers will all live within a single Kernel Kit area, allocated by the group.  The group tries to allocate an area with properties specified by the <I><FONT  color=991122 face=HELVETICA>placement</I></FONT> and <I><FONT  color=991122 face=HELVETICA>lock</I></FONT> arguments, large enough to hold <I><FONT  color=991122 face=HELVETICA>numBuffers</I></FONT> buffers of the specified <I><FONT  color=991122 face=HELVETICA>size</I></FONT> (there may be some padding added).
+<P>
+The second form of the constructor creates a BBufferGroup but doesn't create any buffers for it.  You should add BBuffers to the group before trying to use it.
+<P>
+The third form of the constructor creates a BBufferGroup that contains the specified list of buffers.  <I><FONT  color=991122 face=HELVETICA>bufferList</I></FONT> points to an array of buffer IDs for the buffers to be controlled by the group, and <I><FONT  color=991122 face=HELVETICA>numBuffers</I></FONT> is the number of buffers in the list.  This version of the constructor isn't one you'll use very often.
+<P>
+Before using any buffers from a new <A HREF="#BBufferGroup">BBufferGroup</A>, call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to determine if any errors occurred while creating the group.
+<P>
+<HR>
+<H3>
+<A NAME="~BBufferGroup"></A>~BBufferGroup
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BBufferGroup()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Releases all memory used by the <A HREF="#BBufferGroup">BBufferGroup</A>, including the BBuffers it controls.
+<P>
+Keep in mind that <B><TT><A HREF="#AddBuffer()">AddBuffer()</A></TT></B> clones the buffer area.  This destructor releases the clones, but it's your application's job to release the original area you added.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Your node needs to delete the buffer group corresponding to any connection that is disconnected or whenever the node is deleted.  Until your node does so, the other end of the connection will be blocked waiting for the buffer group to be deleted.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddBuffer()"></A>AddBuffer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddBuffer(</TT></B></FONT>const buffer_clone_info &amp;<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given the buffer_clone_info, this function clones the buffer and adds the clone to the BBufferGroup.  Normally you'll fill out the buffer_clone_info structure yourself.
+<P>
+Since the buffer is cloned, you'll need to delete the original memory area specified by the buffer_clone_info structure yourself when you're no longer using it; the BBufferGroup won't do it for you.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You shouldn't pass the result of a <B><TT><A HREF="Buffer.html#CloneInfo()">BBuffer::CloneInfo()</A></TT></B> call to this function, as doing so would create an "alias" buffer for the same memory area.  This is probably not the effect you want.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error adding the buffer to the group.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't clone the buffer into the BBufferGroup's address space.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="AddBuffersTo()"></A>AddBuffersTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddBuffersTo(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>needLock</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds the group's buffers to the specified <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, storing them in an array with the specified <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>needLock</I></FONT> is <B><TT>true</TT></B>, the BBufferGroup is locked before performing the operation, then unlocked when finished; otherwise, you guarantee that the buffers won't go anywhere during the <B><TT>AddBuffersTo()</TT></B> call.
+<P>
+The buffers are added by ID number, and are therefore in int32 format.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error adding the buffers to the message.
+<P>
+<UL>
+<LI>Errors from <B><TT><A HREF="../The%20Application%20Kit/Message.html#AddInt32()">AddInt32()</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="CountBuffers()"></A>CountBuffers()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>CountBuffers(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>outBufferCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns, in <I><FONT  color=991122 face=HELVETICA>outBufferCount</I></FONT>, the number of buffers in the group.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The number of buffers was returned successfully.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid outBufferCount pointer.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetBufferList()"></A>GetBufferList()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetBufferList(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>listCount</I></FONT>, <A HREF="Buffer.html#BBuffer">BBuffer</A> **<I><FONT  color=991122 face=HELVETICA>outBuffers</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a list of all the buffers in the group.  When calling <B><TT>GetBufferList()</TT></B>, pass in <I><FONT  color=991122 face=HELVETICA>outBuffers</I></FONT> a pointer to an array of <A HREF="Buffer.html#BBuffer">BBuffer</A> pointers that you want to be filled with pointers to the group's buffers, and specify the number of elements in the array in <I><FONT  color=991122 face=HELVETICA>listCount</I></FONT>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No errors.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>listCount</I></FONT> is less than 1, or <I><FONT  color=991122 face=HELVETICA>outBuffers</I></FONT> is <B><TT>NULL
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the error code resulting from the construction of the BBufferGroup.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The new group was created successfully.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Couldn't allocate the buffers for the group.
+<P>
+<LI>Area errors.  See 
+<P>
+<HR>
+<H1>
+<A NAME="Areas"></A>Areas
+</H1>
+<P>
+ in
+<P>
+<HR>
+<H1>
+<A NAME="The%20Kernel%20Kit"></A>The Kernel Kit
+</H1>
+<P>
+.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="ReclaimAllBuffers()"></A>ReclaimAllBuffers()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReclaimAllBuffers(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If you pass a buffer group to some other <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> but pass <B><TT>true</TT></B> for <I><FONT  color=991122 face=HELVETICA>willReclaim</I></FONT> in the <B><TT>BMediaRoster::SetOutputBuffers()</TT></B> call, you can later reclaim the buffers into the BBufferGroup by calling <B><TT>Reclaim()</TT></B>.
+<P>
+<B><TT>ReclaimAllBuffers()</TT></B> will return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> when all buffers are accounted for, or return an error if buffers can't be reclaimed.
+<P>
+If you have buffers that reference some object that might go away (such as a BBitmap), you should call <B><TT>ReclaimAllBuffers()</TT></B> on the group and delete the BBufferGroup before that object goes away.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Before reclaiming your buffers, be sure to call <B><TT>BMediaRoster::SetOutputBuffersFor(output, NULL)</TT></B> to let the Media Kit know your producer no longer has permission to use them.  If you forget this step, the producer will hang onto the buffers until it's deleted, and your <B><TT>ReclaimAllBuffers()</TT></B> call will hang, possibly forever.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  All buffers reclaimed successfully.
+<P>
+<UL>
+<LI><B><TT>B_MEDIA_CANNOT_RECLAIM_BUFFERS</TT></B>.  Some buffers couldn't be reclaimed.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="RequestBuffer()"></A>RequestBuffer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Buffer.html#BBuffer">BBuffer</A> *<B><TT><FONT  color=000022 size=+1>Request</TT></B></FONT><B><TT><FONT  color=000022 size=+1>Buffer(</TT></B></FONT>size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> = <FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RequestBuffer(</TT></B></FONT><A HREF="Buffer.html#BBuffer">BBuffer</A> *<I><FONT  color=991122 face=HELVETICA>outBuffer</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> = <FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to a <A HREF="Buffer.html#BBuffer">BBuffer</A> of at least the specified <I><FONT  color=991122 face=HELVETICA>size</I></FONT> that your <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> subclass can put data into, then pass on to a <B><TT><A HREF="misc_api.html#media_destination">media_destination</A></TT></B>.  If there isn't a suitable buffer available, the call will block until either a buffer becomes available (in which case the buffer is returned) or the specified <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> is reached.
+<P>
+If you pass a <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> value that's less than zero, <B><TT><A HREF="#RequestBuffer()">RequestBuffer()</A></TT></B> will return <B><TT>NULL</TT></B> immediately if there's no buffer available, otherwise it will return a pointer to a buffer you can use.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In BeOS Release 4.5, the <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> is ignored (unless you specify a negative value); <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B> is always used, regardless of the value you specify.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>RequestBuffer()</TT></B> doesn't use the buffer flags; instead, you can look at the buffers within a BBufferGroup to find a specific buffer to request yourself, based on the value returned by <B><TT><A HREF="Buffer.html#Flags()">BBuffer::Flags()</A></TT></B> or <B><TT>BBuffer::Size()</TT></B>, for example.  Use the second form of <B><TT><A HREF="#RequestBuffer()">RequestBuffer()</A></TT></B> to obtain a specific buffer.
+<P>
+The first version of <B><TT>RequestBuffer()</TT></B> returns <B><TT>NULL</TT></B> if no buffer can be obtained, and sets errno to the appropriate error code.  The second version returns an appropriate error code.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Don't call <B><TT>RequestBuffer()</TT></B> while an outstanding <B><TT><A HREF="#ReclaimAllBuffers()">ReclaimAllBuffers()</A></TT></B> request is pending.  To make sure that doesn't happen, a buffer producer should be designed to not know about the old group anymore once <B><TT>SetBufferGroup()</TT></B> is called to change its buffer group.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No errors.
+<P>
+<UL>
+<LI><B><TT>B_MEDIA_BUFFERS_NOT_RECLAIMED</TT></B>.  Buffers are in the process of being reclaimed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  A miscellaneous error occurred.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="RequestError()"></A>RequestError()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RequestError</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the last <B><TT><A HREF="#RequestBuffer()">RequestBuffer()</A></TT></B> error.  This is useful if <B><TT><A HREF="#RequestBuffer()">RequestBuffer()</A></TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="WaitForBuffers()"></A>WaitForBuffers()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>WaitForBuffers</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Waits until the currently pending buffer reclamation is finished, then returns.  If there isn't a buffer reclamation in progress, returns immediately.
+<P>
+<b>RETURN CODES</b>
+<P>
+B_OK.  No error.
+<P>
+<UL>
+<LI>Semaphore errors.  Unable to acquire the semaphore used to detect that buffer reclamation is done.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

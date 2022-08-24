@@ -1,0 +1,112 @@
+<HTML><HEAD><TITLE>Screen Saver: An Example Screen Saver</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Screen Saver Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Screen%20Saver%20Master%20Index.html"><FONT face=HELVETICA>Screen Saver Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="An%20Example%20Screen%20Saver"></A>An Example Screen Saver
+</H1>
+<P>
+Here&gt;s sample code that implements a screen saver that blanks the screen.  This is pretty boring, so you&gt;ll probably want to change the <B><TT><A HREF="ScreenSaverClass.html#Draw()">Draw()</A></TT></B> function to do something cute.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Minimal screen saver example. */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;#include &lt;add-ons/screen_saver/ScreenSaver.h>
+&nbsp;&nbsp;&nbsp;#include &lt;interface/StringView.h>
+&nbsp;&nbsp;&nbsp;#include &lt;BeBuild.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;extern "C" {
+&nbsp;&nbsp;&nbsp;_EXPORT
+&nbsp;&nbsp;&nbsp;BScreenSaver *instantiate_screen_saver( BMessage *msg, image_id id );
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;class MinimalSaver : public BScreenSaver
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;    MinimalSaver( BMessage *archive, image_id image );
+&nbsp;&nbsp;&nbsp;    virtual ~MinimalSaver( void );
+&nbsp;&nbsp;&nbsp;    
+&nbsp;&nbsp;&nbsp;    virtual void StartConfig( BView *view );
+&nbsp;&nbsp;&nbsp;    virtual status_t StartSaver( BView *view, bool preview );
+&nbsp;&nbsp;&nbsp;    virtual void Draw( BView *view, int32 frame );
+&nbsp;&nbsp;&nbsp;};
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;BScreenSaver *instantiate_screen_saver( BMessage *msg, image_id id )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    return new MinimalSaver( msg, id );
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;MinimalSaver::MinimalSaver( BMessage *archive, image_id image )
+&nbsp;&nbsp;&nbsp;    : BScreenSaver( archive, image )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    /* Nothing else to do here... */
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;MinimalSaver::~MinimalSaver( void )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    /* Nothing else to do here... */
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;void MinimalSaver::StartConfig( BView *view )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    view->AddChild( new BStringView( BRect( 10, 10, 200, 35 ),
+&nbsp;&nbsp;&nbsp;                                     B_EMPTY_STRING, 
+&nbsp;&nbsp;&nbsp;                                     "Minimal Saver" ) );
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;status_t MinimalSaver::StartSaver( BView *view, bool preview )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    /* We&gt;re so minimal, we don&gt;t have a preview. */
+&nbsp;&nbsp;&nbsp;    if( preview ) return B_ERROR;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    return B_OK;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;void MinimalSaver::Draw( BView *view, int32 frame )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if( frame == 0 ) {
+&nbsp;&nbsp;&nbsp;        /* Fill the screen with black on the first frame: */
+&nbsp;&nbsp;&nbsp;        view->SetLowColor( 0, 0, 0 );
+&nbsp;&nbsp;&nbsp;        view->FillRect( view->Bounds(), B_SOLID_LOW );
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Screen Saver Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Screen%20Saver%20Master%20Index.html"><FONT face=HELVETICA>Screen Saver Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

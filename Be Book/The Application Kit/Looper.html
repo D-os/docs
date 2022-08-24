@@ -1,0 +1,1030 @@
+<HTML><HEAD><TITLE>The Application Kit: BLooper</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BLooper"></A>BLooper
+</H1>
+<P>
+Derived from:  public <A HREF="Handler.html#BHandler">BHandler</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Looper.h">be/app/Looper.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Looper.summary.html"><i>Summary</i></A></H6>
+<P>
+A BLooper object creates a "message loop" that receives messages that are sent or posted to the BLooper.  The message loop runs in a separate thread that's spawned (and told to run) when the BLooper receives a <B><TT><A HREF="#Run()">Run()</A></TT></B> call.  If you're creating your own <A HREF="#BLooper">BLooper</A>, you can invoke <B><TT><A HREF="#Run()">Run()</A></TT></B> from within the constructor.
+<P>
+You tell the loop to stop by sending the BLooper a <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> message, which invokes the object's <B><TT><A HREF="#Quit()">Quit()</A></TT></B> function.  You can also call <B><TT><A HREF="#Quit()">Quit()</A></TT></B> directly, but you have to Lock() the object first (BLooper locking is explained later).  <B><TT><A HREF="#Quit()">Quit()</A></TT></B> deletes the BLooper for you.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <A HREF="Application.html#BApplication">BApplication</A> class, the most important BLooper subclass, bends the above description in a couple of ways:
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<UL>
+<LI>A <A HREF="Application.html#BApplication">BApplication</A> takes over the main thread, it doesn't spawn a new one.
+<P>
+<LI>You <I>do</I> have to <B><TT>delete</TT></B> <B><TT><A HREF="Application.html#be_app">be_app</A></TT></B>; you can't just<B><TT> <A HREF="#Quit()">Quit()</A></TT></B> it. 
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Messages%20and%20Handlers"></A>Messages and Handlers
+</H3>
+<P>
+You can deliver messages to a BLooper's thread by...
+<P>
+<UL>
+<LI>Posting them directly by calling BLooper's <B><TT><A HREF="#PostMessage()">PostMessage()</A></TT></B> function.
+<P>
+<LI>Sending them through BMessenger's <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> or BMessage's <B><TT><A HREF="Message.html#SendReply()">SendReply()</A></TT></B> function.
+<P>
+</UL>
+<P>
+As messages arrive, they're added to the BLooper's <A HREF="MessageQueue.html#BMessageQueue">BMessageQueue</A> object.  The BLooper takes messages from the queue in the order that they arrived, and calls <B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B> for each one.  <B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B> locks the BLooper and then hands the message to a <A HREF="Handler.html#BHandler">BHandler</A> object by invoking the handler's <B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B> function. But which <A HREF="Handler.html#BHandler">BHandler</A> does the BLooper hand the message to?  Here's the path:
+<P>
+<UL>
+<LI>If an incoming message targets a specific <A HREF="Handler.html#BHandler">BHandler</A>, and if that <A HREF="Handler.html#BHandler">BHandler</A> is one of the BLooper's <I>eligible handlers</I> (as set through the <B><TT><A HREF="#AddHandler()">AddHandler()</A></TT></B> function), the BLooper uses that BHandler.  (See the <A HREF="Message.html#BMessage">BMessage</A> and <A HREF="Messenger.html#BMessenger">BMessenger</A> classes for instructions on how to target a BHandler.)
+<P>
+<LI>Otherwise it hands the message to its <I>preferred handler</I>, as set through <B><TT><A HREF="#SetPreferredHandler()">SetPreferredHandler()</A></TT></B>.  
+<P>
+<LI>If no preferred handler is set, the BLooper itself handles the message (its own implementation of <B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B> is invoked).
+<P>
+</UL>
+<P>
+After the handler is finished (when its MessageReceived() returns), the <A HREF="Message.html#BMessage">BMessage</A> is automatically deleted and the BLooper is unlocked.
+<P>
+<HR>
+<H3>
+<A NAME="Locking"></A>Locking
+</H3>
+<P>
+Access to many BLooper functions (and some <A HREF="Handler.html#BHandler">BHandler</A> functions) is proteced by a lock.  To invoke a lock-protected functions (or groups of functions), you must first call <B><TT><A HREF="#Lock()">Lock()</A></TT></B>, and then call <B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> when you're done.  The lock is scoped to the calling thread:  <B><TT><A HREF="#Lock()">Lock()</A></TT></B>/<B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> calls can be nested within the thread.  Keep in mind that each <B><TT><A HREF="#Lock()">Lock()</A></TT></B> <I>must</I> balanced by an <B><TT><A HREF="#Unlock()">Unlock()</A></TT></B>.
+<P>
+The BLooper constructor automatically locks the object.  It's unlocked when <B><TT><A HREF="#Run()">Run()</A></TT></B> is invoked.  This means that the <B><TT><A HREF="#Run()">Run()</A></TT></B> function&mdash;and any other lock-protected functions that you call before you call <B><TT><A HREF="#Run()">Run()</A></TT></B>&mdash;must be called from the thread that constructed the BLooper.
+<P>
+<HR>
+<H3>
+<A NAME="Allocation"></A>Allocation
+</H3>
+<P>
+Because they <B><TT>delete</TT></B> themselves when told to quit, BLoopers can't be allocated on the stack; you have to construct them with <B><TT>new</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<UL>
+<LI><B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#QuitRequested()">QuitRequested()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BLooper()"></A>BLooper()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BLooper(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>priority</I></FONT> = <FONT  face=HELVETICA>B_NORMAL_PRIORITY</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>portCapacity</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_LOOPER_PORT_DEFAULT_CAPACITY</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BLooper(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Assigns the BLooper object a <I><FONT  color=991122 face=HELVETICA>name</I></FONT> and then locks it (by calling <B><TT><A HREF="#Lock()">Lock()</A></TT></B>).  <I><FONT  color=991122 face=HELVETICA>priority</I></FONT> is a value that describes the amount of CPU attention the message loop will receive once it starts running, and <I><FONT  color=991122 face=HELVETICA>portCapacity</I></FONT> is the number of messages the BLooper can hold in its "message port" (this is <I>not</I> the message queue, as explained below).
+<P>
+After you construct the <A HREF="#BLooper">BLooper</A>, you have to tell it to <B><TT><A HREF="#Run()">Run()</A></TT></B>.  Because the object is locked, <B><TT><A HREF="#Run()">Run()</A></TT></B> can only be called from the thread that constructed the object. It's legal to invoke <B><TT><A HREF="#Run()">Run()</A></TT></B> from within a subclass implementation of the constructor.
+<P>
+<H4>
+<A NAME="Priority"></A>Priority
+</H4>
+<P>
+A set of priority values are defined in <B>kernel/OS.h</B>; from lowest to highest, they are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_LOW_PRIORITY</TT></B></TD>
+<TD>For threads running in the background that shouldn't interrupt other threads.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#B_NORMAL_PRIORITY">B_NORMAL_PRIORITY</A></TT></B></TD>
+<TD>For all ordinary threads, including the main thread.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#B_DISPLAY_PRIORITY">B_DISPLAY_PRIORITY</A></TT></B></TD>
+<TD>For threads associated with objects in the user interface, including window threads.</TD>
+<TR>
+<TD><B><TT>B_URGENT_DISPLAY_PRIORITY</TT></B></TD>
+<TD>For interface threads that deserve more attention than ordinary windows. </TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#B_REAL_TIME_DISPLAY_PRIORITY">B_REAL_TIME_DISPLAY_PRIORITY</A></TT></B></TD>
+<TD>For threads that animate the on-screen display.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#B_URGENT_PRIORITY">B_URGENT_PRIORITY</A></TT></B></TD>
+<TD>For threads performing time-critical computations.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#B_REAL_TIME_PRIORITY">B_REAL_TIME_PRIORITY</A></TT></B></TD>
+<TD>For threads controlling real-time processes that need unfettered access to the CPUs.</TD>
+</TABLE>
+<P>
+<H4>
+<A NAME="Port%20Capacity"></A>Port Capacity
+</H4>
+<P>
+Messages that are sent to a BLooper first show up in a port (as the term is defined by the Kernel Kit), and then are moved to the BMessageQueue.  The capacity of the <A HREF="MessageQueue.html#BMessageQueue">BMessageQueue</A> is virtually unlimited; the capacity of the port is not.  Although messages are moved from the port to the queue as quickly as possible, the port can fill up.  A full port will block subsequent message senders.
+<P>
+The default port capacity (100), should be sufficient for most apps, but you can fiddle with it through the <I><FONT  color=991122 face=HELVETICA>portCapacity</I></FONT> argument.
+<P>
+<HR>
+<H3>
+<A NAME="~BLooper()"></A>~BLooper()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BLooper()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the message queue and all pending messages and deletes the message loop.  BHandlers that have been added to the BLooper are not deleted, but <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> objects added as common filters are
+<P>
+In general, you should never <B><TT>delete</TT></B> your BLooper objects:  With the exception of the <A HREF="Application.html#BApplication">BApplication</A> object, BLoopers are destroyed by the <B><TT><A HREF="#Quit()">Quit()</A></TT></B> function.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you create a BLooper-derived class that uses multiple inheritance, make sure the first class your mixin class inherits from is BLooper; otherwise, you'll crash when you try to close the window.  This happens because of an interaction between the window thread how C++ deletes objects of a multiply-inherited class.  In other words:
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class myClass : public BLooper, public OtherClass {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+is safe, while
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class myClass : public OtherClass, public BLooper {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+is not.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="LooperForThread()"></A>LooperForThread()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static BLooper *<B><TT><FONT  color=000022 size=+1>LooperForThread(</TT></B></FONT>thread_id&nbsp;<I><FONT  color=991122 face=HELVETICA>thread</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the BLooper object that spawned the specified <I><FONT  color=991122 face=HELVETICA>thread</I></FONT>, or <B><TT>NULL</TT></B> if the thread doesn't belong to a BLooper. 
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddCommonFilterList()"></A>AddCommonFilterList()
+, 
+<A NAME="RemoveCommonFilterList()"></A>RemoveCommonFilterList()
+, 
+<A NAME="SetCommonFilterList()"></A>SetCommonFilterList()
+, 
+<A NAME="CommonFilterList()"></A>CommonFilterList()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>AddCommonFilter(<A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>filter</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <B><TT><FONT  color=000022 size=+1>RemoveCommonFilter(<A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>filter</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SetCommonFilterList(<A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>filters</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *</TT></B><B><TT><FONT  color=000022 size=+1>CommonFilterList(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+For all but <B><TT><A HREF="#CommonFilterList()">CommonFilterList()</A></TT></B>, the BLooper must be locked.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+These functions manage the BLooper's list of BMessageFilters.  Message filters are objects that screen in-coming messages.  In the case of <A HREF="#BLooper">BLooper</A>, each message is passed through all filters in the list before it's passed on to <B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B>.  The order of the filters in the list is determinate.  See the <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> class for details on how message filters work.
+<P>
+<B><TT>AddCommonFilter()</TT></B> adds <I><FONT  color=991122 face=HELVETICA>filter</I></FONT> to the end of the filter list (creating a <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> container if necessary).  
+<P>
+<B><TT>RemoveCommonFilter()</TT></B> removes <I><FONT  color=991122 face=HELVETICA>filter</I></FONT> from the list, but doesn't free the filter.  It returns <B><TT>true</TT></B> if successful, and <B><TT>false</TT></B> if it can't find the specified filter.
+<P>
+<B><TT><A HREF="#SetCommonFilterList()">SetCommonFilterList()</A></TT></B> deletes the current filter list and its contents, and replaces it with <I><FONT  color=991122 face=HELVETICA>filters</I></FONT>.  All elements in <I><FONT  color=991122 face=HELVETICA>filters</I></FONT> must be <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> pointers.  The BLooper takes ownership of all objects in <I><FONT  color=991122 face=HELVETICA>filters</I></FONT>, as well as <I><FONT  color=991122 face=HELVETICA>filters</I></FONT> itself.  If <I><FONT  color=991122 face=HELVETICA>filters</I></FONT> is <B><TT>NULL</TT></B>, the current list is deleted without a replacement.  
+<P>
+<B><TT><A HREF="#CommonFilterList()">CommonFilterList()</A></TT></B> returns a pointer to the current list.  You can examine the list but you shouldn't modify or delete it.
+<P>
+<HR>
+<H3>
+<A NAME="AddHandler()"></A>AddHandler()
+, 
+<A NAME="RemoveHandler()"></A>RemoveHandler()
+, 
+<A NAME="HandlerAt()"></A>HandlerAt()
+, 
+<A NAME="CountHandlers()"></A>CountHandlers()
+, 
+<A NAME="IndexOf()"></A>IndexOf()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>AddHandler(</TT></B></FONT><A HREF="Handler.html#BHandler">BHandler</A> *<I><FONT  color=991122 face=HELVETICA>handler</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>RemoveHandler(</TT></B></FONT><A HREF="Handler.html#BHandler">BHandler</A> *<I><FONT  color=991122 face=HELVETICA>handler</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>HandlerAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountHandlers(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IndexOf(</TT></B></FONT><A HREF="Handler.html#BHandler">BHandler</A> *<I><FONT  color=991122 face=HELVETICA>handler</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#AddHandler()">AddHandler()</A></TT></B> adds <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> to the BLooper's list of <A HREF="Handler.html#BHandler">BHandler</A> objects, and <B><TT><A HREF="#RemoveHandler()">RemoveHandler()</A></TT></B> removes it.  Only BHandlers that have been added to the list are eligible to respond to the messages the BLooper dispatches.
+<P>
+<B><TT><A HREF="#AddHandler()">AddHandler()</A></TT></B> fails if the <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> already belongs to a BLooper; a <A HREF="Handler.html#BHandler">BHandler</A> can belong to no more than one BLooper at a time.  It can change its affiliation from time to time, but must be removed from one BLooper before it can be added to another.  <B><TT><A HREF="#RemoveHandler()">RemoveHandler()</A></TT></B> returns <B><TT>true</TT></B> if it succeeds in removing the <A HREF="Handler.html#BHandler">BHandler</A> from the <A HREF="#BLooper">BLooper</A>, and <B><TT>false</TT></B> if not or if the <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> doesn't belong to the BLooper in the first place.
+<P>
+<B><TT><A HREF="#AddHandler()">AddHandler()</A></TT></B> also calls the <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>'s <B><TT><A HREF="Handler.html#SetNextHandler()">SetNextHandler()</A></TT></B> function to assign it the BLooper as its default next handler.  <B><TT><A HREF="#RemoveHandler()">RemoveHandler()</A></TT></B> calls the same function to set the <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>'s next handler to <B><TT>NULL</TT></B>.
+<P>
+<B><TT><A HREF="#HandlerAt()">HandlerAt()</A></TT></B> returns the <A HREF="Handler.html#BHandler">BHandler</A> object currently located at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> in the BLooper's list of eligible handlers, or <B><TT>NULL</TT></B> if the index is out of range.  Indices begin at 0 and there are no gaps in the list.  <B><TT><A HREF="#CountHandlers()">CountHandlers()</A></TT></B> returns the number of objects currently in the list; the count should always be at least 1, since the list automatically includes the BLooper itself.  <B><TT><A HREF="#IndexOf()">IndexOf()</A></TT></B> returns the index of the specified <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>, or <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if that object isn't in the list.
+<P>
+For any of these functions to work, the BLooper must be locked.
+<P>
+<B>See also:  <TT><A HREF="Handler.html#Looper()">BHandler::Looper()</A></TT></B>, <B><TT><A HREF="Handler.html#SetNextHandler()">BHandler::SetNextHandler()</A></TT></B>, <B><TT><A HREF="#PostMessage()">PostMessage()</A></TT></B>, the <A HREF="Messenger.html#BMessenger">BMessenger</A> class
+<P>
+<HR>
+<H3>Archive()  see <A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></H3>
+<P>
+<HR>
+<H3>CommonFilterList()   see <A HREF="#AddCommonFilterList()">AddCommonFilterList()</A></H3>
+<P>
+<HR>
+<H3>CountHandlers()   see <A HREF="#AddHandler()">AddHandler()</A></H3>
+<P>
+<HR>
+<H3>CountLockRequests()   see <A HREF="#LockingThread()">LockingThread()</A></H3>
+<P>
+<HR>
+<H3>CountLocks()   see <A HREF="#LockingThread()">LockingThread()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="CurrentMessage()"></A>CurrentMessage()
+, 
+<A NAME="DetachCurrentMessage()"></A>DetachCurrentMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Message.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>CurrentMessage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Message.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>DetachCurrentMessage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The message that a BLooper passes to its handler(s) is called the "current message."  These functions access the current message; they're meaningless (they return <B><TT>NULL</TT></B>) when called from outside the message processing loop. 
+<P>
+<B><TT>CurrentMessage()</TT></B> simply returns a pointer to the current message without affecting the <A HREF="Message.html#BMessage">BMessage</A> object itself.  This is particularly useful to functions that respond to system messages (such as <B><TT><A HREF="../The%20Interface%20Kit/MenuField.html#MouseDown()">MouseDown()</A></TT></B> and <B><TT><A HREF="../The%20Game%20Kit/WindowScreen.html#ScreenChanged()">ScreenChanged()</A></TT></B>), but that aren't sent the full <A HREF="Message.html#BMessage">BMessage</A> object that initiated the response.
+<P>
+<B><TT>DetachCurrentMessage()</TT></B> removes the current message from the message queue and passes ownership of it to the caller; deleting the message is the caller's responsibility.  This is useful if you want to delay the response to the message without tying up the BLooper.  But be careful&mdash;if the message sender is waiting for a synchronous reply, detaching the message and holding on to it will block the sender.
+<P>
+<HR>
+<H3>DetachCurrentMessage()  see <A HREF="#CurrentMessage()">CurrentMessage()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="DispatchMessage()"></A>DispatchMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>DispatchMessage(<A HREF="Message.html#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>message</I></FONT>, <B><TT><A HREF="Handler.html#BHandler">BHandler</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>target</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B> is the BLooper's central message-processing function.  It's called automatically as messages arrive in the looper's queue, one invocation per message.  You never invoke <B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B> yourself.
+<P>
+The default implementation passes <I><FONT  color=991122 face=HELVETICA>message</I></FONT> to <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> by invoking the latter's <B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;target->MessageReceived(message);</PRE>
+<P>
+The only exception is where <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.<B><TT>what</TT></B> is <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> and <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> is the looper itself; in this case, the object invokes its own <B><TT><A HREF="#QuitRequested()">QuitRequested()</A></TT></B> function.  
+<P>
+You can override this function to dispatch the messages that your own application defines or recognizes.  All unhandled messages should be passed to the base class version, as demonstrated below:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyLooper::DispatchMessage(BMessage *msg, BHandler *target)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch ( msg->what ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case MY_MESSAGE1:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break; 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case MY_MESSAGE2:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break; 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>baseClass</I>::DispatchMessage(msg, target);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Also, note that you mustn't delete <I><FONT  color=991122 face=HELVETICA>message</I></FONT>; it's deleted for you..
+<P>
+The system locks the BLooper before calling <B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B> and keeps it locked for the duration of the function.
+<P>
+<HR>
+<H3>HandlerAt()   see <A HREF="#AddHandler()">AddHandler()</A></H3>
+<P>
+<HR>
+<H3>IndexOf()   see <A HREF="#AddHandler()">AddHandler()</A></H3>
+<P>
+<HR>
+<H3>IsLocked()   see <A HREF="#LockingThread()">LockingThread()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Lock()"></A>Lock()
+, 
+<A NAME="LockWithTimeout()"></A>LockWithTimeout()
+, 
+<A NAME="Unlock()"></A>Unlock()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <B><TT><FONT  color=000022 size=+1>Lock(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>LockWithTimeout(<A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>Unlock(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Lock()">Lock()</A></TT></B> locks the BLooper.  Locks are held within the context of a thread; while a BLooper is locked, no other thread can invoke its most important functions (<B><TT><A HREF="#AddHandler()">AddHandler()</A></TT></B>, <B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B>, etc.)   
+<P>
+If the looper is already locked (by some other thread), <B><TT><A HREF="#Lock()">Lock()</A></TT></B> blocks until the looper is unlocked.  To set a timeout for the block, use <B><TT><A HREF="#LockWithTimeout()">LockWithTimeout()</A></TT></B> instead.  <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> is measured in microseconds; if it's 0, the function returns immediately (with or without the lock); if it's <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B>, it blocks without limit.
+<P>
+<B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> unlocks a locked looper.  It can only be called by the thread that currently holds the lock.
+<P>
+Calls to <B><TT><A HREF="#Lock()">Lock()</A></TT></B>/<B><TT><A HREF="#LockWithTimeout()">LockWithTimeout()</A></TT></B> and <B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> can be nested, but locking and unlocking must always be balanced.  A single <B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> will <I>not</I> undo a series of <B><TT><A HREF="#Lock()">Lock()</A></TT></B>'s.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#Lock()">Lock()</A></TT></B> returns <B><TT>true</TT></B> if it was able to lock the looper, or if it's already locked by the calling thread, and <B><TT>false</TT></B> otherwise.
+<P>
+<B><TT><A HREF="#LockWithTimeout()">LockWithTimeout()</A></TT></B> returns:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The looper was successfully locked.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.  The call timed out without locking the looper.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  This looper was deleted while the function was blocked.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="LockingThread()"></A>LockingThread()
+, 
+<A NAME="IsLocked()"></A>IsLocked()
+, 
+<A NAME="CountLocks()"></A>CountLocks()
+, 
+<A NAME="CountLockRequests()"></A>CountLockRequests()
+, 
+<A NAME="Sem()"></A>Sem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+thread_id <B><TT><FONT  color=000022 size=+1>LockingThread(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsLocked(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountLocks(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountLockRequests(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+sem_id <B><TT><FONT  color=000022 size=+1>Sem(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions may be useful while debugging a BLooper.
+<P>
+<B><TT><A HREF="#LockingThread()">LockingThread()</A></TT></B> returns the thread that currently has the BLooper locked, or &ndash;1 if the BLooper isn't locked.
+<P>
+<B><TT><A HREF="#IsLocked()">IsLocked()</A></TT></B> returns <B><TT>true</TT></B> if the calling thread currently has the BLooper locked (if it's the locking thread) and <B><TT>false</TT></B> if not (if some other thread is the locking thread or the BLooper isn't locked).
+<P>
+<B><TT><A HREF="#CountLocks()">CountLocks()</A></TT></B> returns the number of times the locking thread has locked the BLooper&mdash;the number of <B><TT><A HREF="#Lock()">Lock()</A></TT></B> (or <B><TT><A HREF="#LockWithTimeout()">LockWithTimeout()</A></TT></B>) calls that have not yet been balanced by matching <B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> calls.
+<P>
+<B><TT><A HREF="#CountLockRequests()">CountLockRequests()</A></TT></B> returns the number of threads currently trying to lock the BLooper.  The count includes the thread that currently has the lock plus all threads currently waiting to acquire it.
+<P>
+<B><TT><A HREF="#Sem()">Sem()</A></TT></B> returns the <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#sem_id">sem_id</A></TT></B> for the semaphore that the BLooper uses to implement the locking mechanism.
+<P>
+<B>See also:  <TT><A HREF="#Lock()">Lock()</A></TT></B> 
+<P>
+<HR>
+<H3>LockWithTimeout()   see <A HREF="#Lock()">Lock()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MessageReceived()"></A>MessageReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MessageReceived(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Simply calls the inherited function.  For the current release, the BLooper implementation of this function does nothing of importance.
+<P>
+<B>See also:  <TT><A HREF="Handler.html#MessageReceived()">BHandler::MessageReceived()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MessageQueue()"></A>MessageQueue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="MessageQueue.html#BMessageQueue">BMessageQueue</A> *<B><TT><FONT  color=000022 size=+1>MessageQueue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the queue that holds messages delivered to the BLooper's thread.  You rarely need to examine the message queue directly; it's made available so you can cheat fate by looking ahead.
+<P>
+<B>See also:  </B>the <A HREF="MessageQueue.html#BMessageQueue">BMessageQueue</A> class
+<P>
+<HR>
+<H3>
+<A NAME="PostMessage()"></A>PostMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>PostMessage(<A HREF="Message.html#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>PostMessage(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>command</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>PostMessage(<A HREF="Message.html#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>message</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Handler.html#BHandler">BHandler</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>handler</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Handler.html#BHandler">BHandler</A>&nbsp;*</TT></B><I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT>&nbsp;=&nbsp;<B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>PostMessage(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>command</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Handler.html#BHandler">BHandler</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>handler</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Handler.html#BHandler">BHandler</A>&nbsp;*</TT></B><I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT>&nbsp;=&nbsp;<B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#PostMessage()">PostMessage()</A></TT></B> is similar to <B><TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B>.  The <A HREF="Messenger.html#BMessenger">BMessenger</A> version is preferred (it's a bit safer than <B><TT><A HREF="#PostMessage()">PostMessage()</A></TT></B>).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Places a message at the far end of the BLooper's message queue.  The message will be processed by <B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B> when it comes to the head of the queue.  
+<P>
+The message can be a full <A HREF="Message.html#BMessage">BMessage</A> object (<I><FONT  color=991122 face=HELVETICA>message</I></FONT>), or just a command constant (<I><FONT  color=991122 face=HELVETICA>command</I></FONT>).  In the former case, the message is copied and the caller retains ownership of the argument, which can be deleted as soon as <B><TT><A HREF="#PostMessage()">PostMessage()</A></TT></B> returns.  In the latter case, a <A HREF="Message.html#BMessage">BMessage</A> is created (and deleted) for you.
+<P>
+<I><FONT  color=991122 face=HELVETICA>handler</I></FONT> is the designated handler for the message, and must be part of this BLooper's handler chain.  If <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> is (literally) <B><TT>NULL</TT></B>, the designated handler is the BLooper's preferred handler at the time <B><TT><A HREF="#DispatchMessage()">DispatchMessage()</A></TT></B> is called.  In the versions of <B><TT><A HREF="#PostMessage()">PostMessage()</A></TT></B> that don't have a <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> argument, the designated handler is the BLooper object itself.
+<P>
+Replies to the message are delivered to <I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT>.  If a <I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT> isn't specified, replies are sent to <B><TT><A HREF="Application.html#be_app_messenger">be_app_messenger</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+A BLooper should never post a message to itself from within its own message loop thread.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><UL>
+<LI><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The message was successfully posted.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MISMATCHED_VALUES">B_MISMATCHED_VALUES</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> doesn't belong to this BLooper.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>Other errors</I></FONT>.  See the return values for <B><TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>PreferredHandler()   see <A HREF="#SetPreferredHandler()">SetPreferredHandler()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Quit()"></A>Quit()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>Quit(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Shuts down the message loop (if it's running), and deletes the BLooper.  The object must be locked.
+<P>
+When <B><TT><A HREF="#Quit()">Quit()</A></TT></B> is called from the BLooper's thread, the message loop is immediately stopped and any messages in the message queue are deleted (without being processed).  Note that, in this case, <B><TT><A HREF="#Quit()">Quit()</A></TT></B> doesn't return since the calling thread is dead.
+<P>
+When called from another thread, <B><TT><A HREF="#Quit()">Quit()</A></TT></B> waits until all messages currently in the queue have been handled before it kills the message loop.  It returns after the BLooper has been deleted. 
+<P>
+<HR>
+<H3>
+<A NAME="QuitRequested()"></A>QuitRequested()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <B><TT><FONT  color=000022 size=+1>QuitRequested(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's invoked when the BLooper receives a <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> message.  You never invoke this function directly.  Derived classes implement this function to return <B><TT>true</TT></B> if it's okay to quit this <A HREF="#BLooper">BLooper</A>, and <B><TT>false</TT></B> if not.  Note that this function does <I>not</I> actually quit the object&mdash;the code that handles the <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> message does that.
+<P>
+BLooper's default implementation of <B><TT><A HREF="#QuitRequested()">QuitRequested()</A></TT></B> always returns <B><TT>true</TT></B>.
+<P>
+<HR>
+<H3>RemoveCommonFilter()   see <A HREF="#AddCommonFilterList()">AddCommonFilterList()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Run()"></A>Run()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#thread_id">thread_id</A></TT></B> <B><TT><FONT  color=000022 size=+1>Run(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Spawns the message loop thread and starts it running.  <B><TT><A HREF="#Run()">Run()</A></TT></B> expects the BLooper to be locked (once only!) when it's called; it unlocks the object before it returns.  Keep in mind that a BLooper is locked when it's constructed.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Calling <B><TT><A HREF="#Run()">Run()</A></TT></B> on a BLooper that's already running will dump you into the debugger.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><UL>
+<LI></B><I>Positive values</I>.  The thread was successfully spawned and started; this is the thread_id for the thread.
+<P>
+<LI><I>Thread errors</I>.  See <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#spawn_thread()">spawn_thread()</A></TT></B> and <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#resume_thread()">resume_thread()</A></TT></B>.
+<P>
+<LI><I>Port errors</I>.  See <B><TT><A HREF="../The%20Kernel%20Kit/Ports.html#create_port()">create_port()</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>AddCommonFilter()</H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetPreferredHandler()"></A>SetPreferredHandler()
+, 
+<A NAME="PreferredHandler()"></A>PreferredHandler()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetPreferredHandler(</TT></B></FONT>BHandler<A HREF="Handler.html#BHandler">AddCommonFilter()</A> *<I><FONT  color=991122 face=HELVETICA>handler</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>PreferredHandler(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the BLooper's preferred handler&mdash;the <A HREF="Handler.html#BHandler">BHandler</A> object that should handle messages not specifically targetted to another BHandler.
+<P>
+To designate the current preferred handler&mdash;whatever object that may be&mdash;as the target of a message, pass <B><TT>NULL</TT></B> for the target handler to <B><TT><A HREF="#PostMessage()">PostMessage()</A></TT></B> or to the <A HREF="Messenger.html#BMessenger">BMessenger</A> constructor.
+<P>
+Posting or sending messages to the preferred handler can be useful.  For example, in the Interface Kit, <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> objects name the current focus view as the preferred handler.  This makes it possible for other objects&mdash;such as BMenuItems and BButtons&mdash;to target messages to the <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> that's currently in focus, without knowing what view that might be.  For example, by posting its messages to the window's preferred handler, a Cut menu item can make sure that it always acts on whatever view contains the current selection.  See the chapter on the Interface Kit for information on windows, views, and the role of the focus view. 
+<P>
+By default, BLoopers don't have a preferred handler; until one is set, <B><TT><A HREF="#PreferredHandler()">PreferredHandler()</A></TT></B> returns <B><TT>NULL</TT></B>.  Note however, that messages targeted to the preferred handler are dispatched to the BLooper whenever the preferred handler is <B><TT>NULL</TT></B>.  In other words, the BLooper acts as default preferred handler, even though the default is formally <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT>BControl::SetTarget()</TT></B> and <B><TT>BMenuItem::SetTarget()</TT></B> in the Interface Kit, <B><TT><A HREF="#PostMessage()">PostMessage()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Thread()"></A>Thread()
+, 
+<A NAME="Team()"></A>Team()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+thread_id <B><TT><FONT  color=000022 size=+1>Thread(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+team_id <B><TT><FONT  color=000022 size=+1>Team(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions identify the thread that runs the message loop and the team to which it belongs.  <B><TT><A HREF="#Thread()">Thread()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if <B><TT><A HREF="#Run()">Run()</A></TT></B> hasn't yet been called to spawn the thread and begin the loop.  <B><TT><A HREF="#Team()">Team()</A></TT></B> always returns the application's <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#team_id">team_id</A></TT></B>.
+<P>
+<HR>
+<H3>Unlock()   see <A HREF="#Lock()">Lock()</A></H3>
+<P>
+<B><HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+</B><HR>
+<H3>
+<A NAME="B_LOOPER_PORT_DEFAULT_CAPACITY"></A>B_LOOPER_PORT_DEFAULT_CAPACITY
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+#define <B><TT><FONT  color=000022 size=+1>B_LOOPER_PORT_DEFAULT_CAPACITY</TT></B></FONT> 100
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The default capacity of the port that holds incoming messages before they're placed in the BLooper's BMessageQueue. The capacity is set in the BLooper constructor.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

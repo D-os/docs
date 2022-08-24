@@ -1,0 +1,74 @@
+<HTML><HEAD><TITLE>Messages: System Messages</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Messages Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Messages%20Master%20Index.html"><FONT face=HELVETICA>Messages Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="System%20Messages"></A>System Messages
+</H1>
+<P>
+This chapter lists and lightly describes the messages that are defined by Be.  The list includes messages that are sent from the system to your application, messages that your application can create and send to other applications (and servers), and messages that are defined for their formats, but that you don't literally <I>send</I> anywhere (such as a clipboard message format).
+<P>
+Most messages are listed by their command constants (<B><TT><A HREF="GeneralMessages.html#B_ABOUT_REQUESTED">B_ABOUT_REQUESTED</A></TT></B>, <B><TT><A HREF="GeneralMessages.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B>, etc.).  Where the command constant isn't specific enough, the message is listed by some other field.  For example, every Node Monitor message has the command constant <B><TT><A HREF="GeneralMessages.html#B_NODE_MONITOR">B_NODE_MONITOR</A></TT></B>, and is further distinguished&mdash;and listed below&mdash;by its "opcode" field value (<B><TT><A HREF="NodeMonitorMessages.html#B_ENTRY_REMOVED">B_ENTRY_REMOVED</A></TT></B>, <B><TT><A HREF="NodeMonitorMessages.html#B_STAT_CHANGED">B_STAT_CHANGED</A></TT></B>, etc.).  If a message doesn't have a defined command constant or other descriptive field, it's identified prosaically ("Clipboard Data", for example).  
+<P>
+The list presents the messages in alphabetical order (ignoring the leading "B_").  Each message entry looks something like this:
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Tells you whether the message is meant to be delivered ("Deliverable"), or if it's defined simply for its format ("Format").  A message can be both:  It can be used as a deliverable by one part of the system, and used just for its format in another.
+<P>
+If the message is deliverable, it will describe the following:
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The sender of the message.  An important point here is whether the message is sent by the system, by your app, or by both.  If the "<B>Source:</B>" line doesn't mention that your app can send the message, then don't send it.  Often the source is listed, vaguely, as "the system."  This denotes that the message is sent by one of the basic servers (App Server or Input Server, mainly).  Other sources (Node Monitor, Roster Monitor, MIME Monitor) are identified more precisely.  In any case, the identity of the source is provided mainly so you know which ballpark you're in&mdash;the exact identity shouldn't matter to your code.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The target of the message.  This is the <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> object that receives the message, and, if applicable, converts it to a hook function.  For example, the target of a <B><TT><A HREF="GeneralMessages.html#B_VIEW_MOVED">B_VIEW_MOVED</A></TT></B> message is the view's <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A>, not the <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> itself (because the <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> never actually sees the <B><TT><A HREF="GeneralMessages.html#B_VIEW_MOVED">B_VIEW_MOVED</A></TT></B> message&mdash;it only sees the <B><TT>ViewMoved()</TT></B> hook function).  The target is often either <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> or a <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> object, but for some messages the target is declared by your app (the target of a BControl's invocation message, for example).
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;The hook function that the target invokes when the message is received.  If this line is missing, the message doesn't map to a hook function.
+<P>
+This is followed by a brief description that tells you the circumstances under which the message is sent, and how your app is expected to behave when it receives the message.  If the description doesn't say what your app is supposed to do, then it doesn't <I>have</I> to actively do anything, but it shouldn't interfere with the default mechanism.
+<P>
+After the description is a table that lists the message's Be-defined fields.  If it doesn't have any fields, the table is excluded.  If a field holds an array of data, the maximum size of the array, if known, is given in brackets after the field name:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"byte" [3]</PRE>
+<P>
+In some cases, the array size is the value of some other field.  Here, the size of the array in the "argv" field is given by the value of the "argc" field:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"argv" ["argc"]</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Messages Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Messages%20Master%20Index.html"><FONT face=HELVETICA>Messages Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

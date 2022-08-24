@@ -1,0 +1,483 @@
+<HTML><HEAD><TITLE>The Application Kit: Scripting</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Scripting"></A>Scripting
+</H1>
+<P>
+Scripting provides a means for programatically controlling some other application by sending it special scripting commands.  These commands are defined by the "scripted" application itself.  For example, if  you want some other application to be able to tell your application to perform the "FlipOver" operation, you have to publish the format of the "FlipOver" command.  The set of operations that you want to expose is called a "suite."  
+<P>
+The BeOS defines some number of suites that correspond to particular classes.  For example, all <A HREF="Application.html#BApplication">BApplication</A> objects respond to the commands defined in the "vnd.Be-application" suite.  One of the commands in the suite gives you access to the application's windows.  When you've located the window that you want, you can move it, close it, resize it, and so on, according to the commands in the "vnd.Be-window" suite.
+<P>
+<HR>
+<H2>
+<A NAME="Basics"></A><FONT SIZE=6>B</FONT>asics
+</H2>
+<P>
+The scripting framework defines the following notions: commands, properties, and specifiers.  If you are familiar with AppleScript, these are equivalent to verbs, nouns, and adjectives.  Commands act on a specific instance of a property, as determined by the specifiers.
+<P>
+<HR>
+<H3>
+<A NAME="Commands"></A>Commands
+</H3>
+<P>
+The command conveys the action of a scripting command and is stored in the <I>what</I> field of the scripting BMessage.  There are six standard commands (defined in <B>be/app/Message.h</B>):
+<P>
+<UL>
+<LI><B><TT>
+<A NAME="B_COUNT_PROPERTIES"></A>B_COUNT_PROPERTIES
+</TT></B> counts the number of instances of a property.
+<P>
+<LI><B><TT>
+<A NAME="B_CREATE_PROPERTY"></A>B_CREATE_PROPERTY
+</TT></B> creates a new instance of a property.
+<P>
+<LI><B><TT>
+<A NAME="B_DELETE_PROPERTY"></A>B_DELETE_PROPERTY
+</TT></B> destroys an instance of a property.
+<P>
+<LI><B><TT>
+<A NAME="B_EXECUTE_PROPERTY"></A>B_EXECUTE_PROPERTY
+</TT></B> executes an instance of a property.
+<P>
+<LI><B><TT>
+<A NAME="B_GET_PROPERTY"></A>B_GET_PROPERTY
+</TT></B> gets the value of an instance of a property.
+<P>
+<LI><B><TT>
+<A NAME="B_SET_PROPERTY"></A>B_SET_PROPERTY
+</TT></B> sets of the value of an instance of a property.  The "data" field contains the new value of the property.
+<P>
+</UL>
+<P>
+Each of these commands acts on a "property," which is nothing more than a scriptable feature of an object.  As a real world example, the windows owned by an application are properties, as is the title of each window.  The particular interpretation of the command depends upon the property it is acting on.  For example, <B><TT>B_DELETE_PROPERTY</TT></B>, acting on the "Entry" property of a  Tracker window, causes a file to be moved to the trash.  However, the same command acting on the "Selection" property of the same window removes files from the list of selected items.
+<P>
+Scriptable objects should limit themselves to this set of commands.  If an object uses a nonstandard command, it runs the risk of being unusable by general scripting tools.
+<P>
+<HR>
+<H3>
+<A NAME="Properties%20and%20Specifiers"></A>Properties and Specifiers
+</H3>
+<P>
+A property represents a scriptable feature of an object.  Properties are named; these names are strings unique within a class.  For example, a <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> defines properties such as "Frame," "Title," and "View."  The data type of the property and its allowable values are determined by the property.  For example, the window's "Frame" accepts <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RECT_TYPE">B_RECT_TYPE</A></TT></B> values while the "Title" is a <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>.
+<P>
+Sometimes a property is represented by another object.  For example, BWindow's "View" designates a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A>, an object which has a set of properties distinct from those of BWindow.
+<P>
+An object may have more than one instance of a given property.  For example, the "Window" property of <A HREF="Application.html#BApplication">BApplication</A>, has as many instances as there are windows in the application.  As a result, there is some ambiguity when you ask for <I>the</I> Window of an application.  Instead, it's more correct to ask for the first Window, or the Window named "Snyder."  In other words, a property is not enough to identify a feature; a specific instance must be picked out as well.
+<P>
+Specifiers are used to target ("specify") particular instances of properties.  A specifier is a <A HREF="Message.html#BMessage">BMessage</A> containing the following elements:
+<P>
+<UL>
+<LI>The name of the property in the "property" field, stored as a <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>.
+<P>
+<LI>The specifier constant, indicating a method of identifying a specific instance of the property, in the <I>what</I> field along with any necessary supporting fields.
+<P>
+</UL>
+<P>
+There are seven standard specifier constants (defined in <B>&lt;be/app/Message.h></B>):
+<P>
+<UL>
+<LI><B><TT>
+<A NAME="B_DIRECT_SPECIFIER"></A>B_DIRECT_SPECIFIER
+</TT></B>.  The property name is sufficient specification by itself, usually because there's only one instance of the property.  If there's more than one value for the property, a <B><TT>B_DIRECT_SPECIFIER</TT></B> would specify them all.
+<P>
+<LI><B><TT>
+<A NAME="B_NAME_SPECIFIER"></A>B_NAME_SPECIFIER
+</TT></B>.  The specifier message has a "name" field of type <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B> with the name of a particular instance of the property.
+<P>
+<LI><B><TT>
+<A NAME="B_ID_SPECIFIER"></A>B_ID_SPECIFIER
+</TT></B>.  The specifier message has an "id" field with a unique identifying value of type <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> for a particular instance of the property.
+<P>
+<LI><B><TT>
+<A NAME="B_INDEX_SPECIFIER"></A>B_INDEX_SPECIFIER
+</TT></B>.  The specifier message has an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> field named "index" with the index to a particular instance of the property.
+<P>
+<LI><B><TT>
+<A NAME="B_REVERSE_INDEX_SPECIFIER"></A>B_REVERSE_INDEX_SPECIFIER
+</TT></B>.  The index counts backwards from the end of the list.
+<P>
+<LI><B><TT>
+<A NAME="B_RANGE_SPECIFIER"></A>B_RANGE_SPECIFIER
+</TT></B>.  In addition to an "index" field, the specifier message has an additional <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> field named "range", identifying "range" items beginning at "index."
+<P>
+<LI><B><TT>
+<A NAME="B_REVERSE_RANGE_SPECIFIER"></A>B_REVERSE_RANGE_SPECIFIER
+</TT></B>.  The "index" counts from the end of the list backwards.  Depending on the kind of data and the message protocol, the "range" may extend toward the front of the list from the index or toward the end of the list.  In other words, the index works in reverse, the range may or may not.
+<P>
+</UL>
+<P>
+As with messages, the precise meaning of a given specifier depends upon the context.  Additionally, there may be user-defined (or perhaps more properly object-defined) specifiers.  User-defined specifier constants should be greater than <B><TT><A HREF="misc.html#B_SPECIFIERS_END">B_SPECIFIERS_END</A></TT></B> to prevent conflicts with Be-defined specifiers.
+<P>
+Specifiers are added to the "specifier" field of a scripting message using <B><TT><A HREF="Message.html#AddSpecifier()">BMessage::AddSpecifier()</A></TT></B>.  There are several variants of this method, including shortcuts for adding <B><TT><A HREF="#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B>, <B><TT><A HREF="#B_INDEX_SPECIFIER">B_INDEX_SPECIFIER</A></TT></B>, <B><TT><A HREF="#B_RANGE_SPECIFIER">B_RANGE_SPECIFIER</A></TT></B>, and <B><TT><A HREF="#B_NAME_SPECIFIER">B_NAME_SPECIFIER</A></TT></B> specifiers.  For all other specifiers, you must manually construct the specifier and add it to the scripting message with <B><TT><A HREF="Message.html#AddSpecifier()">AddSpecifier()</A></TT></B>.  For example, to add a <B><TT><A HREF="#B_ID_SPECIFIER">B_ID_SPECIFIER</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage specifier(B_ID_SPECIFIER); // create a new specifier
+&nbsp;&nbsp;&nbsp;specifier.AddInt32("id", 2827); // add the id number to the specifier
+&nbsp;&nbsp;&nbsp;message.AddSpecifier(&amp;specifier); // add the specifier to the message</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+You <I>must</I> use <B><TT><A HREF="Message.html#AddSpecifier()">AddSpecifier()</A></TT></B> to add specifiers to a BMessage; it performs additional scripting support work that <B><TT><A HREF="Message.html#AddMessage()">AddMessage()</A></TT></B> doesn't.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="The%20Specifier%20Stack"></A>The Specifier Stack
+</H3>
+<P>
+In general, an application will not be able to obtain a <A HREF="Messenger.html#BMessenger">BMessenger</A> for the target object; instead, it'll have to settle for a <A HREF="Messenger.html#BMessenger">BMessenger</A> targeting the <A HREF="Application.html#BApplication">BApplication</A> of the program containing the desired object.  In these cases, a single specifier may be insufficient to target a scripting message.  The true power of specifiers lies in their ability to be chained together in the specifier stack.
+<P>
+An example best illustrates the operation of the specifier stack.  The following code snippet creates a message that will target the frame of the second view of the window named "egg" in the target application:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;message.AddSpecifier("Label");
+&nbsp;&nbsp;&nbsp;message.AddSpecifier("MenuBar");
+&nbsp;&nbsp;&nbsp;message.AddSpecifier("Window", 1);</PRE>
+<P>
+Repeated calls to <B><TT><A HREF="Message.html#AddSpecifier()">AddSpecifier()</A></TT></B> build the specifier stack.  The order of the calls is very important; the specifiers are evaluated in the opposite order from which they were added.  When this message is received by the target application, it will first peel off the third specifier and direct the message to the second window of the application.  The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> will then peel off the second specifier and direct the message to the window's key menu bar.  The first specifier ("Label") is then processed by the BMenuBar.  This process is covered in more detail below under <a href="#ResolveSpecifier()">"ResolveSpecifier()"</a>.
+<P>
+<HR>
+<H3>
+<A NAME="Replies"></A>Replies
+</H3>
+<P>
+A reply is generated for every scripting request.  The reply message contains the following fields:
+<P>
+<UL>
+<LI>The <I><FONT  color=991122 face=HELVETICA>what</I></FONT> data member defaults to <B><TT><A HREF="misc.html#B_REPLY">B_REPLY</A></TT></B> unless some other constant is appropriate.  For example, if the message was not understood, the object responds with a <B><TT><A HREF="misc.html#B_MESSAGE_NOT_UNDERSTOOD">B_MESSAGE_NOT_UNDERSTOOD</A></TT></B> BMessage.
+<P>
+<LI>The <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B> field "error" contains the error code for the operation.  This field is always present.
+<P>
+<LI>Responses to a successful <B><TT><A HREF="#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B> request will additionally contain the value or values of the requested property in the "result" array.  The data will be of a type appropriate for the property.
+<P>
+</UL>
+<P>
+Any scriptable objects that you create should also obey the above protocol.  Of course, individual objects are free to define their own protocols for relaying additional information in the reply; in these cases, consult the documentation for the class in question.
+<P>
+<HR>
+<H2>
+<A NAME="Creating%20and%20Sending%20Scripting%20Messages"></A><FONT SIZE=6>C</FONT>reating and <FONT SIZE=6>S</FONT>ending <FONT SIZE=6>S</FONT>cripting <FONT SIZE=6>M</FONT>essages
+</H2>
+<P>
+The scripting facilities of an application can be invoked in three easy steps:
+<P>
+<UL>
+<LI>Set the command constant for the scripting message.
+<P>
+<LI>Construct the specifier stack for the scripting message.
+<P>
+<LI>Send the scripting message to the target application.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Example"></A>Example
+</H3>
+<P>
+Suppose we want to fetch the frame rectangle of the second view of the window titled "egg" in an application with the signature "application/x-fish".  The code:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage message, reply;
+&nbsp;&nbsp;&nbsp;BRect result;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;// set the command constant
+&nbsp;&nbsp;&nbsp;message.what = B_GET_PROPERTY;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;// construct the specifier stack
+&nbsp;&nbsp;&nbsp;message.AddSpecifier("Frame"); // B_DIRECT_SPECIFIER
+&nbsp;&nbsp;&nbsp;message.AddSpecifier("View", 1); // B_INDEX_SPECIFIER
+&nbsp;&nbsp;&nbsp;message.AddSpecifier("Window", "egg"); // B_NAME_SPECIFIER
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;// send the message and fetch the result
+&nbsp;&nbsp;&nbsp;BMessenger("application/x-fish").SendMessage(&amp;message, &amp;reply);
+&nbsp;&nbsp;&nbsp;reply.FindRect("result", &amp;result)</PRE>
+<P>
+Short and sweet.
+<P>
+<HR>
+<H2>
+<A NAME="Suites"></A><FONT SIZE=6>S</FONT>uites
+</H2>
+<P>
+There is one missing element in the scripting system, namely the ability to query an object for its scripting abilities.  This is useful when the controlling application doesn't know the precise type of the object it is scripting.  Having a method of discovering the scripting abilities of an object enables more dynamic uses of scripting.
+<P>
+An object's scripting abilities are organized into one or more scripting "suites," a set of supported messages and associated specifiers.  A suite is identified by a MIME-like string with the "suite" supertype.  For example, <A HREF="../The%20Interface%20Kit/Control.html#BControl">BControl</A> implements the "suite/vnd.Be-control" scripting suite.  Nothing prevents two objects from implementing the same suite; two sound editors, for example, could have different implementations of a common scripting suite for filtering audio data.
+<P>
+To ask an object for its supported scripting suites, send it a standard scripting message with a <B><TT>B_GET_PROPERTY</TT></B> request for the "Suites" property:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;message.what = B_GET_PROPERTY;
+&nbsp;&nbsp;&nbsp;message.AddSpecifier("Suites");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;... add remaining specifiers here ...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;messenger.SendMessage(&amp;message, &amp;reply);</PRE>
+<P>
+The target object responds with a <B><TT><A HREF="misc.html#B_REPLY">B_REPLY</A></TT></B> <A HREF="Message.html#BMessage">BMessage</A> with the following fields:
+<P>
+<UL>
+<LI>The error code in "error".
+<P>
+<LI>An array named "suites" containing the names of the suites supported by the object.
+<P>
+<LI>An array named "messages" containing flattened <A HREF="PropertyInfo.html#BPropertyInfo">BPropertyInfo</A> objects describing the supported messages and specifiers for the various supported suites.
+<P>
+</UL>
+<P>
+Less usefully, you can send a <B><TT><A HREF="misc.html#B_GET_SUPPORTED_SUITES">B_GET_SUPPORTED_SUITES</A></TT></B> <A HREF="Message.html#BMessage">BMessage</A> directly to an object and obtain its supported suites in an identically-formed reply.
+<P>
+Every scriptable object supports the "suite/vnd.Be-handler" suite by dint of its <A HREF="Handler.html#BHandler">BHandler</A> heritage.  This suite is sometimes referred to as the "universal suite."  It performs the following functions:
+<P>
+<UL>
+<LI>Implements the "Suites" propery and responds to <B><TT><A HREF="misc.html#B_GET_SUPPORTED_SUITES">B_GET_SUPPORTED_SUITES</A></TT></B> messages, as described above.
+<P>
+<LI>Implements the "Messenger" property, allowing the caller to obtain a <A HREF="Messenger.html#BMessenger">BMessenger</A> to the object, simplifying further communication with the object.
+<P>
+<LI>Implements the "InternalName" property, returning the name of the BHandler.
+<P>
+<LI>Responds to any other scripting requests with a <B><TT><A HREF="misc.html#B_MESSAGE_NOT_UNDERSTOOD">B_MESSAGE_NOT_UNDERSTOOD</A></TT></B> BMessage.  This is a "catch-all" response after all the other objects in the hierarchy have rejected the scripting request.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Making%20Objects%20Scriptable"></A><FONT SIZE=6>M</FONT>aking <FONT SIZE=6>O</FONT>bjects <FONT SIZE=6>S</FONT>criptable
+</H2>
+<P>
+Since scripting messages are passed via BMessengers, objects accepting scripting messages must be derived from BHandler.  Typically, adding scripting support entails little more than overriding the following methods:
+<P>
+<UL>
+<LI><B><TT>ResolveSpecifier()</TT></B> to direct the scripting message to the appropriate BHandler.
+<P>
+<LI><B><TT>MessageReceived()</TT></B> to implement the scripting requests.
+<P>
+<LI><B><TT>GetSupportedSuites()</TT></B> to publish the supported scripting suites.
+<P>
+</UL>
+<A NAME="28511:%20head2:%20ResolveSpecifier()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="ResolveSpecifier()"></A>ResolveSpecifier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>ResolveSpecifier(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>what</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>property</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to determine the proper handler for a scripting message.  The message is targeted to the <A HREF="Handler.html#BHandler">BHandler</A>, but the specifiers may indicate that it should be assigned to another object.  It's the job of <B><TT><A HREF="#ResolveSpecifier()">ResolveSpecifier()</A></TT></B> to examine the current specifier (or more, if necessary) and return the object that should either handle the message or look at the next specifier.  This function is called before the message is dispatched and before any filtering functions are called.
+<P>
+The first argument, <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, points to the scripting message under consideration.  The current specifier is passed in <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>; it will be at index <I><FONT  color=991122 face=HELVETICA>index</I></FONT> in the specifier array of <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.  Finally, <I><FONT  color=991122 face=HELVETICA>what</I></FONT> contains the <B><TT>what</TT></B> data member of <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> while <I><FONT  color=991122 face=HELVETICA>property</I></FONT> contains the name of the targetted property.
+<P>
+<B><TT><A HREF="#ResolveSpecifier()">ResolveSpecifier()</A></TT></B> returns a pointer to the next <A HREF="Handler.html#BHandler">BHandler</A> that should look at the message.  Here, it has four options:
+<P>
+<UL>
+<LI>If the <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> identifies a <A HREF="Handler.html#BHandler">BHandler</A> belonging to another <A HREF="Looper.html#BLooper">BLooper</A>, it should send the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> to the <A HREF="Looper.html#BLooper">BLooper</A> and return <B><TT>NULL</TT></B>.  The message will be handled in the message loop of the other BLooper; it won't be further processed in this one.  For example, a <A HREF="Handler.html#BHandler">BHandler</A> that kept a list of proxies might use code like the following:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( (strcmp(property, "Proxy") == 0)</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+Since this function resolved the specifier at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, it calls <B><TT><A HREF="Message.html#PopSpecifier()">PopSpecifier()</A></TT></B> to decrement the index before forwarding the message.  Otherwise, the next handler would try to resolve the same specifier.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<UL>
+<LI>If the <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> picks out another <A HREF="Handler.html#BHandler">BHandler</A> object belonging to the same <A HREF="Looper.html#BLooper">BLooper</A>, <B><TT><A HREF="#ResolveSpecifier()">ResolveSpecifier()</A></TT></B> can return that BHandler.  For example:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( proxy ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    message->PopSpecifier();</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+This, in effect, puts the returned object in the BHandler's place as the designated handler for the message.  The <A HREF="Looper.html#BLooper">BLooper</A> will give the returned handler a chance to respond to the message or resolve the next specifier.  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<UL>
+<LI>If it can resolve all remaining specifiers and recognizes the message as one that the <A HREF="Handler.html#BHandler">BHandler</A> itself can handle, it should return the <A HREF="Handler.html#BHandler">BHandler</A> (<B><TT>this</TT></B>).  For example:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( (strcmp(property, "Value") == 0)</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+This confirms the <A HREF="Handler.html#BHandler">BHandler</A> as the message target.  <B><TT><A HREF="#ResolveSpecifier()">ResolveSpecifier()</A></TT></B> won't be called again, so it's not necessary to call <B><TT><A HREF="Message.html#PopSpecifier()">PopSpecifier()</A></TT></B> before returning.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<UL>
+<LI>If it doesn't recognize the property or can't resolve the specifier, it should call (and return the value returned by) the inherited version of <B><TT><A HREF="#ResolveSpecifier()">ResolveSpecifier()</A></TT></B>. 
+<P>
+</UL>
+<P>
+The <A HREF="Application.html#BApplication">BApplication</A> object takes the first path when it resolves a specifier for a "Window" property; it sends the message to the specified <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> and returns <B><TT>NULL</TT></B>.  A <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> follows the second path when it resolves a specifier for a "View" property; it returns the specified BView.  Thus, a message initially targeted to the <A HREF="Application.html#BApplication">BApplication</A> object can find its way to a BView.
+<P>
+BHandler's version of <B><TT><A HREF="#ResolveSpecifier()">ResolveSpecifier()</A></TT></B> recognizes a <B><TT><A HREF="#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B> <I><FONT  color=991122 face=HELVETICA>message</I></FONT> with a direct <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> requesting a "Suite" for the supported suites, "Messenger" for the <A HREF="Handler.html#BHandler">BHandler</A>, or the BHandler's "InternalName" (the same name that its <B><TT><A HREF="Handler.html#Name()">Name()</A></TT></B> function returns).  In all three cases, it assigns the <A HREF="Handler.html#BHandler">BHandler</A> (<B><TT>this</TT></B>) as the object responsible for the message.
+<P>
+For all other specifiers and messages, it sends a <B><TT><A HREF="misc.html#B_MESSAGE_NOT_UNDERSTOOD">B_MESSAGE_NOT_UNDERSTOOD</A></TT></B> reply and returns <B><TT>NULL</TT></B>.  The reply message has an "error" field with <B><TT>B_SCRIPT_SYNTAX</TT></B> as the error and a "message" field with a longer textual explanation of the error.
+<P>
+<HR>
+<H3>
+<A NAME="MessageReceived()"></A>MessageReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>MessageReceived(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B> is called to process any incoming scripting messages.  Scripting messages are treated in this regard much as any other BMessage.  <B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B> should be implemented to carry out the actions requested by scripting commands.
+<P>
+<A NAME="20730:%20head2:%20GetSupportedSuites()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="GetSupportedSuites()"></A>GetSupportedSuites()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetSupportedSuites(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to report the suites of messages and specifiers they understand.  This function is called in response to either a <B><TT>B_GET_PROPERTIES</TT></B> scripting message for the "Suites" property or a <B><TT><A HREF="misc.html#B_GET_SUPPORTED_SUITES">B_GET_SUPPORTED_SUITES</A></TT></B> message. 
+<P>
+Each derived class should add the names of the suites it implements to the "suites" array of <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.  Each item in the array is a MIME-like string with the "suite" supertype.  In addition, the class should add corresponding flattened <A HREF="PropertyInfo.html#BPropertyInfo">BPropertyInfo</A> objects in the "messages" array.  A typical implementation of <B><TT><A HREF="#GetSupportedSuites()">GetSupportedSuites()</A></TT></B> looks like:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t MyHandler::GetSupportedSuites(BMessage *message)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message->AddString("suites", "suite/vnd.Me-my_handler"));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPropertyInfo prop_info(prop_list);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message->AddFlat("messages", &amp;prop_info);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return BHandler::GetSupportedSuites(message);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The value returned by <B><TT><A HREF="#GetSupportedSuites()">GetSupportedSuites()</A></TT></B> is added to <I><FONT  color=991122 face=HELVETICA>message</I></FONT> in the int32 "error" field.  BHandler's version of this function adds the universal suite "suite/vnd.Be-handler" to <I><FONT  color=991122 face=HELVETICA>message</I></FONT> then returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

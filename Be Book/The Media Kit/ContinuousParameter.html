@@ -1,0 +1,291 @@
+<HTML><HEAD><TITLE>The Media Kit: BContinuousParameter</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BContinuousParameter"></A>BContinuousParameter
+</H1>
+<P>
+Derived from:  <A HREF="Parameter.html#BParameter">BParameter</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/ParameterWeb.h">be/media/ParameterWeb.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="ContinuousParameter.summary.html"><i>Summary</i></A></H6>
+<P>
+The BContinuousParameter class represents parameters whose values can vary along a continuous range.  Examples include gain or equalizer controls, turntable pitch controls, and the like.
+<P>
+The default system theme implements BContinuousParameters as <A HREF="../Release%20Notes/InterfaceKit.html#BSlider">BSlider</A> controls.
+<P>
+Call <B><TT><A HREF="ParameterGroup.html#MakeContinuousParameter()">BParameterGroup::MakeContinuousParameter()</A></TT></B> to create a BContinuousParameter control.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+You never create or delete a BContinuousParameter object yourself.  Use the appropriate <A HREF="ParameterGroup.html#BParameterGroup">BParameterGroup</A> functions to create these objects and add them to groups.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="GetResponse()"></A>GetResponse()
+, 
+<A NAME="SetResponse()"></A>SetResponse()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetResponse(</TT></B></FONT>response *<I><FONT  color=991122 face=HELVETICA>response</I></FONT>, float *<I><FONT  color=991122 face=HELVETICA>factor</I></FONT>, float *<I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetResponse(</TT></B></FONT>response <I><FONT  color=991122 face=HELVETICA>response</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>factor</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetResponse()</TT></B> returns in <I><FONT  color=991122 face=HELVETICA>response</I></FONT>, <I><FONT  color=991122 face=HELVETICA>factor</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> the response type, factor, and offset currently in effect for the BContinuousParameter.
+<P>
+<B><TT>SetResponse()</TT></B> sets these values.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>response</I></FONT> describes how the BContinuousParameter's value is displayed to me the user.  For example, if your parameter is polynomial in scale, you may wish to record only the base value, and let the BContinuousParameter handle presenting the value to the user as a polynomial by raising the value to the power specified by <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> before displaying the value on the screen.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>
+</UL>
+<B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_LINEAR</TT></B></TD>
+<TD>For every unit of change in the parameter's value, the displayed value also changes by 1.  The <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> should be 1.</TD>
+<TR>
+<TD><B><TT>B_POLYNOMIAL</TT></B></TD>
+<TD>The <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is a power to which the control's value is raised before being displayed.</TD>
+<TR>
+<TD><B><TT>B_EXPONENTIAL</TT></B></TD>
+<TD>The <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is the base; the displayed value is the factor raised to the power of the parameter's value.</TD>
+<TR>
+<TD><B><TT>B_LOGARITHMIC</TT></B></TD>
+<TD>The <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is the base; the displayed value is the base <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> logarithm of the parameter's value.</TD>
+</TABLE>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> is added to the value after the transformation specified by response is computed, but before displaying the value.
+<P>
+If you wish the displayed value to be v2+1, you would use the following call:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SetResponse(B_POLYNOMIAL, 2.0, 1.0);</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The mapping specified by these functions is only used for controls that display the current value of the control.  The default system theme doesn't currently display this information.  Since this information is only used for display purposes, you will still have to handle (as appropriate for your needs) mapping between the value of the control and the parameter value it represents.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+For example, a BContinuousParameter that selects a frequency between 20 Hz and 20,000 Hz might use a range from 0 to 3, with an exponent base of 10 and a multiplication factor of 20.  In this case, the parameter will receive values from 0.0 to 3.0, which the UI control knows to map to the values 20 through 20,000 for display purposes.
+<P>
+<HR>
+<H3>
+<A NAME="MaxValue()"></A>MaxValue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>MaxValue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the maximum possible value the BContinuousParameter can take, which was specified when the control was created.  The value is in the units specified when the control was created, such as "dB" or "Hz."
+<P>
+<HR>
+<H3>
+<A NAME="MinValue()"></A>MinValue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>MinValue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the minimum possible value the BContinuousParameter can take, which was specified when the object was created.  The value is in the units specified when the object was created, such as "dB" or "Hz."
+<P>
+<HR>
+<H3>SetResponse() see <A HREF="#GetResponse()">GetResponse()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ValueStep()"></A>ValueStep()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>ValueStep(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the granularity of values between <B><TT><A HREF="#MinValue()">MinValue()</A></TT></B> and <B><TT><A HREF="#MaxValue()">MaxValue()</A></TT></B> supported by the hardware.
+<P>
+<HR>
+<H3>
+<A NAME="ValueType()"></A>ValueType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual type_code <B><TT><FONT  color=000022 size=+1>ValueType(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Return a type_code indicating the data type of the control's value; by default, this is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="response"></A>response
+</H3>
+<P>
+Declared in:  &lt;be/media/ParameterWeb.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_LINEAR</TT></B></TD>
+<TD>For every unit of change in the parameter's value, the displayed value also changes by 1.  The <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> should be 1.</TD>
+<TR>
+<TD><B><TT>B_POLYNOMIAL</TT></B></TD>
+<TD>The <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is a power to which the control's value is raised before being displayed.</TD>
+<TR>
+<TD><B><TT>B_EXPONENTIAL</TT></B></TD>
+<TD>The <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is the base; the displayed value is the factor raised to the power of the parameter's value.</TD>
+<TR>
+<TD><B><TT>B_LOGARITHMIC</TT></B></TD>
+<TD>The <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is the base; the displayed value is the base <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> logarithm of the parameter's value.</TD>
+</TABLE>
+<P>
+These values define the response type for a BContinuousParameter.
+<P>
+<B><TT>B_LINEAR</TT></B> indicates that the user interface will display the parameter's value as-is.
+<P>
+<B><TT>B_POLYNOMIAL</TT></B> displays the parameter's value raised to the factor power.  For instance, if <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is 2, the displayed value would be the parameter's value squared.
+<P>
+<B><TT>B_EXPONENTIAL</TT></B> displays the <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> raised to the power of the parameter's value.  If the parameter's value is 3 and the <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is 2, the displayed value would be 23 or 8.
+<P>
+<B><TT>B_LOGARITHMIC</TT></B> displays the base <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> logarithm of the parameter's value; if the <I><FONT  color=991122 face=HELVETICA>factor</I></FONT> is 10 and the parameter's value is 3, the displayed value would be log10(3).
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

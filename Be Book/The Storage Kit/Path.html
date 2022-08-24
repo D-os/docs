@@ -1,0 +1,945 @@
+<HTML><HEAD><TITLE>The Storage Kit: BPath</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BPath"></A>BPath
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/Path.h">be/storage/Path.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Path.summary.html"><i>Summary</i></A></H6>
+<P>
+A BPath object represents an absolute pathname, and provides some simple path manipulation and querying functions.  The primary features of the class are:
+<P>
+<UL>
+<LI><B>It allocates storage for you</B>.  When you tell your BPath object which pathname you want it to represent, the object allocates storage for the pathname automatically.  When you delete the object, the storage is freed.
+<P>
+<LI><B>It always represents an absolute path</B>.  The pathname strings that you use to initialize a BPath can be relative, and they can include references to "." and "..".  The BPath "normalizes" the passed-in strings to create an absolute pathname, as described in <a href="#Initializing%20and%20Normalizing">"Initializing and Normalizing"</a>.
+<P>
+</UL>
+<P>
+BPaths are handy, but don't expect them to actually<I> do </I>very much:  <B>A BPath is just a pathname.  </B>It identifies the location of a file, but it can't manipulate the file, nor can it change the structure of the file system.
+<P>
+So what do you use BPaths for?
+<P>
+<UL>
+<LI><B>You can use your BPaths to initialize other, more powerful objects</B> (BEntry, <A HREF="Node.html#BNode">BNode</A> and its kids).  See &nbsp;<a href="#Converting%20a%20BPath%20on%20page131">"Converting a BPath" on page131</a>.
+<P>
+<LI><B>BPaths can be passed through BMessages</B>.  To add a BPath to a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>, you have to flatten it first:  BPath implements <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A> for exactly this reason.  The receiver of the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> can resurrect the flattened object as a BPath object or as an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> structure.  See <a href="#Passing%20a%20BPath%20in%20a%20BMessage">"Passing a BPath in a BMessage"</a>.
+<P>
+<LI><B>BPath objects are ideal for caching references to files. </B> BPaths  don't consume much in the way of system resources&mdash;they don't contain file descriptors, for example.  So they're great for keeping track of the files that your application is interested in. 
+<P>
+</UL>
+<P>
+In the way that they're used, BPaths and <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>s are nearly identical.  In particular, <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>s can do all three of the things listed here.  Whether you use BPaths (pathnames in general) or <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>s is largely a matter of taste.
+<P>
+<A NAME="10803:%20head2:%20Initializing%20and%20Normalizing"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Initializing%20and%20Normalizing"></A>Initializing and Normalizing
+</H3>
+<P>
+You initialize a BPath&mdash;in other words, you establish the path that the object represents &mdash;by passing a string (or two, or a <A HREF="Directory.html#BDirectory">BDirectory</A> and a string) to the constructor or to the <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function.  Upon initialization, the BPath object concatenates the strings and then "normalizes" the passed-in strings <I>if it has to</I> (this emphasis is important, as we'll see in a moment).  The following elements trigger normalization:
+<P>
+<UL>
+<LI>a relative pathname (after concatenation; e.g. "boot/lbj")
+<P>
+<LI>the presence of "." or ".." ("/boot/lbj/../lbj/./fido")
+<P>
+<LI>redundant slashes ("/boot//lbj")
+<P>
+<LI>a trailing slash ("/boot/lbj/")
+<P>
+</UL>
+<P>
+During normalization, BPath conjures up an absolute pathname in the form
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+/<I>dir1</I>/<I>dir2</I>/<I>...</I>/<I>dirN</I>/<I>leaf
+<P>
+</I>						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+It does this by applying the following rules:
+<P>
+<UL>
+<LI>relative pathnames are reckoned off of the current working directory
+<P>
+<LI>"." is ignored (at the head of a path, it's taken as the cwd).
+<P>
+<LI>".." bumps up one directory level
+<P>
+<LI>redundant slashes are coalesced
+<P>
+<LI>a trailing slash is removed.
+<P>
+</UL>
+<P>
+(The one exception to this final rule is "/" as a full pathname.)
+<P>
+There's a subtle side-effect that you get with normalization:  <B>When you normalize a pathname, all the elements in the path up to but not including the leaf must exist.  </B>In other words, a normalized BPath object gives you the <I>same</I> guarantee of existence as does an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> structure.  The subtlety, here, is that an unnormalized BPath <I>needn't exist at all</I>.  
+<P>
+For example, here we create a BPath for a pathname that contains a non-existent directory:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* We&gt;ll assume that "/abc/def/" doesn't exist. */
+&nbsp;&nbsp;&nbsp;BPath path("/abc/def/ghi.jkl");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Nonetheless, the BPath is successfully initialized. 
+&nbsp;&nbsp;&nbsp; * The Path() function returns a pointer to the object&gt;s
+&nbsp;&nbsp;&nbsp; * pathname string. 
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;printf("Path:  %sn". path.Path());</PRE>
+<P>
+On the command line we see: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ Path:  /abc/def/ghi.jkl</PRE>
+<P>
+But if we tickle the normalization machine...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* The redundant slash causes a normalization. */
+&nbsp;&nbsp;&nbsp;BPath path("/abc/def//ghi.jkl");</PRE>
+<P>
+....the object is invalid: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ Path:  (null)</PRE>
+<P>
+<H4>
+<A NAME="Forcing%20Initialization"></A>Forcing Initialization
+</H4>
+<P>
+Both the constructor and the <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function carry an optional argument that lets you force the passed-in path to be normalized:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* The trailing bool forces normalization. */
+&nbsp;&nbsp;&nbsp;BPath path("/abc/def/ghi.jkl", true);
+&nbsp;&nbsp;&nbsp;printf("Path:  %sn", path.Path());</PRE>
+<P>
+In this case, the forced normalization nullifies the object: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$Path:  (null)</PRE>
+<P>
+<H4>
+<A NAME="Normalization%20by%20Default?"></A>Normalization by Default?
+</H4>
+<P>
+Since forcing normalization makes BPath's behaviour more consistent and reliable, why not always normalize?  Because <B>normalization can be expensive.   
+<P>
+</B>During normalization, the pathname is <B><TT>stat</TT></B>'d and prodded rather heavily.  If you're planning on using your BPath's pathname to initialize a <A HREF="Entry.html#BEntry">BEntry</A> or <A HREF="Node.html#BNode">BNode</A>, this prodding will happen again.  Rather than incur the expense twice, you may want to live with unnormalized BPath objects, and take the normalization hit during the subsequent initialization.
+<P>
+<H4>
+<A NAME="Other%20Normalization%20Details"></A>Other Normalization Details
+</H4>
+<P>
+<UL>
+<LI><B>You can't force the BPath constructor or SetTo() function to skip the normalization.</B>  If the path <I>needs</I> to be normalized, it <I>will</I> be normalized.
+<P>
+<LI><B>BPath doesn't let you ask if its pathname was normalized.  
+<P>
+</B></UL>
+<P>
+<HR>
+<H3>
+<A NAME="The%20BPath%20Calling%20Convention"></A>The BPath Calling Convention
+</H3>
+<P>
+BPath objects are passed back to you (by reference) by a number of Storage Kit functions. However, you shouldn't find any functions that ask for a BPath object.  This is a convention of usage:
+<P>
+<UL>
+<LI>If an API element returns a pathname to you, it does so in the form of a BPath.  If it asks for a pathname from you (as an argument), it asks for a <B><TT>const char *</TT></B>. 
+<P>
+</UL>
+<P>
+As an example of a function that returns a BPath to you, recall BEntry's <B><TT><A HREF="Entry.html#GetPath()">GetPath()</A></TT></B> function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t BEntry::GetPath(BPath *path)</PRE>
+<P>
+(As an aside, this is where the auto-allocation comes in handy&mdash;because BPath allocates the pathname storage for you, you don't have to mess around with ugly buffer and length arguments.)
+<P>
+On the other hand, BEntry's <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> takes a pathname as a <B><TT>const char *</TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t BEntry::SetTo(const char *path)</PRE>
+<P>
+If you've got a BPath loaded up with a pathname, you would call this function thus:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;entry.SetTo(path.Path());</PRE>
+<P>
+The constructors and <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> functions in (most of) the Storage Kit classes have <B><TT>const char *</TT></B> versions that can be called as shown here.
+<P>
+<A NAME="38251:%20head2:%20Passing%20a%20BPath%20in%20a%20BMessage"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Passing%20a%20BPath%20in%20a%20BMessage"></A>Passing a BPath in a BMessage
+</H3>
+<P>
+Let's say you've got a BPath object that you want to send to some other application.  To do this, you have to add it to a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object through the latter's <B><TT><A HREF="../The%20Application%20Kit/Message.html#AddFlat()">AddFlat()</A></TT></B> function.  As an inheritor from <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A>, the BPath knows how to flatten itself for just this purpose.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage msg;
+&nbsp;&nbsp;&nbsp;BPath path("/boot/lbj/fido");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* The check here is important, as we&gt;ll describe 
+&nbsp;&nbsp;&nbsp; * in a moment. 
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;if (msg.AddFlat("pathname", &amp;path) != B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* handle the error */</PRE>
+<P>
+The receiver of the message can retrieve the pathname as a BPath object by calling <B><TT><A HREF="../The%20Application%20Kit/Message.html#FindFlat()">FindFlat()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyApp::MessageReceived(BMessage *msg) 
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (msg->FindFlat("pathname", &amp;path) != B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* handle the error */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Alternatively, the pathname can be retrieved as an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> through <B><TT><A HREF="../The%20Application%20Kit/Message.html#FindRef()">FindRef()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyApp::MessageReceived(BMessage *msg) 
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (msg->FindRef("pathname", &amp;ref) != B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* handle the error */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If you want to skip all the conversion business and simply pass the pathname as a string, use <B><TT><A HREF="../The%20Application%20Kit/Message.html#AddString()">AddString()</A></TT></B>.  The receiver, of course, would have to call <B><TT><A HREF="../The%20Application%20Kit/Message.html#FindString()">FindString()</A></TT></B> to retrieve your pathname string.
+<P>
+<H4>
+<A NAME="What's%20Really%20Going%20On%20"></A>What's Really Going On 
+</H4>
+<P>
+When you add a flattened BPath to a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>, the object's pathname is turned into an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>.  If the message receiver asks for a BPath (through <B><TT><A HREF="../The%20Application%20Kit/Message.html#FindFlat()">FindFlat()</A></TT></B>), the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> is turned back into a BPath object.  Therefore, i<B>t's more efficient to retrieve a flattened BPath as an entry_ref than it is to unflatten it as a BPath object.
+<P>
+</B>The BPath to <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> conversion has another, more subtle implication:  <B>Adding a BPath through AddFlat() performs an implicit normalization on the data that's added to the BMessage.
+<P>
+</B>If the normalization fails, the <B><TT><A HREF="../The%20Application%20Kit/Message.html#AddFlat()">AddFlat()</A></TT></B> function returns an error and the data isn't added to the BMessage.  The original BPath is untouched, regardless of the result of the normalization.
+<P>
+<A NAME="28972:%20head2:%20Converting%20a%20BPath"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Converting%20a%20BPath"></A>Converting a BPath
+</H3>
+<P>
+As mentioned earlier, most of the Storage Kit classes have constructors and <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> functions that accept <B><TT>const char *</TT></B> arguments.  If you want to turn your BPath into a <A HREF="File.html#BFile">BFile</A> (for example), you would do this (including error checks):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;BFile file(path.Path());
+&nbsp;&nbsp;&nbsp;err = InitCheck();</PRE>
+<P>
+or
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;err = file.SetTo(path.Path());</PRE>
+<P>
+To convert a BPath to an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>, pass the pathname to the <B><TT><A HREF="Entry.html#get_ref_for_path()">get_ref_for_path()</A></TT></B> function: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;err = get_ref_for_path(path.Path(), &amp;ref);</PRE>
+<P>
+For you Node Monitor users:  You can't convert directly to a <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> structure.  The quickest way from here to there is:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* We&gt;ll skip InitCheck() and catch errors in GetNodeRef(). */
+&nbsp;&nbsp;&nbsp;BEntry entry(path.Path());
+&nbsp;&nbsp;&nbsp;err = entry.GetNodeRef(&amp;nref);</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="Immutability"></A>Immutability
+</H3>
+<P>
+Remember, a BPath represents a pathname, not a node.  It isn't "updated" when the file system changes:
+<P>
+<UL>
+<LI>A BPath's pathname string never changes behind your back, even if the entry that it originally pointed to is renamed, moved, or deleted.  
+<P>
+</UL>
+<P>
+For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry entry;
+&nbsp;&nbsp;&nbsp;BPath path;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Set a BPath, construct a BEntry from it, rename
+&nbsp;&nbsp;&nbsp; * the entry, and then print the BPath&gt;s pathname.
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;if (path.SetTo("/boot/lbj/fido") == B_OK) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (entry.SetTo(&amp;path) == B_OK) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (entry.Rename("rover") == B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Pathname: %sn", path.Path());</PRE>
+<P>
+We see...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ Pathname:  /boot/lbj/fido</PRE>
+<P>
+...even though the entry that the BPath was constructed to represent has been renamed. 
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BPath()"></A>BPath()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPath(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, bool <I><FONT  color=991122 face=HELVETICA>normalize</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPath(</TT></B></FONT>const <A HREF="Directory.html#BDirectory">BDirectory</A> *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, bool <I><FONT  color=991122 face=HELVETICA>normalize</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPath(</TT></B></FONT>const <A HREF="Entry.html#BEntry">BEntry</A> *entry<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPath(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPath(</TT></B></FONT>const BPath &amp;<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BPath object that represents the path that's created from the arguments.  See the analogous <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> functions for descriptions of the flavorful constructors.
+<P>
+<UL>
+<LI>The default constructor does nothing; it should be followed by a call to <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>.  
+<P>
+<LI>The copy constructor makes a copy of the argument's pathname.  
+<P>
+</UL>
+<P>
+The constructor automatically allocates memory for the object's stored pathname.  The memory is freed when the object is deleted. 
+<P>
+To check to see if an initialization was successful, call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="~BPath"></A>~BPath
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual ~<B><TT><FONT  color=000022 size=+1><A HREF="../Release%20Notes/StorageKit.html#BPath()">BPath()</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the object's pathname storage and extinguishes the object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Append()"></A>Append()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Append(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>normalize</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Appends the pathname given by <I><FONT  color=991122 face=HELVETICA>path</I></FONT> to the object's current pathname.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> must be relative.  If normalize is <B><TT>true</TT></B>, the new pathname is normalized; otherwise, it's normalized only if necessary.
+<P>
+Note that this...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp; Append("subdir/file") </PRE>
+<P>
+...is the same as (and is implemented as):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;path.SetTo(path.Path(), "subdir/file");</PRE>
+<P>
+The <B><TT><A HREF="#Append()">Append()</A></TT></B> return value is picked up from the <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> call.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> contained a leading "/", or <B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B> is uninitialized.
+<P>
+<LI>See <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> for other return values.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetParent()"></A>GetParent()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetParent(</TT></B></FONT>BPath *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the argument with the pathname to the parent directory of <B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.  Destructive parenting is acceptable (sociologically, it's a given):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path("/boot/lbj/fido");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;path.GetParent(&amp;path);</PRE>
+<P>
+Other details...
+<P>
+<UL>
+<LI><B><TT>GetParent()</TT></B> makes a call to <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>, but it's guaranteed not to tickle the normalization machine.
+<P>
+<LI>You can't get the parent of "/".
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Hello, mother.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  You tried to get the parent of "/".
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't allocate storage for the pathname.
+<P>
+</UL>
+<P>
+If the initialization isn't successful, the argument's <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> is set to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the status of the most recent construction or <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> call.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The initialization was successful.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The object is uninitialized (this includes <B><TT><A HREF="#Unset()">Unset()</A></TT></B>).
+<P>
+<LI>See <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> for other errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Path()"></A>Path()
+, 
+<A NAME="Leaf()"></A>Leaf()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Path(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Leaf(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return the object's full path and leaf name, respectively.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path("/boot/lbj/fido");
+&nbsp;&nbsp;&nbsp;printf("Path:  %sn", path.Path());
+&nbsp;&nbsp;&nbsp;printf("Leaf:  %sn", path.Leaf());</PRE>
+<P>
+Produces...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ Path:  /boot/lbj/fido
+&nbsp;&nbsp;&nbsp;$ Leaf:  fido</PRE>
+<P>
+In both cases, the returned pointers belong to the BPath object.  When the BPath is deleted, the pointers go with it.
+<P>
+If the BPath isn't initialized, the functions return pointers to <B><TT>NULL</TT></B>. 
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+, 
+<A NAME="Unset()"></A>Unset()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, bool <I><FONT  color=991122 face=HELVETICA>normalize</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const <A HREF="Directory.html#BDirectory">BDirectory</A> *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>normalize</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const <A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Unset(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function frees the pathname that the object currently holds, and re-initializes the object according to the arguments:
+<P>
+<UL>
+<LI>The first<I><FONT  color=991122 face=HELVETICA> </I></FONT>version concatenates the <I><FONT  color=991122 face=HELVETICA>path</I></FONT> and <I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> strings (interposing a "/" if necessary).  If <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is relative, the concatenated pathname is appended to the current working directory.  Note that you don't have to split your pathname into two parts to call this constructor; the optional <I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> argument is provided simply as a convenience.
+<P>
+<LI>The second version performs a similar operation using the path of the <A HREF="Directory.html#BDirectory">BDirectory</A> as the initial part of the pathname.
+<P>
+<LI>The third version initilizes the object with the path and name of the <I><FONT  color=991122 face=HELVETICA>entry</I></FONT>.
+<P>
+</UL>
+<P>
+Regarding the <I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> argument:
+<P>
+<UL>
+<LI>The <I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> string can contain directories&mdash;it needn't be <I>just</I> a leaf name.
+<P>
+<LI>However, <I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> must be a relative pathname (it can't start with "/").
+<P>
+</UL>
+<P>
+If set to <B><TT>true</TT></B>, the <I><FONT  color=991122 face=HELVETICA>normalize</I></FONT> argument tells the object to normalize the new pathname.  By default (<B><TT>false</TT></B>), the pathname is normalized only if necessary.  Note that the default <I>doesn't </I>mean that the object absolutely won't normalize, it just won't do it if it doesn't think it's necessary.  See &nbsp;<a href="#Initializing%20and%20Normalizing%20on%20page128">"Initializing and Normalizing" on page128</a> for the full story on normalizing a pathname, including the conditions that trigger default normalization.  Normalizing has no meaning with the <A HREF="Entry.html#BEntry">BEntry</A> version of <B><TT>SetTo()</TT></B>.
+<P>
+Storage for the pathname is allocated by the BPath object and is freed when the object is deleted (or when you re-initialize through <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>).  The <I><FONT  color=991122 face=HELVETICA>path</I></FONT> and <I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> arguments are copied into the allocated storage.
+<P>
+Other details...
+<P>
+<UL>
+<LI>Destructive setting is safe:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;/* This works... */
+&nbsp;&nbsp;&nbsp;path.SetTo(path.Path(), ...);</PRE>
+<P>
+<UL>
+<LI>Currently, <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> only checks pathname and filename length if it has to normalize.
+<P>
+</UL>
+<P>
+<B><TT><A HREF="#Unset()">Unset()</A></TT></B> frees the object's pathname storage and sets the <B><TT><A HREF="#InitCheck()">InitCheck()</A> </TT></B>value to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Successful initialization.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is <B><TT>NULL</TT></B>, <I><FONT  color=991122 face=HELVETICA>leaf</I></FONT> isn't relative (it starts with a "/"), or <I><FONT  color=991122 face=HELVETICA>dir</I></FONT> is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  A directory in the path doesn't exist (normalization only).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  A pathname element is too long (normalization only).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't allocate storage for the pathname.
+<P>
+</UL>
+<P>
+The return value is also recorded in <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="BFlattenable%20Functions"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>F</FONT>lattenable <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+The following functions are implemented in accordance with the rules set down by the <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A> class.  You never need to invoke these functions directly; they're implemented so a BPath can added to a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> (see &nbsp;<a href="#Passing%20a%20BPath%20in%20a%20BMessage%20on%20page130">"Passing a BPath in a BMessage" on page130</a>).  But in case you're interested...
+<P>
+<HR>
+<H3>
+<A NAME="AllowsTypeCode()"></A>AllowsTypeCode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>AllowsTypeCode(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>code</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>code</I></FONT> is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B>, and <B><TT>false</TT></B> otherwise.
+<P>
+<HR>
+<H3>
+<A NAME="Flatten()"></A>Flatten()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Flatten(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, ssize_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Converts the object's pathname to an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> and writes it into <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  Currently, <I><FONT  color=991122 face=HELVETICA>size</I></FONT> is ignored.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Peachy.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  The pathname is too long (> 1024 characters).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  A directory in the path doesn't exist.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="FlattenedSize()"></A>FlattenedSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual ssize_t <B><TT><FONT  color=000022 size=+1>FlattenedSize()</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the size of the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> that represents the flattened pathname.
+<P>
+<HR>
+<H3>
+<A NAME="IsFixedSize()"></A>IsFixedSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>IsFixedSize()</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>false</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="TypeCode()"></A>TypeCode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual type_code <B><TT><FONT  color=000022 size=+1>TypeCode()</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Unflatten()"></A>Unflatten()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Unflatten(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>code</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ssize_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes the BPath with the flattened <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> data that's found in <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  The type code must be <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Wrong type code (not <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B>).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  A directory in the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> data doesn't exist.
+<P>
+</UL>
+<P>
+The <B><TT><A HREF="#Unflatten()">Unflatten()</A></TT></B> return value is recorded in <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BPath&amp; operator<B><TT><FONT  color=000022 size=+1>=(</TT></B></FONT>const BPath &amp;<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BPath&amp; operator<B><TT><FONT  color=000022 size=+1>=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes <B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B> with a copy of the pathname that's gotten from the argument.  Also sets <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="=="></A>==
+, 
+<A NAME="!="></A>!=
+ (comparison)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const BPath &amp;<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>!=(</TT></B></FONT>const BPath &amp;<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>!=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Compares <B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>'s pathname with the pathname taken from the argument.  The comparison is a simple <B><TT>strcmp()</TT></B>; neither path is normalized or otherwise altered before the comparison is made.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPath path("/boot/lbj/fido");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;chdir("/boot");
+&nbsp;&nbsp;&nbsp;printf("Are they equal?  %dn", path == "lbj/fido");</PRE>
+<P>
+Displays:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ Are they equal? 0</PRE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

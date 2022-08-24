@@ -1,0 +1,695 @@
+<HTML><HEAD><TITLE>The Application Kit: BHandler</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BHandler"></A>BHandler
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Handler.h">be/app/Handler.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Handler.summary.html"><i>Summary</i></A></H6>
+<P>
+A BHandler object responds to messages that are handed to it by a BLooper.  The <A HREF="Looper.html#BLooper">BLooper</A> tells the BHandler about a message by invoking the BHandler's MessageReceived() function. 
+<P>
+<HR>
+<H3>
+<A NAME="The%20Handler%20List"></A>The Handler List
+</H3>
+<P>
+To be eligible to get messages from a <A HREF="Looper.html#BLooper">BLooper</A>, a BHandler must be in the BLooper's list of <I>eligible handlers</I> (as explained in the <A HREF="Looper.html#BLooper">BLooper</A> class).  The list of eligible handlers is ordered; if the "first" handler doesn't want to respond to a message that it has received, it simply calls the inherited version of  <B><TT><A HREF="#MessageReceived()">MessageReceived()</A> </TT></B>and the message will automatically be handed to the object's "next" handler.  (System messages are not handed down the list.)  The <A HREF="Looper.html#BLooper">BLooper</A> that all these BHandlers belong to is always the last the last handler in the list (BLooper inherits from BHandler).  
+<P>
+A BHandler's next handler assignment can be changed through <B><TT><A HREF="#SetNextHandler()">SetNextHandler()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Targets"></A>Targets
+</H3>
+<P>
+You can designate a target BHandler for most messages.  The designation is made when calling BLooper's <B><TT><A HREF="Looper.html#PostMessage()">PostMessage()</A></TT></B> function or when constructing the <A HREF="Messenger.html#BMessenger">BMessenger</A> object that will send the message.  Messages that a user drags and drops are targeted to the object (a BView) that controls the part of the window where the message was dropped.  The messaging mechanism eventually passes the target BHandler to <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B>, so that the message can be delivered to its designated destination.
+<P>
+<HR>
+<H3>
+<A NAME="Filtering"></A>Filtering
+</H3>
+<P>
+Messages can be filtered before they're dispatched&mdash;that is, you can define a function that will look at the message before the target BHandler's hook function is called.  The filter function is associated with a <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> object, which records the criteria for calling the function.
+<P>
+Filters that should apply only to messages targeted to a particular BHandler are assigned to the BHandler by <B><TT><A HREF="#SetFilterList()">SetFilterList()</A></TT></B> or <B><TT><A HREF="#AddFilter()">AddFilter()</A></TT></B>.  Filters that might apply to any message a <A HREF="Looper.html#BLooper">BLooper</A> dispatches, regardless of its target, are assigned by the parallel <A HREF="Looper.html#BLooper">BLooper</A> functions, <B><TT><A HREF="Looper.html#SetCommonFilterList()">SetCommonFilterList()</A></TT></B> and <B><TT>AddCommonFilter()</TT></B>.  See those functions and the <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> class for details.
+<P>
+<HR>
+<H3>
+<A NAME="Notifiers%20and%20Observers"></A>Notifiers and Observers
+</H3>
+<P>
+A BHandler can be a <B>notifier</B>.  A notifier is a handler that maintains one or more states and notifies interested parties when those states change.  Each state is idenfified by a 32-bit "what" code.  Interested parties, called <B>observers</B>, can register to monitor changes in one or more states by calling <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B> and specifying the "what" code of the state they want to be notified of changes to.
+<P>
+This notification occurs when the BHandler calls <B><TT><A HREF="../Release%20Notes/AppKit.html#SendNotices()">SendNotices()</A></TT></B>; it's the handler's job to call <B><TT><A HREF="../Release%20Notes/AppKit.html#SendNotices()">SendNotices()</A></TT></B> whenever a state changes, to ensure that observers are kept informed of the changes.  The BHandler passes to <B><TT><A HREF="../Release%20Notes/AppKit.html#SendNotices()">SendNotices()</A></TT></B> a message template to be sent to the observers.
+<P>
+When a notification is sent, observers receive a <B><TT><A HREF="../Messages/GeneralMessages.html#B_OBSERVER_NOTICE_CHANGE">B_OBSERVER_NOTICE_CHANGE</A></TT></B> message with an int32 field <B><TT>B_OBSERVE_WHICH_CHANGE</TT></B> that contains the "what" code of the state that changed, and a <B><TT>B_OBSERVE_ORIGINAL_WHAT</TT></B> field that contains the "what" value that was in the template BMessage.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#MessageReceived()">MessageReceived()</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BHandler()"></A>BHandler()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BHandler(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>name</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BHandler(<A HREF="Message.html#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BHandler by assigning it a <I><FONT  color=991122 face=HELVETICA>name</I></FONT> and registering it with the messaging system.  BHandlers can also be reconstructed from a <A HREF="Message.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="~BHandler()"></A>~BHandler()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><FONT  color=000022 size=+1>~BHandler()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes any BMessageFilters assigned to the BHandler.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>Instantiate()  see <A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>AddFilter()   see <A HREF="#SetFilterList()">SetFilterList()</A></H3>
+<P>
+<a href="#Archived%20Fields">"Archived Fields"</a>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+, 
+<A NAME="see"></A>see
+</H3>
+<P>
+<HR>
+<H3>FilterList()   see <A HREF="#SetFilterList()">SetFilterList()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetSupportedSuites()"></A>GetSupportedSuites()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetSupportedSuites(<A HREF="Message.html#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to report the suites of messages and specifiers they understand.  This function is called in response to either a <B><TT>B_GET_PROPERTIES</TT></B> scripting message for the "Suites" property or a <B><TT><A HREF="misc.html#B_GET_SUPPORTED_SUITES">B_GET_SUPPORTED_SUITES</A></TT></B> message. 
+<P>
+Each derived class should add the names of the suites it implements to the "suites" array of <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.  Each item in the array is a MIME string with the "suite" supertype.  In addition, the class should add corresponding flattened <A HREF="PropertyInfo.html#BPropertyInfo">BPropertyInfo</A> objects in the "messages" array.  A typical implementation of <B><TT><A HREF="#GetSupportedSuites()">GetSupportedSuites()</A></TT></B> looks like:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t MyHandler::GetSupportedSuites(BMessage *message)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message->AddString("suites", "suite/vnd.Me-my_handler"));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPropertyInfo prop_info(prop_list);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message->AddFlat("messages", &amp;prop_info);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return BHandler::GetSupportedSuites(message);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The value returned by <B><TT><A HREF="#GetSupportedSuites()">GetSupportedSuites()</A></TT></B> is added to <I><FONT  color=991122 face=HELVETICA>message</I></FONT> in the int32 "error" field.  
+<P>
+BHandler's version of this function adds the universal suite "suite/vnd.Be-handler" to <I><FONT  color=991122 face=HELVETICA>message</I></FONT> then returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="LockLooper()"></A>LockLooper()
+, 
+<A NAME="LockLooperWithTimeout()"></A>LockLooperWithTimeout()
+, 
+<A NAME="UnlockLooper()"></A>UnlockLooper()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <B><TT><FONT  color=000022 size=+1>LockLooper(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>LockLooperWithTimeout(<A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>UnlockLooper(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These are "smart" versions of BLooper's locking functions (<B><TT><A HREF="Looper.html#Lock()">BLooper::Lock()</A></TT></B> et. al.).  The difference between the versions is that these functions retrieve the handler's looper and lock  it (or unlock it) in a pseudo-atomic operation, thus avoiding a race condition.  Anytime you're tempted to write code such as this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* DON'T DO THIS */
+&nbsp;&nbsp;&nbsp;if (myHandler->Looper()->Lock()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;myHandler->Looper()->Unlock(); 
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Don't do it.  Instead, do this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* DO THIS INSTEAD */
+&nbsp;&nbsp;&nbsp;if (myHandler->LockLooper()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;myHandler->UnlockLooper(); 
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Except for an additional return value in <B><TT><A HREF="#LockLooperWithTimeout()">LockLooperWithTimeout()</A></TT></B>, these functions are identical to their <A HREF="Looper.html#BLooper">BLooper</A> analogues.  See to <B><TT><A HREF="Looper.html#Lock()">BLooper::Lock()</A></TT></B> for details.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#LockLooper()">LockLooper()</A></TT></B> returns <B><TT>true</TT></B> if it was able to lock the looper, or if it's already locked by the calling thread, and <B><TT>false</TT></B> otherwise.  If the handler changes loopers during the call, <B><TT>false</TT></B> is returned.
+<P>
+<B><TT><A HREF="#LockLooperWithTimeout()">LockLooperWithTimeout()</A></TT></B> returns:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The looper was successfully locked.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.  The call timed out without locking the looper.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  This handler's looper is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MISMATCHED_VALUES">B_MISMATCHED_VALUES</A></TT></B>.  The handler switched loopers during the call.
+<P>
+</UL>
+<P>
+<HR>
+<H3>LockLooperWithTimeout()   see <A HREF="#LockLooper()">LockLooper()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Looper()"></A>Looper()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="Looper.html#BLooper">BLooper</A> *</TT></B><B><TT><FONT  color=000022 size=+1>Looper(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="Looper.html#BLooper">BLooper</A> object that the BHandler has been added to.  The function returns <B><TT>NULL</TT></B> if the object hasn't been added to a BLooper.  A BHandler can be associated with only one <A HREF="Looper.html#BLooper">BLooper</A> at a time.
+<P>
+Note that a <A HREF="Looper.html#BLooper">BLooper</A> object automatically adds itself (as a handler) to itself (as a looper), and a <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> automatically adds its child views.  To explicitly add a handler to a looper, you call <B><TT><A HREF="Looper.html#AddHandler()">BLooper::AddHandler()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="MessageReceived()"></A>MessageReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>MessageReceived(<A HREF="Message.html#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to messages that are received by the BHandler.  The default (BHandler) implementation of this function responds only to scripting requests.  It passes all other messages to the next handler by calling that object's version of <B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B>.
+<P>
+A typical <B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B> implementation distinguishes between messages by looking at its command constant (i.e. the <B><TT>what</TT></B> field).  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyHandler::MessageReceived(BMessage *message)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch ( message->what ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case COMMAND_ONE:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HandleCommandOne()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case COMMAND_TWO:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HandleCommandTwo()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>baseClass</I>::MessageReceived(message);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+It's essential that all unhandled messages are passed to the base class implementation of <B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B>, as shown here.  The handler chain model depends on it.
+<P>
+If the message comes to the end of the line&mdash;if it's not recognized and there is no next handler&mdash;the BHandler version of this function sends a <B><TT><A HREF="misc.html#B_MESSAGE_NOT_UNDERSTOOD">B_MESSAGE_NOT_UNDERSTOOD</A></TT></B> reply to notify the message source.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/importantBullet.gif">
+					<TD><FONT FACE="helvetica">
+<I><B>Do not delete the argument </B></I><I><FONT  color=991122 face=HELVETICA>message<B> when you're done with.</B></I></FONT>  It doesn't belong to you.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>Name()   see <A HREF="#SetName()">SetName()</A></H3>
+<P>
+<HR>
+<H3>NextHandler()   see <A HREF="#SetNextHandler()">SetNextHandler()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ResolveSpecifier()"></A>ResolveSpecifier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual BHandler *<B><TT><FONT  color=000022 size=+1>ResolveSpecifier(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Message.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>what</I></FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>property</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to determine the proper handler for a scripting message.  The message is targeted to the <A HREF="#BHandler">BHandler</A>, but the specifiers may indicate that it should be assigned to another object.  It's the job of <B><TT><A HREF="#ResolveSpecifier()">ResolveSpecifier()</A></TT></B> to examine the current specifier (or more, if necessary) and return the object that should either handle the message or look at the next specifier.  This function is called before the message is dispatched and before any filtering functions are called.
+<P>
+The first argument, <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, points to the scripting message under consideration.  The current specifier is passed in <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>; it will be at index <I><FONT  color=991122 face=HELVETICA>index</I></FONT> in the specifier array of <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.  Finally, <I><FONT  color=991122 face=HELVETICA>what</I></FONT> contains the <B><TT>what</TT></B> data member of <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> while <I><FONT  color=991122 face=HELVETICA>property</I></FONT> contains the name of the targeted property.
+<P>
+If the current BHandler is able to handle the scripting message, it should return a pointer to itself (<I><FONT  color=991122 face=HELVETICA>this</I></FONT>).  If a BHandler in another <A HREF="Looper.html#BLooper">BLooper</A> is the target, it should send the message to the <A HREF="Looper.html#BLooper">BLooper</A> and return <B><TT>NULL</TT></B>.  This causes the current <A HREF="Looper.html#BLooper">BLooper</A> to stop further processing of the message.  Otherwise, the function should return a pointer to the BHandler that should handle the message, if no specifiers remain, or look at the next specifier, if any exist.  Often, <B><TT>ResolveSpecifier()</TT></B> calls <B><TT><A HREF="Message.html#PopSpecifier()">PopSpecifier()</A></TT></B> before returning so the next BHandler won't examine the same specifier.
+<P>
+BHandler's version of <B><TT><A HREF="#ResolveSpecifier()">ResolveSpecifier()</A></TT></B> recognizes a <B><TT><A HREF="misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B> <I><FONT  color=991122 face=HELVETICA>message</I></FONT> with a direct <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> requesting a "Messenger" for the BHandler or the BHandler's "InternalName" (the same name that its <B><TT><A HREF="#Name()">Name()</A></TT></B> function returns).  In both cases, it assigns the BHandler (<B><TT>this</TT></B>) as the object responsible for the message.
+<P>
+For all other specifiers and messages, it sends a <B><TT><A HREF="misc.html#B_MESSAGE_NOT_UNDERSTOOD">B_MESSAGE_NOT_UNDERSTOOD</A></TT></B> reply and returns <B><TT>NULL</TT></B>.  The reply message has an "error" field with <B><TT>B_SCRIPT_SYNTAX</TT></B> as the error and a "message" field with a longer textual explanation of the error.
+<P>
+For more information about this function and scripting in general, see the "Scripting" section near the beginning of this chapter.
+<P>
+<B>See also:  <TT><A HREF="Message.html#AddSpecifier()">BMessage::AddSpecifier()</A></TT></B>, <B><TT><A HREF="Message.html#GetCurrentSpecifier()">BMessage::GetCurrentSpecifier()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetFilterList()"></A>SetFilterList()
+, 
+<A NAME="FilterList()"></A>FilterList()
+, 
+<A NAME="AddFilter()"></A>AddFilter()
+, 
+<A NAME="RemoveFilter()"></A>RemoveFilter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetFilterList(</TT></B></FONT><A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *<I><FONT  color=991122 face=HELVETICA>list</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *<B><TT><FONT  color=000022 size=+1>FilterList(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AddFilter(</TT></B></FONT><A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> *<I><FONT  color=991122 face=HELVETICA>filter</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>RemoveFilter(</TT></B></FONT><A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> *<I><FONT  color=991122 face=HELVETICA>filter</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions manage a list of <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> objects associated with the BHandler.
+<P>
+<B><TT><A HREF="#SetFilterList()">SetFilterList()</A></TT></B> assigns the BHandler a new <I><FONT  color=991122 face=HELVETICA>list</I></FONT> of filters; the list must contain pointers to instances of the <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> class or to instances of classes that derive from BMessageFilter.  The new list replaces any list of filters previously assigned.  All objects in the previous list are deleted, as is the <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> that contains them.  If <I><FONT  color=991122 face=HELVETICA>list</I></FONT> is <B><TT>NULL</TT></B>, the current list is removed without a replacement.  <B><TT><A HREF="#FilterList()">FilterList()</A></TT></B> returns the current list of filters.
+<P>
+<B><TT><A HREF="#AddFilter()">AddFilter()</A></TT></B> adds a <I><FONT  color=991122 face=HELVETICA>filter</I></FONT> to the end of the BHandler's list of filters.  It creates the <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> object if it doesn't already exist.  By default, BHandlers don't maintain a <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> of filters until one is assigned or the first <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> is added.  <B><TT><A HREF="#RemoveFilter()">RemoveFilter()</A></TT></B> removes a <I><FONT  color=991122 face=HELVETICA>filter</I></FONT> from the list without deleting it.  It returns <B><TT>true</TT></B> if successful, and <B><TT>false</TT></B> if it can't find the specified filter in the list (or the list doesn't exist).  It leaves the <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> in place even after removing the last filter.
+<P>
+For <B><TT><A HREF="#SetFilterList()">SetFilterList()</A></TT></B>, <B><TT><A HREF="#AddFilter()">AddFilter()</A></TT></B>, and <B><TT><A HREF="#RemoveFilter()">RemoveFilter()</A></TT></B> to work, the BHandler must be assigned to a <A HREF="Looper.html#BLooper">BLooper</A> object and the <A HREF="Looper.html#BLooper">BLooper</A> must be locked.
+<P>
+<B>See also:  <TT><A HREF="Looper.html#SetCommonFilterList()">BLooper::SetCommonFilterList()</A></TT></B>, <B><TT><A HREF="Looper.html#Lock()">BLooper::Lock()</A></TT></B>, the <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> class
+<P>
+<HR>
+<H3>
+<A NAME="SetName()"></A>SetName()
+, 
+<A NAME="Name()"></A>Name()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetName(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Name(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the name that identifies the BHandler.  The name is originally set by the constructor.  <B><TT><A HREF="#SetName()">SetName()</A></TT></B> assigns the BHandler a new name, and <B><TT><A HREF="#Name()">Name()</A></TT></B> returns the current name.  The string returned by <B><TT><A HREF="#Name()">Name()</A></TT></B> belongs to the BHandler object; it shouldn't be altered or freed.
+<P>
+<B>See also:  </B>the BHandler constructor, <B><TT>BView::FindView()</TT></B> in the Interface Kit
+<P>
+<HR>
+<H3>
+<A NAME="SetNextHandler()"></A>SetNextHandler()
+, 
+<A NAME="NextHandler()"></A>NextHandler()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SetNextHandler(<A HREF="#BHandler">BHandler</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>handler</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="#BHandler">BHandler</A> *</TT></B><B><TT><FONT  color=000022 size=+1>NextHandler(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetNextHandler()">SetNextHandler()</A></TT></B> reorders the objects in the <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> chain so that handler follows this BHandler.  This BHandler and <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> must already be part of the same chain, and the <A HREF="Looper.html#BLooper">BLooper</A> they belong to must be locked.  The order of objects in the handler chain affects the way in-coming messages are handled (as explained in <a href="&lt;v>SuperMac(TM)  HDTmpWorkThe Application Kittopic_Messaging.html#Inheritance%20and%20the%20Handler%20Chain">"Inheritance and the Handler Chain"</a>.  By default handlers are placed in the order that they're added (through <B><TT><A HREF="Looper.html#AddHandler()">BLooper::AddHandler()</A></TT></B>).
+<P>
+<B><TT><A HREF="#NextHandler()">NextHandler()</A></TT></B> returns this object next handler.  If this object is at the end of the chain, it returns <B><TT>NULL</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="StartWatching()"></A>StartWatching()
+, 
+<A NAME="StartWatchingAll()"></A>StartWatchingAll()
+, 
+<A NAME="StopWatching()"></A>StopWatching()
+, 
+<A NAME="StopWatchingAll()"></A>StopWatchingAll()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t </I><B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>watcher</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>what</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT>BHandler *<I><FONT  color=991122 face=HELVETICA>watcher</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>what</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatchingAll(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>watcher</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatchingAll(</TT></B></FONT>BHandller *<I><FONT  color=991122 face=HELVETICA>watcher</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>watcher</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>what</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT>BHandler *<I><FONT  color=991122 face=HELVETICA>watcher</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>what</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatchingAll(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>watcher</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatchingAll(</TT></B></FONT>BHandller *<I><FONT  color=991122 face=HELVETICA>watcher</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The BHandler class provides the concept of a <B>notifier</B>.  Notifiers maintain one or more states that other entities might want to monitor changes to.  These states are identified by a 32-bit <I><FONT  color=991122 face=HELVETICA>what</I></FONT> code.  Another entity&mdash;a BHandler or a <A HREF="Messenger.html#BMessenger">BMessenger</A>&mdash;can watch for changes notifiers' states.  These are called <B>observers</B>.
+<P>
+<B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B> registers the <A HREF="Messenger.html#BMessenger">BMessenger</A> or BHandler specified by <I><FONT  color=991122 face=HELVETICA>watcher</I></FONT> to be notified whenever the state specified by <I><FONT  color=991122 face=HELVETICA>what</I></FONT> changes.  <B><TT><A HREF="#StartWatchingAll()">StartWatchingAll()</A></TT></B> registers the specified <A HREF="Messenger.html#BMessenger">BMessenger</A> or BHandler to be notified when any of the notifer's states change.
+<P>
+<B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B> works by sending a message to the BHandler you want to observe, with a <A HREF="Messenger.html#BMessenger">BMessenger</A> back to the observer, so both must be attached to a looper at the time <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B> is called.
+<P>
+<B><TT><A HREF="#StopWatching()">StopWatching()</A></TT></B> ceases monitoring of the state <I><FONT  color=991122 face=HELVETICA>what</I></FONT>.  <B><TT><A HREF="#StopWatchingAll()">StopWatchingAll()</A></TT></B>, by some odd coincidence, stops all monitoring by the BHandler or <A HREF="Messenger.html#BMessenger">BMessenger</A> specified by <I><FONT  color=991122 face=HELVETICA>watcher</I></FONT>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_HANDLER">B_BAD_HANDLER</A></TT></B>.  The specified BHandler isn't valid.
+<P>
+</UL>
+<P>
+<HR>
+<H3>UnlockLooper()   see <A HREF="#LockLooper()">LockLooper()</A></H3>
+<P>
+<A NAME="14722:%20head1:%20Archived%20Fields"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+<B><TABLE BORDER cellpadding=4>
+<TH></B>Field</TH>
+<TH>Type code</TH>
+<TH>Meaning</TH>
+<TR>
+<TD>"_name"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The object's name (see <B><TT><A HREF="#SetName()">SetName()</A></TT></B>).</TD>
+</TABLE>
+<P>
+<HR>
+<H2>
+<A NAME="Scripting%20Suites%20and%20Properties"></A><FONT SIZE=6>S</FONT>cripting <FONT SIZE=6>S</FONT>uites and <FONT SIZE=6>P</FONT>roperties
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME=""InternalName""></A>"InternalName"
+</H3>
+<P>
+<B><TABLE BORDER cellpadding=4>
+<TH>Message</B></TH>
+<TH>Specifiers</TH>
+<TH>Reply Type</TH>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TD>
+</TABLE></TT></B>
+<P>
+Returns the handler's name.
+<P>
+<HR>
+<H3>
+<A NAME=""Messenger""></A>"Messenger"
+</H3>
+<P>
+<B><TABLE BORDER cellpadding=4>
+<TH></B>Message</TH>
+<TH>Specifiers</TH>
+<TH>Reply Type</TH>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSENGER_TYPE">B_MESSENGER_TYPE</A></TD>
+</TABLE></TT></B>
+<P>
+Returns a <A HREF="Messenger.html#BMessenger">BMessenger</A> for the handler.
+<P>
+<HR>
+<H3>
+<A NAME=""Suites""></A>"Suites"
+</H3>
+<P>
+<B><TABLE BORDER cellpadding=4>
+<TH></B>Message</TH>
+<TH>Specifiers</TH>
+<TH>Reply Type</TH>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B> array</TD>
+</TABLE>
+<P>
+Returns an array of suites that the target supports, identified by name (e.g. "suite/vnd.Be-handler").
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

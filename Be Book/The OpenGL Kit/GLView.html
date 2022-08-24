@@ -1,0 +1,800 @@
+<HTML><HEAD><TITLE>The OpenGL Kit: BGLView</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The OpenGL Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20OpenGL%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The OpenGL Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BGLView"></A>BGLView
+</H1>
+<P>
+Derived from:  public <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/opengl/GLView.h">be/opengl/GLView.h</A>
+<P>
+Library:  libGL.so
+<P>
+<H6><A HREF="GLView.summary.html"><i>Summary</i></A></H6>
+<P>
+The BGLView class provides a means for rendering graphics using OpenGL calls in a view.
+<P>
+<HR>
+<H2>
+<A NAME="The%20Graphics%20Buffers"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>G</FONT>raphics <FONT SIZE=6>B</FONT>uffers
+</H2>
+<P>
+A BGLView automatically manages video buffers and interfaces to supported hardware acceleration chipsets; all you have to do is call the appropriate OpenGL calls to render your graphics.
+<P>
+The <B>frontbuffer</B> is the graphics buffer that is currently visible on the screen.  A <B>backbuffer</B> is a graphics buffer that is located offscreen.
+<P>
+In a single-buffered context, drawing commands are performed in the frontbuffer.  Drawing performed in single-buffered mode immediately appears on the screen.
+<P>
+In double-buffered contexts, drawing is performed in the backbuffer and is not visible onscreen until the <B><TT><A HREF="#SwapBuffers()">SwapBuffers()</A></TT></B> function is called to swap the two buffers and refresh the screen image.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The BGLView class currently only supports double-buffered OpenGL contexts.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="BGLView%20&amp;%20BDirectWindow"></A>BGLView &amp; BDirectWindow
+</H3>
+<P>
+The BGLView class provides a function, <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B>, that your <B><TT><A HREF="../The%20Game%20Kit/DirectWindow.html#DirectConnected()">BDirectWindow::DirectConnected()</A></TT></B> function can call to handle the work of refreshing the OpenGL display.
+<P>
+<A NAME="Using%20OpenGL"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Using%20OpenGL"></A><FONT SIZE=6>U</FONT>sing <FONT SIZE=6>O</FONT>pen<FONT SIZE=6>G</FONT><FONT SIZE=6>L</FONT>
+</H2>
+<P>
+Long-winded discussion of how to use OpenGL is well beyond the realm of what this book is intended to cover; for complete information on OpenGL, see the OpenGL web site at http://www.opengl.org, where you'll find complete documentation and sample code.
+<P>
+However, it's important to understand how OpenGL fits into the framework of a BeOS application.  The example that follows will draw a pattern of lines around a central point, as seen in the picture below.
+<P>
+<IMG SRC="art/gltest.gif" ALIGN="bottom">
+<P>
+This code has been structured to make it relatively easy to port sample programs from the OpenGL web site; however, most of those samples use GLUT features, which aren't available yet in the BeOS implementation of OpenGL.  In particular, most of the samples on the OpenGL web site use GLUT functions to handle user interface of some form.  You'll have to add code for this yourself.
+<P>
+The complete source code and project file can be found on the Be web site at &lt;&lt;&lt;insert URL here>>>.
+<P>
+The first thing that's needed, as always, is an application object, which we establish as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;class SampleGLApp : public BApplication {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SampleGLApp();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SampleGLWindow&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;theWindow;
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+The SampleGLApp class has a constructor and a private pointer to the application's window.  The constructor looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SampleGLApp::SampleGLApp()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: BApplication("application/x-vnd.Be-GLSample") {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BRect windowRect;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Set type to the appropriate value for the
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// sample program you&gt;re working with.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type = BGL_RGB|BGL_DOUBLE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;windowRect.Set(50,50,350,350);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;theWindow = new SampleGLWindow(windowRect, type);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The first thing the constructor here does is set the variable type to describe the context we need.  In this example, we want an RGB context with double-buffering on, so we specify <B><TT>BGL_RGB</TT></B> and <B><TT>BGL_DOUBLE</TT></B>.  Then we create the window using the <B><TT>new</TT></B> function.
+<P>
+The SampleGLWindow class is almost as simple:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;class SampleGLWindow : public BWindow {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SampleGLWindow(BRect frame, uint32 type);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;virtual bool&nbsp;&nbsp;&nbsp;QuitRequested();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SampleGLView&nbsp;&nbsp;&nbsp;*theView;
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+The constructor accepts a frame rectangle for the window and the OpenGL context type parameter that will be passed to SampleGLView's constructor.  As always, <B><TT><A HREF="../The%20Application%20Kit/Application.html#QuitRequested()">QuitRequested()</A></TT></B> is overridden to post a <B><TT><A HREF="../Messages/GeneralMessages.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> message to the application and return <B><TT>true</TT></B>.  A pointer to the SampleGLView object is maintained as well.
+<P>
+The constructor is fairly trivial:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SampleGLWindow::SampleGLWindow(BRect frame, uint32 type)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: BWindow(frame, "OpenGL Test", B_TITLED_WINDOW, 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AddChild(theView=new SampleGLView(Bounds(), type));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;theView->Render();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This code establishes the window, then creates the SampleGLView and adds it as a child of the window.  Once that's done, the window is made visible by calling <B><TT><A HREF="../The%20Game%20Kit/WindowScreen.html#Show()">Show()</A></TT></B>.  Finally, the SampleGLView's contents are drawn by calling the SampleGLView's <B><TT>Render()</TT></B> function.
+<P>
+The meat of this program is in the SampleGLView class, which follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;class SampleGLView : public BGLView {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SampleGLView(BRect frame, uint32 type);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;virtual void&nbsp;&nbsp;&nbsp;AttachedToWindow(void);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;virtual void&nbsp;&nbsp;&nbsp;FrameResized(float newWidth, float newHeight);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;virtual void&nbsp;&nbsp;&nbsp;ErrorCallback(GLenum which);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Render(void);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gInit(void);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gDraw(void);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gReshape(int width, int height);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height;
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+The SampleGLView class implements the constructor and reimplements three of the functions of the BGLView class: <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B>, <B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B>, and <B><TT><A HREF="#ErrorCallback()">ErrorCallback()</A></TT></B>.  An additional public method, <B><TT>Render()</TT></B>, will contain the actual code for drawing the contents of the view.
+<P>
+In addition, there are three private methods that will contain the actual OpenGL calls for initializing, drawing, and resizing the BGLView's contents and a pair of values to represent the width and height of the BGLView.
+<P>
+The constructor is very simple:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SampleGLView::SampleGLView(BRect frame, uint32 type)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: BGLView(frame, "SampleGLView", B_FOLLOW_ALL_SIDES, 0,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width = frame.right-frame.left;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height = frame.bottom-frame.top;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+For the most part, the constructor defers to the BGLView constructor, setting the resizingMode to <B><TT>B_FOLLOW_ALL_SIDES</TT></B> and the OpenGL context type to the value specified.
+<P>
+The only addition is that the <B><TT>
+<A NAME="width"></A>width
+</TT></B> and <B><TT>
+<A NAME="height"></A>height
+</TT></B> of the view are cached, based upon the frame rectangle specified.  This is done because we'll need that information when the view is attached to the window, and the BGLView class doesn't include <B><TT><A HREF="../The%20Interface%20Kit/Rect.html#Width()">Width()</A></TT></B> and <B><TT><A HREF="../The%20Interface%20Kit/Rect.html#Height()">Height()</A></TT></B> functions.
+<P>
+The <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> function, which is called when the SampleGLView is attached to its parent window, looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void SampleGLView::AttachedToWindow(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LockGL();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGLView::AttachedToWindow();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gInit();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gReshape(width, height);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UnlockGL();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This performs the initialization of the OpenGL context.  First, <B><TT><A HREF="#LockGL()">LockGL()</A></TT></B> is called to lock the context and let the OpenGL Kit know which view should be targeted by future OpenGL calls.  Then the inherited version of <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> is called to let BGLView set up the view normally.
+<P>
+Once that's done, the <B><TT>gInit()</TT></B> and <B><TT>gReshape()</TT></B> functions are called.  <B><TT>gInit()</TT></B>, as we'll see shortly, is responsible for initializing the context.  <B><TT>gReshape()</TT></B> is called to configure the OpenGL coordinate system for the BGLView given the current <B><TT>
+<A NAME="width"></A>width
+</TT></B> and <B><TT>
+<A NAME="height"></A>height
+</TT></B> of the view.
+<P>
+Finally, <B><TT>UnlockGL()</TT></B> is called to release the OpenGL context for the SampleGLView and to indicate that we're done using the context for the time being.
+<P>
+The <B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B> function is called automatically whenever the SampleGLView is resized:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void SampleGLView::FrameResized(float newWidth, float newHeight) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LockGL();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGLView::FrameResized(width, height);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width = newWidth;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height = newHeight;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gReshape(width,height);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UnlockGL();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Render();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+As always, this function begins by locking the OpenGL context.  It then calls the inherited version of <B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B> to let BGLView perform whatever tasks it may need to do.
+<P>
+The new width and height of the view are saved in the <B><TT>
+<A NAME="width"></A>width
+</TT></B> and <B><TT>
+<A NAME="height"></A>height
+</TT></B> variables, then the <B><TT>gReshape()</TT></B> function is called to adjust the OpenGL context given the new size of the view.
+<P>
+Finally, the context is unlocked, and <B><TT>Render()</TT></B> is called to redraw the view's contents at the new size.
+<P>
+Although the default <B><TT><A HREF="#ErrorCallback()">ErrorCallback()</A></TT></B> function provided by BGLView would be acceptable, we include one of our own anyway:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void SampleGLView::ErrorCallback(GLenum whichError) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fprintf(stderr, "Unexpected error occured (%d):n", whichError);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fprintf(stderr, "    %sn", gluErrorString(whichError));
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Note the use of the <B><TT>gluErrorString()</TT></B> OpenGL function to obtain an appropriate error message for the error code.  You can use this function to avoid displaying error messages for errors that are acceptable or expected.
+<P>
+The <B><TT>gInit()</TT></B> function sets up the OpenGL context and initializes variables that will be used later:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void SampleGLView::gInit(void) {
+&nbsp;&nbsp;&nbsp;    glClearColor(0.0, 0.0, 0.0, 0.0);
+&nbsp;&nbsp;&nbsp;    glLineStipple(1, 0xF0E0);
+&nbsp;&nbsp;&nbsp;    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+&nbsp;&nbsp;&nbsp;    use_stipple_mode = GL_FALSE;
+&nbsp;&nbsp;&nbsp;    use_smooth_mode = GL_TRUE;
+&nbsp;&nbsp;&nbsp;    linesize = 2;
+&nbsp;&nbsp;&nbsp;    pointsize = 4;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Briefly, this sets the clear color (the background color) of the view to black, configures the pattern for stippled lines and the blending function to be used when blending is enabled.  It also selects not to use stippled lines (you can change this by setting <B><TT>use_stipple_mode</TT></B> to <B><TT>GL_TRUE</TT></B>) and to use anti-aliasing when drawing the lines (you can change this by setting <B><TT>
+<A NAME="use_smooth_mode"></A>use_smooth_mode
+</TT></B> to <B><TT>GL_FALSE</TT></B>).  It also chooses to use 2 pixel wide lines, and 4 pixel wide points.
+<P>
+This function doesn't call <B><TT><A HREF="#LockGL()">LockGL()</A></TT></B> and <B><TT><A HREF="#UnlockGL()">UnlockGL()</A></TT></B>, so they must be called by the calling function (and if you look at the <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> code above, you'll see that this is the case).
+<P>
+There are some global variables used by this program (some of them accessed in the above code), so lets' take a quick look at those:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;GLenum use_stipple_mode;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// GL_TRUE to use dashed lines
+&nbsp;&nbsp;&nbsp;GLenum use_smooth_mode;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// GL_TRUE to use anti-aliased lines
+&nbsp;&nbsp;&nbsp;GLint linesize;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Line width
+&nbsp;&nbsp;&nbsp;GLint pointsize;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Point diameter
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;float pntA[3] = {
+&nbsp;&nbsp;&nbsp;    -160.0, 0.0, 0.0
+&nbsp;&nbsp;&nbsp;};
+&nbsp;&nbsp;&nbsp;float pntB[3] = {
+&nbsp;&nbsp;&nbsp;    -130.0, 0.0, 0.0
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+The varaibles <B><TT>
+<A NAME="use_stipple_mode"></A>use_stipple_mode
+</TT></B>, <B><TT>
+<A NAME="use_smooth_mode"></A>use_smooth_mode
+</TT></B>, <B><TT>
+<A NAME="linesize"></A>linesize
+</TT></B>, and <B><TT>
+<A NAME="pointsize"></A>pointsize
+</TT></B> are discussed in the <B><TT>gInit()</TT></B> function above.  The two float arrays define points in three-dimensional space.  These points will be used as the endpoints of the lines drawn by the <B><TT>gDraw()</TT></B> function.
+<P>
+The <B><TT>gDraw()</TT></B> function does the actual drawing into the OpenGL context:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void SampleGLView::gDraw(void) {
+&nbsp;&nbsp;&nbsp;    GLint i;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    glClear(GL_COLOR_BUFFER_BIT);
+&nbsp;&nbsp;&nbsp;    glLineWidth(linesize);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    if (use_stipple_mode) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glEnable(GL_LINE_STIPPLE);
+&nbsp;&nbsp;&nbsp;    } else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glDisable(GL_LINE_STIPPLE);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    if (use_smooth_mode) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glEnable(GL_LINE_SMOOTH);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glEnable(GL_BLEND);
+&nbsp;&nbsp;&nbsp;    } else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glDisable(GL_LINE_SMOOTH);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glDisable(GL_BLEND);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    glPushMatrix();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    for (i = 0; i &lt; 360; i += 5) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glRotatef(5.0, 0,0,1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Rotate right 5 degrees
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glColor3f(1.0, 1.0, 0.0);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Set color for line
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glBegin(GL_LINE_STRIP);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// And create the line
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    glVertex3fv(pntA);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    glVertex3fv(pntB);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glEnd();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glPointSize(pointsize);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Set size for point
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glColor3f(0.0, 1.0, 0.0);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Set color for point
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glBegin(GL_POINTS);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    glVertex3fv(pntA);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Draw point at one end
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    glVertex3fv(pntB);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Draw point at other end
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glEnd();
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    glPopMatrix();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Done with matrix
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Without getting too deeply-involved in OpenGL specifics, this code begins by clearing the context's buffer and setting the line width.  It then enables the features selected by the <B><TT>
+<A NAME="use_stipple_mode"></A>use_stipple_mode
+</TT></B> and <B><TT>
+<A NAME="use_line_mode"></A>use_line_mode
+</TT></B> variables.
+<P>
+Once that's done, it establishes a matrix to be used for rotating the lines and draws the lines with points at each end, drawing one every five degrees in a 360-degree circle around the center of the window.  After drawing all the lines, the matrix is destroyed and the function returns.
+<P>
+The <B><TT>gReshape()</TT></B> function handles adjusting the OpenGL context's coordinate system and viewport when the SampleGLView is first created, and whenever the view is resized:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void SampleGLView::gReshape(int width, int height) {
+&nbsp;&nbsp;&nbsp;    glViewport(0, 0, width, height);
+&nbsp;&nbsp;&nbsp;    glMatrixMode(GL_PROJECTION);
+&nbsp;&nbsp;&nbsp;    glLoadIdentity();
+&nbsp;&nbsp;&nbsp;    gluOrtho2D(-175, 175, -175, 175);
+&nbsp;&nbsp;&nbsp;    glMatrixMode(GL_MODELVIEW);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This code simply sets the viewport's coordinate system to reflect the new width and height of the view, and establishes a projection matrix such that no matter what the size and shape of the window, the center of the window is considered to be (0,0) and the window is 300 units wide and 300 units tall.  This lets the rendering code draw without having to worry about scaling; OpenGL handles it for us.
+<P>
+The details of how this works are, again, beyond the scope of this chapter.
+<P>
+Finally, the <B><TT>Render()</TT></B> function is the high-level function used to actually update the contents of the SampleGLView whenever we wish to redraw it:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void SampleGLView::Render(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LockGL();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gDraw();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SwapBuffers();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UnlockGL();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#LockGL()">LockGL()</A></TT></B> is called to lock the context before calling <B><TT>gDraw()</TT></B> to do the actual OpenGL calls to draw the view.  Then the <B><TT><A HREF="#SwapBuffers()">SwapBuffers()</A></TT></B> function is called to swap the backbuffer that was just drawn to the screen, and the context is unlocked.
+<P>
+<H4>
+<A NAME="Adapting%20OpenGL%20Sample%20Code"></A>Adapting OpenGL Sample Code
+</H4>
+<P>
+The program described above can easily be adapted to be used with other sample code from the OpenGL web site.  First, replace the code in the <B><TT>gInit()</TT></B>, <B><TT>gDraw()</TT></B>, and <B><TT>gReshape()</TT></B> functions with the code from the <B><TT>Init()</TT></B>, <B><TT>Draw()</TT></B>, and <B><TT>Reshape() </TT></B>functions in the sample code (some of the sample programs give these functions slightly different names).
+<P>
+Keep in mind that the current implementation of OpenGL under BeOS doesn't support single-buffered graphics, so you'll need to make whatever adjustments are necessary to use double-buffering.
+<P>
+Once these functions have been implemented, copy any global variables from the sample program into your project.  Finally, in the SampleGLApp constructor, fix the OpenGL context type and window size information to match that used by the sample program.
+<P>
+You may also wish to implement code to handle user interface to let you configure the sample program; that's beyond the scope of this chapter&mdash;see the Interface Kit chapter of the Be Developer's Guide for further information on handling user input.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#ErrorCallback()">ErrorCallback()</A></TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+Can be implemented to handle OpenGL errors.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BGLView()"></A>BGLView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BGLView(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>type</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the view, then creates a new OpenGL drawing context and attaches it to the view.  The <I><FONT  color=991122 face=HELVETICA>type</I></FONT> argument specifies the OpenGL type specification for the view:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>BGL_RGB</TT></B></TD>
+<TD>Use RGB graphics instead of indexed color (8-bit).  This is the default if beither <B><TT>BGL_RGB</TT></B> nor <B><TT>BGL_INDEX</TT></B> is specified.</TD>
+<TR>
+<TD><B><TT>BGL_INDEX</TT></B></TD>
+<TD>Use indexed color (8-bit graphics).  <B>Not currently supported.</TD>
+<TR>
+<TD><TT>BGL_SINGLE</TT></B></TD>
+<TD>Use single-buffering; all rendering is done directly to the display.  This is not currently supported by the BeOS implementation of OpenGL.  This is the default if neither <B><TT>BGL_SINGLE</TT></B> nor <B><TT>BGL_DOUBLE</TT></B> is specified.</TD>
+<TR>
+<TD><B><TT>BGL_DOUBLE</TT></B></TD>
+<TD>Use double-buffered graphics.  All rendering is done to an offscreen buffer and only becomes visible when the <B><TT>SwapBuffers()</TT></B> function is called.</TD>
+<TR>
+<TD><B><TT>BGL_ACCUM</TT></B></TD>
+<TD>Requests that the view have an accumulation buffer.</TD>
+<TR>
+<TD><B><TT>BGL_ALPHA</TT></B></TD>
+<TD>Requests that the view's color buffer include an alpha component.</TD>
+<TR>
+<TD><B><TT>BGL_DEPTH</TT></B></TD>
+<TD>Requests that the view have a depth buffer.</TD>
+<TR>
+<TD><B><TT>BGL_STENCIL</TT></B></TD>
+<TD>Requests that the view have a stencil buffer.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="~BGLView()"></A>~BGLView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BGLView()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Disposes of the OpenGL context for the view. 
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT>AttachedToWindow()</TT></B> and sets the view color to <B><TT><A HREF="../The%20Interface%20Kit/misc.html#Transparency%20Constants">B_TRANSPARENT_32_BIT</A></TT></B> (this improves performance by preventing the Application Server from erasing the view, since OpenGL takes over responsibility for drawing into the view).
+<P>
+<HR>
+<H3>
+<A NAME="CopyPixelsIn()"></A>CopyPixelsIn()
+, 
+<A NAME="CopyPixelsOut()"></A>CopyPixelsOut()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>CopyPixelsIn(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, <A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>dest</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>CopyPixelsOut(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>source</I></FONT>, <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>dest</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions copy pixel data into and out of the OpenGL draw buffer for the context.
+<P>
+<B><TT>CopyPixelsIn()</TT></B> copies the entire contents of the <I><FONT  color=991122 face=HELVETICA>source</I></FONT> <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> into the OpenGL context, offset such that the top-left corner of the <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> is drawn at the point <I><FONT  color=991122 face=HELVETICA>dest</I></FONT> in the OpenGL buffer.
+<P>
+<B><TT>CopyPixelsOut()</TT></B> copies from the OpenGL draw buffer into the specified BBitmap.  The area copied is the size of the <I><FONT  color=991122 face=HELVETICA>dest</I></FONT> bitmap and contains all data from the specified <I><FONT  color=991122 face=HELVETICA>source</I></FONT> point to the bottom-right corner of the buffer.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If the source is larger than the destination, it's clipped at the bottom and right edges to fit; no scaling is performed  Also, the OpenGL context and the BBitmap must be in the same color space.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT>B_OK.</TT></B>  The data was copied without error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The current draw buffer is not valid, or the destination buffer's width or height is less than or equal to zero.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B>.  The source and destination are in different color spaces.
+<P>
+</UL>
+<P>
+<HR>
+<H3>CopyPixelsOut() see <A HREF="#CopyPixelsIn()">CopyPixelsIn()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="DirectConnected()"></A>DirectConnected()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DirectConnected(</TT></B></FONT>direct_buffer_info *<I><FONT  color=991122 face=HELVETICA>directInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If the BGLView is in a <A HREF="../The%20Game%20Kit/DirectWindow.html#BDirectWindow">BDirectWindow</A>, you should call this from your <B><TT><A HREF="../The%20Game%20Kit/DirectWindow.html#DirectConnected()">BDirectWindow::DirectConnected()</A></TT></B> function to let OpenGL update the window properly.
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Refreshes the contents of the BGLView by copying the frontbuffer to the screen.
+<P>
+If the view's color space is eight bits deep and the <B><TT>GL_DITHER</TT></B> OpenGL option is enabled, the display is dithered.
+<P>
+<HR>
+<H3>
+<A NAME="EmbeddedView()"></A>EmbeddedView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>EmbeddedView(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to an embedded view that encompasses the current OpenGL drawing buffer, as defined by OpenGL, for the BGLView.  If the view is single-buffered, this will be the frontbuffer, and if the view is double-buffered, the embedded view will encompass the backbuffer.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>EmbeddedView()</TT></B> returns <B><TT>NULL</TT></B> if, for any reason, <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> functions can't be used in the GL buffer.  Starting with BeOS R4, this function always returns <B><TT>NULL</TT></B>, as the new, high-performance implementation of OpenGL does not support tinkering with the view.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="EnableDirectMode()"></A>EnableDirectMode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>EnableDirectMode(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Call this function to tell the BGLView whether or not it should render in direct mode.  If you're using a <A HREF="../The%20Game%20Kit/DirectWindow.html#BDirectWindow">BDirectWindow</A> and want video refreshes to be done through the direct window method, pass <B><TT>true</TT></B> for <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT>.  If you don't want to use the direct window method, pass <B><TT>false</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="ErrorCallback()"></A>ErrorCallback()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ErrorCallback(</TT></B></FONT>GLenum <I><FONT  color=991122 face=HELVETICA>errorCode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Called when an OpenGL error occurs.  By default, this function invokes the debugger with an error message reading "GL: Error code $xxxx."  You can (and probably should) reimplement this function to cope with errors more gracefully.
+<P>
+<HR>
+<H3>
+<A NAME="FrameResized()"></A>FrameResized()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>FrameResized(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT>FrameResized()</TT></B>, releases tables that need to be recalculated, and resizes the OpenGL buffers.
+<P>
+You can augment this function to perform other necessary tasks, such as adjusting your BGLView's coordinate system.
+<P>
+<HR>
+<H3>
+<A NAME="LockGL()"></A>LockGL()
+, 
+<A NAME="UnlockGL()"></A>UnlockGL()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>LockGL(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>UnlockGL(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions lock and unlock the OpenGL context.  You must lock the context before issuing any OpenGL commands, and unlock it when you're done&mdash;this is how OpenGL knows which context the drawing commands are intended for, since OpenGL itself isn't encapsulated within the BGLView class.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LockGL();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* lock the OpenGL context
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;glEnable(GL_DITHER);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* turn on dithering support */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UnlockGL();</PRE>
+<P>
+Failing to lock and unlock the context appropriately will result in unpredictable behavior and may cause your application to crash.
+<P>
+<HR>
+<H3>
+<A NAME="SwapBuffers()"></A>SwapBuffers()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SwapBuffers(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SwapBuffers(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>vSync</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Swaps the front buffer and back buffer, then redraws the contents of the BGLView.
+<P>
+This function has no effect if the view is single-buffered.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>vSync</I></FONT> is specified and is <B><TT>true</TT></B>, the swap is synchronized with vertical blanking.
+<P>
+<HR>
+<H3>UnlockGL() see <A HREF="#LockGL()">LockGL()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The OpenGL Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20OpenGL%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The OpenGL Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

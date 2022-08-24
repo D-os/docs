@@ -1,0 +1,1016 @@
+<HTML><HEAD><TITLE>The Interface Kit: BScreen</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BScreen"></A>BScreen
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Screen.h">be/interface/Screen.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor or on the stack
+<P>
+<H6><A HREF="Screen.summary.html"><i>Summary</i></A></H6>
+<P>
+A BScreen object represents a single display screen that's connected to the computer.  With a BScreen object you can...
+<P>
+<UL>
+<LI>Get and set the screen's size and pixel depth.
+<P>
+<LI>Get the screen's color map.
+<P>
+<LI>Make a screen shot.
+<P>
+<LI>Set the desktop color.
+<P>
+<LI>Synchronize your code with the screen's retrace event.
+<P>
+</UL>
+<P>
+You can't copy a BScreen object&mdash;the copy constructor and assignment operators are private.
+<P>
+<HR>
+<H3>
+<A NAME="Multiple%20Screens"></A>Multiple Screens
+</H3>
+<P>
+Although, the BeOS currently only supports a single screen, in the future it will let the user hook up multiple screens.  One of the screens, the <I><FONT  color=991122 face=HELVETICA>main screen</I></FONT>, will have the origin of the screen coordinate system at its left top corner.  Other screens will be located elsewhere in the same coordinate system.  If there's just one screen, it's the main screen.
+<P>
+A BScreen object represents one screen.  An application can have more than one object referring to the same screen.
+<P>
+When multiple screens are supported, a <B><TT><A HREF="misc.html#screen_id">screen_id</A></TT></B> identifier will be assigned to each one.  Currently, <B><TT><A HREF="misc.html#Main%20Screen">B_MAIN_SCREEN_ID</A></TT></B> is the only identifier.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BScreen()"></A>BScreen()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BScreen(</TT></B></FONT><A HREF="Window.html#BWindow">BWindow</A> *<I><FONT  color=991122 face=HELVETICA>window</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BScreen(<A HREF="misc.html#screen_id">screen_id</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>id</I></FONT> = <B><TT><A HREF="misc.html#Main%20Screen">B_MAIN_SCREEN_ID</A></TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BScreen object so that it represents the screen where <I><FONT  color=991122 face=HELVETICA>window</I></FONT> is displayed or the screen identified by <I><FONT  color=991122 face=HELVETICA>id</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>window</I></FONT> is <B><TT>NULL</TT></B> or hidden, or if the <I><FONT  color=991122 face=HELVETICA>id</I></FONT> is invalid, the BScreen will represent the main screen.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Since multiple monitors aren't currently supported, there's no API for screen identifiers other than for the main screen.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+To be sure the new object was correctly constructed, call <B><TT><A HREF="#IsValid()">IsValid()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="~BScreen()"></A>~BScreen()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BScreen()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Unlocks the screen and invalidates the BScreen object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>ColorForIndex()   see <A HREF="#ColorMap()">ColorMap()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ColorMap()"></A>ColorMap()
+, 
+<A NAME="IndexForColor()"></A>IndexForColor()
+, 
+<A NAME="ColorForIndex()"></A>ColorForIndex()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const <B><TT><A HREF="misc.html#color_map">color_map</A> </TT></B>*<B><TT><FONT  color=000022 size=+1>ColorMap(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+inline uint8 <B><TT><FONT  color=000022 size=+1>IndexForColor(<A HREF="misc.html#rgb_color">rgb_color</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>color</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+uint8 <B><TT><FONT  color=000022 size=+1>IndexForColor(</TT></B></FONT>uint8 <I><FONT  color=991122 face=HELVETICA>red</I></FONT>, uint8 <I><FONT  color=991122 face=HELVETICA>green</I></FONT>, uint8 <I><FONT  color=991122 face=HELVETICA>blue</I></FONT>, uint8 <I><FONT  color=991122 face=HELVETICA>alpha</I></FONT> = <FONT  face=HELVETICA>255</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="misc.html#rgb_color">rgb_color</A></TT></B> <B><TT><FONT  color=000022 size=+1>ColorForIndex(</TT></B></FONT>const uint8 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+uint8 <B><TT><FONT  color=000022 size=+1>InvertIndex(</TT></B></FONT>uint8 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return information from the <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> structure for this screen.  The <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> structure defines the set of 256 colors that can be displayed in an <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space.  A single <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> is shared by all applications that display on the same screen.  See the <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> structure for more information about the structure.
+<P>
+<B><TT><A HREF="#ColorMap()">ColorMap()</A></TT></B> returns a pointer to the <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> itself.  The structure belongs to the BScreen object; you can't modify or free it.  (Note that the the <B><TT><A HREF="functions.html#system_colors()">system_colors()</A></TT></B> function retrieves the <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> structure for the main screen without reference to a BScreen object.)
+<P>
+<B><TT><A HREF="#IndexForColor()">IndexForColor()</A></TT></B> returns the "index" of the 8-bit color that, in this screen's color map, most closely matches the given 32-bit color.  You can pass the index to functions such <B><TT><A HREF="Bitmap.html#SetBits()">BBitmap::SetBits()</A></TT></B> to set an 8-bit color.  Note that <B><TT><A HREF="#IndexForColor()">IndexForColor()</A></TT></B> knows how to convert <B><TT><A HREF="misc.html#Transparency%20Constants">B_TRANSPARENT_32_BIT</A></TT></B> into <B><TT><A HREF="misc.html#Transparency%20Constants">B_TRANSPARENT_8_BIT</A></TT></B>.
+<P>
+<B><TT><A HREF="#ColorForIndex()">ColorForIndex()</A></TT></B> returns the 32-bit color representation of a given 8-bit color <I><FONT  color=991122 face=HELVETICA>index</I></FONT>.  This function doesn't convert <B><TT><A HREF="misc.html#Transparency%20Constants">B_TRANSPARENT_8_BIT</A></TT></B> into <B><TT><A HREF="misc.html#Transparency%20Constants">B_TRANSPARENT_32_BIT</A></TT></B>.
+<P>
+<B><TT>InvertIndex()</TT></B> takes an 8-bit <I><FONT  color=991122 face=HELVETICA>index</I></FONT> and returns an index that represents the color's "inversion."  Inverted colors are typically used for highlighting.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/importantBullet.gif">
+					<TD><FONT FACE="helvetica">
+The information gained through <B><TT><A HREF="#IndexForColor()">IndexForColor()</A></TT></B>, <B><TT><A HREF="#ColorForIndex()">ColorForIndex()</A></TT></B>, and <B><TT>InvertIndex()</TT></B> can be retrieved more efficiently from the <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> structure.  If you're repeatedly calling these functions, you should consider accessing the <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> structure, instead.  Note, however, that the intelligent <B><TT><A HREF="misc.html#Transparency%20Constants">B_TRANSPARENT_32_BIT</A></TT></B> to <B><TT><A HREF="misc.html#Transparency%20Constants">B_TRANSPARENT_8_BIT</A></TT></B> conversion is not supported by the structure.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="ColorSpace()"></A>ColorSpace()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="misc.html#color_space">color_space</A></TT></B> <B><TT><FONT  color=000022 size=+1>ColorSpace(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the color space of the screen display&mdash;typically <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B>, <B><TT><A HREF="misc.html#B_RGB15">B_RGB15</A></TT></B>, or <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B>&mdash;or <B><TT><A HREF="misc.html#B_NO_COLOR_SPACE">B_NO_COLOR_SPACE</A></TT></B> if the BScreen object is invalid.  
+<P>
+The color space is set by the user through the <B>Screen</B> preferences application.  You can set it programatically through the <B><TT><A HREF="#SetMode()">SetMode()</A></TT></B> function.
+<P>
+<HR>
+<H3>DesktopColor()   see <A HREF="#SetDesktopColor()">SetDesktopColor()</A></H3>
+<P>
+<HR>
+<H3>DPMSCapabilities()   see <A HREF="#SetDPMS()">SetDPMS()</A></H3>
+<P>
+<HR>
+<H3>DPMSState()   see <A HREF="#SetDPMS()">SetDPMS()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Frame()"></A>Frame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>Frame(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the rectangle that locates the screen in the screen coordinate system.  For example, the frame for a 1,024 * 768 main screen looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BRect(0.0, 0.0, 1023.0, 767.0)</PRE>
+<P>
+If the BScreen object is invalid, all sides of the rectangle are set to 0.0.
+<P>
+The screen's frame rectangle is set by the user through the <B>Screen</B> preferences application.  You can set it programatically through the <B><TT><A HREF="#SetMode()">SetMode()</A></TT></B> function.
+<P>
+<HR>
+<H3>GetBitmap()   see <A HREF="#ReadBitmap()">ReadBitmap()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetDeviceInfo"></A>GetDeviceInfo
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetDeviceInfo(accelerant_device_info</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns information about the graphics card.
+<P>
+<HR>
+<H3>GetMode()  see <A HREF="#GetModeList()">GetModeList()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetModeList()"></A>GetModeList()
+, 
+<A NAME="SetMode()"></A>SetMode()
+, 
+<A NAME="GetMode()"></A>GetMode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetModeList(display_mode</TT></B></FONT> **<I><FONT  color=991122 face=HELVETICA>mode_list</I></FONT>, uint32 *<I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetMode(display_mode</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>mode</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>makeDefault</I></FONT> = <B><TT>false</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetMode(display_mode</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and get the screen's <I>display mode</I>.  Each <B><TT>display_mode</TT></B> structure (defined in <B>add-ons/graphics/Accelerant.h</B>) is a distinct combination of screen size, pixel depth, and display timing.
+<P>
+<B><TT><A HREF="#GetModeList()">GetModeList()</A></TT></B> allocates and returns, in <I><FONT  color=991122 face=HELVETICA>mode_list,</I></FONT> a list of the <B><TT>display_mode</TT></B> structures that the graphics card is guaranteed to support; <I><FONT  color=991122 face=HELVETICA>count</I></FONT> is set to the number of <B><TT>display_mode</TT></B> elements in the list.  The caller is responsible for freeing <I><FONT  color=991122 face=HELVETICA>mode_list</I></FONT>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+There's no guarantee that the monitor can support all of the modes that <B><TT><A HREF="#GetModeList()">GetModeList()</A></TT></B> retrieves.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#SetMode()">SetMode()</A></TT></B> resets the screen to the given <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>. If <I><FONT  color=991122 face=HELVETICA>makeDefault</I></FONT> is true, the mode becomes the default for the current workspace. 
+<P>
+<B><TT><A HREF="#GetMode()">GetMode()</A></TT></B> copies the current <B><TT>display_mode</TT></B> into <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>. 
+<P>
+The display_mode structure is:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;display_timing <B><TT><FONT  color=000022 size=+1>timing</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>space</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>virtual_width</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>virtual_height</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>h_display_start</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>v_display_start</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>display_mode</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<UL>
+<LI><B><TT>timing</TT></B> provides CTRC timing information.
+<P>
+<LI><B><TT>space</TT></B> is the color space of the display.
+<P>
+<LI><B><TT>virtual_width</TT></B> is the screen's virtual width in pixels, and <B><TT>virtual_height</TT></B> is the screen's virtual height in lines.
+<P>
+<LI><B><TT>h_display_start</TT></B> is the first displayed pixel in a line, and <B><TT>v_display_start</TT></B> is the first displayeed line.
+<P>
+<LI><B><TT>flags</TT></B> are mode flags:
+<P>
+</UL>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_SCROLL"></A>B_SCROLL
+</TT></B></TD>
+<TD>Scrolling display; a large display is being simulated by scrolling around on a smaller screen.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_8_BIT_DAC"></A>B_8_BIT_DAC
+</TT></B></TD>
+<TD>The DAC is in 8-bit mode.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HARDWARE_CURSOR"></A>B_HARDWARE_CURSOR
+</TT></B></TD>
+<TD>The mode supports a hardware cursor.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PARALLEL_ACCESS"></A>B_PARALLEL_ACCESS
+</TT></B></TD>
+<TD>The mode supports parallel access.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DPMS"></A>B_DPMS
+</TT></B></TD>
+<TD>The mode supports power management.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_IO_FB_NA"></A>B_IO_FB_NA
+</TT></B></TD>
+<TD>The graphics card's frame buffer shouldn't be touched by the Application Server while the card's acceleration engine might be doing so.</TD>
+</TABLE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+The display_timing structure is:
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>pixel_clock</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>h_display</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>h_sync_start</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>h_sync_end</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>h_total</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>v_display</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>h_display</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>v_sync_start</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>v_sync_end</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16 <B><TT><FONT  color=000022 size=+1>v_total</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>display_timing</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<UL>
+<LI><B><TT>pixel_clock</TT></B> is in kHz.
+<P>
+<LI><B><TT>h_display</TT></B> is in pixels, not in character clocks.
+<P>
+<LI><B><TT>v_display</TT></B> is in lines.
+<P>
+<LI><B><TT>flags</TT></B> are:
+<P>
+</UL>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_BLANK_PEDESTAL"></A>B_BLANK_PEDESTAL
+</TT></B></TD>
+<TD>Use a 7.5 IRE blanking pedestal instead of a 0.0 IRE blanking pedestal.  Usually 0.0 IRE.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TIMING_INTERLACED"></A>B_TIMING_INTERLACED
+</TT></B></TD>
+<TD>The mode is interlaced instead of progressively scanned.  Rarely set; most modern displays don't need this.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_POSITIVE_HSYNC"></A>B_POSITIVE_HSYNC
+</TT></B></TD>
+<TD>If set, the mode uses a positive (high) sync polarity.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_POSITIVE_VSYNC"></A>B_POSITIVE_VSYNC
+</TT></B></TD>
+<TD>If set, the mode uses a negative (low) sync polarity.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SYNC_ON_GREEN"></A>B_SYNC_ON_GREEN
+</TT></B></TD>
+<TD>The mode generates sync information on the green color signal.</TD>
+</TABLE>
+<P>
+<B>See also:  </B>ProposeMode()
+<P>
+<HR>
+<H3>
+<A NAME="GetPixelClockLimits()"></A>GetPixelClockLimits()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetPixelClockLimits(display_mode</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>mode</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 *<I><FONT  color=991122 face=HELVETICA>low</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 *<I><FONT  color=991122 face=HELVETICA>high</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This function returns, in <I><FONT  color=991122 face=HELVETICA>low</I></FONT> and <I><FONT  color=991122 face=HELVETICA>high</I></FONT>, the minimum and maximum "pixel clock" rates (in thousands-of-pixels per second) that are possible for the given mode.  Given the pixel clock and a display mode, you can determine the refresh rate range by dividing the pixel clock by the "real" size of the screen, thus:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;uint32 hi_clock, lo_clock;
+&nbsp;&nbsp;&nbsp;float hi_refresh, lo_refresh;
+&nbsp;&nbsp;&nbsp;float real_size;
+&nbsp;&nbsp;&nbsp;display_mode mode;
+&nbsp;&nbsp;&nbsp;GetMode(&amp;mode);
+&nbsp;&nbsp;&nbsp;GetPixelClockLimits(&amp;mode, &amp;lo_clock, &amp;hi_clock);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* The real screen dimensions (i.e. the dimensions for the purposes
+&nbsp;&nbsp;&nbsp; * of the gun) are given by the &gt;timing.h_total&gt; and 
+&nbsp;&nbsp;&nbsp; * &gt;timing.v_total&gt; fields.
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;total_size = mode.timing.h_total * mode.timing.v_total
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Get the refresh rate by dividing the pixel clock by the total
+&nbsp;&nbsp;&nbsp; * screen size.  Remember -- the pixel clock values are given in
+&nbsp;&nbsp;&nbsp; * kHz; we multiply by 1000.0 to retrieve refresh rates in Hz.
+&nbsp;&nbsp;&nbsp; */ 
+&nbsp;&nbsp;&nbsp;hi_refresh = ((float)hi_clock*1000.0)/(float)total_size;
+&nbsp;&nbsp;&nbsp;lo_refresh = ((float)lo_clock*1000.0)/(float)total_size;</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Pixel clock limits returned successfully.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>. No clock limits known.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetTimingConstraints()"></A>GetTimingConstraints()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetTimingConstraints(display_timing_constraints</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>dtc</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This function fills out the <I><FONT  color=991122 face=HELVETICA>dtc</I></FONT> structure with the timing constraints of the current display mode.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. Constraints returned successfully.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>. No constraints known.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="ID()"></A>ID()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="misc.html#screen_id">screen_id</A></TT></B> <B><TT><FONT  color=000022 size=+1>ID(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the identifier for the screen.  The main screen is identified as <B><TT><A HREF="misc.html#Main%20Screen">B_MAIN_SCREEN_ID</A></TT></B>.
+<P>
+The ID isn't presistent across boots, and may change if the monitor is diconnected and then reconnected.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, this function always returns <B><TT><A HREF="misc.html#Main%20Screen">B_MAIN_SCREEN_ID</A></TT></B>, even if the BScreen object is invalid.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>IndexForColor()  see <A HREF="#ColorMap()">ColorMap()</A></H3>
+<P>
+<HR>
+<H3>InvertIndex()  see <A HREF="#ColorMap()">ColorMap()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsValid()"></A>IsValid()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsValid(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the BScreen object is valid (if it represents a real screen connected to the computer), and <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>
+<A NAME="ProposeMode()"></A>ProposeMode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>ProposeMode(display_mode</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>candidate</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const <B><TT>display_mode</TT></B> *<I><FONT  color=991122 face=HELVETICA>low</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const <B><TT>display_mode</TT></B> *<I><FONT  color=991122 face=HELVETICA>high</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#ProposeMode()">ProposeMode()</A></TT></B> is a convenience function that attempts to adjust <I><FONT  color=991122 face=HELVETICA>candidate</I></FONT> so that it's a supported mode (as listed by the <B><TT><A HREF="#GetModeList()">GetModeList()</A></TT></B> function).  It then compares the possibly-adjusted <I><FONT  color=991122 face=HELVETICA>candidate</I></FONT> to the limits declared in <I><FONT  color=991122 face=HELVETICA>low</I></FONT> and <I><FONT  color=991122 face=HELVETICA>high</I></FONT> and expresses this comparison in the return value.  Note that the function <I>doesn't</I> adjust <I><FONT  color=991122 face=HELVETICA>candidate</I></FONT> so that it is, of necessity, between <I><FONT  color=991122 face=HELVETICA>low</I></FONT> and <I><FONT  color=991122 face=HELVETICA>high</I></FONT>.
+<P>
+Exactly how <B><TT><A HREF="#ProposeMode()">ProposeMode()</A></TT></B> works is up to the individual graphics driver.  It's expected that the function will adjust <I><FONT  color=991122 face=HELVETICA>candidate</I></FONT>'s screen size fields while holding the color space constant. 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function was formerly called <B><TT>ProposeDisplayMode()</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>candidate</I></FONT> (as returned) is supported and falls within the limits.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.   <I><FONT  color=991122 face=HELVETICA>candidate</I></FONT> (as returned) is supported, but doesn't fall within the limits. 
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>candidate</I></FONT> isn't supported.
+<P>
+</UL>
+<P>
+<B>See also:  </B>GetModeList()
+<P>
+<HR>
+<H3>
+<A NAME="ReadBitmap()"></A>ReadBitmap()
+, 
+<A NAME="GetBitmap()"></A>GetBitmap()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>ReadBitmap(</TT></B></FONT><A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>draw_cursor</I></FONT> = <B><TT>true</TT></B>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>bounds</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetBitmap(</TT></B></FONT><A HREF="Bitmap.html#BBitmap">BBitmap</A> **<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>draw_cursor</I></FONT> = <B><TT>true</TT></B>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>bounds</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions provide read-only access to the screen by copying the screen's contents into the first argument BBitmap.  The difference between them is that <B><TT><A HREF="#ReadBitmap()">ReadBitmap()</A></TT></B> expects you to allocate the <A HREF="Bitmap.html#BBitmap">BBitmap</A> before passing it in, while <B><TT><A HREF="#GetBitmap()">GetBitmap()</A></TT></B> allocates a new <A HREF="Bitmap.html#BBitmap">BBitmap</A> for you.  The caller is responsible for freeing the <A HREF="Bitmap.html#BBitmap">BBitmap</A> allocated by <B><TT><A HREF="#GetBitmap()">GetBitmap()</A></TT></B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>draw_cursor</I></FONT> argument determines whether the cursor is drawn in the screen shot; <I><FONT  color=991122 face=HELVETICA>bounds</I></FONT> let you specify the region, in screen coordinates, that you want copied.  If <I><FONT  color=991122 face=HELVETICA>bounds</I></FONT> is <B><TT>NULL</TT></B>, the entire screen is copied.  The functions fail if the <B><TT><A HREF="../The%20Translation%20Kit/Default%20Media%20Formats.html#bounds">bounds</A></TT></B> rectangle doesn't fall wholly within the screen's frame.
+<P>
+The functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> on success or <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> on failure.  
+<P>
+<HR>
+<H3>
+<A NAME="SetDesktopColor()"></A>SetDesktopColor()
+, 
+<A NAME="DesktopColor()"></A>DesktopColor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetDesktopColor(<A HREF="misc.html#rgb_color">rgb_color</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>color</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>makeDefault</I></FONT> = <B><TT>true</TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="misc.html#rgb_color">rgb_color</A></TT></B> <B><TT><FONT  color=000022 size=+1>DesktopColor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the color of the desktop&mdash;the backdrop against which windows are displayed on the screen.  <B><TT><A HREF="#SetDesktopColor()">SetDesktopColor()</A></TT></B> makes an immediate change in the desktop color displayed on-screen; <B><TT><A HREF="#DesktopColor()">DesktopColor()</A></TT></B> returns the color currently displayed.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>makeDefault</I></FONT> flag is <B><TT>true</TT></B>, the color that's set becomes the default color for the screen; it's the color that will be shown the next time the machine is booted.  If the flag is <B><TT>false</TT></B>, the color is set only for the current session.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <a href="../BackgroundsBackgrounds.html#Background%20Images">"Background Images"</a> section tells you how to convince the desktop to display a bitmap image.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Typically, users choose the desktop color with the <B>Screen</B> preferences application.
+<P>
+<HR>
+<H3>
+<A NAME="SetDPMS()"></A>SetDPMS()
+, 
+<A NAME="DPMSState()"></A>DPMSState()
+, 
+<A NAME="DPMSCapabilities()"></A>DPMSCapabilities()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetDPMS(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>dpmsState</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <B><TT><FONT  color=000022 size=+1>DPMSState(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <B><TT><FONT  color=000022 size=+1>DPMSCapabilities(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetDPMS()">SetDPMS()</A></TT></B> lets you set the VESA Display Power Management Signaling state for the screen.  The state can be one of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_DPMS_ON"></A>B_DPMS_ON
+</TT></B></TD>
+<TD>Image is visible, normal screen operation.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DPMS_STAND_BY"></A>B_DPMS_STAND_BY
+</TT></B></TD>
+<TD>Image is not visible, but can be restored "instantly."  Saves around 30% of the power used by the monitor in <B><TT><A HREF="#B_DPMS_ON">B_DPMS_ON</A></TT></B> mode.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DPMS_SUSPEND"></A>B_DPMS_SUSPEND
+</TT></B></TD>
+<TD>Image is not visible, but can be restored in less than five seconds.  Saves more power by turning off the CRT's heater.  The amount of savings (or if there's any) depends on the display.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DPMS_OFF"></A>B_DPMS_OFF
+</TT></B></TD>
+<TD>Image is not visible and will take some time to restore.  Typically turns off all monitor power except the processor watching the sync signals for a higher power state (typically <B><TT><A HREF="#B_DPMS_ON">B_DPMS_ON</A></TT></B>).</TD>
+</TABLE>
+<P>
+<B><TT><A HREF="#DPMSState()">DPMSState()</A></TT></B> returns the current display state, indicating whether the monitor is on or off or in one of the two sleep modes.
+<P>
+<B><TT><A HREF="#DPMSCapabilities()">DPMSCapabilities()</A></TT></B> indicates which of the above modes the monitor supports.
+<P>
+<HR>
+<H3>SetMode()  see <A HREF="#GetModeList()">GetModeList()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetToNext"></A>SetToNext
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetToNext(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+In the current BeOS release, this function always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="WaitForRetrace()"></A>WaitForRetrace()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>WaitForRetrace(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>WaitForRetrace(<A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Blocks until the monitor has finished the current vertical retrace, then returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  There are a few milliseconds available before it begins another retrace.  Drawing changes made to the frame buffer in this period won't cause any "flicker" on-screen.
+<P>
+For some graphics card drivers, this function will wait for vertical sync; for others it will wait until vertical blank, providing a few extra milliseconds.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> argument lets you provide a timeout in microseconds&mdash;if the screen hasn't retraced within the limit, the function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

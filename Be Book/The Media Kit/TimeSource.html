@@ -1,0 +1,772 @@
+<HTML><HEAD><TITLE>The Media Kit: BTimeSource</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BTimeSource"></A>BTimeSource
+</H1>
+<P>
+Derived from:  virtual <A HREF="MediaNode.html#BMediaNode">BMediaNode</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/TimeSource.h">be/media/TimeSource.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="TimeSource.summary.html"><i>Summary</i></A></H6>
+<P>
+The BTimeSource class represents a clock to which nodes can be slaved.  By slaving all your nodes to a single master time source, they can be kept in sync with each other.
+<P>
+If a node can, either by design or as a side benefit of the underlying hardware, provide reliable timing services, it might make sense for it to be derived from BTimeSource as well as from whatever other classes it might be derived from, such as <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> or BBufferConsumer.  Doing so will allow other nodes to be slaved to your node's conception of time.
+<P>
+Note that although a BTimeSource is implemented as a real object (and is therefore not a purely abstract class), other nodes won't call your BTimeSource's member functions directly&mdash;instead, your BTimeSource will provide data that other nodes will then read.
+<P>
+There are invisible system implementations of the BTimeSource protocol that serve as stand-ins for other nodes, so if you call <B><TT>BMediaRoster::SetTimeSource()</TT></B> to make one of your nodes (which is derived from BTimeSource) a time source for some other node, the other node might see a system stand-in object, not the actual BTimeSource-derived object.
+<P>
+This abstraction layer serves a valuable purpose: it enforces the desire to prevent any two nodes from having to know anything about each other beyond the Media Kit protocols defined in this chapter; this sort of low-level interdependency is discouraged, because it decreases interoperability.
+<P>
+<HR>
+<H3>
+<A NAME="Keeping%20Time"></A>Keeping Time
+</H3>
+<P>
+Although it can be confusing at first, keep in mind that a node derived from both BTimeSource and <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> (or BBufferConsumer)&mdash;which is therefore a time source, as well as a producer or consumer of buffers&mdash;has to deal with two different time concepts.  As a <A HREF="#BTimeSource">BTimeSource</A>, it needs to understand requests in real time, while as a <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A> or <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A>, it needs to accept requests in performance time.
+<P>
+Real time refers to the actual passage of time, as reported by <B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B> or the <B><TT><A HREF="#BTimeSource::RealTime()">BTimeSource::RealTime()</A></TT></B> function.  It's measured in microseconds.
+<P>
+Performance time runs in "time units" which aren't necessarily directly related to real time.  Since your code will have to deal with both kinds of time, you need to be sure to convert between the two time systems when it's necessary to do so.  Use the <B><TT><A HREF="#BTimeSource::RealTimeFor()">BTimeSource::RealTimeFor()</A></TT></B> function to do this.
+<P>
+For example, to calculate a timeout value, given a desired performance time, and an estimated latency on the connection, you might use the following code:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;bigtime_t timeout = TimeSource()->RealTimeFor(performance_time,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;estimated_latency) - TimeSource()->RealTime();</PRE>
+<P>
+This code converts the <I><FONT  color=991122 face=HELVETICA>performance_time</I></FONT> into the driving time source's units, then subtracts the current real time, which results in the desired timeout value.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<LI><B><TT><A HREF="#HandleMessage()">HandleMessage()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#SnoozeUntil()">SnoozeUntil()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#SetRunMode()">SetRunMode()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#TimeSourceOp()">TimeSourceOp()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor"></A><FONT SIZE=6>C</FONT>onstructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BTimeSource()"></A>BTimeSource()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BTimeSource()">BTimeSource()</A></TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The standard BTimeSource constructor.   You should never directly instantiate a BTimeSource; instead, you should create a node class derived from BTimeSource (and possibly other BMediaNode-derived classes as well) and use the <A HREF="MediaRoster.html#BMediaRoster">BMediaRoster</A> to instantiate the node as desired.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BroadcastTimeWarp()"></A>BroadcastTimeWarp()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>BroadcastTimeWarp</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>newPerformanceTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Whenever time jumps suddenly (for instance, when a seek operation occurs), call this function to inform all slaved nodes that time has jumped in a discontinuous manner.  You should also call this function if the time from which your time source derives its time jumps.
+<P>
+At the real time specified by <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT>, the performance time will instantaneously jump to <I><FONT  color=991122 face=HELVETICA>newPerformanceTime</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="GetStartLatency()"></A>GetStartLatency()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetStartLatency</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t *<I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns in <I><FONT  color=991122 face=HELVETICA>outLatency</I></FONT> the amount of time, in microseconds, needed for the time source to start up, including the time needed to start up any slaved nodes that are started.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The latency value was returned successfully.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The time source has not been initialized.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetTime()"></A>GetTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetTime</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t *<I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT>, bigtime_t *<I><FONT  color=991122 face=HELVETICA>realTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float *<I><FONT  color=991122 face=HELVETICA>drift</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the most recently published time information for this time source; this information specifies the performance time and real time of the last published time stamp, as well as the <I><FONT  color=991122 face=HELVETICA>drift</I></FONT> value, which can be used to interpolate the true current performance time, given a more accurate real time, as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;bigtime_t performanceTime;
+&nbsp;&nbsp;&nbsp;bigtime_t realTime;
+&nbsp;&nbsp;&nbsp;float drift;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (GetTime(&amp;performanceTime, &amp;realTime, &amp;drift) != B_OK);
+&nbsp;&nbsp;&nbsp;performanceTime = performanceTime + (RealTime() - realTime) * drift;</PRE>
+<P>
+Note, however, that the resulting <B><TT>performanceTime</TT></B> is the same value you would have gotten by calling <B><TT><A HREF="#PerformanceTimeFor()">PerformanceTimeFor()</A></TT></B>, which you should use instead.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The returned information is accurate.
+<P>
+<UL>
+<LI>Other values.  The returned information is unreliable.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="HandleMessage()"></A>HandleMessage()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>HandleMessage(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>code</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given a message received on the control port, this function dispatches the message to the appropriate BTimeSource hook function.  If the message doesn't correspond to a hook function, an appropriate error be returned.
+<P>
+If your node derives from <A HREF="#BTimeSource">BTimeSource</A>, your implementation of <B><TT>HandleMessage()</TT></B> should call all inherited forms of <B><TT>HandleMessage()</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The message was dispatched.
+<P>
+<UL>
+<LI>Other errors.  The message couldn't be dispatched, possibly because it doesn't correspond to a hook function.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="IsRunning()"></A>IsRunning()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsRunning</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the BTimeSource is currently progressing through time or <B><TT>false</TT></B> if it's stopped.
+<P>
+<HR>
+<H3>
+<A NAME="Now()"></A>Now()
+, 
+<A NAME="PerformanceTimeFor()"></A>PerformanceTimeFor()
+, 
+<A NAME="RealTimeFor()"></A>RealTimeFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>Now(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>PerformanceTimeFor(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>realTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>RealTimeFor(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>withLatency</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Now()</TT></B> returns an approximation of what the current performance time is.
+<P>
+<B><TT>PerformanceTimeFor()</TT></B> returns an estimate of the performance time represented by the specified real time (as returned by <B><TT><A HREF="#BTimeSource::RealTime()">BTimeSource::RealTime()</A></TT></B>).
+<P>
+<B><TT>RealTimeFor()</TT></B>, given a performance time, returns an approximation of the corresponding real time, adjusted by the given latency.
+<P>
+<HR>
+<H3>
+<A NAME="PublishTime()"></A>PublishTime()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>PublishTime</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>realTime</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>drift</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+While your time source is running, you should repeatedly call this function in order to constantly refresh the mapping between real time and performance time.  When your time source is stopped, you should call this function once with values of zero for all three arguments.
+<P>
+The arguments have the following meanings:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT> is the precise current performance time.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>realTime</I></FONT> is the current real time.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>drift</I></FONT> indicates the value which indicates the rate at which the performance time changes compared to real time.
+<P>
+</UL>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>drift</I></FONT> value makes it possible to interpolate intermediate values.  For instance, if playback of a video source is progressing at normal speed, the <I><FONT  color=991122 face=HELVETICA>drift</I></FONT> value would be 1.0, indicating that performance time and real time progress at the same rate.
+<P>
+However, if the movie is playing at half-speed, <I><FONT  color=991122 face=HELVETICA>drift</I></FONT> would be 0.5, so that for every one unit of real time that passes, only a half-unit of performance time would pass.  This information is used to compute times without having to query the time source each time an update must occur.
+<P>
+The data furnished by this function (which you should try to call about 20 times a second, although variations in frequency are acceptable as long as the <I><FONT  color=991122 face=HELVETICA>drift</I></FONT> value doesn't change much) may be the only information the rest of the world sees from your node.
+<P>
+<HR>
+<H3>
+<A NAME="RealTime()"></A>RealTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static bigtime_t <B><TT><FONT  color=000022 size=+1>RealTime</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the current absolute real time reference that all time sources measure themselves against.  This is the only call that you should rely upon to obtain this value (don't use the Kernel Kit's <B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B> function).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+As of this time, <B><TT>RealTime()</TT></B> and <B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B> do return the same value; however, you shouldn't rely upon this relationship.  When doing media stuff, you should always use <B><TT>RealTime()</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>RealTimeFor() see <A HREF="#Now()">Now()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Seek()"></A>Seek()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Seek</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implement this function to handle a seek request.  When a BTimeSource's performance time is adjusted, it needs to broadcast the change to all nodes slaved to it; call <B><TT><A HREF="#BroadcastTimeWarp()">BroadcastTimeWarp()</A></TT></B> to do this.
+<P>
+Be sure to queue at least one seek request, so seek operations can be requested in advance.  The seek request should occur at the real time specified by <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="SendRunMode()"></A>SendRunMode()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SendRunMode</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>run_mode <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function transmits the specified <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> to all the nodes slaved to this node, so they know that their time source's run mode has changed.  This function is called by <B><TT><A HREF="#SetRunMode()">SetRunMode()</A></TT></B>; it may or may not make sense to call it elsewhere, depending on your BTimeSource implementation.
+<P>
+<HR>
+<H3>
+<A NAME="SetRunMode()"></A>SetRunMode()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetRunMode</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>run_mode <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook function is called when someone requests that your node's run mode be changed.  Be sure to call through to either <B><TT><A HREF="MediaNode.html#SetRunMode()">BMediaNode::SetRunMode()</A></TT></B> or <B><TT><A HREF="#BTimeSource::SetRunMode()">BTimeSource::SetRunMode()</A></TT></B>.
+<P>
+Possible values for <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>BMediaNode::B_FREEWHEELING</TT></B></TD>
+<TD>
+<A NAME="Keep%20data%20accurate,%20even%20if%20the%20perfor"></A>Keep data accurate, even if the perfor
+mance lags or runs too fast.</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_DECREASE_PRECISION">BMediaNode::B_DECREASE_PRECISION</A></TT></B></TD>
+<TD>
+<A NAME="If%20the%20performance%20starts%20to%20lag,%20try%20to%20"></A>If the performance starts to lag, try to 
+catch up.</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_INCREASE_LATENCY">BMediaNode::B_INCREASE_LATENCY</A></TT></B></TD>
+<TD>
+<A NAME="If%20the%20performance%20starts%20to%20lag,%20increase%20"></A>If the performance starts to lag, increase 
+playout delay so buffers are delivered less frequently.</TD>
+<TR>
+<TD><B><TT><A HREF="MediaNode.html#B_DROP_DATA">BMediaNode::B_DROP_DATA</A></TT></B></TD>
+<TD>
+<A NAME="If%20the%20performance%20starts%20to%20lag,%20skip%20data."></A>If the performance starts to lag, skip data.
+</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="SnoozeUntil()"></A>SnoozeUntil()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SnoozeUntil</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>withLatency</I></FONT> = 0,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>retrySignals</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Waits until the specified <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT> (specified in performance time) arrives in real time.  If <I><FONT  color=991122 face=HELVETICA>withLatency</I></FONT> is non-zero, <B><TT>SnoozeUntil()</TT></B> waits until <I><FONT  color=991122 face=HELVETICA>withLatency</I></FONT> microseconds (in real time) prior to the specified performance time; this lets you have time for setup prior to starting some operation.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Because <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT> is specified in performance time, and <I><FONT  color=991122 face=HELVETICA>withLatency</I></FONT> is specified in real time, you can't just subtract <I><FONT  color=991122 face=HELVETICA>withLatency</I></FONT> microseconds from <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT> and snooze until that time, because <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT> may be passing at a rate faster than or slower than real time (if, for example, the time source is running at double-speed).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If <I><FONT  color=991122 face=HELVETICA>retrySignals</I></FONT> is <B><TT>false</TT></B> (as is the default), <B><TT>SnoozeUntil()</TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B> if it's interrupted by a signal before <I><FONT  color=991122 face=HELVETICA>performanceTime</I></FONT>; if <I><FONT  color=991122 face=HELVETICA>retrySignals</I></FONT> is true, the function will go right back to sleep and not return until the time has actually arrived.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error; the snooze has completed without incident.
+<P>
+<UL>
+<LI><B><TT>B_MEDIA_TIME_SOURCE_STOPPED</TT></B>.  The time source is stopped; snoozing on a stopped time source is a bad thing.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Start()"></A>Start()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Start</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>realTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is called when someone wants the BTimeSource to begin running; the <I><FONT  color=991122 face=HELVETICA>realTime</I></FONT> argument indicates the real time at which the time source should start.  Implement the function to queue the request as necessary.
+<P>
+Be sure to queue at least one start request, so that start requests can be filed in advance.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+A BTimeSource measures start and stop times in real time, not in performance time, because BTimeSources are the objects used to perform the mapping between real time and performance time.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Stop()"></A>Stop()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Stop</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>realTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Stop() is called when someone wants the BTimeSource to stop; the realTime argument indicates the real time at which the time source should stop running.  Implement the function to queue the request.
+<P>
+Be sure to queue at least one stop request, so stop requests can be filed in advance.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+A BTimeSource measures start and stop times in real time, not in performance time, because BTimeSources are the objects used to perform the mapping between real time and performance time.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="TimeSourceOp()"></A>TimeSourceOp()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>TimeSourceOp</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>const time_source_op_info &amp;<I><FONT  color=991122 face=HELVETICA>op</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>_reserved</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is called by the <B><TT>BMediaRoster::Start()</TT></B>, <B><TT>BMediaRoster::Stop()</TT></B>, and <B><TT>BMediaRoster::Seek()</TT></B> functions to perform the requested activities.
+<P>
+You must implement this function to handle these requests.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the request was handled successfully; otherwise, return an appropriate error code.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="time_source_op"></A>time_source_op
+</H3>
+<P>
+Declared in:  &lt;be/media/TimeSource.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_TIMESOURCE_START"></A>B_TIMESOURCE_START
+</TT></B></TD>
+<TD>Start the time source.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TIMESOURCE_STOP"></A>B_TIMESOURCE_STOP
+</TT></B></TD>
+<TD>Stop the time source.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TIMESOURCE_STOP_IMMEDIATELY"></A>B_TIMESOURCE_STOP_IMMEDIATELY
+</TT></B></TD>
+<TD>Stop the time source immediately.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TIMESOURCE_SEEK"></A>B_TIMESOURCE_SEEK
+</TT></B></TD>
+<TD>Seek the time source.</TD>
+</TABLE>
+<P>
+These constants identify the various operations <B><TT><A HREF="#TimeSourceOp()">TimeSourceOp()</A></TT></B> will be called upon to handle.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="time_source_op_info"></A>time_source_op_info
+</H3>
+<P>
+Declared in:  &lt;be/media/TimeSource.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct time_source_op_info {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_source_op op;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 _reserved1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t real_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t performance_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 _reserved2[6];
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+Describes a request to <B><TT><A HREF="#TimeSourceOp()">TimeSourceOp()</A></TT></B>.
+<P>
+<UL>
+<LI><B><TT>op</TT></B> indicates the operation to be performed.
+<P>
+<LI><B><TT>real_time</TT></B> indicates the time at which the request is to be filled (this is the <I><FONT  color=991122 face=HELVETICA>atRealTime</I></FONT> argument passed to the <B><TT><A HREF="MediaRoster.html#SeekTimeSource()">BMediaRoster::SeekTimeSource()</A></TT></B>, <B><TT><A HREF="MediaRoster.html#StopTimeSource()">StopTimeSource()</A></TT></B>, or <B><TT><A HREF="MediaRoster.html#StartTimeSource()">StartTimeSource()</A></TT></B> function).
+<P>
+<LI><B><TT>performance_time</TT></B> is the <I><FONT  color=991122 face=HELVETICA>newPerformanceTime</I></FONT> argument passed to <B><TT><A HREF="MediaRoster.html#SeekTimeSource()">SeekTimeSource()</A></TT></B>.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

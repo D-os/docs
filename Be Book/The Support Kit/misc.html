@@ -1,0 +1,804 @@
+<HTML><HEAD><TITLE>The Support Kit: Constants and Defined Types</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Constants%20and%20Defined%20Types"></A>Constants and Defined Types
+</H1>
+<P>
+This section lists the constants and types defined by the Support Kit and used throughout the entire Be operating system.  Not included here are constants used as <B><TT><A HREF="#status_t">status_t</A></TT></B> values (error codes).  They're listed in <a href="ErrorCodes.html#Error%20Codes">"Error Codes"</a>.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Boolean%20Constants"></A>Boolean Constants
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Value</TH>
+<TR>
+<TD><B><TT>
+<A NAME="false"></A>false
+</TT></B></TD>
+<TD>0</TD>
+<TR>
+<TD><B><TT>
+<A NAME="true"></A>true
+</TT></B></TD>
+<TD>1</TD>
+</TABLE>
+<P>
+These constants are defined as values for the <B><TT><A HREF="#bool">bool</A></TT></B> type (described in the next section).  The BeOS defines them for C code only.  Because they match the boolean symbols that are part of the C++ language, they let you use the same <B><TT>bool</TT></B> type and <B><TT>true</TT></B> and <B><TT>false</TT></B> values when programming in both languages.
+<P>
+<B>See also:  <TT><A HREF="#bool">bool</A></TT></B> 
+<P>
+<A NAME="27268:%20apiName:%20Byte%20Swapping%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Byte%20Swapping%20Constants"></A>Byte Swapping Constants
+</H3>
+<P>
+Declared in:  be/support/ByteOrder.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_SWAP_HOST_TO_LENDIAN"></A>B_SWAP_HOST_TO_LENDIAN
+</TT></B></TD>
+<TD>Convert from host byte order to little endian</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SWAP_HOST_TO_BENDIAN"></A>B_SWAP_HOST_TO_BENDIAN
+</TT></B></TD>
+<TD>Convert from host byte order to big endian</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SWAP_LENDIAN_TO_HOST"></A>B_SWAP_LENDIAN_TO_HOST
+</TT></B></TD>
+<TD>Convert from little endian to host byte order</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SWAP_BENDIAN_TO_HOST"></A>B_SWAP_BENDIAN_TO_HOST
+</TT></B></TD>
+<TD>Convert from big endian to host byte order</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SWAP_ALWAYS"></A>B_SWAP_ALWAYS
+</TT></B></TD>
+<TD>Always convert endianness</TD>
+</TABLE>
+<P>
+These constants define the action to be taken by the <B><TT><A HREF="Functions.html#swap_data()">swap_data()</A></TT></B> general byte swapping function.
+<P>
+<B>See also:  <TT><A HREF="Functions.html#swap_data()">swap_data()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Encoding%20Conversion%20Constants"></A>Encoding Conversion Constants
+</H3>
+<P>
+Declared in:  be/support/UTF8.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO1_CONVERSION"></A>B_ISO1_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO2_CONVERSION"></A>B_ISO2_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO3_CONVERSION"></A>B_ISO3_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO4_CONVERSION"></A>B_ISO4_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO5_CONVERSION"></A>B_ISO5_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO6_CONVERSION"></A>B_ISO6_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO7_CONVERSION"></A>B_ISO7_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO8_CONVERSION"></A>B_ISO8_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO9_CONVERSION"></A>B_ISO9_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ISO10_CONVERSION"></A>B_ISO10_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_MAC_ROMAN_CONVERSION"></A>B_MAC_ROMAN_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_SJIS_CONVERSION"></A>B_SJIS_CONVERSION
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_EUC_CONVERSION"></A>B_EUC_CONVERSION
+</TD>
+</TABLE></TT></B>
+<P>
+These constants identify character encodings to the <B><TT><A HREF="Functions.html#convert_to_utf8()">convert_to_utf8()</A></TT></B> and <B><TT><A HREF="Functions.html#convert_from_utf8()">convert_from_utf8()</A></TT></B> functions, which convert text to and from the standard UTF8 character encoding assumed by the BeOS.  The identify the source encoding for a conversion to UTF-8 and the destination encoding for a conversion from UTF-8.
+<P>
+<B>See also:  <TT><A HREF="Functions.html#convert_to_utf8()">convert_to_utf8()</A></TT></B>, the <A HREF="../The%20Interface%20Kit/Font.html#BFont">BFont</A> class in the Interface Kit
+<P>
+<HR>
+<H3>
+<A NAME="Empty%20String"></A>Empty String
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>
+<A NAME="Empty%20String"></A>B_EMPTY_STRING
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This constant provides a global pointer to an empty string ("").
+<P>
+<HR>
+<H3>
+<A NAME="URL%20MIME%20Types"></A>URL MIME Types
+</H3>
+<P>
+Declared in:  
+<A NAME="URL%20MIME%20Types"></A>be/support/TypeConstants.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_HTTP"></A>B_URL_HTTP
+</TT></B></TD>
+<TD>An HTTP (HyperText Transport Protocol) link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_HTTPS"></A>B_URL_HTTPS
+</TT></B></TD>
+<TD>An HTTPS (HyperText Transport Protocol Secure) link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_FTP"></A>B_URL_FTP
+</TT></B></TD>
+<TD>AN FTP (File Transfer Protocol) link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_GOPHER"></A>B_URL_GOPHER
+</TT></B></TD>
+<TD>A Gopher link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_MAILTO"></A>B_URL_MAILTO
+</TT></B></TD>
+<TD>A mailto (email) link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_NEWS"></A>B_URL_NEWS
+</TT></B></TD>
+<TD>A news (usenet) link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_NNTP"></A>B_URL_NNTP
+</TT></B></TD>
+<TD>An NNTP (network time protocol) link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_TELNET"></A>B_URL_TELNET
+</TT></B></TD>
+<TD>A telnet link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_RLOGIN"></A>B_URL_RLOGIN
+</TT></B></TD>
+<TD>An rlogin link</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_URL_TN3270"></A>B_URL_TN3270
+</TT></B></TD>
+<TD>A TN3270 link<B><TT></TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_URL_WAIS"></A>B_URL_WAIS
+</TT></B></TD>
+<TD>A WAIS (Wide Area Information Services) link<B><TT></TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_URL_FILE"></A>B_URL_FILE
+</TT></B></TD>
+<TD>A local file link</TD>
+</TABLE>
+<P>
+These are MIME type strings for various URL types.  An application can register itself as a handler for one of these types.  Once that's done, clicking a link of that type in NetPositive will cause that application to be launched, with a <B><TT><A HREF="../Appendices/System%20Messages.html#B_ARGV_RECEIVED">B_ARGV_RECEIVED</A></TT></B> message with the full URL as the second argument.
+<P>
+<HR>
+<H3>
+<A NAME="NULL%20and%20NIL"></A>NULL and NIL
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Value</TH>
+<TR>
+<TD><B><TT>
+<A NAME="NIL"></A>NIL
+</TT></B></TD>
+<TD>0</TD>
+<TR>
+<TD><B><TT>
+<A NAME="NULL"></A>NULL
+</TT></B> </TD>
+<TD>0</TD>
+</TABLE>
+<P>
+These constants represent "empty" values.  They're synonyms that can be used interchangeably.
+<P>
+<A NAME="22487:%20apiName:%20Type%20Codes"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Type%20Codes"></A>Type Codes
+</H3>
+<P>
+Declared in:  be/support/TypeConstants.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_CHAR_TYPE"></A>B_CHAR_TYPE
+</TT></B></TD>
+<TD>A single character</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INT8_TYPE"></A>B_INT8_TYPE
+</TT></B></TD>
+<TD>An 8-bit integer</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INT16_TYPE"></A>B_INT16_TYPE
+</TT></B></TD>
+<TD>A 16-bit integer</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INT32_TYPE"></A>B_INT32_TYPE
+</TT></B></TD>
+<TD>A 32-bit integer</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INT64_TYPE"></A>B_INT64_TYPE
+</TT></B></TD>
+<TD>A 64-bit integer</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UINT8_TYPE"></A>B_UINT8_TYPE
+</TT></B></TD>
+<TD>An unsigned 8-bit integer</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UINT16_TYPE"></A>B_UINT16_TYPE
+</TT></B></TD>
+<TD>An unsigned 16-bit integer </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UINT32_TYPE"></A>B_UINT32_TYPE
+</TT></B></TD>
+<TD>An unsigned 32-bit integer </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UINT64_TYPE"></A>B_UINT64_TYPE
+</TT></B></TD>
+<TD>An unsigned 64-bit integer</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FLOAT_TYPE"></A>B_FLOAT_TYPE
+</TT></B></TD>
+<TD>A <B><TT>float</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_DOUBLE_TYPE"></A>B_DOUBLE_TYPE
+</TT></B></TD>
+<TD>A <B><TT>double</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_BOOL_TYPE"></A>B_BOOL_TYPE
+</TT></B></TD>
+<TD>A boolean value (the <TT>
+<A NAME="Type%20Codes"></A>bool
+</TT> type)</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OFF_T_TYPE"></A>B_OFF_T_TYPE
+</TT></B></TD>
+<TD>An <B><TT>off_t</TT></B> value</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SIZE_T_TYPE"></A>B_SIZE_T_TYPE
+</TT></B></TD>
+<TD>A <B><TT>size_t</TT></B> value</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SSIZE_T_TYPE"></A>B_SSIZE_T_TYPE
+</TT></B></TD>
+<TD>An <B><TT>ssize_t</TT></B> value</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_POINTER_TYPE"></A>B_POINTER_TYPE
+</TT></B></TD>
+<TD>A pointer of some kind (including <B><TT>void *</TT></B>)</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OBJECT_TYPE"></A>B_OBJECT_TYPE
+</TT></B></TD>
+<TD>An object pointer (such as <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *)</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MESSAGE_TYPE"></A>B_MESSAGE_TYPE
+</TT></B></TD>
+<TD>A <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object (not <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *)</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MESSENGER_TYPE"></A>B_MESSENGER_TYPE
+</TT></B></TD>
+<TD>A <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> object</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_POINT_TYPE"></A>B_POINT_TYPE
+</TT></B></TD>
+<TD>A <A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> object</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RECT_TYPE"></A>B_RECT_TYPE
+</TT></B></TD>
+<TD>A <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> object</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PATH_TYPE"></A>B_PATH_TYPE
+</TT></B></TD>
+<TD>A <A HREF="../Release%20Notes/StorageKit.html#BPath">BPath</A> object</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_REF_TYPE"></A>B_REF_TYPE
+</TT></B></TD>
+<TD>An <TT>
+<A NAME="Type%20Codes"></A>entry_ref
+</TT> structure</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB_COLOR_TYPE"></A>B_RGB_COLOR_TYPE
+</TT></B></TD>
+<TD>An <TT>
+<A NAME="Type%20Codes"></A>rgb_color
+</TT> structure</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PATTERN_TYPE"></A>B_PATTERN_TYPE
+</TT></B></TD>
+<TD>A <TT>
+<A NAME="Type%20Codes"></A>pattern
+</TT> structure</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_STRING_TYPE"></A>B_STRING_TYPE
+</TT></B></TD>
+<TD>A null-terminated character string</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MONOCHROME_1_BIT_TYPE"></A>B_MONOCHROME_1_BIT_TYPE
+</TT></B></TD>
+<TD>Raw data for a monochrome bitmap (1 bit/pixel) </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GRAYSCALE_8_BIT_TYPE"></A>B_GRAYSCALE_8_BIT_TYPE
+</TT></B></TD>
+<TD>Raw data for a grayscale bitmap (8 bits per pixel)</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_COLOR_8_BIT_TYPE"></A>B_COLOR_8_BIT_TYPE
+</TT></B></TD>
+<TD>Raw bitmap data in the <TT>
+<A NAME="Type%20Codes"></A>B_COLOR_8_BIT
+</TT> color space</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB_32_BIT_TYPE"></A>B_RGB_32_BIT_TYPE
+</TT></B></TD>
+<TD>Raw bitmap data in the <TT>
+<A NAME="Type%20Codes"></A>B_RGB_32_BIT
+</TT> color space</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TIME_TYPE"></A>B_TIME_TYPE
+</TT></B></TD>
+<TD>64-bit microsecond <TT>
+<A NAME="Type%20Codes"></A>time_t
+</TT> data</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_PARAMETER_TYPE"></A>B_MEDIA_PARAMETER_TYPE
+</TT></B></TD>
+<TD>A Media Kit parameter.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_PARAMETER_WEB_T"></A>B_MEDIA_PARAMETER_WEB_T
+YPE</TT></B></TD>
+<TD>A Media Kit parameter web.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MEDIA_PARAMETER_GROUP"></A>B_MEDIA_PARAMETER_GROUP
+_TYPE</TT></B></TD>
+<TD>A Media Kit parameter group.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RAW_TYPE"></A>B_RAW_TYPE
+</TT></B></TD>
+<TD>Raw, untyped data&mdash;a stream of bytes </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MIME_TYPE"></A>B_MIME_TYPE
+</TT></B></TD>
+<TD>The type is specified by a MIME string. </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ANY_TYPE"></A>B_ANY_TYPE
+</TT></B></TD>
+<TD>The type can be any type. </TD>
+</TABLE>
+<P>
+These constants describe the types of data held by <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> objects (the Application Kit) and as resources and file system attributes (the Storage Kit).  <B><TT><A HREF="#B_ANY_TYPE">B_ANY_TYPE</A></TT></B> refers to all types; it indicates that the exact type doesn't matter.  <B><TT><A HREF="#B_MIME_TYPE">B_MIME_TYPE</A></TT></B> indicates that the name of the data in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> is a MIME string that specifies its true data type.  The other constants refer only to a particular type.  The <B><TT><A HREF="#type_code">type_code</A></TT></B> defined type marks where these constants are used in the API.
+<P>
+Applications can define their own type codes for data types not found on this list.  All the codes the BeOS defines have values formed by concatenating four uppercase letters into a multicharacter constant.  For example, <B><TT><A HREF="#B_MESSENGER_TYPE">B_MESSENGER_TYPE</A></TT></B> is 'MSNG' and <B><TT><A HREF="#B_SIZE_T_TYPE">B_SIZE_T_TYPE</A></TT></B> is 'SIZT'.
+<P>
+<B>See also:  <TT><A HREF="#type_code">type_code</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="bigtime_t"></A>bigtime_t
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef int64 <B><TT><FONT  color=000022 size=+1>bigtime_t</TT></B></FONT>  
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type records the time in microseconds as a 64-bit integer.  Typically, a <B><TT><A HREF="#bigtime_t">bigtime_t</A></TT></B> variable measures the system time, the number of microseconds since 12:00:00 AM January 1, 1970, UTC (Coordinated Universal Time).
+<P>
+<B>See also:  <TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="bool"></A>bool
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef unsigned char <B><TT><FONT  color=000022 size=+1>bool</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The C++ language defines <B><TT><A HREF="#bool">bool</A></TT></B> as its basic boolean type.  The BeOS extends the definition to C code, so you can use the same type in both languages.  The <B><TT>true</TT></B> and <B><TT>false</TT></B> constants (listed above) are defined as boolean values. 
+<P>
+<HR>
+<H3>
+<A NAME="Function%20Pointers"></A>Function Pointers
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef int (*<B><TT><FONT  color=000022 size=+1>
+<A NAME="Function%20Pointers"></A>B_PFI
+</TT></B></FONT>)() 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef long (*<B><TT><FONT  color=000022 size=+1>
+<A NAME="Function%20Pointers"></A>B_PFL
+</TT></B></FONT>)() 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef void (*<B><TT><FONT  color=000022 size=+1>
+<A NAME="Function%20Pointers"></A>B_PFV
+</TT></B></FONT>)() 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These types define pointers to functions that return <B><TT>int</TT></B>, <B><TT>long</TT></B>, and <B><TT>void</TT></B> values respectively.
+<P>
+<HR>
+<H3>
+<A NAME="instantiation_func"></A>instantiation_func
+</H3>
+<P>
+Declared in:  be/support/Archivable.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef <A HREF="Archivable.html#BArchivable">BArchivable</A> *(*<B><TT><FONT  color=000022 size=+1>instantiation_func</TT></B></FONT>) <B><TT>(</TT></B><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<B><TT>)</TT></B> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type is a pointer to a function that can instantiate an object from a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive and return a pointer to the new object.  The <B><TT><A HREF="Archivable.html#Instantiate()">Instantiate()</A></TT></B> member function of <B><TT><A HREF="Archivable.html#BArchivable">BArchivable</A></TT></B> is such a function.
+<P>
+<B>See also:  </B>the <A HREF="Archivable.html#BArchivable">BArchivable</A> class, <B><TT><A HREF="Functions.html#find_instantiation_func()">find_instantiation_func()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Integer%20Types"></A>Integer Types
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef unsigned char <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>uchar
+</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+typedef signed char <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>int8
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>typedef unsigned char <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>uint8
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef volatile signed char <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>vint8
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef volatile unsigned char <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>vuint8
+</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+typedef short <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>int16
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef unsigned short <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>uint16
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef volatile short <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>vint16
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef volatile unsigned short <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>vuint16
+</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+typedef long <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>int32
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef unsigned long <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>uint32
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef volatile long <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>vint32
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef volatile unsigned long <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>vuint32
+</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+typedef long long <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>int64
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef unsigned long long <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>uint64
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef volatile long long <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>vint64
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;typedef volatile unsigned long long <B><TT><FONT  color=000022 size=+1>
+<A NAME="Integer%20Types"></A>vuint64
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These type names are defined as convenient shorthands for standard integers of various sizes.  They're used in place of <B><TT>int</TT></B>, <B><TT>short</TT></B>, and <B><TT>long</TT></B> throughout the BeOS API.
+<P>
+The number at the end of the type name indicates the size of the integer.  For example, a <B><TT><A HREF="#uint32">uint32</A></TT></B> is an unsigned 32-bit value.   The type is guaranteed to be defined to its stated size for all platforms (thus their exact definitions may vary from platform to platform).
+<P>
+Using these types will make the code you write more portable.  They'll help avoid problems as the operating system and your application move to other platforms.
+<P>
+<HR>
+<H3>
+<A NAME="status_t"></A>status_t
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef int32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="status_t"></A>status_t
+</TT></B></FONT>  
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type indicates an error code; it's used mainly for function return values.
+<P>
+<B>See also:  </B>"Error Codes" 
+<P>
+<HR>
+<H3>
+<A NAME="type_code"></A>type_code
+</H3>
+<P>
+Declared in:  be/support/SupportDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef uint32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="type_code"></A>type_code
+</TT></B></FONT>  
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type is used for the integer codes that indicate a particular data type.  The codes&mdash;such as <B><TT><A HREF="#B_UINT32_TYPE">B_UINT32_TYPE</A></TT></B> and <B><TT><A HREF="#B_MIME_TYPE">B_MIME_TYPE</A></TT></B>&mdash;mark the type of data added to a message or stored as a resource and also appear in other contexts.
+<P>
+<B>See also:  </B><a href="#Type%20Codes">"Type Codes"</a>, the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> class in the Application Kit, the BResource class in the Storage Kit 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

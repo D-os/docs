@@ -1,0 +1,995 @@
+<HTML><HEAD><TITLE>The Storage Kit: BDirectory</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BDirectory"></A>BDirectory
+</H1>
+<P>
+Derived from:  <A HREF="Node.html#BNode">BNode</A>, <A HREF="EntryList.html#BEntryList">BEntryList</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/Directory.h">be/storage/Directory.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Directory.summary.html"><i>Summary</i></A></H6>
+<P>
+A BDirectory object gives you access to the contents of a directory.  A BDirectory's primary features are:
+<P>
+<UL>
+<LI><B>It can iteratively retrieve the entries in the directory</B>.  The entries are returned as <A HREF="Entry.html#BEntry">BEntry</A> objects, <B><TT>entry_refs</TT></B>, or <B><TT>dirent</TT></B> structures (<B><TT><A HREF="#GetNextEntry()">GetNextEntry()</A></TT></B>, <B><TT><A HREF="#GetNextRef()">GetNextRef()</A></TT></B>, <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B>).
+<P>
+<LI><B>It can find a specific entry</B>.   You can ask if the entry exists (<B><TT><A HREF="#Contains()">Contains()</A></TT></B>), and you can retrieve the entry as a <A HREF="Entry.html#BEntry">BEntry</A> (<B><TT><A HREF="#FindEntry()">FindEntry()</A></TT></B>). 
+<P>
+<LI><B>It can create new entries</B>.  Through the aptly named <B><TT><A HREF="#CreateFile()">CreateFile()</A></TT></B>, <B><TT><A HREF="#CreateDirectory()">CreateDirectory()</A></TT></B> and <B><TT><A HREF="#CreateSymLink()">CreateSymLink()</A></TT></B> functions.
+<P>
+</UL>
+<P>
+Unlike the other <A HREF="Node.html#BNode">BNode</A> classes, a BDirectory knows its own entry (<B><TT><A HREF="#GetEntry()">GetEntry()</A></TT></B>)<B><TT>, </TT></B>and can be initialized with a <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> structure.
+<P>
+<HR>
+<H3>
+<A NAME="Retrieving%20Entries"></A>Retrieving Entries
+</H3>
+<P>
+The BDirectory functions that let you iterate over a directory's entries are inherited from BEntryList:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+status_t <B><TT>GetNextEntry(</TT></B><A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse = </I><B><TT>true)</TT></B></FONT>;
+<br>
+status_t <B><TT>GetNextRef(</TT></B>entry_ref *<I><FONT  color=991122 face=HELVETICA>ref<B><TT>)</TT></B></I></FONT>;
+<br>
+int32 <B><TT>GetNextDirents(</TT></B>dirent *<I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>count </I></FONT>= <FONT  face=HELVETICA>INT_MAX<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+For the basic story on these functions, see the <A HREF="EntryList.html#BEntryList">BEntryList</A> class and the function descriptions below.  In addition to the info you'll find there, you should be aware of the following:
+<P>
+<UL>
+<LI><B>Entries are returned in "directory order"</B>.  This is, roughly, the ASCII order of their names.
+<P>
+<LI><B>Try not to alter the directory while you're getting its entries.</B>  Entries are delivered on demand.  If you do something to change the contents of the directory while you're iterating through those contents (such as change the name of the file "aaa" to "zzz") you could end up seeing an entry more than once (technically, you'll see the same node under the guise of different entries), or you could miss an entry.
+<P>
+<LI><B>Counting entries uses the same iterator that retrieves entries</B>.  You mustn't call <B><TT><A HREF="#CountEntries()">CountEntries()</A></TT></B> while you're looping over a GetNext...() function. 
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Creating%20New%20Directories"></A>Creating New Directories
+</H3>
+<P>
+To create a new directory, you can use BDirectory's <B><TT><A HREF="#CreateDirectory()">CreateDirectory()</A></TT></B> function.  The function creates a single new directory as identified by its argument.  The new directory will be a subdirectory of the invoked-upon BDirectory's directory.
+<P>
+You can also create an entire path full of new directories through the global  <B><TT><A HREF="#create_directory()">create_directory()</A> </TT></B>function.  This convenient function attempts to create <I><FONT  color=991122 face=HELVETICA>all</I></FONT> "missing" directories along the path that you pass in. 
+<P>
+<HR>
+<H3>
+<A NAME="Finding%20a%20Directory"></A>Finding a Directory
+</H3>
+<P>
+The <B><TT><A HREF="#find_directory()">find_directory()</A></TT></B> function gives you the pathnames for pre-defined directories.  These directories, such as those that store Be-supplied applications and user-defined preferences settings, are represented by <B><TT>directory_which</TT></B> constants.  These constants are not strings; you can't use them directly.  You have to pass them through <B><TT><A HREF="#find_directory()">find_directory()</A></TT></B>.
+<P>
+Note that the BDirectory class itself doesn't let you find directories on the basis of the <B><TT>directory_which</TT></B> constants&mdash;you have to use the <B><TT><A HREF="#find_directory()">find_directory()</A></TT></B> function (which is documented at the end of this class description).
+<P>
+<HR>
+<H3>
+<A NAME="Node%20Monitoring%20a%20Directory"></A>Node Monitoring a Directory
+</H3>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The following description is a brief, directory-specific view into the Node Monitor.  For the full story, see "The Node Monitor" section of this chapter.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+You can monitor changes to the contents of a directory by passing a BDirectory's <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> and the <B><TT>B_WATCH_DIRECTORY</TT></B> flag to the Node Monitor's <B><TT><A HREF="NodeMonitor.html#watch_node()">watch_node()</A></TT></B> function.  As with all invocations of <B><TT><A HREF="NodeMonitor.html#watch_node()">watch_node()</A></TT></B>, you also have to pass a <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> (the "target") that will receive the Node Monitor notifications; here, we use <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app_messenger">be_app_messenger</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BDirectory dir("/boot/home");
+&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (dir.InitCheck() == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dir.GetNodeRef(&amp;nref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = watch_node(&amp;nref, B_WATCH_DIRECTORY, be_app_messenger);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err != B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* handle the error */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The following changes to the monitored directory cause BMessages to be sent to the target.  The <B><TT>what</TT></B> field for all Node Monitor messages is <B><TT><A HREF="../Messages/GeneralMessages.html#B_NODE_MONITOR">B_NODE_MONITOR</A></TT></B>; the "opcode" field (an integer code) describes the activity:
+<P>
+<UL>
+<LI>An entry was created (opcode = <B><TT><A HREF="#B_ENTRY_CREATED">B_ENTRY_CREATED</A></TT></B>).
+<P>
+<LI>An entry was moved to a different name in the same directory (<B><TT>B_ENTRY_RENAMED</TT></B>).
+<P>
+<LI>An entry was from moved from this directory to a different directory, or vice versa (<B><TT><A HREF="#B_ENTRY_MOVED">B_ENTRY_MOVED</A></TT></B>). 
+<P>
+<LI>An entry (and the node it represents) was deleted from the file system (<B><TT><A HREF="#B_ENTRY_REMOVED">B_ENTRY_REMOVED</A></TT></B>).  
+<P>
+</UL>
+<P>
+The <B><TT>B_WATCH_DIRECTORY</TT></B> flag (by itself) <I>doesn't</I> monitor changes to the directory's own entry.  For example, if you change the name of the directory that you're monitoring, the target isn't sent a message.  If you want a BDirectory to watch changes to itself, you have to throw in one of the other Node Monitor flags  (<B><TT>B_WATCH_NAME</TT></B>, <B><TT>B_WATCH_STAT</TT></B>, or <B><TT>B_WATCH_ATTR</TT></B>).
+<P>
+The other fields in the Node Monitor message describe the entry that changed.  The set of fields depends on the opcode (the following is a summary of the list given in <a href="#Notification%20Messages">"Notification Messages"</a> in the Node Monitor documentation):
+<P>
+<H4>
+<A NAME="B_ENTRY_CREATED"></A>B_ENTRY_CREATED
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH>Type</TH>
+<TH>Description</TH>
+<TR>
+<TD>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT>dev_t</TT></B> of the directory's device.</TD>
+<TR>
+<TD>"directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD><B><TT>ino_t</TT></B> (node number) of the directory.</TD>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD><B><TT>ino_t</TT></B> of the new entry's node. </TD>
+<TR>
+<TD>"name"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The name of the new entry.</TD>
+</TABLE>
+<P>
+<B><TT><H4>
+<A NAME="B_ENTRY_MOVED"></A>B_ENTRY_MOVED
+</H4>
+<P>
+</TT></B>The "device", "node", and "name" fields are the same as for <B><TT><A HREF="#B_ENTRY_CREATED">B_ENTRY_CREATED</A></TT></B>, plus...
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type</TH>
+<TH>Description</TH>
+<TR>
+<TD>"from_directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The <B><TT>ino_t</TT></B> number of the old directory.</TD>
+<TR>
+<TD>"to_directory"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD><B><TT>The ino_t</TT></B> number of the new directory.</TD>
+</TABLE>
+<P>
+<B><TT><H4>
+<A NAME="B_ENTRY_REMOVED"></A>B_ENTRY_REMOVED
+</H4>
+<P>
+</TT></B>The <B><TT>B_ENTRY_REMOVED</TT></B> message takes the same form as <B><TT><A HREF="#B_ENTRY_CREATED">B_ENTRY_CREATED</A></TT></B>, but without the "name" field.  This, obviously, can be a problem&mdash;what good is it if you're told that a file has been removed, but you're not told the file's name?  In some cases, simply being told that a file has been removed actually <I>is</I> good enough:  You can simply re-read the contents of the directory.  
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BDirectory()"></A>BDirectory()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectory(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectory(</TT></B></FONT>const node_ref *<I><FONT  color=991122 face=HELVETICA>nref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectory(</TT></B></FONT>const <A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectory(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectory(</TT></B></FONT>const BDirectory *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectory(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDirectory(</TT></B></FONT>const BDirectory &amp;<I><FONT  color=991122 face=HELVETICA>directory</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BDirectory object that represents the directory as given by the arguments.  See the analogous <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> functions for descriptions of the flavorful constructors.
+<P>
+<UL>
+<LI>The default constructor does nothing; it should be followed by a call to <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>.  
+<P>
+<LI>The copy constructor points the BDirectory to the same directory as is represented by the argument.  The two objects have their own entry iterators.
+<P>
+</UL>
+<P>
+To check to see if an initialization was successful, call <B><TT><A HREF="File.html#InitCheck()">InitCheck()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="~BDirectory()"></A>~BDirectory()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual ~<B><TT><FONT  color=000022 size=+1><A HREF="#BDirectory()">BDirectory()</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Contains()"></A>Contains()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Contains(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>nodeFlags = B_ANY_NODE</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Contains(</TT></B></FONT>const <A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>nodeFlags = B_ANY_NODE</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>path</I></FONT> or <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> is contained within this directory, or in any of its subdirectories (no matter how deep).  You can use the <I><FONT  color=991122 face=HELVETICA>nodeFlags</I></FONT> argument to limit the search to a particular flavor of node:
+<P>
+<UL>
+<LI><B><TT>B_FILE_NODE</TT></B> looks for a "plain" file.
+<P>
+<LI><B><TT>B_DIRECTORY_NODE</TT></B> looks for a directory.
+<P>
+<LI><B><TT>B_SYMLINK_NODE</TT></B> looks for a symbolic link.
+<P>
+<LI><B><TT>B_ANY_NODE</TT></B> (the default) doesn't discriminate between flavors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>CountEntries()  see  <A HREF="#GetNextEntry()">GetNextEntry()</A></H3>
+<P>
+<HR>
+<H3>CreateDirectory()  see  <A HREF="#CreateFile()">CreateFile()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="CreateFile()"></A>CreateFile()
+, 
+<A NAME="CreateDirectory()"></A>CreateDirectory()
+, 
+<A NAME="CreateSymLink()"></A>CreateSymLink()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>CreateFile(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, <A HREF="File.html#BFile">BFile</A> *<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>failIfExists</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>CreateDirectory(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, BDirectory *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>CreateSymLink(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>linkToPath</I></FONT>, <A HREF="SymLink.html#BSymLink">BSymLink</A> *<I><FONT  color=991122 face=HELVETICA>link</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions create a new file, directory, or symbolic link.  The new node is located at <I><FONT  color=991122 face=HELVETICA>path</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is relative, it's reckoned off of the directory represented by this BDirectory; if it's absolute, the path of this BDirectory is ignored.
+<P>
+<UL>
+<LI><B><TT>CreateFile()</TT></B> fails if the file already exists and <I><FONT  color=991122 face=HELVETICA>failIfExists</I></FONT> is <B><TT>true</TT></B>.  If the flag is <B><TT>false</TT></B> (and the file exists), the old file is clobbered and a new one is created.  If successful, the <A HREF="File.html#BFile">BFile</A> argument that you pass in is opened on the new file in <B><TT>B_READ_WRITE</TT></B> mode.
+<P>
+<LI><B><TT>CreateDirectory()</TT></B> and <B><TT>CreateSymLink()</TT></B> fail if <I><FONT  color=991122 face=HELVETICA>path</I></FONT> already exists&mdash;you can't clobber an existing directory or link.
+<P>
+<LI>The <I><FONT  color=991122 face=HELVETICA>linkToPath </I></FONT>argument (<B><TT>CreateSymLink()</TT></B>) is the path that the new symbolic link will be linked to.
+<P>
+</UL>
+<P>
+The object argument (the <A HREF="#BDirectory">BDirectory</A>, <A HREF="File.html#BFile">BFile</A>, or BSymLink) may be NULL.  If the function fails, the object argument, if non-NULL, is <B><TT><A HREF="#Unset()">Unset()</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Illegal <I><FONT  color=991122 face=HELVETICA>path</I></FONT>, <I><FONT  color=991122 face=HELVETICA>file</I></FONT>, <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, or <I><FONT  color=991122 face=HELVETICA>link</I></FONT> specified; may be <B><TT>NULL</TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> may be empty.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  A busy node could not be accessed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The specified <I><FONT  color=991122 face=HELVETICA>path</I></FONT> does not exist or is an empty string.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file system error prevented the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_EXISTS">B_FILE_EXISTS</A></TT></B>.  The file specified by <I><FONT  color=991122 face=HELVETICA>path</I></FONT> already exists.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LINK_LIMIT">B_LINK_LIMIT</A></TT></B>.  A cyclic loop has been detected in the file system.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>path</I></FONT> specified is too long.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to perform the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_FDS">B_NO_MORE_FDS</A></TT></B>.  All file descriptors are in use (too many open files).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_IS_A_DIRECTORY">B_IS_A_DIRECTORY</A></TT></B>.  Can't replace a directory with a file.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_A_DIRECTORY">B_NOT_A_DIRECTORY</A></TT></B>.  A component of the <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is not a directory.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  The volume is read-only.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_PERMISSION_DENIED">B_PERMISSION_DENIED</A></TT></B>.  Create access is denied in the specified <I><FONT  color=991122 face=HELVETICA>path</I></FONT>.
+<P>
+<LI><B><TT>E2BIG</TT></B>.  <I><FONT  color=991122 face=HELVETICA>linkToPath</I></FONT> is too long (<B><TT><A HREF="#CreateSymLink()">CreateSymLink()</A></TT></B> only).
+<P>
+</UL>
+<P>
+<HR>
+<H3>CreateSymLink()  see  <A HREF="#CreateFile()">CreateFile()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="FindEntry()"></A>FindEntry()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindEntry(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, <A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Finds the entry with the given name, and sets the second argument to refer to that entry.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>path</I></FONT> must be a relative pathname.  It's reckoned off of the BDirectory's directory.
+<P>
+<LI>You <I><FONT  color=991122 face=HELVETICA>are</I></FONT> allowed to look for "." and "..".  The former represents this directory's entry.  The latter refers to this directory's parent.
+<P>
+<LI>The <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> argument must be allocated before it's passed in (it needn't be initialized).  
+<P>
+<LI>The <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> applies to symbolic links:  If the flag is <B><TT>true</TT></B>, the link is traversed.  If it's <B><TT>false</TT></B>, you get the <A HREF="Entry.html#BEntry">BEntry</A> that points to the link itself.
+<P>
+</UL>
+<P>
+If <I><FONT  color=991122 face=HELVETICA>path</I></FONT> isn't found, the second argument is automatically <B><TT><A HREF="#Unset()">Unset()</A></TT></B>.  To find out why the lookup failed, invoke <B><TT>InitCheck()</TT></B> on the <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> argument:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry entry;
+&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (dir.FindEntry("aFile", &amp;entry) != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = entry.InitCheck();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The direct return value is also informative, but it may not be as precise as the <B><TT><A HREF="File.html#InitCheck()">InitCheck()</A></TT></B> value.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>path</I></FONT> specified; it may be <B><TT>NULL</TT></B> or empty.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The specified <I><FONT  color=991122 face=HELVETICA>path</I></FONT> does not exist.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>path</I></FONT> specified is too long.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LINK_LIMIT">B_LINK_LIMIT</A></TT></B>.  A cyclic loop has been detected in the file system.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to perform the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  An invalid file prevented the operation.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetEntry()"></A>GetEntry()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetEntry(</TT></B></FONT><A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> to represent this BDirectory.  If the initialization fails, <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> is <B><TT><A HREF="#Unset()">Unset()</A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  The path specified by <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> is too long.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The specified path does not exist.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LINK_LIMIT">B_LINK_LIMIT</A></TT></B>.  A cyclic loop has been detected in the file system.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to perform the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  A busy node could not be accessed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  An invalid file prevented the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_FDS">B_NO_MORE_FDS</A></TT></B>.  All file descriptors are in use (too many open files).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_A_DIRECTORY">B_NOT_A_DIRECTORY</A></TT></B>.  The path includes non-directory entries.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetNextDirents()  see  <A HREF="#GetNextEntry()">GetNextEntry()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetNextEntry()"></A>GetNextEntry()
+, 
+<A NAME="GetNextRef()"></A>GetNextRef()
+, 
+<A NAME="GetNextDirents()"></A>GetNextDirents()
+, 
+<A NAME="CountEntries()"></A>CountEntries()
+, 
+<A NAME="Rewind()"></A>Rewind()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetNextEntry(</TT></B></FONT><A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> <FONT  face=HELVETICA>= false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetNextRef(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+virtual int32  <B><TT><FONT  color=000022 size=+1>GetNextDirents(</TT></B></FONT>dirent *<I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>bufsize, </I></FONT>int32 <I><FONT  color=991122 face=HELVETICA>count = INT_MAX</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual int32<B><TT><FONT  color=000022 size=+1> CountEntries(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Rewind(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The three <B><TT>GetNext...() </TT></B>functions retrieve the "next" entry that lives in the BDirectory and returns it as a <A HREF="Entry.html#BEntry">BEntry</A>, <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>, or <B><TT>dirent</TT></B> structure.
+<P>
+<UL>
+<LI><B><TT>GetNextEntry()</TT></B> returns the entry as a <A HREF="Entry.html#BEntry">BEntry</A> object. If <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> is <B><TT>true</TT></B> and the entry is a symbolic link, the link is traversed.  In other words, <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> could end up being in a different directory than the one referred to by <B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.  When all entries have been visited, the function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>entry</I></FONT> argument must be allocated before it's passed in.
+<P>
+<LI><B><TT>GetNextRef()</TT></B> return the next entry in <I><FONT  color=991122 face=HELVETICA>ref</I></FONT>.  Since an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> doesn't supply enough information to determine if the entry is a link, there's no question of traversal:  The <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> points to <I>exactly</I> the next entry.  When all entries have been visited, the function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> argument must be allocated before it's passed in.
+<P>
+<LI><B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> returns some number of <B><TT>dirent</TT></B> structures, either as many as can be stuffed into <I><FONT  color=991122 face=HELVETICA>buf</I></FONT> (where <I><FONT  color=991122 face=HELVETICA>bufsize</I></FONT> gives the size of <I><FONT  color=991122 face=HELVETICA>buf</I></FONT>), or <I><FONT  color=991122 face=HELVETICA>count</I></FONT> structures, whichever is smaller.  The function returns the number of structures that were stuffed into <I><FONT  color=991122 face=HELVETICA>buf</I></FONT>; when all entries have been visited, it returns 0.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> only reads one dirent at a time, no matter how many you ask for.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>GetNextEntry()</TT></B> and <B><TT>GetNextRef()</TT></B> are reasonably clear; the <B><TT>dirent</TT></B> version deserves more explanation.  You'll find this explanation (and an example) in the <A HREF="EntryList.html#BEntryList">BEntryList</A> class.  Also, keep in mind that the set of candidate entries is different for the <B><TT>dirent</TT></B> version:  <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> finds <I>all</I> entries, including the entries for "." and "..".  The other two versions skip these entries.  
+<P>
+When you're done reading the BDirectory's entries, you can rewind the object's entry iterator by calling <B><TT><A HREF="#Rewind()">Rewind()</A></TT></B>.
+<P>
+<B><TT>CountEntries()</TT></B> returns the number of entries (not counting "." and "..") in the directory.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Never call <B><TT><A HREF="#CountEntries()">CountEntries()</A></TT></B> while you're iterating through the directory.  <B><TT>CountEntries()</TT></B> does a rewind, iterates through the entries, and then rewinds again. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  BDirectory object has not been properly initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_A_DIRECTORY">B_NOT_A_DIRECTORY</A></TT></B>.  The directory is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  The dirent's name is too long.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  End of directory reached.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LINK_LIMIT">B_LINK_LIMIT</A></TT></B>.  A cyclic loop has been detected in the file system.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid input specified, or BDirectory object has not been properly initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to perform the operation.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetNextRef()  see  <A HREF="#GetNextEntry()">GetNextEntry()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetStatFor()"></A>GetStatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetStatFor(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, stat *<I><FONT  color=991122 face=HELVETICA>st</I></FONT>) const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Gets the <B><TT><A HREF="NodeMonitor.html#B_STAT_CHANGED">stat</A></TT></B> structure for the entry designated by <I><FONT  color=991122 face=HELVETICA>path</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> may be either absolute or relative; if it's relative, it's reckoned off of the BDirectory's directory.  This is, primarily, a convenience function; but it's also provided for efficiency. 
+<P>
+<b>RETURN CODES</b>
+<P>
+ 
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  An invalid file prevented the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>path</I></FONT> specified is too long.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The specified <I><FONT  color=991122 face=HELVETICA>path</I></FONT> does not exist.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LINK_LIMIT">B_LINK_LIMIT</A></TT></B>.  A cyclic loop has been detected in the file system.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid input specified; the <I><FONT  color=991122 face=HELVETICA>path</I></FONT> may be <B><TT>NULL</TT></B> or empty.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to perform the operation.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="IsRootDirectory()"></A>IsRootDirectory()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsRootDirectory(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if this BDirectory represents a <I>root directory</I>.  A root directory is the directory that's at the root of a volume's file hierarchy.  Every volume has exactly one root directory; all other files in the volume's hierarchy descend from the root directory.
+<P>
+<HR>
+<H3>Rewind()  see  <A HREF="#GetNextEntry()">GetNextEntry()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+, 
+<A NAME="Unset()"></A>Unset()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const node_ref *<I><FONT  color=991122 face=HELVETICA>nref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const <A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const BDirectory *<I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Unset(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Closes the BDirectory's current directory (if any), and initializes the object to open the directory as given by the arguments. 
+<P>
+<UL>
+<LI>In the <I><FONT  color=991122 face=HELVETICA>path</I></FONT> version, <I><FONT  color=991122 face=HELVETICA>path</I></FONT> can be absolute or relative, and can contain "." and ".." elements.  If <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is relative, it's reckoned off of the current working directory.
+<P>
+<LI>In the<I><FONT  color=991122 face=HELVETICA> dir</I></FONT>/<I><FONT  color=991122 face=HELVETICA>path</I></FONT> version, <I><FONT  color=991122 face=HELVETICA>path</I></FONT> must be relative.  It's reckoned off of the directory given by <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>.
+<P>
+</UL>
+<P>
+If the specification results in a symbolic link that resolves to a directory, then the linked-to directory is opened.  If the specification is (or resolves to) a regular file, the initialization fails.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>path</I></FONT> specified is too long.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The directory does not exist.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LINK_LIMIT">B_LINK_LIMIT</A></TT></B>.  A cyclic loop has been detected in the file system.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid input specified.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to perform the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  A busy node could not be accessed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  An invalid file prevented the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_FDS">B_NO_MORE_FDS</A></TT></B>.  All file descriptors are in use (too many open files).
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BDirectory&amp; operator<B><TT><FONT  color=000022 size=+1>=(</TT></B></FONT>const BDirectory &amp;<I><FONT  color=991122 face=HELVETICA>directory</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+In the expression
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BDirectory a = b;</PRE>
+<P>
+BDirectory <I>a</I> is initialized to refer to the same directory as<I> b</I>.  To gauge the success of the assignment, you should call <B><TT><A HREF="File.html#InitCheck()">InitCheck()</A></TT></B> immediately afterwards.   Assigning a BDirectory to itself is safe.
+<P>
+Assigning from an uninitialized BDirectory is "successful":  The assigned-to BDirectory will also be uninitialized (<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>).
+<P>
+<HR>
+<H2>
+<A NAME="C%20Functions"></A><FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="create_directory()"></A>create_directory()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>create_directory(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, mode_t <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates all missing directories along the path specified by <I><FONT  color=991122 face=HELVETICA>path</I></FONT>.  
+<P>
+<UL>
+<LI>The pathname can be absolute or relative.  If it's relative, the path is reckoned of the current working directory.  If any symlinks are found in the existing portion of the path, they're traversed.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>path</I></FONT> can contain ".", but it may not contain "..".  
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>mode</I></FONT> is the permissions setting (typically expressed as an octal number) that's assigned to all directories that are created.  To set the directories to be readable, writable, and "enterable" by all (for example), you would set the mode to 0777.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> now fully exists (or did in the first place).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is <B><TT>NULL</TT></B>, is empty, or contains "..".
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  Read-only volume. 
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to perform the operation.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="find_directory()"></A>find_directory()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/FindDirectory.h">be/storage/FindDirectory.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>find_directory(</TT></B></FONT>directory_which <I><FONT  color=991122 face=HELVETICA>which</I></FONT>, dev_t <I><FONT  color=991122 face=HELVETICA>volume</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>create_it</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *<I><FONT  color=991122 face=HELVETICA>path_string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>find_directory(</TT></B></FONT>directory_which <I><FONT  color=991122 face=HELVETICA>which</I></FONT>, <A HREF="Path.html#BPath">BPath</A> *<I><FONT  color=991122 face=HELVETICA>path_obj</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>create_it = false</I></FONT>, <A HREF="Volume.html#BVolume">BVolume</A> *<I><FONT  color=991122 face=HELVETICA>volume = NULL</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The first version of this function can be used in either C or C++ code.  The second version is for C++ code only.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Finds the path to the directory symbolized by <I><FONT  color=991122 face=HELVETICA>which</I></FONT> and copies it into <I><FONT  color=991122 face=HELVETICA>path_string</I></FONT>, or uses it to initialize <I><FONT  color=991122 face=HELVETICA>path_obj</I></FONT>.
+<P>
+<UL>
+<LI>The <I><FONT  color=991122 face=HELVETICA>create_it</I></FONT> argument tells the function to create the directory if it doesn't already exist.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>volume</I></FONT> identifies the volume (as a dev_t identifier or <A HREF="Volume.html#BVolume">BVolume</A> object) on which you want to look.  The C++ default (<B><TT>NULL</TT></B>) means to look in the boot volume.
+<P>
+<LI>The <I><FONT  color=991122 face=HELVETICA>length</I></FONT> argument (first version only) gives the length of <I><FONT  color=991122 face=HELVETICA>path</I></FONT>.
+<P>
+</UL>
+<P>
+The <B><TT>directory_which</TT></B> constants are described in the <a href="misc.html#Global%20Constants%20and%20Defined%20Types">"Global Constants and Defined Types"</a> section at the end of this chapter.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The directory was found.
+<P>
+<LI><I>Other codes.</I>  The directory wasn't found or couldn't be created.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

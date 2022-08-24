@@ -1,0 +1,268 @@
+<HTML><HEAD><TITLE>The Game Kit: BSimpleGameSound</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BSimpleGameSound"></A>BSimpleGameSound
+</H1>
+<P>
+Derived from:  <A HREF="GameSound.html#BGameSound">BGameSound</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/game/SimpleGameSound.h">be/game/SimpleGameSound.h</A>
+<P>
+Library:  libgame.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="SimpleGameSound.summary.html"><i>Summary</i></A></H6>
+<P>
+The BSimpleGameSound class represents simple sound effects that don't change, and remain in memory.
+<P>
+Using BSimpleGameSound is, well, simple:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BSimpleGameSound *mysound = new BSimpleGameSound("soundfile.wav");
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;mysound.StartPlaying();</PRE>
+<P>
+This snippet uses BSimpleGameSound to create an object that can be used to play the sound effect in the file "soundfile.wav".  Playing the sound is as simple as calling <B><TT><A HREF="GameSound.html#StartPlaying()">StartPlaying()</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In the current version of the BeOS, when you clone a <A HREF="#BSimpleGameSound">BSimpleGameSound</A>, the sound data buffer is also cloned, so you'll have multiple copies of the sound effect in memory.  Keep this in mind as you write your code, as you can rapidly use a lot of memory this way.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BSimpleGameSound()"></A>BSimpleGameSound()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSimpleGameSound(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>inFile</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGameSoundDevice *<I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSimpleGameSound(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>inFile</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGameSoundDevice *<I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSimpleGameSound(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>inData</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>inFrameCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const gs_audio_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGameSoundDevice *<I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSimpleGameSound(</TT></B></FONT>const BSimpleGameSound &amp;<I><FONT  color=991122 face=HELVETICA>other</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Prepares the object to play the specified sound.  The first form of the constructor preloads the entire sound specified by <I><FONT  color=991122 face=HELVETICA>inFile</I></FONT> into memory, while the second accepts a <I><FONT  color=991122 face=HELVETICA>inFile</I></FONT> as a pathname string.
+<P>
+The third form takes <I><FONT  color=991122 face=HELVETICA>inData</I></FONT> as a pointer to sound data already in memory; this sound data is copied into a buffer owned by the BSimpleGameSound object; once the constructor returns, you can delete the original data if you wish.  The data is copied since some sound cards have an onboard sound buffer, and the API allows support for these devices (whether or not drivers exist that do this is another story).
+<P>
+<I><FONT  color=991122 face=HELVETICA>inFrameCount</I></FONT> indicates how many frames of audio are in that buffer, and <I><FONT  color=991122 face=HELVETICA>format</I></FONT> indicates the format of the audio data.  The size of the Media Kit buffers used by the object is determined by the gs_audio_format structure's <B><TT>buffer_size</TT></B> field.  If the value this field is zero, the Game Kit determines an appropriate buffer size for you.
+<P>
+In both cases, <I><FONT  color=991122 face=HELVETICA>device</I></FONT> specifies the sound device that should be used for playing the sound; <B><TT>NULL</TT></B> uses the default sound player.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <I><FONT  color=991122 face=HELVETICA>device</I></FONT> must always be <B><TT>NULL</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The final form of the constructor duplicates another BSimpleGameSound object.
+<P>
+After instantiating the BSimpleGameSound object, you should call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to determine whether or not the sound was successfully created.
+<P>
+<HR>
+<H3>
+<A NAME="~BSimpleGameSound"></A>~BSimpleGameSound
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BSimpleGameSound()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+A typical destructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a status_t indicating whether or not the object was successfully instantiated.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The sound was successfully initialized.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Unable to create a sound player.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Can't get enough memory to preload the sound.
+<P>
+<LI><I>Other errors</I>.  The sound player may return errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetIsLooping()"></A>SetIsLooping()
+, 
+<A NAME="IsLooping()"></A>IsLooping()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetIsLooping(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>looping</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsLooping(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetIsLooping()">SetIsLooping()</A> </TT></B>turns looping of the sound on if <I><FONT  color=991122 face=HELVETICA>looping</I></FONT> is <B><TT>true</TT></B>, or off if <I><FONT  color=991122 face=HELVETICA>looping</I></FONT> is <B><TT>false</TT></B>.
+<P>
+<B><TT>IsLooping()</TT></B> returns a flag indicating whether or not looping is currently enabled.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Looping was turned on or off without error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The player wasn't initialized properly.
+<P>
+<LI>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

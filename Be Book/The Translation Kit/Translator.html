@@ -1,0 +1,478 @@
+<HTML><HEAD><TITLE>The Translation Kit: BTranslator</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BTranslator"></A>BTranslator
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/translation/Translator.h">be/translation/Translator.h</A>
+<P>
+Library:  libtranslation.so
+<P>
+<H6><A HREF="Translator.summary.html"><i>Summary</i></A></H6>
+<P>
+BTranslator is an abstract superclass that you subclass to define your own proprietary translator objects, one translator per BTranslator subclass.  You add instances of your BTranslator subclasses to a <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> through <B><TT>BTranslatorRoster::AddTranslator()</TT></B>.  BTranslator objects that your app creates and adds to the Roster are not visible to other applications.
+<P>
+Note that the BTranslator destructor is protected; you never <B><TT>delete</TT></B> a BTranslator from outside the class.  Insead, you <B><TT><A HREF="#Release()">Release()</A></TT></B> it.  See <B><TT><A HREF="#Acquire()">Acquire()</A></TT></B> for details.
+<P>
+The primary BTranslator functions are similar to the functions and data that a translator add-on supplies.  Most of the BTranslator functions take you to the <A HREF="Translator%20Protocol.html#Translator%20Add-ons">Translator Add-ons</A> descriptions.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BTranslator()"></A>BTranslator()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BTranslator()">BTranslator()</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The constructor must create and return a new instance of your BTranslator subclass.  Note that the constructor doesn't <B><TT><A HREF="#Acquire()">Acquire()</A></TT></B> the object it returns.
+<P>
+<HR>
+<H3>
+<A NAME="~BTranslator()"></A>~BTranslator()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BTranslator()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Note that the destructor is protected; you can only delete a BTranslator object from within the implementation of the subclass.  From outside the class, you call <B><TT><A HREF="#Release()">Release()</A></TT></B>. 
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Acquire()"></A>Acquire()
+, 
+<A NAME="Release()"></A>Release()
+, 
+<A NAME="ReferenceCount()"></A>ReferenceCount()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BTranslator *<B><TT><FONT  color=000022 size=+1>Acquire(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BTranslator *<B><TT><FONT  color=000022 size=+1>Release(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>ReferenceCount(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT><I><FONT  color=008844 face=HELVETICA>Debugging use only!
+<P>
+</I></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Acquire()">Acquire()</A></TT></B> and <B><TT><A HREF="#Release()">Release()</A></TT></B> increment and decrement the object's reference count.   The count starts at 1 (i.e .the object is implicitly acquired when it's created); if the count falls to 0, the object is deleted.
+<P>
+When you add a BTranslator to a <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A>, the BTranslator is automatically <B><TT><A HREF="#Acquire()">Acquire()</A></TT></B>'d.  When the <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> is deleted, its BTranslators are <B><TT><A HREF="#Release()">Release()</A></TT></B>'d.  Thus, when you instantiate a BTranslator and add it to a <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A>, you and the Roster maintain joint ownership of the object.  To give up ownership (such that the <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> will destroy the object when the Roster itself is destroyed), call <B><TT><A HREF="#Release()">Release()</A></TT></B> after adding the BTranslator to the Roster.
+<P>
+<B><TT><A HREF="#Acquire()">Acquire()</A></TT></B> and <B><TT><A HREF="#Release()">Release()</A></TT></B> both return a pointer to the BTranslator that was just acquired or released.  If <B><TT><A HREF="#Release()">Release()</A></TT></B> caused the object to be deleted, it retruns <B><TT>NULL</TT></B>.
+<P>
+<B><TT><A HREF="#ReferenceCount()">ReferenceCount()</A></TT></B>, which returns the current reference count value, is meant for debugging purposes only.  <B>It is not thread-safe! </B> Don't predicate your code on the value it returns. 
+<P>
+<HR>
+<H3>ReferenceCount()  see  <A HREF="#Acquire()">Acquire()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetConfigurationMessage()"></A>GetConfigurationMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetConfigurationMessage(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Optional
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Hook function that asks the object to write its current state into the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument.  See <A HREF="Translator%20Protocol.html#GetConfigMessage()">GetConfigMessage()</A> [<A HREF="Translator%20Protocol.html#Translator%20Add-ons">Translator Add-ons</A>]  for details.
+<P>
+<HR>
+<H3>
+<A NAME="Identify()"></A>Identify()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Identify(</TT></B></FONT>BPositionIO *<I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const translation_format *<I><FONT  color=991122 face=HELVETICA>inFormat</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;translator_info *<I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>outType</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Required
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Hook function called by the Translator Roster to ask the BTranslator if it knows how to convert <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> into the type described by <I><FONT  color=991122 face=HELVETICA>outType</I></FONT>.  See <A HREF="Translator%20Protocol.html#Identify()">Identify()</A> [<A HREF="Translator%20Protocol.html#Translator%20Add-ons">Translator Add-ons</A>]  for details.
+<P>
+<HR>
+<H3>
+<A NAME="InputFormats()"></A>InputFormats()
+, 
+<A NAME="OutputFormats()"></A>OutputFormats()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual const <B><TT><A HREF="TranslatorRoster.html#translation_format">translation_format</A></TT></B> *<B><TT><FONT  color=000022 size=+1>InputFormats</TT></B></FONT>(int32 *<I><FONT  color=991122 face=HELVETICA>count</I></FONT>) const
+<P>
+
+
+<TR><TD>
+virtual const <B><TT><A HREF="TranslatorRoster.html#translation_format">translation_format</A></TT></B> *<B><TT><FONT  color=000022 size=+1>OutputFormats</TT></B></FONT>(int32 *<I><FONT  color=991122 face=HELVETICA>count</I></FONT>) const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Optional
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+These functions should be implemented to return arrays of <B><TT><A HREF="TranslatorRoster.html#translation_format">translation_format</A></TT></B> structures that describe the formats that this object supports.  If the functions aren't implemented, the object's <B><TT><A HREF="#Identify()">Identify()</A></TT></B> function will be called each time an application requests a translation.  Both functions should set <I><FONT  color=991122 face=HELVETICA>count</I></FONT> to the number of elements in the format array.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/importantBullet.gif">
+					<TD><FONT FACE="helvetica">
+Unlike the analogous translator add-on format arrays, the arrays returned by these functions don't have to be terminated by an empty <B><TT><A HREF="TranslatorRoster.html#translation_format">translation_format</A></TT></B> structure.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="MakeConfigurationView()"></A>MakeConfigurationView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>MakeConfigurationView(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> **<I><FONT  color=991122 face=HELVETICA>outView</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>outExtent</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Optional
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Hook function that lets the BTranslator supply a configuration view.  See <A HREF="Translator%20Protocol.html#MakeConfig()">MakeConfig()</A> [<A HREF="Translator%20Protocol.html#Translator%20Add-ons">Translator Add-ons</A>]  for details.
+<P>
+<HR>
+<H3>OutputFormats()  see <A HREF="#InputFormats()">InputFormats()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Translate()"></A>Translate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Translate(</TT></B></FONT>BPositionIO *<I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const translator_info *<I><FONT  color=991122 face=HELVETICA>inInfo</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>outType</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPositionIO *<I><FONT  color=991122 face=HELVETICA>outDestination</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Required
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Hook function that asks the BTranslator to translate data from <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> to format <I><FONT  color=991122 face=HELVETICA>outType</I></FONT>, writing the output to <I><FONT  color=991122 face=HELVETICA>outDestination</I></FONT>.  See <A HREF="Translator%20Protocol.html#Translate()">Translate()</A> [<A HREF="Translator%20Protocol.html#Translator%20Add-ons">Translator Add-ons</A>]  for details.
+<P>
+<HR>
+<H3>
+<A NAME="TranslatorInfo()"></A>TranslatorInfo()
+, 
+<A NAME="TranslatorName()"></A>TranslatorName()
+, 
+<A NAME="TranslatorVersion()"></A>TranslatorVersion()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual const char *<B><TT><FONT  color=000022 size=+1>TranslatorInfo(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const = 0
+<P>
+
+
+<TR><TD>
+virtual const char *<B><TT><FONT  color=000022 size=+1>TranslatorName(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const = 0
+<P>
+
+
+<TR><TD>
+virtual int32 <B><TT><FONT  color=000022 size=+1>TranslatorVersion(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const = 0
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Required
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#TranslatorInfo()">TranslatorInfo()</A></TT></B> returns a pointer to the translator's long name, e.g. "aiff translator by the Pie Man (pie@the.man)".  
+<P>
+<B><TT><A HREF="#TranslatorName()">TranslatorName()</A></TT></B> returns a pointer to the translator's short name, e.g. "aiff translator".  The short name should be appropriate for display in a menu.
+<P>
+<B><TT><A HREF="#TranslatorVersion()">TranslatorVersion()</A></TT></B> gives an "MM.mm" version number for the translator.  For example, a <B><TT><A HREF="#TranslatorVersion()">TranslatorVersion()</A> </TT></B>of 314 is interpreted as version 3.14.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

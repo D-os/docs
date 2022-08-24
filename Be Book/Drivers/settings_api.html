@@ -1,0 +1,468 @@
+<HTML><HEAD><TITLE>Drivers: Driver Settings API</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Driver%20Settings%20API"></A>Driver Settings API
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/drivers/driver_settings.h">drivers/driver_settings.h</A>
+<P>
+If your driver is loaded before the file system for the disk on which your settings file resides, your driver might not be able to load its settings using Posix calls.  Also, a robust method for reading settings files&mdash;even if they might have become corrupted&mdash;can help the system be more stable; if your driver crashes trying to read its settings, the entire system is in jeopardy.
+<P>
+The driver settings API provides easy, safe access to boolean and string settings, and is available to all drivers and modules.  If your driver has more complex settings, the <B><TT><A HREF="#get_driver_settings()">get_driver_settings()</A></TT></B> function is available to retrieve all your settings in a hierarchical tree.
+<P>
+The boot loader reads the settings files from the boot volume and passes them to the kernel for distribution to the drivers upon request.  The boot loader also lets the user add to these settings at boot time; a line of the form "filename:parameters" in the advanced safe mode menu will add "parameters" to the end of the specified settings file.  This can be used to change debugging information and to test different options while developing your driver.
+<P>
+<HR>
+<H2>
+<A NAME="Using%20the%20Driver%20Settings%20API"></A><FONT SIZE=6>U</FONT>sing the <FONT SIZE=6>D</FONT>river <FONT SIZE=6>S</FONT>ettings <FONT SIZE=6>A</FONT><FONT SIZE=6>P</FONT><FONT SIZE=6>I</FONT>
+</H2>
+<P>
+Using the API is very simple.  Just follow these basic steps:
+<P>
+<LI>Call <B><TT><A HREF="#load_driver_settings()">load_driver_settings()</A></TT></B> to load the settings data.
+<P>
+<LI>Use <B><TT><A HREF="#get_driver_settings()">get_driver_settings()</A></TT></B> or <B><TT><A HREF="#get_driver_parameter()">get_driver_parameter()</A></TT></B> and <B><TT><A HREF="#get_driver_boolean_parameter()">get_driver_boolean_parameter()</A></TT></B> to read the settings.
+<P>
+<LI>Call <B><TT><A HREF="#unload_driver_settings()">unload_driver_settings()</A></TT></B> when you're done.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Settings%20File"></A>The Settings File
+</H3>
+<P>
+Driver settings files are kept in <B>~/config/settings/kernel/drivers</B>.
+<P>
+The settings file is formatted like this:
+<P>
+<UL>
+<LI>Words beginning with "#" indicate that the rest of the line should be treated as a comment.
+<P>
+<LI>Parameters can have values and subparameters.  A parameter has the following form in the settings file:
+<P>
+name [value]* [{
+<br>
+[parameter]*
+<br>
+}] ['n',',']
+<P>
+Where [ ... ] indicates an optional part, and [ ... ]* indicates an optional repeated part.
+<P>
+<LI>Names and values may not contain spaces unless the spaces are preceded by a backslash ('') or the words are enclosed in quotes.
+<P>
+</UL>
+<P>
+Here's an example settings file:
+<P>
+device 0 {
+<br>
+&nbsp;&nbsp;&nbsp;attribute1 value
+<br>
+&nbsp;&nbsp;&nbsp;attribute2 value
+<br>
+}
+<br>
+device 1 {
+<br>
+&nbsp;&nbsp;&nbsp;attribute1 value
+<br>
+}
+<P>
+For this settings file, <B><TT><A HREF="#get_driver_settings()">get_driver_settings()</A></TT></B> will return a pointer to the following tree:
+<P>
+driver_settings = {
+<br>
+&nbsp;&nbsp;&nbsp;parameter_count = 2
+<br>
+&nbsp;&nbsp;&nbsp;parameters = {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name = "device"
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value_count = 1
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values = { "0" }
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameter_count = 2
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameters = {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name = "attributes1"
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value_count = 1
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values = "value"
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameter_count = 0
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameters = NULL
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name = "attribute2"
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value_count = 1
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values = "value"
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameter_count = 0
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameters = NULL
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br>
+&nbsp;&nbsp;&nbsp;},
+<br>
+&nbsp;&nbsp;&nbsp;{
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name = "device"
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value_count = 1
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values = { "1" }
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameter_count = 1
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameters = {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name = "attribute1"
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value_count = 1
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;values = "value"
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameter_count = 0
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parameters = NULL
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<br>
+&nbsp;&nbsp;&nbsp;}
+<br>
+}
+<P>
+<HR>
+<H3>
+<A NAME="Loading%20the%20Settings"></A>Loading the Settings
+</H3>
+<P>
+To load the driver's settings, you need to call <B><TT><A HREF="#load_driver_settings()">load_driver_settings()</A></TT></B>.  For example, if your driver's name is "xr_joystick", you might do this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void *handle = load_driver_settings("xr_joystick");</PRE>
+<P>
+The handle is then used when calling the other driver settings functions, to indicate which driver's settings you want to reference.  This opaque reference protects you against any future changes in the kernel.
+<P>
+<HR>
+<H3>
+<A NAME="Reading%20the%20Settings"></A>Reading the Settings
+</H3>
+<P>
+There are three functions you can use to read driver settings:
+<P>
+<UL>
+<LI><B><TT><A HREF="#get_driver_boolean_parameter()">get_driver_boolean_parameter()</A></TT></B> returns a boolean parameter's value.
+<P>
+<LI><B><TT><A HREF="#get_driver_parameter()">get_driver_parameter()</A></TT></B> returns a string parameter's value.
+<P>
+<LI><B><TT><A HREF="#get_driver_settings()">get_driver_settings()</A></TT></B> returns all the settings at once, encapsulated in a hierarchical format.
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="Reading%20a%20Boolean%20Parameter"></A>Reading a Boolean Parameter
+</H4>
+<P>
+Let's look at a simple driver that has one boolean parameter, "debug", that enables a special debug mode.  The value of this parameter is represented in the settings file by a line "debug value", where value is either "true" or "false".  By default, if there's no setting for the debug parameter, false should be assumed.  If the parameter is specified but no value is included, we want to assume that the user means true.
+<P>
+Our code to read this setting looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void *handle = load_driver_settings("xr_joystick");
+&nbsp;&nbsp;&nbsp;bool debug = get_driver_boolean_parameter(handle, "debug", false,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true);
+&nbsp;&nbsp;&nbsp;unload_driver_settings(handle);</PRE>
+<P>
+If there's no settings file, <B><TT><A HREF="#load_driver_settings()">load_driver_settings()</A></TT></B> will return <B><TT>NULL</TT></B>.  In this case, <B><TT><A HREF="#get_driver_boolean_parameter()">get_driver_boolean_parameter()</A></TT></B> will return <B><TT>false</TT></B> (the value we're passing as the <I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT> argument).
+<P>
+If there's a settings file, but the debug entry isn't found, the <I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT> argument is returned.  Even though the handle is valid, the function can't find a value for that argument, so it uses this as the default.
+<P>
+If the file contains a line starting with "debug", the second word on the line is used as the value.  If no value is specified, <B><TT>true</TT></B> is returned (the value of the <I><FONT  color=991122 face=HELVETICA>noArgValue</I></FONT> argument to <B><TT><A HREF="#get_driver_boolean_parameter()">get_driver_boolean_parameter()</A></TT></B>).  Otherwise the following is done:
+<P>
+<UL>
+<LI>If the value is "1", "true", "yes", "on", "enable", or "enabled", true is returned.
+<P>
+<LI>If the value is "0", "false", "no", "off", "disable", or "disabled", false is returned.
+<P>
+<LI>If the value matches none of these strings, it's treated as if no entry were found, and <I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT> is returned.
+<P>
+</UL>
+<P>
+If more than one line containing the word "debug" is found, the last one in the file is used.  This lets the user override, at boot time, the value previously specified in the settings file.
+<P>
+<H4>
+<A NAME="Reading%20a%20String%20Parameter"></A>Reading a String Parameter
+</H4>
+<P>
+Reading string parameters works in much the same way, using the <B><TT><A HREF="#get_driver_parameter()">get_driver_parameter()</A></TT></B> function.  The only difference is that the string returned will be <B><TT>NULL</TT></B> if the parameter is missing, or the file doesn't exist.
+<P>
+<H4>
+<A NAME="Reading%20All%20Parameters"></A>Reading All Parameters
+</H4>
+<P>
+If your driver has more complex parameters (such as parameters with multiple values, or with subparameters), you can read the entire settings tree using the <B><TT><A HREF="#get_driver_settings()">get_driver_settings()</A></TT></B> function.
+<P>
+The <B><TT><A HREF="#driver_settings">driver_settings</A></TT></B> structure contains the root of the settings tree:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct driver_settings {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int parameter_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct driver_parameter *parameters;
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+Each parameter is described by the driver_parameter structure:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct driver_parameter {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *name;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int value_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char **values;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int parameter_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct driver_parameter *parameters;
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="C%20Functions"></A><FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="get_driver_boolean_parameter()"></A>get_driver_boolean_parameter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>get_driver_boolean_parameter(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>handle</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>keyName</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>noArgValue</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the value of a given boolean parameter.  The driver settings file is specified by the <I><FONT  color=991122 face=HELVETICA>handle</I></FONT>, as returned by <B><TT><A HREF="#load_driver_settings()">load_driver_settings()</A></TT></B>.  The parameter's name is given by <I><FONT  color=991122 face=HELVETICA>keyName</I></FONT>.  If the parameter isn't found, <I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT> is returned.  If the parameter exists but has no value, <I><FONT  color=991122 face=HELVETICA>noArgValue</I></FONT> is returned.  This lets you easily deal with these two conditions, providing appropriate default values without additional code to check for error conditions.
+<P>
+If the handle is <B><TT>NULL</TT></B>, <I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT> is returned.
+<P>
+<HR>
+<H3>
+<A NAME="get_driver_parameter()"></A>get_driver_parameter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>get_driver_parameter(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>handle</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>keyName</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>noArgValue</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the value of a given string parameter.  The driver settings file is specified by the <I><FONT  color=991122 face=HELVETICA>handle</I></FONT>, as returned by <B><TT><A HREF="#load_driver_settings()">load_driver_settings()</A></TT></B>.  The parameter's name is given by <I><FONT  color=991122 face=HELVETICA>keyName</I></FONT>.  If the parameter isn't found, <I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT> is returned.  If the parameter exists but has no value, <I><FONT  color=991122 face=HELVETICA>noArgValue</I></FONT> is returned.  This lets you easily deal with these two conditions, providing appropriate default values without additional code to check for error conditions.
+<P>
+The special keyName value <B><TT>B_SAFEMODE_SAFE_MODE</TT></B> can be used if you want to find out whether or not BeOS was booted in safe mode; the value will be true if BeOS is running in safe mode, or false if a normal boot was performed.
+<P>
+If the handle is <B><TT>NULL</TT></B>, <I><FONT  color=991122 face=HELVETICA>unknownValue</I></FONT> is returned.
+<P>
+<HR>
+<H3>
+<A NAME="get_driver_settings()"></A>get_driver_settings()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const driver_settings *<B><TT><FONT  color=000022 size=+1>get_driver_settings(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>handle</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the values of all parameters in encapsulated form.
+<P>
+<HR>
+<H3>
+<A NAME="load_driver_settings()"></A>load_driver_settings()
+, 
+<A NAME="unload_driver_settings()"></A>unload_driver_settings()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>load_driver_settings(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>driverName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>unload_driver_settings(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>handle</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>load_driver_settings()</TT></B> loads the settings for the driver specified by <I><FONT  color=991122 face=HELVETICA>driverName</I></FONT>, and returns a handle that should be used for calls to other driver settings functions.  If you want to access the safe mode settings, pass <B><TT>B_SAFEMODE_DRIVER_SETTINGS</TT></B>  Returns <B><TT>NULL</TT></B> if no settings are available for the driver.
+<P>
+<B><TT>unload_driver_settings()</TT></B> unloads the settings for the driver whose settings file is specified by <I><FONT  color=991122 face=HELVETICA>handle</I></FONT>.  You should always call this function when you're done reading the settings.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="driver_parameter"></A>driver_parameter
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct <B><TT><FONT  color=000022 size=+1>driver_parameter</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *<B><TT><FONT  color=000022 size=+1>name</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int <B><TT><FONT  color=000022 size=+1>value_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char **<B><TT><FONT  color=000022 size=+1>values</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int <B><TT><FONT  color=000022 size=+1>parameter_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct <B><TT><A HREF="#driver_parameter">driver_parameter</A></TT></B> *<B><TT><FONT  color=000022 size=+1>parameters</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes a subtree of parameters.
+<P>
+<HR>
+<H3>
+<A NAME="driver_settings"></A>driver_settings
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct <B><TT><FONT  color=000022 size=+1>driver_settings</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int <B><TT><FONT  color=000022 size=+1>parameter_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct <B><TT><A HREF="#driver_parameter">driver_parameter</A></TT></B> *<B><TT><FONT  color=000022 size=+1>parameters</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Encapsulates all the settings for a driver.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

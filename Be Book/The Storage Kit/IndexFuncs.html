@@ -1,0 +1,484 @@
+<HTML><HEAD><TITLE>The Storage Kit: Index C Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Index%20C%20Functions"></A>Index C Functions
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/fs_index.h">be/kernel/fs_index.h</A>
+<P>
+Library:  libroot.so
+<P>
+Before a query can be performed on a file system, indices need to be established in which to search.  An index contains a list of files that can be searched given a particular attribute and the desired value.
+<P>
+An index directory is, essentially, a list of the indices on a particular disk; it keeps track of the attributes that can be searched upon.  Each disk has its own index directory.  For instance, a disk might have the following indices in its index directory:
+<P>
+<UL>
+<LI>MAIL:subject
+<P>
+<LI>MAIL:from
+<P>
+<LI>MAIL:to
+<P>
+<LI>MAIL:priority
+<P>
+</UL>
+<P>
+Each of these is the name of an index that can be queried using either the <B><TT>fs_query</TT></B> API or the <A HREF="Query.html#BQuery">BQuery</A> class.
+<P>
+For example, if an e-mail program wishes to allow searching on the name of the sender of a message, it needs to create an index for the "sender" attribute.  Once this index is established, any file that has the "sender" attribute added to it will be added to the "sender" index.
+<P>
+Files which had the "sender" attribute attached <I>before</I> the "sender" index was created, however, will <I>not</I> be in the index until their "sender" attribute is updated, at which time they will be added to the index.  For this reason, you should consider installing your indices when your application is installed, or when it is initially launched.
+<P>
+Since each disk has its own index directory, if you want all disks to have your indices available, you need to create them on each device.  You can do this by using the functions described here in conjunction with the <B><TT>fs_info</TT></B> functions.
+<P>
+There are three indices that are present on every disk:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Index</TH>
+<TH>Meaning</TH>
+<TR>
+<TD>name</TD>
+<TD>The name of the file.</TD>
+<TR>
+<TD>size</TD>
+<TD>The size, in bytes, of the file.</TD>
+<TR>
+<TD>last_modified</TD>
+<TD>The date the file was last changed.</TD>
+</TABLE>
+<P>
+You can always perform queries in these indices.  Their names are reserved; you can't create or remove indices by these names.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Index%20Directory"></A>The Index Directory
+</H3>
+<P>
+The following sample function opens the index directory for a specified device and, in a loop, reads every entry, printing their names to standard output.  This presents a list of each index available on the disk.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void ListIndex(int32 device) 
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIR *d;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index_info info;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct dirent *ent;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d = fs_open_index_dir(device);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!d) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fprintf(stderr, "Unable to open index.n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (ent = fs_read_index_dir(d)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%sn", ent->d_name);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fs_close_index_dir(d);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+After calling <B><TT><A HREF="#fs_open_index_dir()">fs_open_index_dir()</A></TT></B> to open the index directory for the device passed into the function (and handling the error that might occur if that function fails), a <B><TT>while</TT></B> loop iterates through all the entries in the directory, calling <B><TT><A HREF="#fs_read_index_dir()">fs_read_index_dir()</A></TT></B> to obtain the desired information, then printing that information to standard output.
+<P>
+When there are no indices left, <B><TT><A HREF="#fs_read_index_dir()">fs_read_index_dir()</A></TT></B> returns <B><TT>NULL</TT></B> and the <B><TT>while</TT></B> loop exits.  At this point, <B><TT><A HREF="#fs_close_index_dir()">fs_close_index_dir()</A></TT></B> is called to close the index directory.
+<P>
+<HR>
+<H3>
+<A NAME="Installing%20and%20Removing%20Indices"></A>Installing and Removing Indices
+</H3>
+<P>
+To install a new index, use the <B><TT><A HREF="#fs_create_index()">fs_create_index()</A></TT></B> function.  For example, to create an index for the attribute "GOLF:Handicap" on device 4 you would do this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;fs_create_index(4, "GOLF:Handicap", B_INT16_TYPE, 0);</PRE>
+<P>
+This creates an empty index for the golf handicap attribute, which is stored as a 16-bit integer.  Once the index has been created, any file that gets a "GOLF:Handicap" attribute added or changed will be indexed.
+<P>
+(You usually shouldn't hard-code a device number, of course; you can obtain a device number for a specific disk by using the <B><TT>fs_info</TT></B> functions or <B><TT>stat()</TT></B>.)
+<P>
+If you later need to remove the index, you can do so by calling <B><TT><A HREF="#fs_remove_index()">fs_remove_index()</A></TT></B>, like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;fs_remove_index(4, "GOLF:Handicap");</PRE>
+<P>
+You should be careful when deciding to delete an index.  If the user still has files around that contain indexed attributes that they want to be able to search for&mdash;using the Find panel in the Tracker, for example&mdash;they will not be able to do so after the index has been removed.  So you need to decide when it is appropriate to remove indices; the choice is yours, but choose wisely, or you might annoy users.
+<P>
+<HR>
+<H2>
+<A NAME="Index%20Functions"></A><FONT SIZE=6>I</FONT>ndex <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="fs_close_index_dir()"></A>fs_close_index_dir()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_close_index_dir</TT></B></FONT>(DIR *<I><FONT  color=991122 face=HELVETICA>dirp</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Closes the specified index directory and frees <I><FONT  color=991122 face=HELVETICA>dirp</I></FONT>.  You should pass into this function the pointer returned from a previous <B><TT>fs_open_index_dir</TT></B>().  
+<P>
+You should always use this function to close index directories after you finish using them.
+<P>
+If successful, this function returns 0; otherwise it returns -1and sets <B><TT>errno</TT></B> to one of the following codes.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid directory reference specified.
+<P>
+<LI><B><TT>B_BAD_FILE</TT></B>.  Invalid directory reference specified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_create_index()"></A>fs_create_index()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_create_index</TT></B></FONT>(dev_t <I><FONT  color=991122 face=HELVETICA>device</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates a new index called <I><FONT  color=991122 face=HELVETICA>name</I></FONT> on the specified <I><FONT  color=991122 face=HELVETICA>device</I></FONT>.  Once this has been done, adding an attribute named <I><FONT  color=991122 face=HELVETICA>name</I></FONT> to a file causes the file to be added to the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> index, such that subsequent queries will be able to search for files that contain the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> attribute.
+<P>
+<I><FONT  color=991122 face=HELVETICA>type</I></FONT> indicates the kind of data the attribute will contain.  Standard types are defined in the <B>be/support/TypeConstants.h</B> header file.  Different file systems may support different types.  BFS supports the following types of attributes:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A>
+<P>
+</TT></B><LI><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A>
+<P>
+</TT></B><LI><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A>
+<P>
+</TT></B><LI><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_DOUBLE_TYPE">B_DOUBLE_TYPE</A>
+<P>
+</TT></B><LI><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A>
+<P>
+</TT></B><LI><B><TT>B_MIME_STRING_TYPE
+<P>
+</TT></B></UL>
+<P>
+<I><FONT  color=991122 face=HELVETICA>flags</I></FONT> is currently unused and should always be 0.
+<P>
+If successful, this function returns 0; otherwise it returns -1and sets <B><TT>errno</TT></B> to one of the following codes.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The device does not exist, or <I><FONT  color=991122 face=HELVETICA>name</I></FONT> is reserved.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  The device is read-only.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to complete the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_EXISTS">B_FILE_EXISTS</A></TT></B>.  The index <I><FONT  color=991122 face=HELVETICA>name</I></FONT> already exists.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_DEVICE_FULL">B_DEVICE_FULL</A></TT></B>.  There's not enough room on the device to create the index.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid directory reference.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The index type passed isn't supported.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_open_index_dir()"></A>fs_open_index_dir()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+DIR *<B><TT><FONT  color=000022 size=+1>fs_open_index_dir(</TT></B></FONT>dev_t <I><FONT  color=991122 face=HELVETICA>device</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Opens the index directory for the volume identified by <I><FONT  color=991122 face=HELVETICA>device</I></FONT>.  Once open, you can retrieve the names of the indices on the volume by calling <B><TT><A HREF="#fs_read_index_dir()">fs_read_index_dir()</A></TT></B>.
+<P>
+When you have finished using the index directory, call <B><TT><A HREF="#fs_close_index_dir()">fs_close_index_dir()</A></TT></B> to close it.
+<P>
+If the index directory is opened successfully, a pointer to a directory structure is returned.  This pointer should be passed to the other <B><TT>fs_index</TT></B> functions to read entries from the index directory, as well as to close the directory when you're finished with it.
+<P>
+If an error occurs while opening the index directory, this function returns <B><TT>NULL</TT></B> and sets <B><TT>errno</TT></B> to an appropriate value.  
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file error prevented the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid device number specified.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_LINK_LIMIT">B_LINK_LIMIT</A></TT></B>.  A cyclic loop was detected in the directory structure.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to complete the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  The specified file is currently in use.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_FDS">B_NO_MORE_FDS</A></TT></B>.  Too many open files; all file descriptors are in use.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_read_index_dir()"></A>fs_read_index_dir()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct dirent *<B><TT><FONT  color=000022 size=+1>fs_read_index_dir</TT></B></FONT>(DIR *<I><FONT  color=991122 face=HELVETICA>dirp</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Reads the current entry from the open index directory referenced by <I><FONT  color=991122 face=HELVETICA>dirp</I></FONT>, and bumps the pointer to point to the next entry.  dirp should have been obtained through a previous call to <B><TT><A HREF="#fs_open_index_dir()">fs_open_index_dir()</A></TT></B>.  The returned <B><TT>dirent</TT></B> pointer contains information about the index entry, including the name of the attribute represented by the index.  This pointer belongs to the system; you must not delete it.
+<P>
+Through repeated calls to <B><TT><A HREF="#fs_read_index_dir()">fs_read_index_dir()</A></TT></B>, you can obtain a list of all the indices available on the device.  When you reach the end of the list, errno is set to <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.
+<P>
+If an error occurs, this function returns <B><TT>NULL</TT></B> and sets <B><TT>errno</TT></B> to an appropriate value.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid file descriptor <I><FONT  color=991122 face=HELVETICA>fd</I></FONT> specified.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_A_DIRECTORY">B_NOT_A_DIRECTORY</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>dirp</I></FONT> does not represent a valid index directory.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  You've reached the end of the list.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_remove_index()"></A>fs_remove_index()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_remove_index(</TT></B></FONT>dev_t <I><FONT  color=991122 face=HELVETICA>device</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>index_name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the index named <I><FONT  color=991122 face=HELVETICA>index_name</I></FONT> from the specified <I><FONT  color=991122 face=HELVETICA>device</I></FONT>.  Once the index is deleted, it will no longer be possible to use the query system to search for files with the corresponding attribute.
+<P>
+Use this function to remove an index that you no longer wish or need to be able to search upon.  For example, if your application is being uninstalled by your user-friendly uninstaller program, and it's no longer meaningful to be able to search on a given attribute, you should use this function to delete the index for that attribute.
+<P>
+You should be careful when deciding whether or not to delete an index, however.  If the user still has files around that they want to be able to search, using the Tracker's Find panel, for instance, and you've deleted the index for that attribute, they'll be most displeased.  There's a grey area you need to wade through in determining whether or not to delete your indices; your decision needs to be based on the specifics of what your application does and how it will be used.
+<P>
+If the index is removed successfully, <B><TT>fs_remove_index()</TT></B> returns 0.  Otherwise, it returns -1 and sets <B><TT>errno</TT></B> to an appropriate value.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file system error prevented the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid device number specified.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  Can't remove a system-reserved index ("name," "size," "last_modified"), or the device is read-only.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to complete the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The specified index does not exist.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_rewind_index_dir()"></A>fs_rewind_index_dir()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_rewind_index_dir</TT></B></FONT>(DIR *<I><FONT  color=991122 face=HELVETICA>dirp</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Rewinds the specified index directory to the beginning of its list of indices.  This allows you to start over again at the top of a device's index directory and make your way down toward the bottom.
+<P>
+Returns a result code specifying whether or not the operation was successful.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Unlike the most of the other file system functions, <B><TT><A HREF="#fs_rewind_index_dir()">fs_rewind_index_dir()</A></TT></B> <I>doesn't</I> set <B><TT>errno</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  Invalid directory reference specified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_stat_index()"></A>fs_stat_index()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_stat_index</TT></B></FONT>(dev_t <I><FONT  color=991122 face=HELVETICA>device</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>index_name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;struct index_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns, in the <B><TT>index_info</TT></B> structure pointed to by <I><FONT  color=991122 face=HELVETICA>info</I></FONT>, information about the index named <I><FONT  color=991122 face=HELVETICA>index_name</I></FONT> on the specified <I><FONT  color=991122 face=HELVETICA>device</I></FONT>.
+<P>
+The <B><TT>index_info</TT></B> structure is defined as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct index_info
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;modification_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;creation_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uid_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uid;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gid_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gid;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<I><FONT  color=991122 face=HELVETICA>type</I></FONT> contains a code defining the format of the data contained by the attribute represented by the index; standard values for this field are defined in the <B>be/support/TypeConstants.h</B> header file.
+<P>
+<UL>
+<LI><B><TT>size</TT></B> specifies the size of the data the attribute contains.
+<P>
+<LI><B><TT>modification_time</TT></B> contains the time the index was last changed, in seconds since January 1, 1970.
+<P>
+<LI><B><TT>creation_time</TT></B> contains the date and time the index was originally created, in seconds since January 1, 1970.
+<P>
+<LI><B><TT>uid</TT></B> contains the user ID of the owner of the index.
+<P>
+<LI><B><TT>gid</TT></B> contains the group ID of the owner of the index.
+<P>
+</UL>
+<P>
+If the function is successful, it returns 0; otherwise, it returns -1 and sets errno to an appropriate value
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The requested index was not found.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid device number specified.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

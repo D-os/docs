@@ -1,0 +1,738 @@
+<HTML><HEAD><TITLE>The Game Kit: BGameSound</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BGameSound"></A>BGameSound
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/game/GameSound.h">be/game/GameSound.h</A>
+<P>
+Library:  libgame.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="GameSound.summary.html"><i>Summary</i></A></H6>
+<P>
+The BGameSound class is the base class for other game sound classes.  You never use this class directly; instead, you should use the derived classes.
+<P>
+<HR>
+<H2>
+<A NAME="The%20Sound%20of%20Explosions%20in%20the%20Morning"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>S</FONT>ound of <FONT SIZE=6>E</FONT>xplosions in the <FONT SIZE=6>M</FONT>orning
+</H2>
+<P>
+Nothing makes the player happy like the sound of lots of explosions, weird alien things, and other thrilling audio pleasures.  The various BGameSound-derived classes make this a snap.
+<P>
+<HR>
+<H3>
+<A NAME="Choosing%20a%20Player%20Class"></A>Choosing a Player Class
+</H3>
+<P>
+Playing a sound is as simple as instantiating an object derived from the most appropriate class and calling <B><TT><A HREF="#StartPlaying()">StartPlaying()</A></TT></B> on it.  How do you determine the most appropriate class?  Here are some hints:
+<P>
+<LI>If you have a sound effect that's short and is likely to be played often, or needs to be played with minimal latency, use the <A HREF="SimpleGameSound.html#BSimpleGameSound">BSimpleGameSound</A> class.  An arcade game's explosions definitely fit into this class.
+<P>
+<LI>If you have a sound effect that's very long, or doesn't need to be played very often, or whose latency doesn't matter much, use the <A HREF="FileGameSound.html#BFileGameSound">BFileGameSound</A> class.  Music loops can take advantage of this class.
+<P>
+<LI>If you want to be able to push audio buffers at the system, instead of having a callback that fills buffers, use the <A HREF="PushGameSound.html#BPushGameSound">BPushGameSound</A> class.
+<P>
+</UL>
+<P>
+Most games' needs will be filled by the <A HREF="SimpleGameSound.html#BSimpleGameSound">BSimpleGameSound</A> and <A HREF="FileGameSound.html#BFileGameSound">BFileGameSound</A> classes.  And, of course, you can write your own derived classes if none of these classes meet your requirements.
+<P>
+<HR>
+<H3>
+<A NAME="Polyphony"></A>Polyphony
+</H3>
+<P>
+Sometimes the player needs to hear multiple copies of the same sound at the same time; for instance, if they shoot a three-way splitting weapon and hit two targets, they need to hear two explosions at once.  Each BGameSound (or BGameSound-derived) object can play only once at a time, so you'll need to use cloned copies of the sound, one for each channel of polyphony you allow.
+<P>
+This can be done with ease using a simple class like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;class MultipleEffect {
+&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MultipleEffect(BGameSound * sound, int polyphony) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_fx = new BGameSound *[polyphony];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_fx[0] = sound;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (int ix=1; ix&lt;polyphony; ix++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_fx[ix] = sound->Clone();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_current = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_polyphony = polyphony;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void StartPlaying() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int id = atomic_add(&amp;m_current, 1) % m_polyphony;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m_fx[id]->StartPlaying();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 m_current;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 m_polyphony;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGameSound *m_fx;
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+This class' constructor lets you specify a BGameSound-derived sound and the maximum number of times it can be playing at once.  It creates the appropriate number of clones, and its <B><TT><A HREF="#StartPlaying()">StartPlaying()</A></TT></B> implementation automatically selects the oldest one and reuses it.  Since <B><TT><A HREF="#StartPlaying()">StartPlaying()</A></TT></B> restarts a sound from the beginning if it's called on a playing sound, this works out well&mdash;if polyphony is 3, and there are already three sounds playing, the oldest one will be reset and played from the beginning.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In the current version of the BeOS, when you clone a <A HREF="SimpleGameSound.html#BSimpleGameSound">BSimpleGameSound</A>, the sound data buffer is also cloned, so you'll have multiple copies of the sound effect in memory.  Keep this in mind as you write your code, as you can rapidly use a lot of memory this way.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Performance%20Verification"></A>Performance Verification
+</H3>
+<P>
+There are a wide variety of performance concerns, and of course you want your game to work on as many systems as possible.  Be recommends that you test your application in at least these three situations:
+<P>
+<UL>
+<LI>Real-time audio disabled, using an ISA sound card (such as an AWE64 or equivalent card).
+<P>
+<LI>Real-time audio enabled, using a PCI sound card (SoundBlaster PCI 64 or equivalent).
+<P>
+<LI>Real-time audio enabled, using an E-mu 10k sound card.  This sound card has its own node, so its behavior is a little different, and is therefore worth special testing attention.
+<P>
+</UL>
+<P>
+This isn't intended to be an exhaustive list; you should always test your software in as many configurations as possible.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BGameSound()"></A>BGameSound()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BGameSound(</TT></B></FONT>BGameSoundDevice *<I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the sound object.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <I><FONT  color=991122 face=HELVETICA>device</I></FONT> must always be <B><TT>NULL</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="~BGameSound"></A>~BGameSound
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BGameSound()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Releases any memory used by the BGameSound.
+<P>
+If your node has created and set BBufferGroups for any producers, you should delete them in the destructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Clone()"></A>Clone()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual BGameSound *<B><TT><FONT  color=000022 size=+1>Clone(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a copy of the game sound object.  Not implemented in this base class; derived classes must implement it.
+<P>
+<HR>
+<H3>
+<A NAME="Device()"></A>Device()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BGameSoundDevice *<B><TT><FONT  color=000022 size=+1>Device(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the BGameSoundDevice responsible for playing the sound.  This is <B><TT>NULL</TT></B> if the default device is being used.
+<P>
+<HR>
+<H3>
+<A NAME="Format()"></A>Format()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const gs_audio_format &amp;<B><TT><FONT  color=000022 size=+1>Format(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a <B><TT><A HREF="gameAPI.html#gs_audio_format">gs_audio_format</A></TT></B> structure describing the format of the sound.
+<P>
+<HR>
+<H3>Gain() see <A HREF="#SetGain()">SetGain()</A></H3>
+<P>
+<HR>
+<H3>GetAttributes() see <A HREF="#SetAttributes()">SetAttributes()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ID()"></A>ID()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+gs_id <B><TT><FONT  color=000022 size=+1>ID(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the ID of the sound attached to the BGameSound object.  This is 0 if no sound has been selected.
+<P>
+<HR>
+<H3>
+<A NAME="Init()"></A>Init()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Init(</TT></B></FONT>gs_id <I><FONT  color=991122 face=HELVETICA>soundHandle</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Specifies the sound to be played by the object.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The initialization was successful.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The constructor failed.
+<P>
+<LI>Other errors.  The player may return other errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a status_t indicating whether or not the object was successfully initialized.  A return value of <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> means everything's fine; any other value means an error occurred in the constructor.
+<P>
+<HR>
+<H3>
+<A NAME="IsPlaying()"></A>IsPlaying()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>IsPlaying(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the sound is currently playing; otherwise this function returns <B><TT>false</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="LockMemoryPool()"></A>LockMemoryPool()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>LockMemoryPool(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>lockInCore</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function lets you specify whether or not the BGameSound's memory pool (from which buffers are drawn) is locked in memory.  Locking the pool may increase performance, but will increase your memory requirements and may reduce the ability of the computer to use virtual memory efficiently.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You can only set the lock state from within the constructor of a derived class.  Once the state has been set, it can't be changed.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The pool's lock state has been set.
+<P>
+<UL>
+<LI><B><TT>EALREADY</TT></B>.  The lock state has already been set.
+<P>
+</UL>
+<P>
+<HR>
+<H3>Pan() see <A HREF="#SetPan()">SetPan()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetAttributes()"></A>SetAttributes()
+, 
+<A NAME="GetAttributes()"></A>GetAttributes()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetAttributes(</TT></B></FONT>gs_attribute *<I><FONT  color=991122 face=HELVETICA>inAttributes</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>inAttributeCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetAttributes(</TT></B></FONT>gs_attribute *<I><FONT  color=991122 face=HELVETICA>ioAttributes</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>inAttributeCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetAttributes()</TT></B> sets the sound's attributes to match those in the <I><FONT  color=991122 face=HELVETICA>inAttributes</I></FONT> array; <I><FONT  color=991122 face=HELVETICA>inAttributeCount</I></FONT> indicates how many attributes are in the list.  
+<P>
+<B><TT>GetAttributes()</TT></B> returns the sound's current attributes.  The <I><FONT  color=991122 face=HELVETICA>ioAttributes</I></FONT> list contains a list of <I><FONT  color=991122 face=HELVETICA>inAttributeCount</I></FONT> <B><TT><A HREF="gameAPI.html#gs_attribute">gs_attribute</A></TT></B> structures; each entry indicates in its <B><TT>attribute</TT></B> field which attribute is to be stuffed into that slot in the array.  On return, these attributes are filled out.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The attribute changes were recorded.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The player wasn't initialized properly.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetGain()"></A>SetGain()
+, 
+<A NAME="Gain()"></A>Gain()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetGain(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>gain</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>rampDuration</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Gain(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetGain()</TT></B> sets the sound's gain (volume).  If <I><FONT  color=991122 face=HELVETICA>rampDuration</I></FONT> is nonzero, the change in gain will take <I><FONT  color=991122 face=HELVETICA>rampDuration</I></FONT> to occur&mdash;the gain will fade between the current value and the new value over the specified number of microseconds.  If <I><FONT  color=991122 face=HELVETICA>rampDuration</I></FONT> is 0, the change will be immediate.  
+<P>
+<B><TT>Gain()</TT></B> returns the sound's current gain.
+<P>
+The gain ranges from 0.0 (silent) to 1.0 (maximum gain).
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The gain change was recorded.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The object hasn't been initialized properly.
+<P>
+<LI>Other errors.  The derived class may return other appropriate errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetInitError()"></A>SetInitError()
+</H3>
+<P>
+protected:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetInitError(</TT></B></FONT>status_t <I><FONT  color=991122 face=HELVETICA>initError</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the error code that <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> will return.  Derived classes should call this from their constructors.
+<P>
+<HR>
+<H3>
+<A NAME="SetMaxSoundCount()"></A>SetMaxSoundCount()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static int32 <B><TT><FONT  color=000022 size=+1>SetMaxSoundCount(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>maxSoundCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function lets you specify the maximum number of BGameSound-derived objects that can be in use at once.  This value must be between 32 and 1024; if it's outside this range, it gets pinned to 32 or 1024.  The actual value set is returned.
+<P>
+<HR>
+<H3>
+<A NAME="SetMemoryPoolSize()"></A>SetMemoryPoolSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetMemoryPoolSize(</TT></B></FONT>size_t <I><FONT  color=991122 face=HELVETICA>poolSize</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the size of the memory pool from which sound buffers can be obtained to the number of bytes specified by <I><FONT  color=991122 face=HELVETICA>poolSize</I></FONT>.  This value must be between 128kB and 4MB, or <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> will be returned.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You can't change the size of the memory pool once it's been allocated.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+In general you'll only call this function if you're implementing a new BGameSound subclass.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The memory pool size has been set.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The requested pool size is invalid.
+<P>
+<LI><B><TT>EALREADY</TT></B>.  The memory pool has already been allocated; you can't change its size.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetPan()"></A>SetPan()
+, 
+<A NAME="Pan()"></A>Pan()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetPan(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>pan</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>rampDuration</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>Pan(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetPan()</TT></B> sets the sound's pan.  This value, which ranges from -1.0 to 1.0, indicates the apparent position of the sound (from absolute left to absolute right).  A value of 0 indicates that the sound should appear to come from directly in front of the user.  If <I><FONT  color=991122 face=HELVETICA>rampDuration</I></FONT> is nonzero, the change in position will take <I><FONT  color=991122 face=HELVETICA>rampDuration</I></FONT> to occur&mdash;the sound will seem to move from the initial position to the new position over the specified number of microseconds.  If <I><FONT  color=991122 face=HELVETICA>rampDuration</I></FONT> is 0, the change will be immediate.  
+<P>
+<B><TT>Pan()</TT></B> returns the sound's current pan.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The pan change was recorded.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The object hasn't been initialized properly.
+<P>
+<LI>Other errors.  The derived class may return other appropriate errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="StartPlaying()"></A>StartPlaying()
+, 
+<A NAME="StopPlaying()"></A>StopPlaying()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>StartPlaying(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>StopPlaying(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>StartPlaying()</TT></B> begins playback of the sound.  <B><TT>StopPlaying()</TT></B> ends playback.
+<P>
+If you call <B><TT><A HREF="#StartPlaying()">StartPlaying()</A></TT></B> on a sound that's already playing, it stops and restarts from the beginning.
+<P>
+These return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if all is well, or an appropriate error code if not; the error depends on the derived class being used.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<UL>
+<LI><B><TT>EALREADY</TT></B>. The sound is already playing (if you called <B><TT>StartPlaying()</TT></B>) or not playing (if you called <B><TT>StopPlaying()</TT></B>).
+<P>
+<LI>Other errors, as determined by the subclass.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

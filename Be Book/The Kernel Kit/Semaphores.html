@@ -1,0 +1,598 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Semaphores</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Semaphores"></A>Semaphores
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/OS.h">be/kernel/OS.h</A>
+<P>
+Library:  libroot.so
+<P>
+A semaphore is a token that's used to synchronize multiple threads.  The semaphore concept is simple:  To enter into a semaphore-protected "critical section", a thread must first "acquire" the semaphore, through the <B><TT><A HREF="#acquire_sem()">acquire_sem()</A></TT></B> function.  When it passes out of the critical section, the thread "releases" the semaphore through <B><TT><A HREF="#release_sem()">release_sem()</A></TT></B>. 
+<P>
+The advantage of the semaphore system is that if a thread can't acquire a semaphore (because the semaphore is yet to be released by the previous acquirer), the thread blocks in the <B><TT><A HREF="#acquire_sem()">acquire_sem()</A></TT></B> call.  While it's blocked, the thread doesn't waste any cycles.
+<P>
+For the full story about semaphores, see <a href="SemaphoresConcepts.html#Semaphore%20Concepts">"Semaphore Concepts"</a>.  For some code examples, see <a href="SemaphoreExamps.html#Semaphore%20Examples">"Semaphore Examples"</a>.
+<P>
+<A NAME="22148:%20head1:%20Example%201:%20Using%20a%20Semaphore%20as%20a%20Lock"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Semaphore%20Functions"></A><FONT SIZE=6>S</FONT>emaphore <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="acquire_sem()"></A>acquire_sem()
+, 
+<A NAME="acquire_sem_etc()"></A>acquire_sem_etc()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B><B><TT><FONT  color=000022 size=+1> acquire_sem(<A HREF="#sem_id">sem_id</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>sem</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B><B><TT><FONT  color=000022 size=+1> acquire_sem_etc(<A HREF="#sem_id">sem_id</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>sem</I><B>,</B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>count</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions attempt to acquire the semaphore identified by the <I><FONT  color=991122 face=HELVETICA>sem</I></FONT> argument.  Except in the case of an error, <B><TT>acquire_sem()</TT></B> doesn't return until the semaphore has actually been acquired.  
+<P>
+<B><TT>acquire_sem_etc() </TT></B>is the full-blown acquisition version:  It's essentially the same as <B><TT>acquire_sem()</TT></B>, but, in addition, it lets you acquire a semaphore more than once, and also provides a timeout facility:
+<P>
+<UL>
+<LI>The <I><FONT  color=991122 face=HELVETICA>count</I></FONT> argument lets you specify that you want the semaphore to be acquired <I><FONT  color=991122 face=HELVETICA>count</I></FONT> times.  This means that the semaphore's thread count is decremented by the specified amount.  It's illegal to specify a count that's less than 1.
+<P>
+<LI>To enable the timeout, you add <B><TT><A HREF="#B_ABSOLUTE_TIMEOUT">B_ABSOLUTE_TIMEOUT</A></TT></B> or <B><TT><A HREF="#B_RELATIVE_TIMEOUT">B_RELATIVE_TIMEOUT</A></TT></B> to the <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> argument.  <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> to the amount of time, in microseconds, that you're willing to wait, measured relative to now (relative timeout), or in comparison to the value returned by system_time() (absolute timeout).  The function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B> if the semaphore isn't acquired within the specified time.  If you specify a relative <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> of 0 and the semaphore isn't immediately available, the function immediately returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_WOULD_BLOCK">B_WOULD_BLOCK</A></TT></B>.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The Kernel Kit defines two other semaphore-acquisition flag constants (<B><TT><A HREF="#B_CAN_INTERRUPT">B_CAN_INTERRUPT</A></TT></B> and <B><TT><A HREF="#B_CHECK_PERMISSION">B_CHECK_PERMISSION</A></TT></B>).  These additional flags are used by device drivers&mdash;adding these flags into a "normal" (or "user-level") acquisition has no effect.  However, you should be aware that the <B><TT><A HREF="#B_CHECK_PERMISSION">B_CHECK_PERMISSION</A></TT></B> flag is always added in to user-level semaphore acquisition in order to protect system-defined semaphores.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Other than the timeout and the acquisition count, there's no difference between the two acquisition functions.  Specifically, any semaphore can be acquired through either of these functions; you always release a semaphore through<B><TT> <A HREF="#release_sem()">release_sem()</A></TT></B> (or <B><TT><A HREF="#release_sem_etc()">release_sem_etc()</A></TT></B>) regardless of which function you used to acquire it.
+<P>
+To determine if the semaphore is available, the function looks at the semaphore's thread count (before decrementing it):
+<P>
+<UL>
+<LI>If the thread count is positive, the semaphore is available and the current acquisition succeeds.  The <B><TT>acquire_sem()</TT></B> (or <B><TT>acquire_sem_etc()</TT></B>)<B><TT> </TT></B>function returns immediately upon acquisition.
+<P>
+<LI>If the thread count is zero or less, the calling thread is placed in the semaphore's thread queue where it waits for a corresponding <B><TT><A HREF="#release_sem()">release_sem()</A></TT></B> call to de-queue it (or for the timeout to expire).
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  The semaphore was successfully acquired.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SEM_ID">B_BAD_SEM_ID</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>sem</I></FONT> argument doesn't identify a valid semaphore.  It's possible for a semaphore to become invalid while an acquisitive thread is waiting in the semaphore's queue.  For example, if your thread calls <B><TT><A HREF="#acquire_sem()">acquire_sem()</A></TT></B> on a valid (but unavailable) semaphore, and then some other thread deletes the semaphore, your thread will return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SEM_ID">B_BAD_SEM_ID</A></TT></B> from its call to <B><TT>acquire_sem()</TT></B>.  
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>.  The acquisition was interrupted by a signal.  In this case, the semaphore has <I>not</I> been acquired.
+<P>
+</UL>
+<P>
+The other return values apply to <B><TT>acquire_sem_etc()</TT></B> only:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Illegal <I><FONT  color=991122 face=HELVETICA>count</I></FONT> value (less than 1).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_WOULD_BLOCK">B_WOULD_BLOCK</A></TT></B>.  You specified a relative <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> of 0 and the semaphore isn't available.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>.   The timeout expired (for all values of <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> other than 0).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="create_sem()"></A>create_sem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+sem_id <B><TT><FONT  color=000022 size=+1>create_sem(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>thread_count</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new semaphore and returns a system-wide <B><TT><A HREF="#sem_id">sem_id</A></TT></B> number that identifies it.  The arguments are:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>thread_count</I></FONT> initializes the semaphore's<I> thread count</I>, the counting variable that's decremented and incremented as the semaphore is acquired and released (respectively).  You can pass any non-negative number as the count, but you typically pass either 1 or 0.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT> is an optional string name that you can assign to the semaphore.  The name is meant to be used only for debugging.  A semaphore's name needn't be unique&mdash;any number of semaphores can have the same name.
+<P>
+</UL>
+<P>
+Valid <B><TT><A HREF="#sem_id">sem_id</A> </TT></B>numbers are positive integers.  You should always check the validity of a new semaphore through a construction such as
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if ((my_sem = create_sem(1,"My Semaphore")) &lt; B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* If it&gt;s less than B_NO_ERROR, my_sem is invalid. */</PRE>
+<P>
+<B><TT>create_sem()</TT></B> sets the new semaphore's owner to the team of the calling thread.  Ownership may be re-assigned through the <B><TT><A HREF="#set_sem_owner()">set_sem_owner()</A></TT></B> function.  When the owner dies (when all the threads in the team are dead), the semaphore is automatically deleted.  The owner is also signficant in a<B><TT> delete_sem() </TT></B>call:  Only those threads that belong to a semaphore's owner are allowed to delete that semaphore.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>thread_count</I></FONT> value (less than 0).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to allocate the semaphore's name.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_SEMS">B_NO_MORE_SEMS</A></TT></B>.  All valid <B><TT><A HREF="#sem_id">sem_id</A></TT></B> numbers are being used.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="delete_sem()"></A>delete_sem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>delete_sem(</TT></B></FONT>sem_id <I><FONT  color=991122 face=HELVETICA>sem</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the semaphore identified by the argument.  If there are any threads waiting in the semaphore's thread queue, they're immediately unblocked.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function may only be called from a thread that belongs to the semaphore's owner.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  The semaphore was successfully deleted.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SEM_ID">B_BAD_SEM_ID</A></TT></B><I><FONT  color=991122 face=HELVETICA>.  sem</I></FONT> is invalid, or the calling thread doesn't belong to the team that owns the semaphore.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_sem_count()"></A>get_sem_count()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> get_sem_count(</TT></B></FONT>sem_id <I><FONT  color=991122 face=HELVETICA>sem</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>thread_count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>For amusement purposes only</B>; never predicate your code on this function.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Returns, by reference in <I><FONT  color=991122 face=HELVETICA>thread_count</I></FONT>, the value of the semaphore's thread count variable: 
+<P>
+<UL>
+<LI>A positive thread count (<I>n</I>) means that there are no threads in the semaphore's queue, and the next <I>n</I> <B><TT><A HREF="#acquire_sem()">acquire_sem()</A></TT></B> calls will return without blocking.
+<P>
+<LI>If the count is zero, there are no queued threads, but the next <B><TT><A HREF="#acquire_sem()">acquire_sem()</A></TT></B> call will block.
+<P>
+<LI>A negative count (-<I>n</I>) means there are <I>n</I> threads in the semaphore's thread queue and the next call to <B><TT><A HREF="#acquire_sem()">acquire_sem()</A></TT></B> will block.
+<P>
+</UL>
+<P>
+By the time this function returns and you get a chance to look at the <I><FONT  color=991122 face=HELVETICA>thread_count</I></FONT> value, the semaphore's thread count may have changed.  Although watching the thread count might help you while you're debugging your program, this function shouldn't be an integral part of the design of your application.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SEM_ID">B_BAD_SEM_ID</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>sem</I></FONT> is invalid(<I><FONT  color=991122 face=HELVETICA>thread_count</I></FONT> isn't changed).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_sem_info()"></A>get_sem_info()
+, 
+<A NAME="get_next_sem_info()"></A>get_next_sem_info()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_sem_info(</TT></B></FONT>sem_id <I><FONT  color=991122 face=HELVETICA>sem</I></FONT>, sem_info <I><FONT  color=991122 face=HELVETICA>*info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_next_sem_info(</TT></B></FONT>team_id <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 *cookie, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sem_info <I><FONT  color=991122 face=HELVETICA>*info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Copies information about a particular semaphore into the <B><TT>sem_info</TT></B> structure designated by<I><FONT  color=991122 face=HELVETICA> info</I></FONT>.  The first version of the function designates the sempahore directly, by <B><TT><A HREF="#sem_id">sem_id</A></TT></B>.  
+<P>
+The <B><TT>get_next_sem_info()</TT></B> version lets you step through the list of a team's semaphores through iterated calls on the function.  The <I><FONT  color=991122 face=HELVETICA>team</I></FONT> argument identifies the team you want to look at; a <I><FONT  color=991122 face=HELVETICA>team</I></FONT> value of 0 means the team of the calling thread.  The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> argument is a placemark; you set it to 0 on your first call, and let the function do the rest.  The function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> when there are no more sempahores to visit:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Get the sem_info for every sempahore in this team. */
+&nbsp;&nbsp;&nbsp;sem_info info;
+&nbsp;&nbsp;&nbsp;int32 cookie = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (get_next_sem_info(0, &amp;cookie, &amp;info) == B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SEM_ID">B_BAD_SEM_ID</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>sem</I></FONT> value.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TEAM_ID">B_BAD_TEAM_ID</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>team</I></FONT> value.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="release_sem()"></A>release_sem()
+, 
+<A NAME="release_sem_etc()"></A>release_sem_etc()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>release_sem(<A HREF="#sem_id">sem_id</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>sem</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>release_sem_etc(<A HREF="#sem_id">sem_id</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>sem</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>count</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>release_sem()</TT></B> function de-queues the thread that's waiting at the head of the semaphore's thread queue (if any), and increments the semaphore's thread count.  <B><TT>release_sem_etc()</TT></B> does the same, but for <I><FONT  color=991122 face=HELVETICA>count</I></FONT> threads.
+<P>
+Normally, releasing a semaphore automatically invokes the kernel's scheduler.  In other words, when your thread calls <B><TT>release_sem()</TT></B>, you're pretty much guaranteed that some other thread will be switched in immediately afterwards, even if your thread hasn't gotten its fair share of CPU time.  If you want to subvert this automatism, call <B><TT>release_sem_etc()</TT></B> with a <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> value of <B><TT><A HREF="#B_DO_NOT_RESCHEDULE">B_DO_NOT_RESCHEDULE</A></TT></B>.  Preventing the automatic rescheduling is particularly useful if you're releasing a number of different semaphores all in a row:  By avoiding the rescheduling you can prevent some unnecessary context switching.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  The semaphore was successfully released.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SEM_ID">B_BAD_SEM_ID</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>sem</I></FONT> value.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>count</I></FONT> value (less than zero; <B><TT>release_sem_etc()</TT></B> only).
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#acquire_sem()">acquire_sem()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="set_sem_owner()"></A>set_sem_owner()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>set_sem_owner(<A HREF="#sem_id">sem_id</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>sem</I></FONT>, <B><TT><A HREF="Threads.html#team_id">team_id</A></TT></B> <I><FONT  color=991122 face=HELVETICA>team</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Transfers ownership of the designated semaphore to <I><FONT  color=991122 face=HELVETICA>team</I></FONT>.  A semaphore can only be owned by one team at a time; by setting a semaphore's owner, you remove it from its current owner.
+<P>
+There are no restrictions on who can own a semaphore, or on who can transfer ownership.  In practice, however, the only reason you should ever transfer ownership is if you're writing a device driver and you need to bequeath a semaphore to the kernel (the team of which is known, for this purpose, as <B><TT><A HREF="Threads.html#B_SYSTEM_TEAM">B_SYSTEM_TEAM</A></TT></B>).
+<P>
+Semaphore ownership is meaningful for two reason:  
+<P>
+<UL>
+<LI>When a team dies (when all its threads are dead), the semaphores that are owned by that team are deleted.  
+<P>
+<LI>Threads can only by deleted by threads that belongs to a semaphore's owner.  
+<P>
+</UL>
+<P>
+To discover a semaphore's owner, use the <B><TT><A HREF="#get_sem_info()">get_sem_info()</A></TT></B> function.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  Ownership was successfully transferred.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SEM_ID">B_BAD_SEM_ID</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>sem</I></FONT> value.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TEAM_ID">B_BAD_TEAM_ID</A></TT></B>.  Invalid <I><FONT  color=991122 face=HELVETICA>team</I></FONT> value.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Semaphore%20Structures%20and%20Types"></A><FONT SIZE=6>S</FONT>emaphore <FONT SIZE=6>S</FONT>tructures and <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="sem_id"></A>sem_id
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef int32 <B><TT><FONT  color=000022 size=+1>sem_id</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+sem_id numbers identify semaphores.  The id is assigned when the semaphore is created (<B><TT><A HREF="#create_sem()">create_sem()</A></TT></B>).  The values are unique across the system.
+<P>
+<HR>
+<H3>
+<A NAME="sem_info"></A>sem_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct <B><TT><FONT  color=000022 size=+1>sem_info</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#sem_id">sem_id</A></TT></B> sem;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Threads.html#team_id">team_id</A></TT></B> team;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>char</TT></B> name[<B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A></TT></B>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> count;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Threads.html#thread_id">thread_id</A></TT></B> latest_holder;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The sem_info structure supplies information about a semaphore.  You retrieve the structure through the <B><TT><A HREF="#get_sem_info()">get_sem_info()</A></TT></B> function.  The information in the <B><TT>sem_info</TT></B> structure is guaranteed to be internally consistent, but the structure as a whole should be consider to be out-of-date as soon as you receive it.  It provides a picture of a semaphore as it exists just before the info-retrieving function returns.
+<P>
+The fields are:
+<P>
+<UL>
+<LI>sem.  The <B><TT><A HREF="#sem_id">sem_id</A></TT></B> number of the semaphore.
+<P>
+<LI>team.  The<B><TT> <A HREF="Threads.html#team_id">team_id</A></TT></B> of the semaphore's owner.
+<P>
+<LI>name.  The name assigned to the semaphore.  
+<P>
+<LI>count.  The semaphore's thread count. 
+<P>
+<LI>latest_holder.  The thread that most recently acquired the semaphore.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The lastest_holder<B><TT> </TT></B>field is <I>highly</I> undependable; in some cases, the kernel doesn't even record the semaphore acquirer.  Although you can use this field as a hint while debugging, you shouldn't take it too seriously.  Love, Mom.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Semaphore%20Constants"></A><FONT SIZE=6>S</FONT>emaphore <FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Semaphore%20Control%20Flags"></A>Semaphore Control Flags
+</H3>
+<P>
+<UL>
+<LI><B><TT>
+<A NAME="B_CAN_INTERRUPT"></A>B_CAN_INTERRUPT
+</TT></B>  Tells the kernel that the semaphore can be interrupted by a signal.
+<P>
+<LI><B><TT>
+<A NAME="B_DO_NOT_RESCHEDULE"></A>B_DO_NOT_RESCHEDULE
+</TT></B>  Tells the scheduler not to run after a semaphore is released.  In other words, the thread that just released the semaphore gets to keep running.
+<P>
+<LI><B><TT>
+<A NAME="B_CHECK_PERMISSION"></A>B_CHECK_PERMISSION
+</TT></B>  Makes sure that the semaphore acquirer/releaser is running at the proper level.  This is always added into user-level acquisition and release.
+<P>
+<LI><B><TT>
+<A NAME="B_RELATIVE_TIMEOUT"></A>B_RELATIVE_TIMEOUT
+</TT></B>  Used to set a timeout that's relative to now.
+<P>
+<LI><B><TT>
+<A NAME="B_ABSOLUTE_TIMEOUT"></A>B_ABSOLUTE_TIMEOUT
+</TT></B>  Used to set a timeout that's measured against the system clock.
+<P>
+<LI><B><TT>
+<A NAME="B_TIMEOUT"></A>B_TIMEOUT
+</TT></B>&nbsp;&nbsp;&nbsp;  Obsolete; use <TT>
+<A NAME="Semaphore%20Control%20Flags"></A>B_RELATIVE_TIMEOUT
+</TT>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

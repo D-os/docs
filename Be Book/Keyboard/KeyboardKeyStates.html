@@ -1,0 +1,85 @@
+<HTML><HEAD><TITLE>Keyboard: Key States</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Keyboard Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Keyboard%20Master%20Index.html"><FONT face=HELVETICA>Keyboard Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Key%20States"></A>Key States
+</H1>
+<P>
+You can look at the state of all the keys on the keyboard at a given moment in time.  This information is captured and reported in two ways:
+<P>
+<LI>As the "states" field in every <B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message, and
+<P>
+<LI>As the <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#key_states">key_states</A></TT></B> bitfield reported by <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_key_info()">get_key_info()</A></TT></B>.
+<P>
+</UL>
+<P>
+In both cases, the bitfield is an array of 16 bytes,
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;uint8 states[16];</PRE>
+<P>
+with one bit standing for each key on the keyboard.  Bits are numbered from left to right, beginning with the first byte in the array, as illustrated below:
+<P>
+<IMG SRC="art/KeyboardKeyStates-2.gif" ALIGN="bottom">
+<P>
+Bit numbers start with 0 and match key codes.  For example, bit 0x3c corresponds to the <I>A</I> key, 0x3d to the <I>S</I> key, 0x3e to the <I>D</I> key, and so on.  The first bit is 0x00, which doesn't correspond to any key.  The first meaningful bit is 0x01, which corresponds to the Escape key.
+<P>
+When a key is down, the bit corresponding to its key code is set to 1.  Otherwise, the bit is&nbsp;0.  However, for the three keys that toggle keyboard locks&mdash;<B><U>Caps Lock</B></U> (key 0x3b), <B><U>Num Lock</B></U> (key 0x22), and <B><U>Scroll Lock</B></U> (key 0x0f)&mdash;the bit is set to 1 if the lock is on and set to 0 if the lock is off, regardless of the state of the key itself.
+<P>
+To test the bitfield against a particular key, 
+<P>
+<UL>
+<LI>Select the byte in the <B><TT>states</TT></B> array that contains the bit for that key,
+<P>
+<LI>Form a mask for the key that can be compared to that byte, and
+<P>
+<LI>Compare the byte to the mask.
+<P>
+</UL>
+<P>
+For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if (states[keyCode>>3] &amp; (1 &lt;&lt; (7 - (keyCode%8)))) {
+&nbsp;&nbsp;&nbsp;    /* the key is down */
+&nbsp;&nbsp;&nbsp;}</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Keyboard Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Keyboard%20Master%20Index.html"><FONT face=HELVETICA>Keyboard Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

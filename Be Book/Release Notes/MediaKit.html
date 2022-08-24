@@ -1,0 +1,908 @@
+<HTML><HEAD><TITLE>Release Notes: The Media Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Media%20Kit"></A>The Media Kit
+</H1>
+<P>
+<HR>
+<H2>
+<A NAME="BBufferConsumer"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>B</FONT>uffer<FONT SIZE=6>C</FONT>onsumer
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/BufferConsumer.h">be/media/BufferConsumer.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="BBufferConsumer()"></A>BBufferConsumer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>explicit</TT></B><B><TT><FONT  color=000022 size=+1> BBufferConsumer(<A HREF="../The%20Media%20Kit/misc_api.html#media_type">media_type</A> </TT></B></FONT><I><FONT  color=991122 face=HELVETICA>consumer</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <I><FONT  color=991122 face=HELVETICA>consumer</I></FONT> argument used to take a default value (<B><TT>B_MEDIA_UNKNOWN_TYPE</TT></B>); it  no longer does. 
+<P>
+<HR>
+<H2>
+<A NAME="BBufferProducer"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>B</FONT>uffer<FONT SIZE=6>P</FONT>roducer
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/BufferProducer.h">be/media/BufferProducer.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="BBufferProducer()"></A>BBufferProducer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>explicit</TT></B><B><TT><FONT  color=000022 size=+1> BBufferProducer(<A HREF="../The%20Media%20Kit/misc_api.html#media_type">media_type</A> </TT></B></FONT><I><FONT  color=991122 face=HELVETICA>producer</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <I><FONT  color=991122 face=HELVETICA>producer</I></FONT> argument used to take a default value (<B><TT>B_MEDIA_UNKNOWN_TYPE</TT></B>); it  no longer does. 
+<P>
+<HR>
+<H3>
+<A NAME="suggestion_quality"></A>suggestion_quality
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>enum</TT></B><B><TT><FONT  color=000022 size=+1> suggestion_quality(
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>B_ANY_QUALITY  = 0,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_LOW_QUALITY </TT></B></FONT>= 10,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_MEDIUM_QUALITY</TT></B></FONT> = 50,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_HIGH_QUALITY</TT></B></FONT> = 100<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These constants can be used as values for the <I><FONT  color=991122 face=HELVETICA>quality</I></FONT> argument to <B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#FormatSuggestionRequested()">FormatSuggestionRequested()</A></TT></B>.  Although you don't have to use these constants, it's expected that you'll restrict your request to 0-100.
+<P>
+<HR>
+<H2>
+<A NAME="BMediaAddOn"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>edia<FONT SIZE=6>A</FONT>dd<FONT SIZE=6>O</FONT>n
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/MediaAddOn.h">media/MediaAddOn.h</A>
+<P>
+The following functions are no longer pure virtual, they are just virtual: <B><TT><A HREF="../Screen%20Saver/ScreenSaverClass.html#InitCheck()">InitCheck()</A></TT></B>, <B><TT><A HREF="../The%20Media%20Kit/MediaAddOn.html#CountFlavors()">CountFlavors()</A></TT></B>, <B><TT><A HREF="../The%20Media%20Kit/MediaAddOn.html#GetFlavorAt()">GetFlavorAt()</A></TT></B>, <B><TT><A HREF="../The%20Media%20Kit/MediaAddOn.html#InstantiateNodeFor()">InstantiateNodeFor()</A></TT></B>, <B><TT><A HREF="../The%20Media%20Kit/MediaAddOn.html#GetConfigurationFor()">GetConfigurationFor()</A></TT></B>, <B><TT>WantsToStart()</TT></B>, <B><TT><A HREF="../The%20Media%20Kit/MediaAddOn.html#AutoStart()">AutoStart()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="NotifyFlavorChange()"></A>NotifyFlavorChange()
+</H3>
+<P>
+Calling this will cause everyone concerned to be notified of the change to your flavor, and also cause the media server to re-scan your flavor info. It is thread safe. Note that this function is defined protected.
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>NotifyFlavorChange</TT></B></FONT>()
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="BMediaFormats"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>edia<FONT SIZE=6>F</FONT>ormats
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/MediaFormats.h">media/MediaFormats.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="MakeFormatFor()"></A>MakeFormatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>MakeFormatFor</TT></B></FONT>(<B><TT>const media_format_description * </TT></B><I><FONT  color=991122 face=HELVETICA>descs</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>desc_count</I></FONT>, <B><TT>media_format * </TT></B><I><FONT  color=991122 face=HELVETICA>io_format</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0, void * <I><FONT  color=991122 face=HELVETICA>_reserved</I></FONT> = 0);
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="GetBeOSFormatFor()"></A>GetBeOSFormatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>static status_t </TT></B><B><TT><FONT  color=000022 size=+1>GetBeOSFormatFor</TT></B></FONT>(<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>fourcc</I></FONT>, <B><TT>media_format * </TT></B><I><FONT  color=991122 face=HELVETICA>out_format</I></FONT>, <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_type">media_type</A></TT></B> <I><FONT  color=991122 face=HELVETICA>type</I></FONT> = B_MEDIA_UNKNOWN_TYPE)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="GetAVIFormatFor()"></A>GetAVIFormatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>static status_t</TT></B> GetAVIFormatFor(<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>fourcc</I></FONT>, <B><TT>media_format * </TT></B><I><FONT  color=991122 face=HELVETICA>out_format</I></FONT>, <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_type">media_type</A></TT></B> <I><FONT  color=991122 face=HELVETICA>type</I></FONT> = B_MEDIA_UNKNOWN_TYPE)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="GetQuicktimeFormatFor"></A>GetQuicktimeFormatFor
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>static status_t </TT></B>GetQuicktimeFormatFor(<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>vendor</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>fourcc</I></FONT>, <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_format">media_format</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>out_format</I></FONT>, <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_type">media_type</A></TT></B> <I><FONT  color=991122 face=HELVETICA>type</I></FONT> = B_MEDIA_UNKNOWN_TYPE)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="get_next_encoder()"></A>get_next_encoder()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>get_next_encoder</TT></B></FONT>(<B><TT>int32 *</TT></B><I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, <B><TT>media_codec_info *</TT></B><I><FONT  color=991122 face=HELVETICA>ei</I></FONT>);
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>get_next_encoder</TT></B></FONT>( <B><TT>int32 *</TT></B><I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, <B><TT>const media_file_format *</TT></B><I><FONT  color=991122 face=HELVETICA>mfi</I></FONT>, <B><TT>const media_format *input_format</TT></B>, <B><TT>const media_format *</TT></B><I><FONT  color=991122 face=HELVETICA>output_format</I></FONT>, <B><TT>media_codec_info *</TT></B><I><FONT  color=991122 face=HELVETICA>ei</I></FONT>, <B><TT>media_format *</TT></B><I><FONT  color=991122 face=HELVETICA>accepted_input_format</I></FONT>, <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_format">media_format</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>accepted_output_format</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>mfi</I></FONT> comes from <B><TT><A HREF="../The%20Media%20Kit/functions.html#get_next_file_format()">get_next_file_format()</A></TT></B>, pass <B><TT>NULL</TT></B> if you don't care.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>input_format</I></FONT> is the type of data given to the encoder, wildcards are allowed.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>output_format</I></FONT>: the desired output format, wildcards allowed.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>ei</I></FONT>: information about the encoder.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>accepted_input_format</I></FONT>: Type of data that the encoder will accept as input. Wildcards given in <I><FONT  color=991122 face=HELVETICA>input_format</I></FONT> will be specialized here.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>accepted_output_format</I></FONT>: The type of data that the encoder will output. Wildcards in <I><FONT  color=991122 face=HELVETICA>output_format</I></FONT> will be specialized here.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="does_file_accept_format()"></A>does_file_accept_format()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <B><TT><FONT  color=000022 size=+1>does_file_accept_format</TT></B></FONT>(<B><TT>const media_file_format *</TT></B><I><FONT  color=991122 face=HELVETICA>mfi</I></FONT>, <B><TT>const</TT></B> <B><TT>media_format *</TT></B><I><FONT  color=991122 face=HELVETICA>format</I></FONT>);
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="typedef"></A>typedef
+, 
+<A NAME="media_avr_description"></A>media_avr_description
+</H3>
+<P>
+Supports the avr format
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>typedef struct</TT></B> {
+<P>
+
+
+<TR><TD>
+<B><TT>&nbsp;&nbsp;&nbsp;<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> id;
+<P>
+
+
+<TR><TD>
+} <B><TT><FONT  color=000022 size=+1>media_avr_description</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="enum"></A>enum
+, 
+<A NAME="make_format_flags"></A>make_format_flags
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>enum</TT></B> <B><TT><FONT  color=000022 size=+1>make_format_flags</TT></B></FONT> {
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Media%20Kit/MediaFormats.html#make_format_flags">B_EXCLUSIVE</A></TT></B> = 0x1, //Fail if this format has already been registered
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Media%20Kit/MediaFormats.html#make_format_flags">B_NO_MERGE</A></TT></B> = 0x2, //Don&gt;t re-number any formats if there are multiple clashing previous registrations, but fail instead
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Media%20Kit/MediaFormats.html#make_format_flags">B_SET_DEFAULT</A></TT></B> = 0x4 //Set the first format to be the default for the format family (when registering more than one in the same family). Only use in Encoder add-ons. 
+<P>
+
+
+<TR><TD>
+}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="BMediaEventLooper"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>edia<FONT SIZE=6>E</FONT>vent<FONT SIZE=6>L</FONT>ooper
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/MediaEventLooper.h">media/MediaEventLooper.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="ControlThread()"></A>ControlThread()
+</H3>
+<P>
+<B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#thread_id">thread_id</A></TT></B> <B><TT>
+<A NAME="ControlThread"></A>ControlThread
+</TT></B>() 
+<P>
+Protected function to return the id of the thread running this BMediaEventLooper.
+<P>
+<HR>
+<H2>
+<A NAME="BMediaFile"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>edia<FONT SIZE=6>F</FONT>ile
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/MediaFile.h">media/MediaFile.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="BMediaFile()"></A>BMediaFile()
+</H3>
+<P>
+Two new constructors for read-only access to files:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BMediaFile">BMediaFile</A></TT></B></FONT>(<B><TT>const entry_ref * </TT></B><I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>);
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BMediaFile">BMediaFile</A></TT></B></FONT>(<B><TT>BDataIO * </TT></B><I><FONT  color=991122 face=HELVETICA>source</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>);     
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="BMediaRoster"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>edia<FONT SIZE=6>R</FONT>oster
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/mediaRoster.h">media/mediaRoster.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="GetAudioOutput()"></A>GetAudioOutput()
+, 
+<A NAME="SetAudioOuput()"></A>SetAudioOuput()
+</H3>
+<P>
+New versions of these functions.
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetAudioOutput</TT></B></FONT>(<B><TT>media_node * </TT></B><I><FONT  color=991122 face=HELVETICA>out_node</I></FONT>, <B><TT>int32 * </TT></B><I><FONT  color=991122 face=HELVETICA>out_input_id</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/String.html#BString">BString</A> * </TT></B><I><FONT  color=991122 face=HELVETICA>out_input_name</I></FONT>)
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetAudioOuput</TT></B></FONT>(<B><TT>const media_input &amp; </TT></B><I><FONT  color=991122 face=HELVETICA>input_to_output</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="GetAllInputsFor()"></A>GetAllInputsFor()
+, 
+<A NAME="GetAllOutputFor()"></A>GetAllOutputFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetAllInputsFor</TT></B></FONT>(<B><TT>const media_node &amp; </TT></B><I><FONT  color=991122 face=HELVETICA>node</I></FONT>, <B><TT>media_input *</TT></B> <I><FONT  color=991122 face=HELVETICA>out_inputs</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>buf_num_inputs</I></FONT>, <B><TT>int32 * </TT></B><I><FONT  color=991122 face=HELVETICA>out_total_count</I></FONT>)
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetAllOutputsFor</TT></B></FONT>(<B><TT>const media_node &amp; </TT></B><I><FONT  color=991122 face=HELVETICA>node</I></FONT>, <B><TT>media_output *</TT></B> <I><FONT  color=991122 face=HELVETICA>out_outputs</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>buf_num_outputs</I></FONT>, <B><TT>int32 * </TT></B><I><FONT  color=991122 face=HELVETICA>out_total_count</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="GetFormatFor()"></A>GetFormatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetFormatFor</TT></B></FONT>(<B><TT>const media_output &amp; </TT></B><I><FONT  color=991122 face=HELVETICA>output</I></FONT>, <B><TT>media_format *</TT></B> <I><FONT  color=991122 face=HELVETICA>io_format</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> flags = 0)
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetFormatFor</TT></B></FONT>(<B><TT>const media_input &amp; </TT></B><I><FONT  color=991122 face=HELVETICA>input</I></FONT>, <B><TT>media_format *</TT></B> <I><FONT  color=991122 face=HELVETICA>io_format</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0)
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetFormatFor</TT></B></FONT>(<B><TT>const media_node &amp; </TT></B><I><FONT  color=991122 face=HELVETICA>node</I></FONT>, <B><TT>media_format *</TT></B> <I><FONT  color=991122 face=HELVETICA>io_format</I></FONT>, <B><TT>float</TT></B> <I><FONT  color=991122 face=HELVETICA>quality</I></FONT> = B_MEDIA_ANY_QUALITY)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="NodeIDFor()"></A>NodeIDFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_node_id">media_node_id</A></TT></B> <B><TT><FONT  color=000022 size=+1>NodeIDFor</TT></B></FONT>(<B><TT>port_id</TT></B> <I><FONT  color=991122 face=HELVETICA>source_or_destination_port</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Use to find the media node associated with a given port.
+<P>
+<HR>
+<H3>
+<A NAME="GetInstancesFor()"></A>GetInstancesFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetInstancesFor</TT></B></FONT>(<B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_addon_id">media_addon_id</A></TT></B> <I><FONT  color=991122 face=HELVETICA>addon</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> flavor, <B><TT>media_node_id * </TT></B><I><FONT  color=991122 face=HELVETICA>out_id</I></FONT>, int32 * <I><FONT  color=991122 face=HELVETICA>io_count</I></FONT> = 0)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="BMediaTrack"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>edia<FONT SIZE=6>T</FONT>rack
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/MediaTrack.h">media/MediaTrack.h</A>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Media%20Kit/MediaTrack.html#media_seek_type">media_seek_type</A></TT></B> enum has been extended with <B><TT>B_MEDIA_SEEK_DIRECTION_MASK</TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="ReadFrames()"></A>ReadFrames()
+</H3>
+<P>
+New version of ReadFrames()
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>ReadFrames</TT></B></FONT>(<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">void *</A></TT></B><I><FONT  color=991122 face=HELVETICA>out_buffer</I></FONT>, <B><TT>int64 *</TT></B><I><FONT  color=991122 face=HELVETICA>out_frameCount</I></FONT>, <B><TT>media_header *</TT></B><I><FONT  color=991122 face=HELVETICA>mh</I></FONT>, <B><TT>media_decode_info *</TT></B><I><FONT  color=991122 face=HELVETICA>info</I></FONT>);
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="FindKeyFrameForTime()"></A>FindKeyFrameForTime()
+, 
+<A NAME="FindKeyFrameForFrame()"></A>FindKeyFrameForFrame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>FindKeyFrameForTime</TT></B></FONT>(<B><TT>bigtime_t *</TT></B><I><FONT  color=991122 face=HELVETICA>inout_time</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>=0) <B><TT>const</TT></B>;
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>FindKeyFrameForFrame</TT></B></FONT>(<B><TT>int64 *</TT></B><I><FONT  color=991122 face=HELVETICA>inout_frame</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>=0) <B><TT>const</TT></B>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="WriteFrames()"></A>WriteFrames()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>WriteFrames</TT></B></FONT>(<B><TT>const void *</TT></B><I><FONT  color=991122 face=HELVETICA>data</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int64</A></TT></B> <I><FONT  color=991122 face=HELVETICA>num_frames</I></FONT>, <B><TT>media_encode_info *</TT></B><I><FONT  color=991122 face=HELVETICA>info</I></FONT>);
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>WriteFrames</TT></B></FONT>(<B><TT>const void *</TT></B><I><FONT  color=991122 face=HELVETICA>data</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int64</A></TT></B> <I><FONT  color=991122 face=HELVETICA>num_frames</I></FONT>, <B><TT>media_encode_info *</TT></B><I><FONT  color=991122 face=HELVETICA>info</I></FONT>);
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="GetEncodeParameters()"></A>GetEncodeParameters()
+, 
+<A NAME="GetEncodeParameters()"></A>GetEncodeParameters()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetEncodeParameters</TT></B></FONT>(<B><TT>encode_parameters *</TT></B><I><FONT  color=991122 face=HELVETICA>parameters</I></FONT>) <B><TT>const</TT></B>;
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetEncodeParameters</TT></B></FONT>(<B><TT>encode_parameters *</TT></B><I><FONT  color=991122 face=HELVETICA>parameters</I></FONT>);
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="BSoundPlayer"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>S</FONT>ound<FONT SIZE=6>P</FONT>layer
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/SoundPlayer.h">media/SoundPlayer.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="BSoundPlayer()"></A>BSoundPlayer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BSoundPlayer">BSoundPlayer</A></TT></B></FONT>(<B><TT>const media_node &amp; </TT></B><I><FONT  color=991122 face=HELVETICA>toNode</I></FONT>, <B><TT>const media_multi_audio_format * </TT></B><I><FONT  color=991122 face=HELVETICA>format</I></FONT> = NULL, <B><TT>const char * </TT></B><I><FONT  color=991122 face=HELVETICA>name</I></FONT> = NULL, <B><TT>const media_input * </TT></B><I><FONT  color=991122 face=HELVETICA>input</I></FONT> = NULL, void (*PlayBuffer)(void *, void * buffer, size_t size, const media_raw_audio_format &amp; format) = NULL, void (*Notifier)(void *, sound_player_notification what, ...) = NULL, void * <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> = NULL)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+New constructor to support the new <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_multi_audio_format">media_multi_audio_format</A></TT></B> type. 
+<P>
+<HR>
+<H3>
+<A NAME="GetVolumeInfo()"></A>GetVolumeInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetVolumeInfo(media_node * </TT></B></FONT><I><FONT  color=991122 face=HELVETICA>out_node</I></FONT>, <B><TT>int32 * </TT></B><I><FONT  color=991122 face=HELVETICA>out_parameter</I></FONT>, <B><TT>float * </TT></B><I><FONT  color=991122 face=HELVETICA>out_min_dB</I></FONT>, <B><TT>float * </TT></B><I><FONT  color=991122 face=HELVETICA>out_max_dB</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="SetVolumeDB()"></A>SetVolumeDB()
+, 
+<A NAME="VolumeDB()"></A>VolumeDB()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>float</TT></B> <B><TT><FONT  color=000022 size=+1>VolumeDB(<A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>forcePoll</I></FONT> = <B><TT>false</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SetVolumeDB(float</TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>volume_dB</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="BTimedEventQueue"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>T</FONT>imed<FONT SIZE=6>E</FONT>vent<FONT SIZE=6>Q</FONT>ueue
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/TimedEventQueue.h">media/TimedEventQueue.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <B><TT><FONT  color=000022 size=+1>EventCount</TT></B></FONT>() <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+How many events in the queue?
+<P>
+<HR>
+<H2>
+<A NAME="Media%20Kit%20Miscellanea"></A><FONT SIZE=6>M</FONT>edia <FONT SIZE=6>K</FONT>it <FONT SIZE=6>M</FONT>iscellanea
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="suggestion_quality"></A>suggestion_quality
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/BufferProducer.h">media/BufferProducer.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>enum</TT></B> <B><TT><FONT  color=000022 size=+1>suggestion_quality</TT></B></FONT> {
+<P>
+
+
+<TR><TD>
+&nbsp;&nbsp;&nbsp;B_ANY_QUALITY = 0,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_LOW_QUALITY = 10,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_MEDIUM_QUALITY = 50,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_HIGH_QUALITY = 100
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="rtm_realloc"></A>rtm_realloc
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/RealtimeAlloc.h">media/RealtimeAlloc.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>rtm_realloc(void ** </TT></B></FONT><I><FONT  color=991122 face=HELVETICA>data</I></FONT>, <B><TT>size_t</TT></B> <I><FONT  color=991122 face=HELVETICA>new_size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+New realtime memory reallocation function.
+<P>
+<HR>
+<H3>
+<A NAME="Constants%20and%20Types"></A>Constants and Types
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/media/MediaDefs.h">media/MediaDefs.h</A>
+<P>
+<UL>
+<LI>new <B><TT><A HREF="../Messages/GeneralMessages.html#B_MEDIA_FLAVORS_CHANGED">B_MEDIA_FLAVORS_CHANGED</A></TT></B> value for use as &gt;what&gt; field of messages.
+<P>
+<LI>new <B><TT>media_multi_channels</TT></B> and <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_multi_matrix">media_multi_matrix</A></TT></B> enumerations for use with multiple audio channels.
+<P>
+<LI>changes to <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_raw_audio_format">media_raw_audio_format</A></TT></B> enumeration. 
+<P>
+<LI><B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_raw_audio_format">media_raw_audio_format</A></TT></B> is deprecated. Please use <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_multi_audio_format">media_multi_audio_format</A></TT></B> instead. <B><TT>media_format.u.raw_audio</TT></B> and <B><TT>media_raw_audio_format::wildcard</TT></B> have changed to a <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_multi_audio_format">media_multi_audio_format</A></TT></B> struct, which is upwards compatible.
+<P>
+<LI>new <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_multi_audio_info">media_multi_audio_info</A></TT></B> struct (used for a new field in <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_encoded_audio_format">media_encoded_audio_format</A></TT></B>)
+<P>
+<LI>new <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_display_flags">media_display_flags</A></TT></B> struct
+<P>
+<LI>new <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_format_flags">media_format_flags</A></TT></B> enumeration
+<P>
+<LI>changes to the <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_format">media_format</A></TT></B> struct, including these new inline functions: <B><TT><A HREF="../The%20Interface%20Kit/Rect.html#Width()">Width()</A></TT></B>, <B><TT><A HREF="../The%20Interface%20Kit/Rect.html#Height()">Height()</A></TT></B>, and <B><TT><A HREF="../The%20Interface%20Kit/Font.html#Encoding()">Encoding()</A></TT></B>.
+<P>
+plus changes in constness of existing functions.
+<P>
+<LI>new <B><TT>B_AVR_FORMAT_FAMILY</TT></B> in the <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_format_family">media_format_family</A></TT></B> typedef
+<P>
+<LI>new structs for use by encoders and file writers: <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_encode_info">media_encode_info</A></TT></B>, <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#encode_parameters">encode_parameters</A></TT></B>, <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_decode_info">media_decode_info</A></TT></B>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

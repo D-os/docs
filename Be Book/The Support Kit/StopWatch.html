@@ -1,0 +1,350 @@
+<HTML><HEAD><TITLE>The Support Kit: BStopWatch</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BStopWatch"></A>BStopWatch
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/support/StopWatch.h">be/support/StopWatch.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="StopWatch.summary.html"><i>Summary</i></A></H6>
+<P>
+The BStopWatch class is a debugging tool designed to time the execution of portions of your code.  When a BStopWatch object is constructed, it starts an internal timer.  When it's deleted, it stops the timer and prints the elapsed time to standard out in this format:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+StopWatch "<I>name</I>": <I>f</I> usecs.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Where <I>name</I> is the name that you gave to the object when you constructed it, and <I>f</I> is the elapsed time in microseconds.  
+<P>
+Look at all these other things you can do...
+<P>
+<UL>
+<LI>Suspend, resume, and reset the timer (<B><TT><A HREF="#Suspend()">Suspend()</A></TT></B>, <B><TT><A HREF="#Resume()">Resume()</A></TT></B>, <B><TT><A HREF="#Reset()">Reset()</A></TT></B>).
+<P>
+<LI>Ask for the current elapsed time without stopping the timer (<B><TT><A HREF="#ElapsedTime()">ElapsedTime()</A></TT></B>).
+<P>
+<LI>Record "lap points" that are printed out at the end of the run (<B><TT><A HREF="#Lap()">Lap()</A></TT></B>).
+<P>
+</UL>
+<P>
+Using a BStopWatch is simple; this...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BStopWatch *watch = new BStopWatch("Timer 0");
+&nbsp;&nbsp;&nbsp;/* The code you want to time goes here. */
+&nbsp;&nbsp;&nbsp;delete watch;
+&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+...will produce, on standard out, a message that goes something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;StopWatch "Timer 0": 492416 usecs.</PRE>
+<P>
+This would indicate that the timed code took about half a second to execute&mdash;remember, you're looking at microseconds.
+<P>
+If you want to time an entire function, just toss a StopWatch on the stack:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyFunc()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BStopWatch watch("Timer 0");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+When the function returns, the BStopWatch prints its message.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+BStopWatch objects are useful if you want to get an idea of where your cycles are going.  But you shouldn't rely on them for painfully accurate measurements.  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BStopWatch()"></A>BStopWatch()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BStopWatch(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>silent = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a BStopWatch object, names it, and starts its timer.  If <I><FONT  color=991122 face=HELVETICA>silent</I></FONT> is <B><TT>false</TT></B> (the default), the object will print its elapsed time when it's destroyed; otherwise the message isn't printed.  To get the elapsed time from a silent <A HREF="#BStopWatch">BStopWatch</A>, call <B><TT><A HREF="#ElapsedTime()">ElapsedTime()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="~BStopWatch()"></A>~BStopWatch()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BStopWatch()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Stops the object's timer, prints a timing message to standard out (unless it's running silently), and then destroys the object.  By default the timing message looks like this:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+StopWatch "<I>name</I>": <I>f</I> usecs.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If you've recorded some lap points (through the <B><TT><A HREF="#Lap()">Lap()</A></TT></B> function), you'll also see the lap times as well:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+StopWatch "<I>name</I>": <I>f</I> usecs.
+<br>
+    [<I>lap#</I>: <I>soFar</I>#<I>thisLap</I>]    [<I>lap#</I>: <I>soFar</I>#<I>thisLap</I>]   [<I>lap#</I>: <I>soFar</I>#<I>thisLap</I>]...
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+...where<I> lap#</I> is the number of the lap, <I>soFar</I> was the total elapsed time at that lap, and <I>thisLap</I> was the time it took to complete the lap.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="ElapsedTime()"></A>ElapsedTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="misc.html#bigtime_t">bigtime_t</A> <B><TT><FONT  color=000022 size=+1>ElapsedTime(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the elapsed time, in microseconds, since the object was created or last <B><TT><A HREF="#Reset()">Reset()</A></TT></B>.  This function doesn't print the time message, nor does it touch the timer (the timer keeps running&mdash;unless it's paused).
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BStopWatch watch("Timer 0");
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;printf("Elapsed time:  %Ldn", watch.ElapsedTime());</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="Lap()"></A>Lap()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>Lap()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Records a "lap point" and returns the total elapsed time so far.  The lap point times are printed individually when the object is destroyed, provided the object isn't silent.  You can record as many as eight lap points; if you ask for a ninth lap point, the lap isn't recorded and this function returns 0.   See <B><TT><A HREF="#~BStopWatch()">~BStopWatch()</A></TT></B> for a description of what the lap points look like when they're printed.
+<P>
+<HR>
+<H3>
+<A NAME="Name()"></A>Name()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Name(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the name of the object, as set in the constructor.
+<P>
+<HR>
+<H3>Reset()   see <A HREF="#Suspend()">Suspend()</A></H3>
+<P>
+<HR>
+<H3>Resume()   see <A HREF="#Suspend()">Suspend()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Suspend()"></A>Suspend()
+, 
+<A NAME="Resume()"></A>Resume()
+, 
+<A NAME="Reset()"></A>Reset()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Suspend(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Resume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Reset(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions affect the object's timer.
+<P>
+<B><TT>Suspend()</TT></B> stops the timer but doesn't reset it.
+<P>
+<B><TT>Resume()</TT></B> starts the timer running again.
+<P>
+<B><TT>Reset()</TT></B> sets the elapsed time to 0, but doesn't stop the timer.  You can call <B><TT>Reset()</TT></B> at any time, regardless of whether the object is running or suspended. 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

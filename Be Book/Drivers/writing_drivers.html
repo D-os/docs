@@ -1,0 +1,549 @@
+<HTML><HEAD><TITLE>Drivers: Writing Drivers</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Writing%20Drivers"></A>Writing Drivers
+</H1>
+<P>
+A device driver is an add-on that communicates with a specific device or type of device.  Usually this communication involves some form of device-specific protocol.  For example, an add-on that specifically addresses an Ethernet card or graphics card is a device driver.  Likewise, add-ons that know how to talk to a class such as SCSI disks, ATA devices, ATAPI disks, or USB input devices is also a device driver.
+<P>
+A driver's job is to recognize the device and provide a means for applications to talk to it.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+We can't stress this enough: a bug in a device driver can bring down the entire system.  Be very careful, and be sure to test your work well.
+<P>
+</UL>
+<P>
+To reduce the risk of the system being adversely affected by a bug in your code, you should put as much of your code into user space as possible.
+<P>
+This section covers the structure of device drivers, and provides some examples of how to write them.
+<P>
+<A NAME="57942:%20head1:%20Symbols%20Drivers%20Export"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Symbols%20Drivers%20Export"></A><FONT SIZE=6>S</FONT>ymbols <FONT SIZE=6>D</FONT>rivers <FONT SIZE=6>E</FONT>xport
+</H2>
+<P>
+The kernel communicates with drivers by calling certain known entry points, which the driver must implement and export.  These entry points are:
+<P>
+<UL>
+<LI><B><TT><A HREF="#init_hardware()">init_hardware()</A>
+<br>
+</TT></B>Called when the system is booted, to let the driver detect and reset the hardware.
+<P>
+<LI><B><TT><A HREF="#init_driver()">init_driver()</A>
+<br>
+</TT></B>Called when the&nbsp;driver is loaded, so it can allocate needed system resources.
+<P>
+<LI><B><TT><A HREF="#uninit_driver()">uninit_driver()</A>
+<br>
+</TT></B>Called just before the driver is unloaded, so it can free allocated resources.
+<P>
+<LI><B><TT><A HREF="#publish_devices()">publish_devices()</A>
+<br>
+</TT></B>Called to obtain a list of device names supported by the driver.
+<P>
+<LI><B><TT><A HREF="#find_device()">find_device()</A>
+<br>
+</TT></B>Called to obtain a list of pointers to the hook functions for a specified device.
+<P>
+<LI><B><TT><A HREF="#api_version">api_version</A>
+<br>
+</TT></B>This exported value tells the kernel what version of the driver API it was written to, and should always be set to <B><TT>B_CUR_DRIVER_API_VERSION</TT></B> in your source code.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="init_hardware()"></A>init_hardware()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>init_hardware(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is called when the system is booted, which lets the driver detect and reset the hardware it controls.  The function should return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the initialization is successful; otherwise, an appropriate error code should be returned.  If this function returns an error, the driver won't be used.
+<P>
+<HR>
+<H3>
+<A NAME="init_driver()"></A>init_driver()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>init_driver(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Drivers are loaded and unloaded on an as-needed basis.  When a driver is loaded by devfs, this function is called to let the driver allocate memory and other needed system resources.  Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if initialization succeeds, otherwise return an appropriate error code.  &lt;&lt;&lt;what happens if this returns an error?>>>
+<P>
+<HR>
+<H3>
+<A NAME="uninit_driver()"></A>uninit_driver()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>uninit_driver(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is called by devfs just before the driver is unloaded from memory.  This lets the driver clean up after itself, freeing any resources it allocated.
+<P>
+<HR>
+<H3>
+<A NAME="publish_devices()"></A>publish_devices()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char **<B><TT><FONT  color=000022 size=+1>publish_devices(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Devfs calls <B><TT><A HREF="#publish_devices()">publish_devices()</A></TT></B> to learn the names, relative to /dev, of the devices the driver supports.  The driver should return a <B><TT>NULL</TT></B>-terminated array of strings indicating all the installed devices the driver supports.  For example, an ethernet device driver might return:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;static char *devices[] = {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"net/ether",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NULL
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+In this case, devfs will then create the pseudo-file <B>/dev/net/ether</B>, through which all user applications can access the driver.
+<P>
+Since only one instance of the driver will be loaded, if support for multiple devices of the same type is desired, the driver must be capable of supporting them.  If the driver senses (and supports) two ethernet cards, it might return:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;static char *devices[] = {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"net/ether1",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"net/ether2",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NULL
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="find_device()"></A>find_device()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+device_hooks *<B><TT><FONT  color=000022 size=+1>find_device(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+When a device published by the driver is accessed, devfs communicates with it through a series of hook functions that handle the requests.The <B><TT><A HREF="#find_device()">find_device()</A></TT></B> function is called to obtain a list of these hook functions, so that devfs can call them.  The device_hooks structure returned lists out the hook functions.
+<P>
+The device_hooks structure, and what each hook does, is described in the next section.
+<P>
+<HR>
+<H3>
+<A NAME="api_version"></A>api_version
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>api_version</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This variable defines the API version to which the driver was written, and should be set to <B><TT>B_CUR_DRIVER_API_VERSION</TT></B> at compile time.  The value of this variable will be changed with every revision to the driver API; the value with which your driver was compiled will tell devfs how it can communicate with the driver.
+<P>
+<HR>
+<H2>
+<A NAME="Device%20Hooks"></A><FONT SIZE=6>D</FONT>evice <FONT SIZE=6>H</FONT>ooks
+</H2>
+<P>
+The hook functions specified in the device_hooks function returned by the driver's <B><TT><A HREF="#find_device()">find_device()</A></TT></B> function handle requests made by devfs (and through devfs, from user applications).  These are described in this section.
+<P>
+The structure itself looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_open_hook open;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_close_hook close;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_free_hook free;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_control_hook control;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_read_hook read;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_write_hook write;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_select_hook select;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_deselect_hook deselect;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_readv_hook readv;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device_writev_hook writev;
+&nbsp;&nbsp;&nbsp;} device_hooks;</PRE>
+<P>
+In all cases, return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the operation is successfully completed, or an appropriate error code if not.
+<P>
+<HR>
+<H3>
+<A NAME="open_hook()"></A>open_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>open_hook(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, void **<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook function is called when a program opens one of the devices supported by the driver.  The name of the device (as returned by <B><TT><A HREF="#publish_devices()">publish_devices()</A></TT></B>) is passed in name, along with the flags passed to the Posix <B><TT>open()</TT></B> function.  <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> points to space large enough for you to store a single pointer.  You can use this to store state information specific to the <B><TT>open()</TT></B> instance.  If you need to track information on a per-<B><TT>open()</TT></B> basis, allocate the memory you need and store a pointer to it in <B><TT>*cookie</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="close_hook()"></A>close_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>close_hook(</TT></B></FONT>void **<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook is called when an open instance of the driver is closed using the <B><TT>close()</TT></B> Posix function.  Note that because of the multithreaded nature of the BeOS, it's possible there may still be transactions pending, and you may receive more calls on the device.  For that reason, you shouldn't free instance-wide system resources here.  Instead, you should do this in <B><TT><A HREF="#free_hook()">free_hook()</A></TT></B>.  However, if there are any blocked transactions pending, you should unblock them here.
+<P>
+<HR>
+<H3>
+<A NAME="free_hook()"></A>free_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>free_hook(</TT></B></FONT>void **<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook is called once all pending transactions on an open (but closing) instance of your driver are completed.  This is where your driver should release instance-wide system resources.  <B><TT>free_hook()</TT></B> doesn't correspond to any Posix function.
+<P>
+<HR>
+<H3>
+<A NAME="read_hook()"></A>read_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>read_hook(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, off_t <I><FONT  color=991122 face=HELVETICA>position</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>len</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook handles the Posix <B><TT>read()</TT></B> function for an open instance of your driver.  Implement it to read <I><FONT  color=991122 face=HELVETICA>len</I></FONT> bytes of data starting at the specified byte <I><FONT  color=991122 face=HELVETICA>position</I></FONT> on the device, storing the read bytes at <I><FONT  color=991122 face=HELVETICA>data</I></FONT>.  Exactly what this does is device-specific (disk devices would read from the specified offset on the disk, but a graphics driver might have some other interpretation of this request).
+<P>
+Before returning, you should set <I><FONT  color=991122 face=HELVETICA>len</I></FONT> to the actual number of bytes read into the buffer.  Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if data was read (even if the number of returned bytes is less than requested), otherwise return an appropriate error.
+<P>
+<HR>
+<H3>
+<A NAME="readv_hook()"></A>readv_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>readv_hook(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, off_t <I><FONT  color=991122 face=HELVETICA>position</I></FONT>, const struct iovec *<I><FONT  color=991122 face=HELVETICA>vec</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>count</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>len</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook handles the Posix <B><TT>readv()</TT></B> function for an open instance of your driver.  This is a scatter/gather read function; given an array of iovec structures describing address/length pairs for a group of destination buffers, your implementation should fill each successive buffer with bytes, up to a total of <I><FONT  color=991122 face=HELVETICA>len</I></FONT> bytes.  The <I><FONT  color=991122 face=HELVETICA>vec</I></FONT> array has <I><FONT  color=991122 face=HELVETICA>count</I></FONT> items in it.
+<P>
+As with <B><TT><A HREF="#read_hook()">read_hook()</A></TT></B>, set <I><FONT  color=991122 face=HELVETICA>len</I></FONT> to the actual number of bytes read, and return an appropriate result code.
+<P>
+<HR>
+<H3>
+<A NAME="write_hook()"></A>write_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>write_hook(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, off_t <I><FONT  color=991122 face=HELVETICA>position</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>len</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook handles the Posix <B><TT>write()</TT></B> function for an open instance of your driver.  Implement it to write <I><FONT  color=991122 face=HELVETICA>len</I></FONT> bytes of data starting at the specified byte <I><FONT  color=991122 face=HELVETICA>position</I></FONT> on the device, from the buffer pointed to by <I><FONT  color=991122 face=HELVETICA>data</I></FONT>.  Exactly what this does is device-specific (disk devices would write to the specified offset on the disk, but a graphics driver might have some other interpretation of this request).
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if data was read (even if the number of returned bytes is less than requested), otherwise return an appropriate error.
+<P>
+<HR>
+<H3>
+<A NAME="writev_hook()"></A>writev_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>writev_hook(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, off_t <I><FONT  color=991122 face=HELVETICA>position</I></FONT>, const struct iovec *<I><FONT  color=991122 face=HELVETICA>vec</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>count</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>len</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook handles the Posix <B><TT>writev()</TT></B> function for an open instance of your driver.  This is a scatter/gather write function; given an array of iovec structures describing address/length pairs for a group of source buffers, your implementation should write each successive buffer to disk, up to a total of <I><FONT  color=991122 face=HELVETICA>len</I></FONT> bytes.  The <I><FONT  color=991122 face=HELVETICA>vec</I></FONT> array has <I><FONT  color=991122 face=HELVETICA>count</I></FONT> items in it.
+<P>
+Before returning, set <I><FONT  color=991122 face=HELVETICA>len</I></FONT> to the actual number of bytes written, and return an appropriate result code.
+<P>
+<HR>
+<H3>
+<A NAME="control_hook()"></A>control_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>control_hook(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>op</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>len</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook handles the <B><TT>ioctl()</TT></B> function for an open instance of your driver.  The control hook provides a means to perform operations that don't map directly to either <B><TT>read()</TT></B> or <B><TT>write()</TT></B>.  It receives the <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> for the open instance, plus the command code <I><FONT  color=991122 face=HELVETICA>op</I></FONT> and the <I><FONT  color=991122 face=HELVETICA>data</I></FONT> and <I><FONT  color=991122 face=HELVETICA>len</I></FONT> arguments specified by <B><TT>ioctl()</TT></B>'s caller.  These arguments have no inherent relationship; they're simply arguments to <B><TT>ioctl()</TT></B> that are forwarded to your hook function.  Their definitions are defined by the driver.  Common command codes can be found in <B>be/drivers/Drivers.h</B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <I><FONT  color=991122 face=HELVETICA>len</I></FONT> argument is only valid when <B><TT>ioctl()</TT></B> is called from user space; the kernel always sets it to 0.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="select_hook()"></A>select_hook()
+, 
+<A NAME="deselect_hook()"></A>deselect_hook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>select_hook(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, uint8 <I><FONT  color=991122 face=HELVETICA>event</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, selectsync *<I><FONT  color=991122 face=HELVETICA>sync</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>deselect_hook(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>, uint8 <I><FONT  color=991122 face=HELVETICA>event</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, selectsync *<I><FONT  color=991122 face=HELVETICA>sync</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These hooks are reserved for future use.  Set the corresponding entries in your device_hooks structure to <B><TT>NULL</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Driver%20Rules"></A><FONT SIZE=6>D</FONT>river <FONT SIZE=6>R</FONT>ules
+</H2>
+<P>
+Keep the following rules in mind for each instance of your driver:
+<P>
+<UL>
+<LI><B><TT>open()</TT></B> will be called first, and no other hooks will be called until <B><TT>open()</TT></B> returns.
+<P>
+<LI><B><TT>close()</TT></B> may be called while other requests are pending.  As previously mentioned, if you have blocked transactions, you must unblock them when <B><TT>close()</TT></B> is called.  Further calls to other driver hooks my continue to occur after <B><TT>close()</TT></B> is called; however, you should return an error to any such requests.
+<P>
+<LI><B><TT><A HREF="area_malloc.html#free()">free()</A></TT></B> isn't called until all pending transactions for the open instance are completed.
+<P>
+<LI>Multiple threads may be accessing the driver's hooks simultaneously, so be sure to lock and unlock where appropriate.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

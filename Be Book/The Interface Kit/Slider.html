@@ -1,0 +1,1386 @@
+<HTML><HEAD><TITLE>The Interface Kit: BSlider</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BSlider"></A>BSlider
+</H1>
+<P>
+Derived from:  public <A HREF="Control.html#BControl">BControl</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Slider.h">be/interface/Slider.h</A>
+<P>
+Library:  libbe.so<I>
+<P>
+</I><H6><A HREF="Slider.summary.html"><i>Summary</i></A></H6>
+<P>
+A slider is a control that provide a standard way for the user to select a value from a predetermined range; for example, if your application needs to let the user pick a value between 1 and 100, it's easy to create a BSlider object that the user can use to do this.  Sliders can be either horizontal or vertical.
+<P>
+BSlider objects also provide a wide assortment of hooks that let you customize the appearance and behavior of your slider controls.
+<P>
+<HR>
+<H2>
+<A NAME="Using%20BSliders"></A><FONT SIZE=6>U</FONT>sing <FONT SIZE=6>B</FONT><FONT SIZE=6>S</FONT>liders
+</H2>
+<P>
+Creating a basic BSlider is very simple:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSlider(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>label</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 minValue, int32 maxValue,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thumb_style thumbType = B_BLOCK_THUMB,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FOLLOW_LEFT</FONT>&nbsp;|&nbsp;<FONT  face=HELVETICA>B_FOLLOW_TOP</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FRAME_EVENTS</FONT>|<FONT  face=HELVETICA>B_WILL_DRAW</FONT>&nbsp;|&nbsp;<FONT  face=HELVETICA>B_NAVIGABLE</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>frame</I></FONT> is the frame rectangle of the BSlider.  This is used to determine the position the slider will occupy, but when the BSlider is attached to a window, it will automatically be resized to its preferred size&mdash;the bottom and right fields in the <A HREF="Rect.html#BRect">BRect</A> are, essentially, ignored.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT> is the name of the BSlider.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>label</I></FONT> is the label that will be displayed above the slider when it's drawn in a window.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>message</I></FONT> is the message that will be sent when the slider is invoked.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>minValue</I></FONT> and <I><FONT  color=991122 face=HELVETICA>maxValue</I></FONT> are the minimum and maximum values the slider can represent.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>thumbType</I></FONT> is the thumb style, which is either <B><TT><A HREF="#B_BLOCK_THUMB">B_BLOCK_THUMB</A></TT></B> or <B><TT><A HREF="#B_TRIANGLE_THUMB">B_TRIANGLE_THUMB</A></TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT> and <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> are the standard <A HREF="View.html#BView">BView</A> resizing mode and flags.
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.Set(5,5,255,55);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slider = new BSlider(r, "const:slider1", "Construct Speed (%)", NULL,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0, 140);</PRE>
+<P>
+This creates a slider named "const:slider1" with the label "Construct Speed (%)" above it.  The range of possible values for the slider is 0 to 140.
+<P>
+You can add a splash of color to the slider, too.  For example, if you want the slider bar to be light blue, you might add:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slider->SetBarColor(color);</PRE>
+<P>
+You can also add hash marks to the slider:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slider->SetHashMarks(B_HASH_MARKS_BOTTOM);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slider->SetHashMarkCount(10);</PRE>
+<P>
+In this example,  <B><TT><A HREF="#SetHashMarks()">SetHashMarks()</A></TT></B> is used to specify that the hash marks should be below the slider; you can also specify <B><TT><A HREF="#B_HASH_MARKS_TOP">B_HASH_MARKS_TOP</A></TT></B> to put them above the slider, <B><TT><A HREF="#B_HASH_MARKS_BOTH">B_HASH_MARKS_BOTH</A></TT></B> to put them both above and below the slider, and <B><TT><A HREF="#B_HASH_MARKS_NONE">B_HASH_MARKS_NONE</A></TT></B> to omit them entirely (which is the default).
+<P>
+<B><TT><A HREF="#SetHashMarkCount()">SetHashMarkCount()</A></TT></B> is called to indicate that you want 10 hash marks spaced evenly across the slider.
+<P>
+Finally, if you want to add labels at the ends of the slider, to indicate the minimum and maximum values, you can use the <B><TT><A HREF="#SetLimitLabels()">SetLimitLabels()</A></TT></B> function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;slider->SetLimitLabels("Slow", "Fast");</PRE>
+<P>
+This sets the label for the minimum value (the left end of the slider) to "Slow" and the label for the maximum to "Fast".
+<P>
+The result is the "Construct Speed (%)" slider in the window pictures below.  An example of a slider with the <B><TT><A HREF="#B_TRIANGLE_THUMB">B_TRIANGLE_THUMB</A></TT></B> <I><FONT  color=991122 face=HELVETICA>thumbType</I></FONT> and hash marks above and below the slider is also shown.
+<P>
+<IMG SRC="art/constructo.GIF" ALIGN="bottom">
+<P>
+<HR>
+<H2>
+<A NAME="Customizing%20a%20BSlider"></A><FONT SIZE=6>C</FONT>ustomizing a <FONT SIZE=6>B</FONT><FONT SIZE=6>S</FONT>lider
+</H2>
+<P>
+You can customize the appearance of your BSlider by overriding virtual functions in the BSlider class that are responsible for drawing the slider bar, thumb, focus mark, and hash marks.
+<P>
+For example, let's say you want your slider's thumb to be round.  Just create a new class&mdash;let's call it CustomSlider&mdash;derived from <A HREF="#BSlider">BSlider</A>, and override the <B><TT><A HREF="#DrawThumb()">DrawThumb()</A></TT></B> function with code that might look something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;const rgb_color kWhite = {255,255,255,255};
+&nbsp;&nbsp;&nbsp;const rgb_color kWhiteGray = {235,235,235,255);
+&nbsp;&nbsp;&nbsp;const rgb_color kDarkGray = {100,100,100,255};
+&nbsp;&nbsp;&nbsp;const rgb_color kBlackColor = {0,0,0,255};
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;void CustomSlider::DrawThumb(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BRect r;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BView *v;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Get the frame rectangle of the thumb
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// and the offscreen view.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r = ThumbFrame();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v = OffscreenView();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Draw the black shadow
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v->SetHighColor(kBlackColor);&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.top++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.left++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v->StrokeEllipse(r);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Draw the dark grey edge
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v->SetHighColor(kDarkGray);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.bottom--;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.right--;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v->StrokeEllipse(r);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Fill the inside of the thumb
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v->SetHighColor(kWhiteGrayColor);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r.InsetBy(1,1);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v->FillEllipse(r);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+All rendering of a BSlider is done into an offscreen view, which you can get a pointer to by calling the <B><TT><A HREF="#OffscreenView()">OffscreenView()</A></TT></B> function.  This improves performance and makes drawing the slider&mdash;especially complicated ones&mdash;look much smoother to the user.
+<P>
+This code gets a pointer to the offscreen view, then renders a round, beveled thumb into the offscreen view, filling the thumb's frame rectangle as returned by the <B><TT><A HREF="#ThumbFrame()">ThumbFrame()</A></TT></B> function.
+<P>
+The result is a round thumb that looks like the one in the "Totality of Damage" slider in the picture below:
+<P>
+<IMG SRC="art/roundthumb.gif" ALIGN="bottom">
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<UL>
+<LI><B><TT><A HREF="#BarFrame()">BarFrame()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#DrawBar()">DrawBar()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#DrawFocusMark()">DrawFocusMark()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#DrawHashMarks()">DrawHashMarks()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#DrawSlider()">DrawSlider()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="Tab.html#DrawLabel()">DrawLabel()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#DrawThumb()">DrawThumb()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#GetPreferredSize()">GetPreferredSize()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#HashMarksFrame()">HashMarksFrame()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#ResizeToPreferred()">ResizeToPreferred()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetBarColor()">SetBarColor()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetBarThickness()">SetBarThickness()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetFont()">SetFont()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetHashMarks()">SetHashMarks()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetHashMarkCount()">SetHashMarkCount()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetKeyIncrementValue()">SetKeyIncrementValue()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="MenuField.html#SetLabel()">SetLabel()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetLimitLabels()">SetLimitLabels()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetModificationMessage()">SetModificationMessage()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetOrientation()">SetOrientation()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetPosition()">SetPosition()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetSnoozeAmount()">SetSnoozeAmount()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetStyle()">SetStyle()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#SetValue()">SetValue()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#ThumbFrame()">ThumbFrame()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#UpdateText()">UpdateText()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#UseFillColor()">UseFillColor()</A></TT></B>
+<P>
+<LI><B><TT><A HREF="#ValueForPoint()">ValueForPoint()</A></TT></B>
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BSlider()"></A>BSlider()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSlider(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>label</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>minValue</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>maxValue</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thumb_style thumbType = <B><TT><A HREF="#B_BLOCK_THUMB">B_BLOCK_THUMB</A></TT></B>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<B><TT><A HREF="ViewGeneral.html#B_FOLLOW_LEFT">B_FOLLOW_LEFT</A></TT></B>&nbsp;|&nbsp;<B><TT><A HREF="ViewGeneral.html#B_FOLLOW_TOP">B_FOLLOW_TOP</A></TT></B>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<B><TT><A HREF="ViewGeneral.html#B_FRAME_EVENTS">B_FRAME_EVENTS</A></TT></B>&nbsp;|&nbsp;<B><TT><A HREF="ViewGeneral.html#B_WILL_DRAW">B_WILL_DRAW</A></TT></B>&nbsp;|&nbsp;<B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE">B_NAVIGABLE</A></TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSlider(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>label</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>minValue</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>maxValue</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;orientation <I><FONT  color=991122 face=HELVETICA>posture</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thumb_style thumbType = <B><TT><A HREF="#B_BLOCK_THUMB">B_BLOCK_THUMB</A></TT></B>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<B><TT><A HREF="ViewGeneral.html#B_FOLLOW_LEFT">B_FOLLOW_LEFT</A></TT></B>&nbsp;|&nbsp;<B><TT><A HREF="ViewGeneral.html#B_FOLLOW_TOP">B_FOLLOW_TOP</A></TT></B>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<B><TT><A HREF="ViewGeneral.html#B_FRAME_EVENTS">B_FRAME_EVENTS</A></TT></B>&nbsp;|&nbsp;<B><TT><A HREF="ViewGeneral.html#B_WILL_DRAW">B_WILL_DRAW</A></TT></B>&nbsp;|&nbsp;<B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE">B_NAVIGABLE</A></TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSlider(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BSlider by passing the appropriate arguments to the <A HREF="Control.html#BControl">BControl</A> constructor.  <A HREF="Control.html#BControl">BControl</A> initializes the slider's <I><FONT  color=991122 face=HELVETICA>label</I></FONT> and assigns it a model <I><FONT  color=991122 face=HELVETICA>message</I></FONT> that identifies the action that should be carried out when the slider is invoked.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> arguments are the same as those declared for the <A HREF="View.html#BView">BView</A> class and are passed up the inheritance hierarchy to the <A HREF="View.html#BView">BView</A> constructor without change.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>minValue</I></FONT> and <I><FONT  color=991122 face=HELVETICA>maxValue</I></FONT> parameters define the minimum and maximum values to which the slider can be set.
+<P>
+If you want to control whether the slider is horizontal or vertical, use the second form of the constructor, and set the <I><FONT  color=991122 face=HELVETICA>posture</I></FONT> argument to either <B><TT>B_HORIZONTAL</TT></B> or <B><TT><A HREF="misc.html#B_VERTICAL">B_VERTICAL</A></TT></B>.  If you don't specify this argument, the slider will be horizontal by default.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>thumbType</I></FONT> argument defines the look of the slider's thumb, and can be either of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_BLOCK_THUMB"></A>B_BLOCK_THUMB
+</TT></B></TD>
+<TD>The thumb is a rectangular block.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRIANGLE_THUMB"></A>B_TRIANGLE_THUMB
+</TT></B></TD>
+<TD>The thumb is a triangular pointer.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="~BSlider()"></A>~BSlider()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BSlider()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees memory allocated by the BSlider object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="Control.html#BControl">BControl</A> version of this function to set the background color of the button so that it matches the background color of its parent.  This function also sets the start position of the slider and allocates other memory needed for the slider to function.
+<P>
+<B>See also:  <TT>BView::AttachedToWindow()</TT></B>, <B><TT><A HREF="Control.html#AttachedToWindow()">BControl::AttachedToWindow()</A>
+<P>
+</TT></B><HR>
+<H3>BarColor() see <A HREF="#SetBarColor()">SetBarColor()</A></H3>
+<P>
+<HR>
+<H3>BarThickness() see <A HREF="#SetBarThickness()">SetBarThickness()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the slider by calling <B><TT><A HREF="#DrawSlider()">DrawSlider()</A></TT></B>.
+<P>
+<B>See also:  <TT>BView::Draw()</TT></B>, <B><TT><A HREF="#DrawSlider()">DrawSlider()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="DrawBar()"></A>DrawBar()
+, 
+<A NAME="BarFrame()"></A>BarFrame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawBar(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual <A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>BarFrame(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>DrawBar()</TT></B> draws the slider bar.  The bar is the narrow region the thumb slides through.  The bar should be drawn into the offscreen view.
+<P>
+<B><TT>BarFrame()</TT></B> returns the frame rectangle that encloses the slider bar.
+<P>
+These functions can be augmented or replaced by your own versions to alter the appearance of the slider bar.
+<P>
+<B>See also:  <TT><A HREF="#OffscreenView()">OffscreenView()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="DrawFocusMark()"></A>DrawFocusMark()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawFocusMark(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If the slider is in focus, draws a mark indicating that this is the case.
+<P>
+You can override this function to alter the appearance of the slider control.
+<P>
+<HR>
+<H3>
+<A NAME="DrawHashMarks()"></A>DrawHashMarks()
+, 
+<A NAME="HashMarksFrame()"></A>HashMarksFrame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawHashMarks(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual <A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>HashMarksFrame(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>DrawHashMarks()</TT></B> draws the hash marks.
+<P>
+<B><TT>HashMarksFrame()</TT></B> returns the frame rectangle that encloses the hash marks.  If the hash marks are set to <B><TT><A HREF="#B_HASH_MARKS_TOP">B_HASH_MARKS_TOP</A></TT></B> or <B><TT><A HREF="#B_HASH_MARKS_BOTTOM">B_HASH_MARKS_BOTTOM</A></TT></B>, the rectangle encloses only the area needed to draw the marks.  If the setting is <B><TT><A HREF="#B_HASH_MARKS_BOTH">B_HASH_MARKS_BOTH</A></TT></B>, the hash marks frame rectangle is the bounds rectangle of the entire slider control.
+<P>
+These functions can be augmented or replaced by your own versions to alter the appearance of the hash marks.
+<P>
+<HR>
+<H3>
+<A NAME="DrawSlider()"></A>DrawSlider()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawSlider(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the entire slider control by calling the functions responsible for drawing the various parts of the control:
+<P>
+<UL>
+<LI> <B><TT><A HREF="#DrawBar()">DrawBar()</A>
+<P>
+</UL>
+<P>
+</TT></B>Once the slider has been drawn into the offscreen view, it's copied to its parent window.
+<P>
+<B>See also:  <TT><A HREF="#DrawBar()">DrawBar()</A></TT></B>, <B><TT><A HREF="#DrawHashMarks()">DrawHashMarks()</A></TT></B>, <B><TT><A HREF="#DrawThumb()">DrawThumb()</A></TT></B>, <B><TT><A HREF="#DrawFocusMark()">DrawFocusMark()</A></TT></B>, <B><TT><A HREF="#DrawText()">DrawText()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="DrawText()"></A>DrawText()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawText(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the slider's text areas.  These are the minimum label, maximum label, and status message.
+<P>
+The minimum and maximum labels can be set using the <B><TT><A HREF="#SetLimitLabels()">SetLimitLabels()</A></TT></B> function.  The status message is obtained by calling the <B><TT><A HREF="#UpdateText()">UpdateText()</A></TT></B> function.  If you want there to be a status message, simply override <B><TT><A HREF="#UpdateText()">UpdateText()</A></TT></B> to return the string you want drawn as the status message.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In the default implementation of this function, the limit labels are only drawn if both of them have been configured to a value other than <B><TT>NULL</TT></B>.  If either of them is <B><TT>NULL</TT></B>, neither will be drawn.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+This function can be augmented or replaced by your own version to alter the appearance or placement of the text.
+<P>
+<B>See also:  </B> <B><TT><A HREF="#SetLimitLabels()">SetLimitLabels()</A></TT></B>, <B><TT><A HREF="#UpdateText()">UpdateText()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="DrawThumb()"></A>DrawThumb()
+, 
+<A NAME="ThumbFrame()"></A>ThumbFrame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DrawThumb(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual <A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>ThumbFrame(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>DrawThumb()</TT></B> draws the slider's thumb.  If you choose to reimplement this function, you should call <B><TT><A HREF="#Style()">Style()</A></TT></B> to determine whether to draw a block thumb or a triangle thumb.
+<P>
+<B><TT>ThumbFrame()</TT></B> returns the frame rectangle that encloses the thumb.
+<P>
+These functions can be augmented or replaced by your own versions to alter the appearance of the thumb.
+<P>
+<HR>
+<H3>
+<A NAME="FrameResized()"></A>FrameResized()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>FrameResized(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float&nbsp;*<I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="Control.html#BControl">BControl</A> version of <B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B> to adjust the offscreen view and bitmap used for rendering the slider.
+<P>
+<HR>
+<H3>
+<A NAME="GetPreferredSize()"></A>GetPreferredSize()
+, 
+<A NAME="ResizeToPreferred()"></A>ResizeToPreferred()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>GetPreferredSize(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float&nbsp;*<I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ResizeToPreferred(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetPreferredSize()</TT></B> calculates the width and height of the area needed to render the complete slider control, given the current configuration of the control's various settings.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>width</I></FONT> returned by this function is the width of the slider control.  The <I><FONT  color=991122 face=HELVETICA>height</I></FONT> is calculated by taking the height of the slider bar itself, adding two times the height of the hash marks, then adding room for the status text (if there is any) and limit strings (if there are any).
+<P>
+Note that the height always includes room for hash marks both above and below the slider, even if the slider has no hash marks or only one of the two sets of marks.
+<P>
+<B><TT>ResizeToPreferred()</TT></B> resizes the slider control to be the preferred size.
+<P>
+You can override these functions to alter the preferred size of the slider; this is particularly important if you override other functions to change the appearance of the slider.
+<P>
+<HR>
+<H3>HashMarks() see <A HREF="#SetHashMarks()">SetHashMarks()</A></H3>
+<P>
+<HR>
+<H3>HashMarkCount() see <A HREF="#SetHashMarkCount()">SetHashMarkCount()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="KeyDown()"></A>KeyDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>KeyDown(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>bytes</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Augments the inherited version of <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> to let the up and right arrow keys increment the value of the slider, and the down and left arrow keys to decrement the value of the slider.
+<P>
+<B>See also:  <TT><A HREF="Control.html#Invoke()">BControl::Invoke()</A></TT></B>, <B><TT>BView::KeyDown()
+<P>
+</TT></B><HR>
+<H3>MaxLimitLabel() see <A HREF="#SetLimitLabels()">SetLimitLabels()</A></H3>
+<P>
+<HR>
+<H3>MinLimitLabel() see <A HREF="#SetLimitLabels()">SetLimitLabels()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MouseDown()"></A>MouseDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MouseDown(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Overrides the <A HREF="View.html#BView">BView</A> version of <B><TT><A HREF="#MouseDown()">MouseDown()</A></TT></B> to track mouse the mouse when the button is pressed.  A single click causes the thumb to immediately reposition itself to the clicked location, and a click and drag motion causes the slider to follow the mouse cursor until the button is released.
+<P>
+If a modification message has been established, it is sent repeatedly while the mouse button is down.  This can be used, for example, to let the changes to the value of the slider be instantly reflected in an onscreen display.  When the mouse button is released and the slider has been set to its resting position, the slider's model message is sent.
+<P>
+<B>See also:  <TT>BView::MouseDown()</TT></B>, <B><TT><A HREF="Control.html#Invoke()">BControl::Invoke()</A></TT></B>, <B><TT>BControl::SetTarget(), ModificationMessage(), SetModificationMessage()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="OffscreenView()"></A>OffscreenView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>OffscreenView(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the offscreen <A HREF="View.html#BView">BView</A> in which the slider is rendered prior to being copied to the screen.  Because the slider is a complex graphical construct, it's rendered offscreen, then copied onto the screen.  This function is provided to make it possible to further customize the appearance of a custom slider control.
+<P>
+<HR>
+<H3>Orientation() see <A HREF="#SetOrientation()">SetOrientation()</A></H3>
+<P>
+<HR>
+<H3>ResizeToPreferred() see <A HREF="#GetPreferredSize()">GetPreferredSize()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetBarColor()"></A>SetBarColor()
+, 
+<A NAME="BarColor()"></A>BarColor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetBarColor(</TT></B></FONT>rgb_color <I><FONT  color=991122 face=HELVETICA>bar_color</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual rgb_color <B><TT><FONT  color=000022 size=+1>BarColor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetBarColor()</TT></B> sets the color of the slider bar.
+<P>
+<B><TT>BarColor()</TT></B> returns the slider bar's color.
+<P>
+<HR>
+<H3>
+<A NAME="SetBarThickness()"></A>SetBarThickness()
+, 
+<A NAME="BarThickness()"></A>BarThickness()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetBarThickness(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>thickness</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+float <B><TT><FONT  color=000022 size=+1>BarThickness(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetBarThickness()</TT></B> sets the slider bar's thickness and <B><TT><A HREF="#BarThickness()">BarThickness()</A></TT></B> returns the current thickness.
+<P>
+The slider bar's thickness determines how many pixels across the slider bar is.  If no thickness is defined, the bar occupies the entire unused width or height of the slider's bounding rectangle.
+<P>
+<HR>
+<H3>
+<A NAME="SetFont()"></A>SetFont()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetFont(</TT></B></FONT>const <A HREF="Font.html#BFont">BFont</A> *<I><FONT  color=991122 face=HELVETICA>font</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>properties</I></FONT> = <FONT  face=HELVETICA>B_FONT_ALL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets the font used for the slider's labels to <I><FONT  color=991122 face=HELVETICA>font</I></FONT>.  The <I><FONT  color=991122 face=HELVETICA>properties</I></FONT> flags indicate which properties of the <I><FONT  color=991122 face=HELVETICA>font</I></FONT> should be used, and which should remain unchanged.
+<P>
+<HR>
+<H3>
+<A NAME="SetHashMarks()"></A>SetHashMarks()
+, 
+<A NAME="HashMarks()"></A>HashMarks()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetHashMarks(</TT></B></FONT>hash_mark_location <I><FONT  color=991122 face=HELVETICA>where</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+hash_mark_location <B><TT><FONT  color=000022 size=+1>HashMarks(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetHashMarks()</TT></B> sets the placement of the hash marks.  This value can be one of the following:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_HASH_MARKS_NONE"></A>B_HASH_MARKS_NONE
+</TT></B></TD>
+<TD>The slider should have no hash marks.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HASH_MARKS_TOP"></A>B_HASH_MARKS_TOP
+</TT></B></TD>
+<TD>The slider should have hash marks above the slider bar.  For horizontal sliders only.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HASH_MARKS_BOTTOM"></A>B_HASH_MARKS_BOTTOM
+</TT></B></TD>
+<TD>The slider should have hash marks below the slider bar.  For horizontal sliders only.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HASH_MARKS_BOTH"></A>B_HASH_MARKS_BOTH
+</TT></B></TD>
+<TD>The slider should have hash marks above and below the slider bar.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HASH_MARKS_LEFT"></A>B_HASH_MARKS_LEFT
+</TT></B></TD>
+<TD>The slider should have has marks to the left of the slider bar.  For vertical sliders only.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HASH_MARKS_RIGHT"></A>B_HASH_MARKS_RIGHT
+</TT></B></TD>
+<TD>The slider should have has marks to the right of the slider bar.  For vertical sliders only.</TD>
+</TABLE>
+<P>
+<B><TT>HashMarks()</TT></B> returns the current placement of the hash marks.
+<P>
+<HR>
+<H3>
+<A NAME="SetHashMarkCount()"></A>SetHashMarkCount()
+, 
+<A NAME="HashMarkCount()"></A>HashMarkCount()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetHashMarkCount(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>hash_mark_count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>HashMarkCount(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetHashMarkCount()</TT></B> sets the number of hash marks that will be displayed above and/or below the slider.
+<P>
+<B><TT>HashMarkCount()</TT></B> returns the number of hash marks currently set up.
+<P>
+<HR>
+<H3>
+<A NAME="SetKeyIncrementValue()"></A>SetKeyIncrementValue()
+, 
+<A NAME="KeyIncrementValue()"></A>KeyIncrementValue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetKeyIncrementValue(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>increment_value</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>KeyIncrementValue(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetKeyIncrementValue()</TT></B> sets the amount by which the slider's value changes when the keyboard is used to move the thumb.
+<P>
+<B><TT>KeyIncrementValue()</TT></B> returns the amount by which the slider's value changes when the keyboard is used to move the thumb.
+<P>
+<HR>
+<H3>
+<A NAME="SetLimitLabels()"></A>SetLimitLabels()
+, 
+<A NAME="MinLimitLabel()"></A>MinLimitLabel()
+, 
+<A NAME="MaxLimitLabel()"></A>MaxLimitLabel()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetLimitLabels(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>minLabel</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>maxLabel</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>MinLimitLabel(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>MaxLimitLabel(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetLimitLabels()</TT></B> sets the labels used to mark the minimum and maximum values on the slider.
+<P>
+<B><TT>MinLimitLabel()</TT></B> and <B><TT>MaxLimitLabel()</TT></B> return the current strings used to mark the minimum and maximum values on the slider.
+<P>
+<HR>
+<H3>
+<A NAME="SetModificationMessage()"></A>SetModificationMessage()
+, 
+<A NAME="ModificationMessage()"></A>ModificationMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetModificationMessage(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>ModificationMessage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetModificationMessage()</TT></B> sets the model message that's sent while the mouse is being tracked.  The modification message is sent repeatedly as long as the mouse button is held down after being initially clicked inside the slider.
+<P>
+<B><TT>ModificationMessage()</TT></B> returns the modification message currently set up.
+<P>
+<B>See also:  </B> <B><TT><A HREF="#MouseDown()">MouseDown()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="SetOrientation()"></A>SetOrientation()
+, 
+<A NAME="Orientation()"></A>Orientation()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetOrientation(</TT></B></FONT>orientation <I><FONT  color=991122 face=HELVETICA>posture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+orientation <B><TT><FONT  color=000022 size=+1>Orientation(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetOrientation()</TT></B> sets the slider's orientation and <B><TT><A HREF="#Orientation()">Orientation()</A></TT></B> returns its current orientation.  The possible values are <B><TT>B_HORIZONTAL</TT></B> and <B><TT><A HREF="misc.html#B_VERTICAL">B_VERTICAL</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="SetPosition()"></A>SetPosition()
+, 
+<A NAME="Position()"></A>Position()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetPosition(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>position</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual float <B><TT><FONT  color=000022 size=+1>Position(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetPosition()</TT></B> sets the value of the slider given a value between 0.0 and 1.0, where 0.0 is the minimum value of the slider, and 1.0 is the maximum value.  This lets you set the slider to a relative position without having to look up the maximum and minimum values of the slider.
+<P>
+<B><TT>Position()</TT></B> returns the slider value scaled to the range 0.0 to 1.0.
+<P>
+<HR>
+<H3>
+<A NAME="SetSnoozeAmount()"></A>SetSnoozeAmount()
+, 
+<A NAME="SnoozeAmount()"></A>SnoozeAmount()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetSnoozeAmount(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>snooze_time</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>SnoozeAmount(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetSnoozeAmount()</TT></B> sets the time (in microseconds) that the slider snoozes for between updates while the mouse is being tracked.
+<P>
+<B><TT>SnoozeAmount()</TT></B> returns the time that the slider snoozes while the mouse is being tracked.
+<P>
+<HR>
+<H3>
+<A NAME="SetStyle()"></A>SetStyle()
+, 
+<A NAME="Style()"></A>Style()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetStyle(</TT></B></FONT>thumb_style <I><FONT  color=991122 face=HELVETICA>style</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+thumb_style <B><TT><FONT  color=000022 size=+1>Style(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetStyle()</TT></B> sets the thumb style for the slider.  The <I><FONT  color=991122 face=HELVETICA>style</I></FONT> can be either of the following two values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_BLOCK_THUMB"></A>B_BLOCK_THUMB
+</TT></B></TD>
+<TD>The thumb should be a rectangular block.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRIANGLE_THUMB"></A>B_TRIANGLE_THUMB
+</TT></B></TD>
+<TD>The thumb should be triangular.</TD>
+</TABLE>
+<P>
+<B><TT>Style()</TT></B> returns the current thumb style.
+<P>
+<HR>
+<H3>
+<A NAME="SetValue()"></A>SetValue()
+, 
+<A NAME="Value()"></A>Value()
+, 
+<A NAME="ValueForPoint()"></A>ValueForPoint()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetValue(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>value</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual int32 <B><TT><FONT  color=000022 size=+1>Value(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+virtual int32 <B><TT><FONT  color=000022 size=+1>ValueForPoint(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>location</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetValue()</TT></B> augments the <A HREF="Control.html#BControl">BControl</A> function to pin the value to the maximum and minimum values for the slider and the position of the thumb before calling the inherited function.
+<P>
+<B><TT>ValueForPoint()</TT></B> returns the slider value represented by the given screen coordinates.
+<P>
+<HR>
+<H3>SnoozeAmount() see <A HREF="#SetSnoozeAmount()">SetSnoozeAmount()</A></H3>
+<P>
+<HR>
+<H3>Style() see <A HREF="#SetStyle()">SetStyle()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="UpdateText()"></A>UpdateText()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual char *<B><TT><FONT  color=000022 size=+1>UpdateText(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the status message that should be displayed with the slider.  By default, this function returns <B><TT>NULL</TT></B>; if you want a status message to be displayed, simply override this function to return the appropriate string.
+<P>
+The pointer you return is yours; the <B><TT><A HREF="#DrawText()">DrawText()</A></TT></B> routine won't dispose of it unless you augment it to do so.
+<P>
+<HR>
+<H3>
+<A NAME="UseFillColor()"></A>UseFillColor()
+, 
+<A NAME="FillColor()"></A>FillColor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>UseFillColor(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>use_fill</I></FONT>, const rgb_color *<I><FONT  color=991122 face=HELVETICA>bar_color</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>FillColor(</TT></B></FONT>rgb_color *<I><FONT  color=991122 face=HELVETICA>bar_color</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>UseFillColor()</TT></B> sets the color used to fill the area of the slider bar that's "filled."  That is, the part of the bar between the minimum value of the slider and the current thumb position.  If the <I><FONT  color=991122 face=HELVETICA>use_fill</I></FONT> parameter is <B><TT>true</TT></B>, filling this area of the slider with the fill color is turned on.  If <I><FONT  color=991122 face=HELVETICA>use_fill</I></FONT> is <B><TT>false</TT></B>, the entire slider bar is always drawn in the bar color.
+<P>
+<B><TT>FillColor()</TT></B> stores the current fill color in <I><FONT  color=991122 face=HELVETICA>bar_color</I></FONT>.  The boolean value returned by the function is <B><TT>true</TT></B> if the fill color is being used, <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>Value() see <A HREF="#SetValue()">SetValue()</A></H3>
+<P>
+<HR>
+<H3>ValueForPoint() see <A HREF="#SetValue()">SetValue()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="MenuField.html#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_mod_msg"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>The flattened modification message.</TD>
+<TR>
+<TD>"_sdelay"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The snooze amount.</TD>
+<TR>
+<TD>"_bcolor"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The bar color.</TD>
+<TR>
+<TD>"_fcolor"</TD>
+<TD>B_INT32_TYPE</TD>
+<TD>The fill color.</TD>
+<TR>
+<TD>"_minlbl"</TD>
+<TD>B_STRING_TYPE</TD>
+<TD>The minimum limit label.</TD>
+<TR>
+<TD>"_maxlbl"</TD>
+<TD>B_STRING_TYPE</TD>
+<TD>The maximum limit label.</TD>
+<TR>
+<TD>"_min"</TD>
+<TD>B_INT32_TYPE</TD>
+<TD>The minimum possible value.</TD>
+<TR>
+<TD>"_max"</TD>
+<TD>B_INT32_TYPE</TD>
+<TD>The maximum possible value.</TD>
+<TR>
+<TD>"_incrementvalue"</TD>
+<TD>B_INT32_TYPE</TD>
+<TD>The keyboard navigation increment value.</TD>
+<TR>
+<TD>"_hashcount"</TD>
+<TD>B_INT32_TYPE</TD>
+<TD>The number of hash marks to draw.</TD>
+<TR>
+<TD>"_hashloc"</TD>
+<TD>B_INT16_TYPE</TD>
+<TD>Where to draw the hash marks.</TD>
+<TR>
+<TD>"_sstyle"</TD>
+<TD>B_INT32_TYPE</TD>
+<TD>The thumb style.</TD>
+</TABLE>
+<P>
+Some of these fields may not be present if the setting they represent isn't used, or is the default value.  For example, if there is no minimum limit label set, the "_min_lbl" field doesn't exist.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

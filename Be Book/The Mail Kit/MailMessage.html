@@ -1,0 +1,315 @@
+<HTML><HEAD><TITLE>The Mail Kit: BMailMessage</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Mail Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Mail%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Mail Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMailMessage"></A>BMailMessage
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kit/mail/E-mail.h">be/kit/mail/E-mail.h</A>
+<P>
+Library:  libmail.so
+<P>
+<H6><A HREF="MailMessage.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMailMessage class provides an easy way to send e-mail messages.  If you want to do it the hard way, look up the SMTP RFC and start plodding your way through the Network Kit documentation.  You'll get it working one of these days.
+<P>
+Or you can sail right on through and be sending e-mail from your own applications in a matter of minutes using your friend, the BMailMessage.
+<P>
+<HR>
+<H3>
+<A NAME="Constructing%20a%20Mail%20Message"></A>Constructing a Mail Message
+</H3>
+<P>
+To send an e-mail, you simply construct a new BMailMessage object, add a "To" header field, add the content, and send the message on its way.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMailMessage *mail;
+&nbsp;&nbsp;&nbsp;char *message;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;mail = new BMailMessage();
+&nbsp;&nbsp;&nbsp;mail->AddHeaderField(B_MAIL_TO, "bob@uncle.com");
+&nbsp;&nbsp;&nbsp;mail->AddHeaderField(B_MAIL_SUBJECT, "Hi");
+&nbsp;&nbsp;&nbsp;message = "Hi, Uncle Bob!";
+&nbsp;&nbsp;&nbsp;mail->AddContent(message, strlen(message));</PRE>
+<P>
+This is a pretty basic message.  The subject is "Hi," the message is sent to "bob@uncle.com," and the message body is "Hi, Uncle Bob!"
+<P>
+You can add other fields, including carbon-copy (CC) and blind-carbon-copy (BCC) fields, and you can add attachments.  For example, if you want to also attach a file called "/boot/home/file.zip," you can do the following:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;mail->AddEnclosure("/boot/home/file.zip");</PRE>
+<P>
+Once your message has been constructed, you can send it by calling <B><TT><A HREF="#Send()">Send()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;mail->Send();</PRE>
+<P>
+That's the basic technique behind sending e-mail under the BeOS.  The mail daemon also fetches incoming mail from a POP server, but you can't use the BMailMessage class to read these messages; you use the BeOS <A HREF="../Release%20Notes/StorageKit.html#BQuery">BQuery</A> and <A HREF="../Release%20Notes/StorageKit.html#BNode">BNode</A> classes to locate messages of interest and obtain information about them.  See "Querying Mail Messages" for more information.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMailMessage()"></A>BMailMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BMailMessage(void)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates and returns a new BMailMessage object, which is empty.  You need to call other functions defined by this class to fill out the message.
+<P>
+<HR>
+<H3>
+<A NAME="~BMailMessage()"></A>~BMailMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+~BMailMessage()
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Destroys the <A HREF="#BMailMessage">BMailMessage</A>, even if the object's fields are "dirty."  For example, if you create a new BMailMessage object with the intention of sending a message, fill out some or all of the fields, and then delete the object, the object is destroyed without being sent.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddContent()"></A>AddContent()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>AddContent(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>text</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>encoding</I></FONT> <FONT  face=HELVETICA>= B_ISO1_CONVERSION</FONT>, bool <I><FONT  color=991122 face=HELVETICA>replace = false</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddContent</TT></B></FONT>(const char *<I><FONT  color=991122 face=HELVETICA>text</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>encoding</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>replace</I></FONT> = <B><TT>false)
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Adds the specified <I><FONT  color=991122 face=HELVETICA>text</I></FONT> (which contains <I><FONT  color=991122 face=HELVETICA>length</I></FONT> characters) to the BMailMessage object's content.  The text's encoding is specified by the <I><FONT  color=991122 face=HELVETICA>encoding</I></FONT> parameter, either directly or by pointer.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>replace</I></FONT> is <B><TT>true</TT></B>, any existing text is deleted before the new content is added; otherwise, the specified text is appended to the end of the existing message content.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The content was changed without error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Unable to add the new content.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="AddEnclosure()"></A>AddEnclosure()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>AddEnclosure(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>enclosure_ref</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>replace = false</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddEnclosure</TT></B></FONT>(const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>replace = false</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddEnclosure</TT></B></FONT>(const char *<I><FONT  color=991122 face=HELVETICA>mime_type</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>replace = false</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds an attachment to the message.  The first two forms of <B><TT>AddEnclosure()</TT></B> add a file to the message, given either an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> pointer or a pathname.  The third form adds a block of memory (of the given <I><FONT  color=991122 face=HELVETICA>length</I></FONT>) to the message as an enclosure, with the specified MIME type.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>replace</I></FONT> is <B><TT>true</TT></B>, any existing attachments&mdash;including the body of the message&mdash;are removed before the new one is added; otherwise the new enclosure is added, leaving previous attachments intact.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you specify <B><TT>true</TT></B> for <I><FONT  color=991122 face=HELVETICA>replace</I></FONT>, not only will all existing enclosures be discarded, but so will the content of the message body itself.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The content was changed without error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Unable to add the new enclosure.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="AddHeaderField()"></A>AddHeaderField()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>AddHeaderField(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>field_name</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>field_str</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>replace = false</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds a header field to the BMailMessage object.  The value of the field whose name is specified by <I><FONT  color=991122 face=HELVETICA>field_name</I></FONT> is set to the string specified by <I><FONT  color=991122 face=HELVETICA>field_str</I></FONT>.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>replace</I></FONT> is <B><TT>true</TT></B>, all existing header fields of the specified name are deleted before adding the new header field; if <I><FONT  color=991122 face=HELVETICA>replace</I></FONT> is <B><TT>false</TT></B>, a new header whose field is named <I><FONT  color=991122 face=HELVETICA>field_name</I></FONT> is added.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The content was changed without error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Unable to add the new header field.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Send()"></A>Send()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>Send(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>send_now</I></FONT> = <B><TT>false</TT></B>, bool <I><FONT  color=991122 face=HELVETICA>remove_when_sent = false</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Queues the message for transmission.  If <I><FONT  color=991122 face=HELVETICA>send_now</I></FONT> is <B><TT>true</TT></B>, the message is sent immediately; otherwise, it is placed in the queue to be sent the next time <B><TT><A HREF="maildaemon.html#check_for_mail()">check_for_mail()</A></TT></B> is called or the mail daemon performs an automatic mail check.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>remove_when_sent</I></FONT> argument is <B><TT>true</TT></B>, the message will be deleted from the user's disk drive after it has been sent; otherwise, it will be saved for posterity.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The content was changed without error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MAIL_NO_RECIPIENT">B_MAIL_NO_RECIPIENT</A></TT></B>.  There needs to be either a "To" or "Bcc" field in the message.
+<P>
+<LI>Errors from <B><TT>BMessage::SendMessage()</TT></B>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Mail Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Mail%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Mail Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,435 @@
+<HTML><HEAD><TITLE>The Storage Kit: BEntryList</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BEntryList"></A>BEntryList
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/EntryList.h">be/storage/EntryList.h</A>
+<P>
+Library:  none
+<P>
+<H6><A HREF="EntryList.summary.html"><i>Summary</i></A></H6>
+<P>
+BEntryList is a pure abstract class that defines the protocol for iterating over a set of file system entries.  Each derived class must figure out how to create (or "discover") the entry list in the first place:  BEntryList only supplies functions for getting entries out of the list, it doesn't let you put them in. The BEntryList class has two derived classes:  <A HREF="Directory.html#BDirectory">BDirectory</A> and BQuery.
+<P>
+At the heart of the BEntryList class are the three <B><TT>GetNext...()</TT></B> functions, which let you retrieve the entries as...
+<P>
+<UL>
+<LI><A HREF="Entry.html#BEntry">BEntry</A> objects (<B><TT><A HREF="#GetNextEntry()">GetNextEntry()</A></TT></B>), 
+<P>
+<LI><B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> structures (<B><TT><A HREF="#GetNextRef()">GetNextRef()</A></TT></B>), 
+<P>
+<LI>or <B><TT>dirent</TT></B> ("directory entry") structures (<B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B>).  
+<P>
+</UL>
+<P>
+You call these functions iteratively; each call gets the "next" entry (or set of entries in the case of <B><TT>GetNextDirents(</TT></B>)).  You check the <B><TT>GetNext...()</TT></B> return value to detect the end of the list:
+<P>
+<UL>
+<LI>For <B><TT><A HREF="#GetNextEntry()">GetNextEntry()</A></TT></B> and <B><TT><A HREF="#GetNextRef()">GetNextRef()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B> indicates that there are no more entries to get.
+<P>
+<LI><B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> returns 0 when it's at the end of the list.
+<P>
+</UL>
+<P>
+To get back to the top of an entry list, you call <B><TT><A HREF="#Rewind()">Rewind()</A></TT></B>, but note...
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#Rewind()">Rewind()</A></TT></B> applies to BDirectories only.  You can't rewind a BQuery's entry list.  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Here's an example of an iteration over all the entries in a <A HREF="Directory.html#BDirectory">BDirectory</A>, retrieved as <A HREF="Entry.html#BEntry">BEntry</A> objects:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BDirectory dir("/boot/home/fido");
+&nbsp;&nbsp;&nbsp;BEntry entry;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;dir.Rewind();
+&nbsp;&nbsp;&nbsp;while (dir.GetNextEntry(&amp;entry) == B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* do something with entry here. */</PRE>
+<P>
+The final BEntryList function, <B><TT><A HREF="#CountEntries()">CountEntries()</A></TT></B>, also only applies to BDirectories; but even there you shouldn't depend on it.  The count is stale as soon as <B><TT><A HREF="#CountEntries()">CountEntries()</A></TT></B> returns.  The user could create a new file or delete a file in the directory while you're iterating over the entries.  Also, <B><TT><A HREF="#CountEntries()">CountEntries()</A></TT></B> shares the entry list pointer with the <B><TT>GetNext...()</TT></B> functions.  You mustn't intermingle a <B><TT><A HREF="#CountEntries()">CountEntries()</A></TT></B> call within your <B><TT>GetNext...()</TT></B> loop.
+<P>
+One more <A HREF="Directory.html#BDirectory">BDirectory</A> wrinkle:
+<P>
+<UL>
+<LI>Entries are retrieved in "directory order".  (This is a POSIX term that means, roughly, ASCII order.)  If the user renames a file while you're iterating over the directory, it's possible that the file won't be seen, or will show up under its old name <I>and</I> its new name. 
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Entry%20List%20Pointer"></A>The Entry List Pointer
+</H3>
+<P>
+Each BEntryList object has a single iterator pointer that's shared by all three <B><TT>GetNext...()</TT></B> formats (and <B><TT><A HREF="#CountEntries()">CountEntries()</A></TT></B>).  Thus, each successive call to a <B><TT>GetNext...()</TT></B> function gets the next entry, regardless of the format. For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BEntry entry;
+&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;dir.GetNextEntry(&amp;entry);
+&nbsp;&nbsp;&nbsp;dir.GetNextRef(&amp;ref);</PRE>
+<P>
+Here, <B><TT>entry</TT></B> represents the first entry in the directory, and <B><TT>ref</TT></B> represents the second entry.
+<P>
+<HR>
+<H3>
+<A NAME="Multiple%20Retrieval"></A>Multiple Retrieval
+</H3>
+<P>
+<B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> is different from the other two flavors in that it can retrieve more than one entry at a time.  Or it will, someday; currently <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> retrieves only one entry at a time, no matter how many you ask for.
+<P>
+<HR>
+<H3>
+<A NAME="Choosing%20an%20Iterator"></A>Choosing an Iterator
+</H3>
+<P>
+So, which flavor of <B><TT>GetNext...()</TT></B> should you use?  Here's how they compare:
+<P>
+<UL>
+<LI><B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> is by far the fastest (even in the current one-struct-at-a-time version), but it's also the least wieldy&mdash;the protocol isn't nearly as nice as the other two functions.  The <B><TT>dirent</TT></B> structure, while jam-packed with fun facts, usually has to be turned into other structures <B><TT>(node_ref</TT></B>s or <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>s) in order to be useful.
+<P>
+<LI><B><TT><A HREF="#GetNextRef()">GetNextRef()</A></TT></B> is slower, but the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> structure can be immediately usable (or, at least, cachable).  Nonetheless, you're still a step away from a "real" object.
+<P>
+<LI><B><TT><A HREF="#GetNextEntry()">GetNextEntry()</A></TT></B> is the slowest, but at least it hands you an object that you can sink your teeth into.
+<P>
+</UL>
+<P>
+The actual timing numbers depend on your machine, the class that you're invoking the functions through, and some other factors.  But the difference is (ahem) significant:  <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> is about an order of magnitude faster than <B><TT><A HREF="#GetNextEntry()">GetNextEntry()</A></TT></B>, with <B><TT><A HREF="#GetNextRef()">GetNextRef()</A></TT></B> right about in the middle.
+<P>
+If, for example, you're simply compiling a list of leaf names, you should certainly use <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> (painful though it may be).  But if you plan on actually <I>doing</I> something with each and every entry that you retrieve, then bite the bullet:  Use <B><TT><A HREF="#GetNextEntry()">GetNextEntry()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="The%20dirent%20Structure%20and%20GetNextDirents()"></A>The dirent Structure and GetNextDirents()
+</H3>
+<P>
+Of the three iterator functions, <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> needs some explanation.  The <B><TT>dirent</TT></B> structure, which is what the function returns, describes aspects of the retrieved entry:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct dirent {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev_t d_dev;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t d_ino;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev_t d_pdev;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t d_pino;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unsigned short d_reclen;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char d_name[1];
+&nbsp;&nbsp;&nbsp;} dirent;</PRE>
+<P>
+The fields are:
+<P>
+<UL>
+<LI><B><TT>d_dev</TT></B> is a device id that identifies the device (file system) on which this entry lies.
+<P>
+<LI><B><TT>d_ino</TT></B> is the node number for this entry's node.
+<P>
+<LI><B><TT>d_pdev</TT></B> and <B><TT>d_pino</TT></B> are the device and inode numbers for the parent directory.
+<P>
+<LI><B><TT>d_reclen</TT></B> is the length of this dirent structure.  The length is variable because...
+<P>
+<LI><B><TT>d_name</TT></B> is a buffer that's allocated to hold the (<B><TT>NULL</TT></B>-terminated) name of this entry.
+<P>
+</UL>
+<P>
+So&mdash;let's pretend we've retrieved a dirent and we want to do something with it.  In addition to looking at individual fields, we can combine some of them to make other structures:
+<P>
+<UL>
+<LI><B><TT>d_dev</TT></B> + <B><TT>d_ino</TT></B> = <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> of the entry's node 
+<P>
+<LI><B><TT>d_pdev</TT></B> + <B><TT>d_pino</TT></B> = <B><TT><A HREF="misc.html#node_ref">node_ref</A></TT></B> of the parent directory
+<P>
+<LI><B><TT>d_pdev</TT></B> + <B><TT>d_pino</TT></B> + <B><TT>d_name</TT></B> = <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> for the entry
+<P>
+</UL>
+<P>
+In code:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;dirent *dent;
+&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;node_ref nref;
+&nbsp;&nbsp;&nbsp;node_ref pnref;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Allocate and fill the dirent here... */
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Make a node_ref to this entry&gt;s node. */
+&nbsp;&nbsp;&nbsp;nref.device = dirent->d_dev;
+&nbsp;&nbsp;&nbsp;nref.node = dirent->d_ino;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Make a node_ref to this entry&gt;s parent. */
+&nbsp;&nbsp;&nbsp;pnref.device = dirent->d_pdev;
+&nbsp;&nbsp;&nbsp;pnref.node = dirent->d_pino;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Make an entry_ref to this entry. */
+&nbsp;&nbsp;&nbsp;ref.device = dirent->d_pdev;
+&nbsp;&nbsp;&nbsp;ref.directory = dirent->d_pino;
+&nbsp;&nbsp;&nbsp;ref.set_name(dirent->d_name);</PRE>
+<P>
+Where you go from here is a simple matter of programming.  Me?  I'm going to  lunch.
+<P>
+<H4>
+<A NAME="Getting%20a%20dirent"></A>Getting a dirent
+</H4>
+<P>
+Now that we know what to do with a <B><TT>dirent</TT></B>, let's see how to get one.  The <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> protocol looks like this:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+int32 <B><TT>GetNextDirents(</TT></B>dirent *<I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>bufsize</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>count = INT_MAX<B><TT>)
+<P>
+</TT></B></I></FONT>						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+By default, the function stuffs as many <B><TT>dirent</TT></B> structs as it can into the first <I><FONT  color=991122 face=HELVETICA>bufsize</I></FONT> bytes of  <I><FONT  color=991122 face=HELVETICA>buf</I></FONT>.  These structures represent the next <I><FONT  color=991122 face=HELVETICA>N</I></FONT> entries in the entry list.  The <I><FONT  color=991122 face=HELVETICA>count</I></FONT> argument lets you set a limit to the number of structures that you want to be retrieved at a time.  The function returns the number of structures that it actually got.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Keep in mind that currently <B><TT><A HREF="#GetNextDirents()">GetNextDirents()</A></TT></B> can only read one <B><TT>dirent</TT></B> at a time, regardless of the size of <I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, or the value of <I><FONT  color=991122 face=HELVETICA>count</I></FONT>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Let's try it.  For the purposes of this example, we'll convert each <B><TT>dirent</TT></B> into an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>, as described in the previous section.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* This is the buffer that we&gt;ll stuff structures into. */
+&nbsp;&nbsp;&nbsp;char buf[4096];
+&nbsp;&nbsp;&nbsp;dirent *dent;
+&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* We&gt;ll assume dir is a valid BDirectory object. */
+&nbsp;&nbsp;&nbsp;while ((count = dir.GetNextDirents((dirent *)buf, 4096)) > 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dent = (dirent *)buf;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Now we step through the dirents. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (count-- > 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ref.device = dent->d_pdev;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ref.directory = dent->d_pino;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ref.set_name(dent->d_name);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Do something with the ref. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Bump the pointer. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dent = (dirent *)((char *)dent + dent->d_reclen);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Remember, the structure is variable length&mdash;you have to increment the pointer by hand, as shown here.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="CountEntries()"></A>CountEntries()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual int32 <B><TT><FONT  color=000022 size=+1>CountEntries(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) = 0
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the number of entries that are in the entry list.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+For <A HREF="Query.html#BQuery">BQuery</A> this is a no-op.  Also, BDirectory's implementation manipulates the entry list pointer; thus, you shouldn't call <B><TT><A HREF="#CountEntries()">CountEntries()</A></TT></B> while you're iterating through the directory's entries.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="GetNextEntry()"></A>GetNextEntry()
+, 
+<A NAME="GetNextRef()"></A>GetNextRef()
+, 
+<A NAME="GetNextDirents()"></A>GetNextDirents()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetNextEntry(</TT></B></FONT><A HREF="Entry.html#BEntry">BEntry</A> *<I><FONT  color=991122 face=HELVETICA>entry</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>) = 0
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetNextRef(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>) = 0
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual int32 <B><TT><FONT  color=000022 size=+1>GetNextDirents(</TT></B></FONT>dirent *<I><FONT  color=991122 face=HELVETICA>buf</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>bufsize</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>count = INT_MAX</I></FONT><B><TT><FONT  color=000022 size=+1>) = 0
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions return the "next" entry in the entry list as a <A HREF="Entry.html#BEntry">BEntry</A>, <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B>, or <B><TT>dirent</TT></B> structure.   The end of the list is signalled by...
+<P>
+<UL>
+<LI><B><TT>GetNextEntry()</TT></B> and <B><TT>GetNextRef()</TT></B> return <B><TT>B_ENTRY_NOT_FOUND.
+<P>
+</TT></B><LI><B><TT>GetNextDirents()</TT></B> returns 0.
+<P>
+</UL>
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>traverse</I></FONT> argument is <B><TT>
+<A NAME="true"></A>true
+</TT></B>, symlinks are traversed.
+<P>
+See the introduction for more information.   
+<P>
+<HR>
+<H3>
+<A NAME="Rewind()"></A>Rewind()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Rewind(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Rewinds the entry list pointer so it points to the first element in the list.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+For <A HREF="Query.html#BQuery">BQuery</A> this is a no-op.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

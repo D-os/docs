@@ -1,0 +1,497 @@
+<HTML><HEAD><TITLE>The Midi Kit: BMidiSynth</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMidiSynth"></A>BMidiSynth
+</H1>
+<P>
+Derived from:  <A HREF="Midi.html#BMidi">BMidi</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/midi/MidiSynth.h">be/midi/MidiSynth.h</A>
+<P>
+Library:  libmidi.so
+<P>
+<H6><A HREF="MidiSynth.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMidiSynth class is the MIDI interface to the General MIDI synthesizer.  If you want to send MIDI data to the synthesizer, you have to create an instance of BMidiSynth.  You can can send MIDI messages to the object directly:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Create and initialize a BMidiSynth. */
+&nbsp;&nbsp;&nbsp;BMidiSynth midiSynth;
+&nbsp;&nbsp;&nbsp;midiSynth.EnableInput(true, true);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Choose an instrument and play a note. */
+&nbsp;&nbsp;&nbsp;midiSynth.ProgramChange(1, B_ACOUSTIC_GRAND);
+&nbsp;&nbsp;&nbsp;midiSynth.NoteOn(1, 40, 100, B_NOW);
+&nbsp;&nbsp;&nbsp;snooze(1000000);
+&nbsp;&nbsp;&nbsp;midiSynth.NoteOff(1, 40, 100, B_NOW);</PRE>
+<P>
+Or you can connect the BMidiSynth to the output of some other <A HREF="Midi.html#BMidi">BMidi</A> object, such as a BMidiPort:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Connect the synth to a MIDI port. */
+&nbsp;&nbsp;&nbsp;BMidiPort midiPort;
+&nbsp;&nbsp;&nbsp;char buf[B_OS_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Initialize the BMidiPort. */
+&nbsp;&nbsp;&nbsp;if (midiPort.GetDeviceName(0, buf) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midiPort.Open(buf);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* midiSynth from above -- already created and initialized. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midiPort.Connect(midiSynth);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midiPort.Start();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The one thing you shouldn't do is connect a BMidiFile to a BMidiSynth.  If you want to realize the contents of a MIDI file, you should use an instance of <A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A> instead (BMidiSynthFile is derived from BMidiSynth).
+<P>
+BMidiSynth doesn't spray MIDI messages, so it doesn't do any good to connect other <A HREF="Midi.html#BMidi">BMidi</A> objects to its output.  In other words, don't do this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* --- DON'T DO THIS ---   It's meaningless. */
+&nbsp;&nbsp;&nbsp;midiSynth.Connect(someOtherMidiObject);</PRE>
+<P>
+<A NAME="24586:%20head2:%20Initializing%20your%20BMidiSynth"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Initializing%20your%20BMidiSynth"></A>Initializing your BMidiSynth
+</H3>
+<P>
+When you create a BMidiSynth object, it creates an instance of <A HREF="Synth.html#BSynth">BSynth</A> for you (if the object doesn't already exist).  The <A HREF="Synth.html#BSynth">BSynth</A> object, which its represented globally in your application as <B><TT>be_synth</TT></B>, provides control over some of the synthesizer's global parameters, such as volume and reverberation. 
+<P>
+Before you send messages to your <A HREF="#BMidiSynth">BMidiSynth</A>, you have to call <B><TT><A HREF="#EnableInput()">EnableInput()</A></TT></B>.   The function enables the object's input and tells the synthesizer whether it should load the synth file.  If you tell <B><TT><A HREF="#EnableInput()">EnableInput()</A></TT></B> not to load the file, you'll have to load the instruments that you want yourself.  For example, here we load a single instrument, then play a note.  We also have to send a <B><TT>ProgramChange()</TT></B> message to tell the BMidiSynth object use our loaded instrument on the proper channel (i.e. the channel that we're playing the note on):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Enable input, but don't load the synth file. */
+&nbsp;&nbsp;&nbsp;midiSynth.EnableInput(true, false);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Load a couple of instruments. */
+&nbsp;&nbsp;&nbsp;midiSynth.LoadInstrument(B_TINKLE_BELL);
+&nbsp;&nbsp;&nbsp;midiSynth.LoadInstrument(B_VIOLIN);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Associate the instrument with a MIDI channel. */
+&nbsp;&nbsp;&nbsp;midiSynth.ProgramChange(1, B_TINKLE_BELL);
+&nbsp;&nbsp;&nbsp;midiSynth.ProgramChange(2, B_VIOLIN);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Play. */
+&nbsp;&nbsp;&nbsp;midiSynth.NoteOn(1, 84, 100);
+&nbsp;&nbsp;&nbsp;snooze(10);
+&nbsp;&nbsp;&nbsp;midiSynth.NoteOn(2, 60, 100);
+&nbsp;&nbsp;&nbsp;snooze(1000000);
+&nbsp;&nbsp;&nbsp;midiSynth.NoteOff(1, 84, 100);
+&nbsp;&nbsp;&nbsp;snooze(10);
+&nbsp;&nbsp;&nbsp;midiSynth.NoteOff(2, 60, 100);</PRE>
+<P>
+The order and number of instruments follow the General MIDI specification, but begin with instrument 0 (some synthesizers and sequencers expect instrument numbers to start at 1).  The handy <B><TT>midi_axe</TT></B> constants, defined in <B>be/midi/MidiDefs.h</B>, provide the descriptive instrument names used here.
+<P>
+<H4>
+<A NAME="Instrument%20Scope"></A>Instrument Scope
+</H4>
+<P>
+All of the instrument loading functions (<B><TT><A HREF="#EnableInput()">EnableInput()</A></TT></B> and the functions described under <B><TT><A HREF="#LoadInstrument()">LoadInstrument()</A></TT></B>) affect all <B><TT>be_synth</TT></B> clients (i.e. all BMidiSynth objects in your application).  This can be beneficial:  Loading an instrument from one BMidiSynth object means it doesn't have to be loaded again when, for example, a <A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A> needs it (the synthesizer is smart about reloading:  If an instrument is already loaded, it won't try to load it again).  As another example, if you have more than one BMidiSynth object, they can each load all instruments (through <B><TT><A HREF="#EnableInput()">EnableInput()</A></TT></B>) without suffering a performance penalty.   
+<P>
+However, there's a dark side:  If a BMidiSynth unloads an instrument (through <B><TT><A HREF="#UnloadInstrument()">UnloadInstrument()</A></TT></B> or <B><TT>FlushInstrumentCache(false))</TT></B>, thet instrument disappears for all other BMidiSynth objects as well.  You can prevent unwanted instrument unloading by calling <B><TT>FlushInstrumentCache(true)</TT></B> (see the function description for more information).
+<P>
+<H4>
+<A NAME="Percussion%20Instruments"></A>Percussion Instruments
+</H4>
+<P>
+To use the MIDI Channel 10 percussion instruments, you <I>must</I> load all instruments:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* I want percussion, therefore... */
+&nbsp;&nbsp;&nbsp;midiSynth.EnableInput(true, true);</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMidiSynth()"></A>BMidiSynth()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMidiSynth(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BMidiSynth object.  Also constructs a <A HREF="Synth.html#BSynth">BSynth</A> object and assigns the object to the app-wide <B><TT>be_synth</TT></B> variable (if the object doesn't already exist).  To turn on your BMidiSynth object, you must call <B><TT><A HREF="../The%20Interface%20Kit/MenuField.html#SetEnabled()">SetEnabled()</A> </TT></B>after construction.  
+<P>
+<HR>
+<H3>
+<A NAME="~BMidiSynth()"></A>~BMidiSynth()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual<B><TT><FONT  color=000022 size=+1> </TT></B></FONT><B><TT><FONT  color=000022 size=+1>~BMidiSynth()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Disconnects the object from the synthesizer, and destroys the object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="EnableInput()"></A>EnableInput()
+, 
+<A NAME="IsInputEnabled()"></A>IsInputEnabled()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>EnableInput(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>enable</I></FONT>,<I><FONT  color=991122 face=HELVETICA> </I></FONT>bool <I><FONT  color=991122 face=HELVETICA>loadSynthFile</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsInputEnabled(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>EnableInput()</TT></B> tells the object to connect and disconnect itself to the synthesizer, as <I><FONT  color=991122 face=HELVETICA>enable</I></FONT> is <B><TT>true</TT></B> or <B><TT>false</TT></B>.  A disabled BMidiSynth doesn't pass on any MIDI messages to the synthesizer.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>enable</I></FONT> is <B><TT>true</TT></B> and <I><FONT  color=991122 face=HELVETICA>loadSynthFile</I></FONT> is <B><TT>true</TT></B>, any instruments in the synth file (as designated by <B><TT>be_synth</TT></B>) that haven't already been loaded are immediately loaded.  Loading the entire synth file can take a long time (more than a second, less than a minute), and this isn't your last shot at loading instruments, so you may not want to load all at once.  If you want to defer loading, you can call <B><TT><A HREF="#LoadInstrument()">LoadInstrument()</A></TT></B> after calling <B><TT>EnableInput()</TT></B>.  
+<P>
+<B><TT><A HREF="#IsInputEnabled()">IsInputEnabled()</A></TT></B> tells you if the BMidiSynth is currently enabled.
+<P>
+See &nbsp;<a href="#Initializing%20your%20BMidiSynth%20on%20page30">"Initializing your BMidiSynth" on page30</a> for more on instrument loading, instrument scope, and the use of Channel 10 percussion.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A> objects do not have to call <B><TT>EnableInput()</TT></B>.  Input is automatically enabled when the object loads a file.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+Currently, <B><TT><A HREF="#EnableInput()">EnableInput()</A></TT></B> always return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>FlushInstrumentCache()  see <A HREF="#LoadInstrument()">LoadInstrument()</A></H3>
+<P>
+<HR>
+<H3>GetMuteMap()  see <A HREF="#MuteChannel()">MuteChannel()</A></H3>
+<P>
+<HR>
+<H3>GetSoloMap()  see <A HREF="#MuteChannel()">MuteChannel()</A></H3>
+<P>
+<HR>
+<H3>IsInputEnabled()  see <A HREF="#EnableInput()">EnableInput()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="LoadInstrument()"></A>LoadInstrument()
+, 
+<A NAME="RemapInstrument()"></A>RemapInstrument()
+, 
+<A NAME="UnloadInstrument()"></A>UnloadInstrument()
+, 
+<A NAME="FlushInstrumentCache()"></A>FlushInstrumentCache()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>LoadInstrument(</TT></B></FONT>int16 <I><FONT  color=991122 face=HELVETICA>instrument</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemapInstrument(</TT></B></FONT>int16 <I><FONT  color=991122 face=HELVETICA>from</I></FONT>, int16 <I><FONT  color=991122 face=HELVETICA>to</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>UnloadInstrument(</TT></B></FONT>int16 <I><FONT  color=991122 face=HELVETICA>instrument</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FlushInstrumentCache(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>flush</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions affect <I>all</I> <B><TT>be_synth</TT></B> clients (they should actually be part of the <A HREF="Synth.html#BSynth">BSynth</A> class).  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#LoadInstrument()">LoadInstrument()</A></TT></B> loads the designated instrument from the synth file, if it isn't loaded already.  You have to load an instrument before you can use it; if you've already loaded all instruments (through <B><TT>InputEnabled())</TT></B>, you won't have to call this function.  A loaded instrument is available to all BMidiSynth objects in your application.
+<P>
+<B><TT><A HREF="#RemapInstrument()">RemapInstrument()</A></TT></B> tells the synthesizer to replace all <I><FONT  color=991122 face=HELVETICA>from</I></FONT> instrument requests with <I>to</I> requests.  For example, here we tell the synthesizer to play a gunshot whenever a banjo note is requested:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Banjo becomes gunshot.  A good idea. */
+&nbsp;&nbsp;&nbsp;midiSynth.RemapInstrument(B_BANJO, B_GUNSHOT);</PRE>
+<P>
+<B><TT><A HREF="#UnloadInstrument()">UnloadInstrument()</A></TT></B> removes the designated instrument from the synthesizer.  
+<P>
+<B><TT>FlushInstrumentCache()</TT></B> has a goofy protocol.  If <I><FONT  color=991122 face=HELVETICA>flush</I></FONT> is <B><TT>false</TT></B>, the synthesizer stops playing all current notes (and samples) and unloads all loaded instruments.  If <I><FONT  color=991122 face=HELVETICA>flush</I></FONT> is <B><TT>true</TT></B>, the synthesizer's current output is unaffected, but it's prevented from unloading any instruments in the future.  In other words, <B><TT>FlushInstrumentCache(true)</TT></B> tells the synthesizer to ignore all subsequent <B><TT><A HREF="#UnloadInstrument()">UnloadInstrument()</A></TT></B> calls.  The inability to unload instruments holds until <B><TT>FlushInstrumentCache(false)</TT></B> is called.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+See &nbsp;<a href="#Initializing%20your%20BMidiSynth%20on%20page30">"Initializing your BMidiSynth" on page30</a> for more on instrument loading, instrument scope, and the use of Channel 10 percussion.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+Currently, <B><TT>UnloadInstrument()</TT></B> always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The other two <B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> functions return...
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Instrument successfully loaded or remapped.
+<P>
+<LI><B><TT>B_BAD_INSTRUMENT</TT></B>.  Illegal instrument specification.
+<P>
+<LI>B_NO_MEMORY.  Not enough memory to load instrument.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="MuteChannel()"></A>MuteChannel()
+, 
+<A NAME="GetMuteMap()"></A>GetMuteMap()
+, 
+<A NAME="SoloChannel()"></A>SoloChannel()
+, 
+<A NAME="GetSoloMap()"></A>GetSoloMap()
+</H3>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions are broken; don't use them.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<A NAME=""></A>
+<P>
+<HR>
+<H3>RemapInstrument()  see <A HREF="#LoadInstrument()">LoadInstrument()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetTransposition()"></A>SetTransposition()
+, 
+<A NAME="Transposition()"></A>Transposition()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetTransposition(</TT></B></FONT>int16 <I><FONT  color=991122 face=HELVETICA>transpose</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+int16 <B><TT><FONT  color=000022 size=+1>Transposition(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetTransposition()</TT></B> sets the amount, in halfsteps, by which subsequently generated notes will be transposed (shifted in pitch).  Notes that are already sounding are not transposed.  The transposition affects all channels of the invoked-upon object.  
+<P>
+<B><TT>Transposition()</TT></B> returns the current transposition amount (in halfsteps); the default is 0.
+<P>
+<HR>
+<H3>
+<A NAME="SetVolume()"></A>SetVolume()
+, 
+<A NAME="Volume()"></A>Volume()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetVolume(</TT></B></FONT>double <I><FONT  color=991122 face=HELVETICA>volume</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+double <B><TT><FONT  color=000022 size=+1>Volume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetVolume()</TT></B> scales the object's amplitude (on all channels) by <I><FONT  color=991122 face=HELVETICA>volume</I></FONT>.  In addition to affecting subsequently-generated notes, the new volume scale affects notes that are currently being generated by this object.  
+<P>
+<B><TT>Volume()</TT></B> returns the current amplitude scalar value; the default is 1.0.
+<P>
+<HR>
+<H3>SoloChannel()  see <A HREF="#MuteChannel()">MuteChannel()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Tick()"></A>Tick()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>Tick(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of microseconds since the object was created.  You should use this measurement for relative values only (for measuring the time between notes, for example).  Also, note that the <I><FONT  color=991122 face=HELVETICA>time</I></FONT> argument to the MIDI hook functions measures time in milliseconds.
+<P>
+<HR>
+<H3>Transposition()  see <A HREF="#SetTransposition()">SetTransposition()</A></H3>
+<P>
+<HR>
+<H3>UnloadInstrument()  see <A HREF="#LoadInstrument()">LoadInstrument()</A></H3>
+<P>
+<HR>
+<H3>Volume()  see <A HREF="#SetVolume()">SetVolume()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

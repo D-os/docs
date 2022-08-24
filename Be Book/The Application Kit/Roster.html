@@ -1,0 +1,716 @@
+<HTML><HEAD><TITLE>The Application Kit: BRoster</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BRoster"></A>BRoster
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Roster.h">be/app/Roster.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Roster.summary.html"><i>Summary</i></A></H6>
+<P>
+The BRoster object represents a service that keeps a roster of all applications currently running.  It can provide information about any of those applications, activate one of them, add another application to the roster by launching it, or get information about an application to help you decide whether to launch it. 
+<P>
+There's just one roster and it's shared by all applications.  When an application starts up, a BRoster object is constructed and assigned to a global variable, <B><TT><A HREF="misc.html#be_roster">be_roster</A></TT></B>.  You always access the roster through this variable; you never have to instantiate a BRoster in application code.
+<P>
+The BRoster identifies applications in three ways:
+<P>
+<UL>
+<LI>By <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> references to the executable files where they reside.
+<P>
+<LI>By their signatures.  The signature is a unique identifier for the application assigned as a file-system attribute or resource at compile time or by the <A HREF="Application.html#BApplication">BApplication</A> constructor at run time.  You can obtain signatures for the applications you develop by contacting Be's developer support staff.  They can also tell you what the signatures of other applications are.
+<P>
+<LI>At run time, by their <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#team_id">team_id</A></TT></B>s.  A team is a group of threads sharing an address space; every application is a team.
+<P>
+</UL>
+<P>
+If an application is launched more than once, the roster will include one entry for each instance of the application that's running.  These instances will have the same signature, but different team identifiers.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BRoster()"></A>BRoster()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BRoster(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets up the object's connection to the roster service.
+<P>
+When an application constructs its <A HREF="Application.html#BApplication">BApplication</A> object, the system constructs a BRoster object and assigns it to the <B><TT><A HREF="misc.html#be_roster">be_roster</A></TT></B> global variable.  A BRoster is therefore readily available from the time the application is initialized until the time it quits; you don't have to construct one.  The constructor is public only to give programs that don't have <A HREF="Application.html#BApplication">BApplication</A> objects access to the roster.
+<P>
+<HR>
+<H3>
+<A NAME="~BRoster()"></A>~BRoster()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BRoster()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Does nothing.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="ActivateApp()"></A>ActivateApp()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ActivateApp(</TT></B></FONT>team_id <I><FONT  color=991122 face=HELVETICA>team</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Activates the <I><FONT  color=991122 face=HELVETICA>team</I></FONT> application (by bringing one of its windows to the front and making it the active window).  This function works only if the target application has a window on-screen.  The newly activated application is notified with a <B><TT><A HREF="misc.html#B_APP_ACTIVATED">B_APP_ACTIVATED</A></TT></B> message.
+<P>
+<B>See also:  <TT><A HREF="Application.html#AppActivated()">BApplication::AppActivated()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="AddToRecentDocuments()"></A>AddToRecentDocuments()
+, 
+<A NAME="GetRecentDocuments()"></A>GetRecentDocuments()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>AddToRecentDocuments(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>document</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetRecentDocuments(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>refList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>ofType</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>openedByAppSig</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetRecentDocuments(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>refList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>ofTypeList</I></FONT>[] = <FONT  face=HELVETICA>NULL</FONT>, int32 <I><FONT  color=991122 face=HELVETICA>ofTypeListCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>openedByAppSig</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#AddToRecentDocuments()">AddToRecentDocuments()</A></TT></B> adds the document file specified by <I><FONT  color=991122 face=HELVETICA>document</I></FONT> to the list of recent documents.  If you wish to record that a specific application used the document, you can specify the signature of that application using the <I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> argument; otherwise you can specify <B><TT>NULL</TT></B>.
+<P>
+<B><TT><A HREF="#GetRecentDocuments()">GetRecentDocuments()</A></TT></B> returns a list of the most recent documents.  The <A HREF="Message.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>refList</I></FONT> will be filled out with information about the <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT> most recently used documents.  If you want to obtain a list of documents of a specific type, you can specify a pointer to that MIME type string in the <I><FONT  color=991122 face=HELVETICA>ofType</I></FONT> argument.  Likewise, if you're only interested in files that want to be opened by a specific application, specify that application's signature in <I><FONT  color=991122 face=HELVETICA>openedByAppSig</I></FONT>; if you don't care, pass <B><TT>NULL</TT></B>.
+<P>
+If you want to get a list of files of multiple types, you can specify a pointer to an array of strings in <I><FONT  color=991122 face=HELVETICA>ofTypeList</I></FONT>, and the number of types in the list in <I><FONT  color=991122 face=HELVETICA>ofTypeListCount</I></FONT>.
+<P>
+Specifying <B><TT>NULL</TT></B> for <I><FONT  color=991122 face=HELVETICA>ofType</I></FONT> will fetch all files of all types.
+<P>
+The resulting <I><FONT  color=991122 face=HELVETICA>refList</I></FONT> will have a field, "refs", containing the entry_refs to the resulting list of files.
+<P>
+<HR>
+<H3>
+<A NAME="AddToRecentFolders()"></A>AddToRecentFolders()
+, 
+<A NAME="GetRecentFolders()"></A>GetRecentFolders()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>AddToRecentFolders(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>folder</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetRecentFolders(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>refList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>openedByAppSig</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#AddToRecentFolders()">AddToRecentFolders()</A></TT></B> adds the folder specified by <I><FONT  color=991122 face=HELVETICA>folder</I></FONT> to the list of recent folders.  If you wish to record that a specific application used the folder, you can specify the signature of that application using the <I><FONT  color=991122 face=HELVETICA>appSig</I></FONT> argument; otherwise you can use <B><TT>NULL</TT></B>.
+<P>
+<B><TT><A HREF="#GetRecentFolders()">GetRecentFolders()</A></TT></B> returns a list of the most recently-accessed folders.  The <A HREF="Message.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>refList</I></FONT> will be filled out with information about the <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT> most recently used folders.  If you're only interested in folders that were used by a specific application, specify that application's signature in <I><FONT  color=991122 face=HELVETICA>openedByAppSig</I></FONT>; if you don't care, pass <B><TT>NULL</TT></B>.
+<P>
+The resulting <I><FONT  color=991122 face=HELVETICA>refList</I></FONT> will have a field, "refs", containing the entry_refs to the resulting list of folders.
+<P>
+<HR>
+<H3>
+<A NAME="Broadcast()"></A>Broadcast()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Broadcast(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Broadcast(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, <A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>reply_to</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sends the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> to every running application, except to those applications (<B><TT><A HREF="misc.html#B_ARGV_ONLY">B_ARGV_ONLY</A></TT></B>) that don't accept messages.  The message is sent asynchronously with a timeout of 0.  As is the case for other message-sending functions, the caller retains ownership of the <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.
+<P>
+This function returns immediately after setting up the broadcast operation.  It doesn't wait for the messages to be sent and doesn't report any errors encountered when they are.  It returns an error only if it can't start the broadcast operation.  If successful in getting the operation started, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+Replies to the broadcasted message will be sent via the <I><FONT  color=991122 face=HELVETICA>reply_to</I></FONT> <A HREF="Messenger.html#BMessenger">BMessenger</A>, if specified.  If <I><FONT  color=991122 face=HELVETICA>reply_to</I></FONT> is absent, the replies will be lost.
+<P>
+<B>See also:  <TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="FindApp()"></A>FindApp()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindApp(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>type</I></FONT>, entry_ref *<I><FONT  color=991122 face=HELVETICA>app</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindApp(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, entry_ref *<I><FONT  color=991122 face=HELVETICA>app</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Finds the application associated with the MIME data <I><FONT  color=991122 face=HELVETICA>type</I></FONT> or with the specified <I><FONT  color=991122 face=HELVETICA>file</I></FONT>, and modifies the <I><FONT  color=991122 face=HELVETICA>app</I></FONT> <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> structure so that it refers to the executable file for that application.  If the <I><FONT  color=991122 face=HELVETICA>type</I></FONT> is an application signature, this function finds the application that has that signature.  Otherwise, it finds the preferred application for the type.  If the <I><FONT  color=991122 face=HELVETICA>file</I></FONT> is an application executable, <B><TT><A HREF="#FindApp()">FindApp()</A></TT></B> merely copies the file reference to the <I><FONT  color=991122 face=HELVETICA>app</I></FONT> argument.  Otherwise, it finds the preferred application for the file type.
+<P>
+In other words, this function goes about finding an application in the same way that <B><TT><A HREF="#Launch()">Launch()</A></TT></B> finds the application it will launch.
+<P>
+If it can translate the <I><FONT  color=991122 face=HELVETICA>type</I></FONT> or <I><FONT  color=991122 face=HELVETICA>file</I></FONT> into a reference to an application executable, <B><TT><A HREF="#FindApp()">FindApp()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If not, it returns an error code, typically one describing a file system error.
+<P>
+<B>See also:  <TT><A HREF="#Launch()">Launch()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetAppInfo()"></A>GetAppInfo()
+, 
+<A NAME="GetRunningAppInfo()"></A>GetRunningAppInfo()
+, 
+<A NAME="GetActiveAppInfo()"></A>GetActiveAppInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAppInfo(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, app_info&nbsp;*<I><FONT  color=991122 face=HELVETICA>appInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAppInfo(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>executable</I></FONT>, app_info *<I><FONT  color=991122 face=HELVETICA>appInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetRunningAppInfo(</TT></B></FONT>team_id <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, app_info *<I><FONT  color=991122 face=HELVETICA>appInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetActiveAppInfo(</TT></B></FONT>app_info *<I><FONT  color=991122 face=HELVETICA>appInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return (in <I><FONT  color=991122 face=HELVETICA>appInfo</I></FONT>) information about a specific application.  In all cases, the application must be running.
+<P>
+<UL>
+<LI><B><TT>GetAppInfo()</TT></B> finds an app that has the given <I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, or that was launched from the <I><FONT  color=991122 face=HELVETICA>executable</I></FONT> file.  If there's more than one such app, the function chooses one at random. 
+<P>
+</UL>
+<UL>
+<LI><B><TT><A HREF="#GetRunningAppInfo()">GetRunningAppInfo()</A></TT></B> reports on the app that corresponds to the given <I><FONT  color=991122 face=HELVETICA>team</I></FONT> identifier.
+<P>
+<LI><B><TT><A HREF="#GetActiveAppInfo()">GetActiveAppInfo()</A></TT></B> reports on the currently active app.
+<P>
+</UL>
+<P>
+If they're able to fill in the <B><TT><A HREF="misc.html#app_info">app_info</A></TT></B> structure with meaningful values, these functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  <B><TT><A HREF="#GetActiveAppInfo()">GetActiveAppInfo()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if there's no active application.  <B><TT><A HREF="#GetRunningAppInfo()">GetRunningAppInfo()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TEAM_ID">B_BAD_TEAM_ID</A></TT></B> if <I><FONT  color=991122 face=HELVETICA>team</I></FONT> isn't a valid team identifier for a running application.  <B><TT><A HREF="#GetAppInfo()">GetAppInfo()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if the application isn't running.
+<P>
+The <B><TT><A HREF="misc.html#app_info">app_info</A></TT></B> structure contains the following fields:
+<P>
+thread_id <B><TT>thread
+<br>
+</TT></B>The identifier for the application's main thread of execution, or &ndash;1 if the application isn't running.  (The main thread is the thread in which the application is launched and in which its <B><TT>main()</TT></B> function runs.)
+<P>
+team_id <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#team">team</A>
+<br>
+</TT></B>The identifier for the application's team, or &ndash;1 if the application isn't running.  (This will be the same as the <I><FONT  color=991122 face=HELVETICA>team</I></FONT> passed to <B><TT><A HREF="#GetRunningAppInfo()">GetRunningAppInfo()</A></TT></B>.)
+<P>
+port_id <B><TT>port
+<br>
+</TT></B>The port where the application's main thread receives messages, or &ndash;1 if the application isn't running.
+<P>
+uint32 <B><TT>flags
+<br>
+</TT></B>A mask that contains information about the behavior of the application.
+<P>
+entry_ref <B><TT>ref
+<br>
+</TT></B>A reference to the file that was, or could be, executed to run the application.  (This will be the same as the <I><FONT  color=991122 face=HELVETICA>executable</I></FONT> passed to <B><TT><A HREF="#GetAppInfo()">GetAppInfo()</A></TT></B>.)
+<P>
+char <B><TT>signature</TT></B>[]
+<br>
+The signature of the application.  (This will be the same as the <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> passed to <B><TT><A HREF="#GetAppInfo()">GetAppInfo()</A></TT></B>.)
+<P>
+The <B><TT>flags</TT></B> mask can be tested (with the bitwise <B><TT><A HREF="../The%20Interface%20Kit/Rect.html#&amp;">&amp;</A></TT></B> operator) against these two constants:
+<P>
+<UL>
+<LI><B><TT><A HREF="misc.html#B_BACKGROUND_APP">B_BACKGROUND_APP</A></TT></B>.  The application won't appear in the Deskbar's application list.
+<P>
+<LI><B><TT><A HREF="misc.html#B_ARGV_ONLY">B_ARGV_ONLY</A></TT></B><B><TT>
+<A NAME=".%20%20"></A>.  
+</TT></B>The application can't receive messages. Information can be passed to it at launch only, in an array of argument strings (as on the command line).
+<P>
+</UL>
+<P>
+The <B><TT>flags</TT></B> mask also contains a value that explains the application's launch behavior.  This value must be filtered out of <B><TT>flags</TT></B> by combining <B><TT>flags</TT></B> with the <B><TT><A HREF="misc.html#B_LAUNCH_MASK">B_LAUNCH_MASK</A></TT></B> constant.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;unit32 behavior = theInfo.flags &amp; <B><TT>B_LAUNCH_MASK</TT></B>;</PRE>
+<P>
+The result will match one of these three constants:
+<P>
+<UL>
+<LI><B><TT><A HREF="misc.html#B_EXCLUSIVE_LAUNCH">B_EXCLUSIVE_LAUNCH</A></TT></B>.  The application can be launched only if an application with the same signature isn't already running.
+<P>
+<LI><B><TT><A HREF="misc.html#B_SINGLE_LAUNCH">B_SINGLE_LAUNCH</A></TT></B><B><TT>
+<A NAME=".%20%20"></A>.  
+</TT></B>The application can be launched only once from the same executable file.  However, an application with the same signature might be launched from a different executable.  For example, if the user copies an executable file to another directory, a separate instance of the application can be launched from each copy.
+<P>
+<LI><B><TT><A HREF="misc.html#B_MULTIPLE_LAUNCH">B_MULTIPLE_LAUNCH</A></TT></B><B><TT>
+<A NAME=".%20%20"></A>.  
+</TT></B>There are no restrictions.  The application can be launched any number of times from the same executable file.
+<P>
+</UL>
+<P>
+These flags affect BRoster's <B><TT><A HREF="#Launch()">Launch()</A></TT></B> function.  <B><TT><A HREF="#Launch()">Launch()</A></TT></B> can always start up a <B><TT><A HREF="misc.html#B_MULTIPLE_LAUNCH">B_MULTIPLE_LAUNCH</A></TT></B> application.  However, it can't launch a <B><TT><A HREF="misc.html#B_SINGLE_LAUNCH">B_SINGLE_LAUNCH</A></TT></B> application if a running application was already launched from the same executable file.  It can't launch a <B><TT><A HREF="misc.html#B_EXCLUSIVE_LAUNCH">B_EXCLUSIVE_LAUNCH</A></TT></B> application if an application with the same signature is already running.
+<P>
+<B>See also:  <TT><A HREF="#Launch()">Launch()</A></TT></B>, <B><TT><A HREF="Application.html#GetAppInfo()">BApplication::GetAppInfo()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetAppList()"></A>GetAppList()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetAppList(</TT></B></FONT><A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *<I><FONT  color=991122 face=HELVETICA>teams</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetAppList(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *<I><FONT  color=991122 face=HELVETICA>teams</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Fills in the <I><FONT  color=991122 face=HELVETICA>teams</I></FONT> <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> with team identifiers for applications in the roster.  Each item in the list will be of type <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#team_id">team_id</A></TT></B>.  It must be cast to that type when retrieving it from the list, as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BList *teams = new BList;
+&nbsp;&nbsp;&nbsp;be_roster->GetAppList(teams);
+&nbsp;&nbsp;&nbsp;team_id who = (team_id)teams->ItemAt(someIndex);</PRE>
+<P>
+The list will contain one item for each instance of an application that's running.  For example, if the same application has been launched three times, the list will include the <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#team_id">team_id</A></TT></B>s for all three running instances of that application.
+<P>
+If a <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> is passed, the list identifies only applications running under that signature.  If a <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> isn't specified, the list identifies all running applications.
+<P>
+<B>See also:  <TT><A HREF="#TeamFor()">TeamFor()</A></TT></B>, the <A HREF="Messenger.html#BMessenger">BMessenger</A> constructor
+<P>
+<HR>
+<H3>
+<A NAME="GetRecentApps()"></A>GetRecentApps()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetRecentApps(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>refList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#GetRecentApps()">GetRecentApps()</A></TT></B> returns a list of the most recently-launched applications.  The <A HREF="Message.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>refList</I></FONT> will be filled out with information about the <I><FONT  color=991122 face=HELVETICA>maxCount</I></FONT> most recently-launched applications.
+<P>
+The resulting <I><FONT  color=991122 face=HELVETICA>refList</I></FONT> will have a field, "refs", containing the entry_refs to the resulting applications.
+<P>
+<HR>
+<H3>GetRecentDocuments()   see <A HREF="#AddToRecentDocuments()">AddToRecentDocuments()</A></H3>
+<P>
+<HR>
+<H3>GetRecentFolders()   see <A HREF="#AddToRecentFolders()">AddToRecentFolders()</A></H3>
+<P>
+<HR>
+<H3>IsRunning()   see <A HREF="#TeamFor()">TeamFor()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Launch()"></A>Launch()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Launch(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>type</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Message.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id&nbsp;*<I><FONT  color=991122 face=HELVETICA>team</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Launch(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>type</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Support%20Kit/List.html#BList">BList</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>messages</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id&nbsp;*<I><FONT  color=991122 face=HELVETICA>team</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Launch(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>type</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;<I><FONT  color=991122 face=HELVETICA>argc</I></FONT>,&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;**<I><FONT  color=991122 face=HELVETICA>argv</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id&nbsp;*<I><FONT  color=991122 face=HELVETICA>team</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Launch(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const <A HREF="Message.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id&nbsp;*<I><FONT  color=991122 face=HELVETICA>team</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Launch(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const <A HREF="../The%20Support%20Kit/List.html#BList">BList</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>messages</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id&nbsp;*<I><FONT  color=991122 face=HELVETICA>team</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Launch(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>file</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;<I><FONT  color=991122 face=HELVETICA>argc</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char&nbsp;* const char *<I><FONT  color=991122 face=HELVETICA>argv</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id&nbsp;*<I><FONT  color=991122 face=HELVETICA>team</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Launches the application associated with a MIME <I><FONT  color=991122 face=HELVETICA>type</I></FONT> or with a particular <I><FONT  color=991122 face=HELVETICA>file</I></FONT>.  If the MIME <I><FONT  color=991122 face=HELVETICA>type</I></FONT> is an application signature, this function launches the application with that signature.  Otherwise, it launches the preferred application for the type.  If the <I><FONT  color=991122 face=HELVETICA>file</I></FONT> is an application executable, it launches that application.  Otherwise, it launches the preferred application for the file type and passes the <I><FONT  color=991122 face=HELVETICA>file</I></FONT> reference to the application in a <B><TT><A HREF="misc.html#B_REFS_RECEIVED">B_REFS_RECEIVED</A></TT></B> message.  In other words, <B><TT><A HREF="#Launch()">Launch()</A></TT></B> finds the application to launch just as <B><TT><A HREF="#FindApp()">FindApp()</A></TT></B> finds the application for a particular <I><FONT  color=991122 face=HELVETICA>type</I></FONT> or <I><FONT  color=991122 face=HELVETICA>file</I></FONT>.
+<P>
+If a <I><FONT  color=991122 face=HELVETICA>message</I></FONT> is specified, it will be sent to the application on-launch where it will be received and responded to before the application is notified that it's ready to run.  Similarly, if a list of <I><FONT  color=991122 face=HELVETICA>messages</I></FONT> is specified, each one will be delivered on-launch.  The caller retains ownership of the <A HREF="Message.html#BMessage">BMessage</A> objects (and the container BList); they won't be deleted for you.
+<P>
+Sending an on-launch message is appropriate if it helps the launched application configure itself before it starts getting other messages.  To launch an application and send it an ordinary message, call <B><TT><A HREF="#Launch()">Launch()</A></TT></B> to get it running, then set up a <A HREF="Messenger.html#BMessenger">BMessenger</A> object for the application and call BMessenger's <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> function.
+<P>
+If the target application is already running, <B><TT><A HREF="#Launch()">Launch()</A></TT></B> won't launch it again, unless it permits multiple instances to run concurrently (it doesn't wait for the messages to be sent or report errors encountered when they are).  It fails for <B><TT><A HREF="misc.html#B_SINGLE_LAUNCH">B_SINGLE_LAUNCH</A></TT></B> and <B><TT><A HREF="misc.html#B_EXCLUSIVE_LAUNCH">B_EXCLUSIVE_LAUNCH</A></TT></B> applications that have already been launched.  Nevertheless, it assumes that you want the messages to get to the application and so delivers them to the currently running instance.
+<P>
+Instead of messages, you can launch an application with an array of argument strings that will be passed to its <B><TT>main()</TT></B> function.  <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> contains the array and <I><FONT  color=991122 face=HELVETICA>argc</I></FONT> counts the number of strings.  If the application accepts messages, this information will also be packaged in a <B><TT><A HREF="misc.html#B_ARGV_RECEIVED">B_ARGV_RECEIVED</A></TT></B> message that the application will receive on-launch.
+<P>
+If successful, <B><TT><A HREF="#Launch()">Launch()</A></TT></B> places the identifier for the newly launched application in the variable referred to by <I><FONT  color=991122 face=HELVETICA>team</I></FONT> and returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If unsuccessful, it sets the <I><FONT  color=991122 face=HELVETICA>team</I></FONT> variable to&nbsp;&ndash;1 and returns an error code, typically one of the following:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>type</I></FONT> or <I><FONT  color=991122 face=HELVETICA>file</I></FONT> is not valid, or an attempt is being made to send an on-launch message to an application that doesn't accept messages (that is, to a <B><TT><A HREF="misc.html#B_ARGV_ONLY">B_ARGV_ONLY</A></TT></B> application).
+<P>
+<LI><B><TT>B_ALREADY_RUNNING.,</TT></B>The application is already running and can't be launched again (it's a <B><TT><A HREF="misc.html#B_SINGLE_LAUNCH">B_SINGLE_LAUNCH</A></TT></B> or <B><TT><A HREF="misc.html#B_EXCLUSIVE_LAUNCH">B_EXCLUSIVE_LAUNCH</A></TT></B> application).
+<P>
+<LI><B><TT>B_LAUNCH_FAILED.,</TT></B>The attempt to launch the application failed for some other reason, such as insufficient memory.
+<P>
+<LI>A file system error.  The <I><FONT  color=991122 face=HELVETICA>file</I></FONT> or <I><FONT  color=991122 face=HELVETICA>type</I></FONT> can't be matched to an application.
+<P>
+</UL>
+<P>
+<B>See also:  </B>the <A HREF="Messenger.html#BMessenger">BMessenger</A> class, <B><TT><A HREF="#GetAppInfo()">GetAppInfo()</A></TT></B>, <B><TT><A HREF="#FindApp()">FindApp()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="StartWatching()"></A>StartWatching()
+, 
+<A NAME="StopWatching()"></A>StopWatching()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>events</I></FONT> = <FONT  face=HELVETICA>B_REQUEST_LAUNCHED | B_REQUEST_QUIT</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#StartWatching()">StartWatching()</A> </TT></B>initiates the application event monitor, which is used for keeping track of events such as application launches.  The caller specifies the events to monitor through the <I><FONT  color=991122 face=HELVETICA>events</I></FONT> argument; <I><FONT  color=991122 face=HELVETICA>target</I></FONT> is the <A HREF="Messenger.html#BMessenger">BMessenger</A> to which the corresponding notification messages are sent.  The <I><FONT  color=991122 face=HELVETICA>events</I></FONT> flags and the corresponding messages are listed below:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Flag</B></TH>
+<TH>Message</TH>
+<TR>
+<TD><B><TT>B_REQUEST_LAUNCHED</TT></B></TD>
+<TD><B><TT><A HREF="../Messages/GeneralMessages.html#B_SOME_APP_LAUNCHED">B_SOME_APP_LAUNCHED</A></TD>
+<TR>
+<TD>B_REQUEST_QUIT</TT></B></TD>
+<TD><B><TT><A HREF="../Messages/GeneralMessages.html#B_SOME_APP_QUIT">B_SOME_APP_QUIT</A></TD>
+<TR>
+<TD>B_REQUEST_ACTIVATED</TT></B></TD>
+<TD><B><TT><A HREF="../Messages/GeneralMessages.html#B_SOME_APP_ACTIVATED">B_SOME_APP_ACTIVATED</A></TD>
+</TABLE></TT></B>
+<P>
+The fields in a notification message describe the application that was launched, quit, or activated:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type</TH>
+<TH>Description</TH>
+<TR>
+<TD>"mime_sig"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>MIME signature</TD>
+<TR>
+<TD>"team"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#team_id">team_id</A></TD>
+<TR>
+<TD></TT></B>"thread"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#thread_id">thread_id</A></TD>
+<TR>
+<TD></TT></B>"flags"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>application  flags</TD>
+<TR>
+<TD>"ref"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B></TD>
+<TD>executable's <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TD>
+</TABLE></TT></B>
+<P>
+<B><TT><A HREF="#StopWatching()">StopWatching()</A> </TT></B>terminates the application monitor previously initiated for a given BMessenger.
+<P>
+<HR>
+<H3>StartWatching() </H3>
+<P>
+<HR>
+<H3>
+<A NAME="TeamFor()"></A>TeamFor()
+, 
+<A NAME="IsRunning()"></A>IsRunning()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+team_id <B><TT><FONT  color=000022 size=+1>TeamFor(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>signature</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+team_id <B><TT><FONT  color=000022 size=+1>TeamFor(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>executable</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsRunning(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>signature</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsRunning(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>executable</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Both these functions query whether the application identified by its <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> or by a reference to its <I><FONT  color=991122 face=HELVETICA>executable</I></FONT> file is running.  <B><TT>TeamFor()<A HREF="#TeamFor()">StartWatching() </A></TT></B> returns its team identifier if it is, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if it's not.  <B><TT><A HREF="#IsRunning()">IsRunning()</A></TT></B> returns <B><TT>true</TT></B> if it is, and <B><TT>false</TT></B> if it's not.
+<P>
+If the application is running, you probably will want its team identifier (to set up a <A HREF="Messenger.html#BMessenger">BMessenger</A>, for example).  Therefore, it's most economical to simply call <B><TT><A HREF="#TeamFor()">TeamFor()</A></TT></B> and forego <B><TT><A HREF="#IsRunning()">IsRunning()</A></TT></B>.
+<P>
+If more than one instance of the <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> application is running, or if more than one instance was launched from the same <I><FONT  color=991122 face=HELVETICA>executable</I></FONT> file, <B><TT><A HREF="#TeamFor()">TeamFor()</A></TT></B> arbitrarily picks one of the instances and returns its <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#team_id">team_id</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#GetAppList()">GetAppList()</A></TT></B> 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

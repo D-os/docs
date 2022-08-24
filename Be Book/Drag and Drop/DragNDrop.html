@@ -1,0 +1,563 @@
+<HTML><HEAD><TITLE>Drag and Drop: Drag and Drop</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="../index.html"><FONT face=HELVETICA>Be Book Table of Contents</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Drag%20and%20Drop">Drag and Drop</A>
+</H1>
+<P>
+This is the reference document for constructing BMessage objects as used in BeOS' standard negotiated drag'n'drop actions. If you're reading it for the first time, you should probably read the entire thing. If you want to look up something and you're reading this with a browser, you can jump to any of the following:
+<P>
+1. <A HREF="#36645: head1: Simple vs. Negotiated Drag'n'Drop">Simple vs. Negotiated Drag'n'Drop</A>
+<P>
+2. <A HREF="#39457: head1: Basics of Drag and Drop">Basics of Drag and Drop</A>
+<P>
+3. <A HREF="#23388: head1: BMessage Formats in Negotiated Drag'n'Drop">BMessage Formats in Negotiated Drag'n'Drop</A>
+<P>
+3a. <A HREF="#21113: head2: Protocol for the drag message">Protocol for the drag message</A>
+<P>
+3b. <A HREF="#40424: head2: Protocol for the Negotiation Message">Protocol for the Negotiation Message</A>
+<P>
+3c. <A HREF="#39988: head2: Protocol for the Data Message">Protocol for the Data Message</A>
+<P>
+4. <A HREF="#14568: head1: Summary of the Negotiated Drag'n'Drop Protocol">Summary of the Negotiated Drag'n'Drop Protocol</A>
+<P>
+<HR>
+<H2>
+<A NAME="Prerequisites"><FONT SIZE=6>P</FONT>rerequisites</A>
+</H2>
+<P>
+Drag and Drop makes use of a number of elements of the BeOS programming kit, and you'll need to be at least reasonably familiar with the following topics, in order to be comfortable reading this document:
+<P>
+<UL>
+<LI>The <B><TT>BMessage</TT></B> class, since dragged objects are sent to their targets as <B><TT>BMessage</TT></B> objects. You should understand what a <B><TT>BMessage</TT></B> is, how to add data to a <B><TT>BMessage</TT></B> or extract data from it, how to send a <B><TT>BMessage</TT></B>, and where to put code to handle incoming <B><TT>BMessage</TT></B>s.
+<P>
+<LI>The <B><TT>BView</TT></B> class. The drag and drop action is fundamentally a GUI operation, and <B><TT>BView</TT></B> objects are the most important objects in handling GUI events; subclasses of <B><TT>BView</TT></B> are where you will most often define code to both initiate a drag, and handle a drop.
+<P>
+<LI>The Translation Kit, if you wish to make use of the BeOS' built-in translation abilities to (for example) drag a JPEG image from an application, to another application that only understands raw bitmaps.
+<P>
+</UL>
+<A NAME="36645:%20head1:%20Simple%20vs.%20Negotiated%20Drag'n'Drop"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Simple%20vs.%20Negotiated%20Drag'n'Drop"><FONT SIZE=6>S</FONT>imple vs. <FONT SIZE=6>N</FONT>egotiated <FONT SIZE=6>D</FONT>rag'n'<FONT SIZE=6>D</FONT>rop</A>
+</H2>
+<P>
+Roughly speaking, you can do two different kinds of drag and drop operations; both appear the same to the user, but they differ in the complexity of the background communication between the source of the drag, and the drop target.
+<P>
+<HR>
+<H3>
+<A NAME="Simple%20Drag'n'Drop">Simple Drag'n'Drop</A>
+</H3>
+<P>
+A <I>simple</I> drag'n'drop is one where the action of dragging and dropping corresponds internally to a single <B><TT>BMessage</TT></B> being sent, from the origin of the drag to the drop target. This was the original drag'n'drop protocol for the BeOS, and is still highly useful in dragging and dropping which takes place within a single application, or within a tightly coupled set of applications which "know about" one another. For example, you could drag around drawing elements of a drawing program using this protocol; each drag operation would result in the drawing application sending a <B><TT>BMessage</TT></B> within itself, and that <B><TT>BMessage</TT></B> would contain the data necessary to indicate which drawing element had been moved, and to where. Using the built in drag'n'drop abilities of the BeOS in this manner will lessen your own workload, since many of the most basic aspects, such as visually dragging a bitmap around on the screen, are handled automatically.
+<P>
+<HR>
+<H3>
+<A NAME="Negotiated%20Drag'n'Drop">Negotiated Drag'n'Drop</A>
+</H3>
+<P>
+A <I>negotiated</I> drag and drop is used in a more general context, when the originator of a drag and the receiver (drop target) of that drag do not necessarily know anything about one another. This more general drag'n'drop is necessary if we wish to make usage of the BeOS, particularly it's media-related applications, as intuitive to the user as possible. For example, the user should expect to be able to drag an image from one graphics program (say a viewer) to another graphics program (such as a paint program) with no difficulty. However, there are many different underlying data formats for representing images, and the two graphics programs will have to negotiate (with the aid of the Translation kit) for the most suitable or desirable format.
+<P>
+Note that the negotiated drag'n'drop protocol is not a "hard and fast" requirement; it is not enforced by the system, and could easily be modified; for example, you might need a particularly complex negotiation that takes more steps than defined in the standard. The major user of negotiated drag'n'drop you are likely to encounter right now is in Tracker, and we will talk about that in more detail later. Other applications may support negotiated drag'n'drop or may not. Also note that a simpler protocol was originally defined, and may still be used by older applications. It's easy to make your code handle this older protocol; see the later section on "Handling the Old Drag'n'Drop Protocol".
+<P>
+<A NAME="39457:%20head1:%20Basics%20of%20Drag%20and%20Drop"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Basics%20of%20Drag%20and%20Drop"><FONT SIZE=6>B</FONT>asics of <FONT SIZE=6>D</FONT>rag and <FONT SIZE=6>D</FONT>rop</A>
+</H2>
+<P>
+Let's assume the user is working with two applications, and is going to drag something from the first application (which we'll call the sender application) to the second application (which we'll call the receiver application.) In a nutshell, here are the steps that make up this entire process:
+<P>
+<B>1. </B>&nbsp;&nbsp;&nbsp;<B>Detection</B>: Code in a <B><TT>BView</TT></B> object of the sender application notices that the user has clicked on something of interest, and started dragging it. The monitoring code that notices this is usually spread out between the <B><TT>BView::MouseDown()</TT></B> and <B><TT>BView::MouseMoved()</TT></B> functions, and typically has to differentiate between the start of a real drag and drop, or a click that might (for example) select an object without dragging it, but that moves just one or two pixels because the user has a slightly jittery hand. The drag detection code will typically have to use <B><TT>BView::SetMouseEventMask()</TT></B> to temporarily enable full reporting of mouse movement (which is not normally reported to the application, for efficiency reasons).
+<P>
+<B>2. </B>&nbsp;&nbsp;&nbsp;<B>Initiation</B>:  Once the sender application's detection code has decided a drag and drop action has been started, it initiates the drag and drop internally, by creating a <B><TT>BMessage</TT></B> object containing information about the nature of the object being dragged, and then passing that <B><TT>BMessage</TT></B> to the <B><TT>BView::DragMessage()</TT></B> function. <B><TT>BView::DragMessage()</TT></B> also determines how the object being dragged appears visually to the user; you can pass it a <B><TT>BBitmap</TT></B>, in which case it will drag a cool picture around the screen, or you can pass it a <B><TT>BRect</TT></B>, in which case it will drag a boring old rectangular outline. After calling <B><TT>DragMessage</TT></B>, the sender's code should remember to delete its own copy of the <B><TT>BMessage</TT></B>. <B>Note</B>: The sender should not delete the <B><TT>BBitmap</TT></B> it passes to <B><TT>DragMessage</TT></B>; this will be done by the system
+<P>
+<B>3. </B>&nbsp;&nbsp;&nbsp;<B>Drag</B>:  This is the easy part; once the sender application has initiated the drag, as described in the previous step, dragging a visual representation around the screen is handled by the system. The next time application code is invoked is on the . . .
+<P>
+<B>4. </B>&nbsp;&nbsp;&nbsp;<B>Drop</B>:  The user releases the mouse button while the mouse is in a <B><TT>BView</TT></B> of the receiver application. This causes the <B><TT>MessageReceived()</TT></B> function of the recipient <B><TT>BView</TT></B> to be invoked, with the dragged <B><TT>BMessage</TT></B> as its received message. This is the first of three <B><TT>BMessage</TT></B> objects that can be sent as part of a single drag and drop action. We'll call this first message the <I>drag message</I>. In a simple drag'n'drop, the drag message can contain just about anything you want it to; since both the sender and the receiver "know about" one another, they presumably have a common private protocol, and the receiver can analyze the message and do whatever is required. In a negotiated drag'n'drop, the drag message does <I>not</I> typically carry the data that defines the object being dropped; for example, if you drop a block of text, the message that is dropped normally does not contain the text that was dragged. Instead, the drag message contains information about the different formats and methods by which the sender application may supply the data to the receiver application, and about which actions the receiver application can request of the sender application.
+<P>
+<B>5. </B>&nbsp;&nbsp;&nbsp;<B>Negotiation</B> [optional, used in negotiated drag'n'drop]:  The receiver application replies to the drag message with a second message, which is dispatched back to the sender application using the <B><TT>BMessage::SendReply()</TT></B> function. We'll call this second message the <I>negotiation message</I>. The receiver creates the negotiation message by looking through the options supplied by the sender in the drag message, choosing one or more, and including those option in the message so that the sender will know which of its possible replies is actually desired. The negotiation message also contains information about what the receiver would like the sender to do with the dragged data; for example, if you drag a file to the Trash, the negotiation message sent back "from" the Trash will include a request that the sender delete the dragged data. 
+<P>
+<B>6. </B>&nbsp;&nbsp;&nbsp;<B>Data Transmission</B> [optional, used in negotiated drag'n'drop]:  The sender examines the negotiation message sent back to it by the receiver, to find out which available data format the receiver wants the data in. The sender then packages up the data, and dispatches it off to the receiver in the <I>data</I> message. (Optionally, the sender can, at the request of the receiver, create a file through which it passes the data to the receiver, rather than passing the data directly in the <B><TT>BMessage</TT></B>. We'll talk about this when we discuss the details of the drop, negotiation, and data messages.)
+<P>
+<B>7. </B>&nbsp;&nbsp;&nbsp;<B>Completion</B> [optional, used in negotiated drag'n'drop]:  The receiver gets the data message from the sender, extracts the desired data, and uses it in whatever way it wants.
+<P>
+This sounds more complex than it is. A picture is worth a thousand words, so here is a simplified schematic of the process:
+<P>
+<img src="art/dragdropschematic.jpg">
+<P>
+<HR>
+<H2>
+<A NAME="Example:%20Simple%20Drag'n'Drop"><FONT SIZE=6>E</FONT>xample: <FONT SIZE=6>S</FONT>imple <FONT SIZE=6>D</FONT>rag'n'<FONT SIZE=6>D</FONT>rop</A>
+</H2>
+<P>
+Before going on to more complex matters, let's see just how simple "simple" drag'n'drop can be. The code below defines a very simple application, which lets one drag around a black square in a window. The application is both the sender (i.e., you click on the square in the application window to start the drag), and the receiver (you release the mouse button within the application window, to reposition the square). Most of the program code is "boilerplate", similar to what would be found in any application involving a <B><TT>BView</TT></B>. Those parts of the code pertaining specifically to the drag and drop are given in bold.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Drag the black square around using drag'n'drop--a very
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simple-minded program. The DETECTION, INITIATIOIN, DRAG,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and DROP steps correspond to those of the same name given
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in the overview section, "Basics of Drag and Drop". */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;#include &lt;Application.h&gt;
+&nbsp;&nbsp;&nbsp;#include &lt;InterfaceKit.h&gt;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;rgb_color black = {0, 0, 0, 64};
+&nbsp;&nbsp;&nbsp;const char *APP_SIGNATURE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= "application/x-vnd.Be-MyDragnDrop";
+&nbsp;&nbsp;&nbsp;/* The constant below is arbitrary--the fact that is is 'drag' is
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;meaningless. However, it MUST be chosen so as not to conflict
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with system-wide BMessage 'what' values--see the BMessage 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;documentation for details. */
+&nbsp;&nbsp;&nbsp;<B>const uint32 MY_DRAG_ACTION = 'drag';</B>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;class MyDragDropView : public BView {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPoint _button_click;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BRect _SquareSides;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyDragDropView(BRect rect) : BView(rect, "", 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_FOLLOW_ALL_SIDES, B_WILL_DRAW) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_SquareSides = BRect(20, 20, 90, 90);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void Draw(BRect where) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetHighColor(black);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FillRect(_SquareSides);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void MouseDown( BPoint where ) {
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* 1. DETECTION : Our detection code is pretty simple-minded;</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if the user clicks in the black square, they're starting a drag. */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (_SquareSides.Contains(where)) {</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Turn on the event mask for all pointer events, so we'll know when</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// the user lets go of the mouse button.</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetMouseEventMask( B_POINTER_EVENTS, 0 );</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* 2. INITIATION : Create a BMessage instance, and pass it</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to BView::DragMessage() to start the drag. */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage *drag_message = new BMessage( MY_DRAG_ACTION );</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Remember, in the drag message, where the drag started */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;drag_message-&gt;AddPoint("click_location", where);</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DragMessage( drag_message, _SquareSides, this );</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* 3. DRAG : this is handled by the user and system, we</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;don't write any code at all to do the dragging. The</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;next step will take place in the MessageReceived() function. */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* DON'T FORGET TO DELETE THE MESSAGE AFTER YOU'RE DONE*/</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete drag_message;</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</B>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}; /* end of MouseDown() */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void MessageReceived(BMessage *msg) {
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* 4. DROP : MessageReceived() can called for many different</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;messages. We're only interested in ones with a 'what'</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;field of MY_DRAG_ACTION, as was created in the MouseDown()</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function. */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (msg-&gt;what == MY_DRAG_ACTION) {</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPoint clicked;</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* We put "click_location" into the original message, now</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;we can get it out */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg-&gt;FindPoint("click_location", &amp;clicked);</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPoint whereto;</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* The "_drop_point_" message field is automatically</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inserted by the OS; is is the screen point the</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mouse was on when the drag ended. */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg-&gt;FindPoint("_drop_point_", &amp;whereto);</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Convert "_drop_point_" to view coordinates. */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;whereto = ConvertFromScreen(whereto);</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Move the square by the same amount the mouse moved</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in the drag. */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_SquareSides.OffsetBy(whereto-clicked);</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Ensure the view is redrawn */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Invalidate();</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</B>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}; /* end of MessageReceived() */
+&nbsp;&nbsp;&nbsp;}; /* end of MyDragDropView class */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;class MyDragDropWindow : public BWindow {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyDragDropWindow(BRect frame)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: BWindow(frame, "Drag'n'Drop Example", B_TITLED_WINDOW, B_NOT_ZOOMABLE) {
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interior = new MyDragDropView(this-&gt;Bounds());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AddChild(interior);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool QuitRequested() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be_app-&gt;PostMessage(B_QUIT_REQUESTED);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return true;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BView *interior;
+&nbsp;&nbsp;&nbsp;}; /* end of MyDragDropWindow class */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;class MyDragDropApp : public BApplication {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyDragDropApp::MyDragDropApp() : BApplication(APP_SIGNATURE) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BRect windowRect;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;windowRect.Set(50,50,349,399);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new MyDragDropWindow(windowRect);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyDragDropWindow&nbsp;&nbsp;&nbsp;*theWindow;
+&nbsp;&nbsp;&nbsp;}; /* end of MyDragDropApp class */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* The "main" function creates and runs the application.*/
+&nbsp;&nbsp;&nbsp;int main(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyDragDropApp *theApp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;theApp = new(MyDragDropApp);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;theApp-&gt;Run();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete theApp;
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;</PRE>
+<P>
+<A NAME="23388:%20head1:%20BMessage%20Formats%20in%20Negotiated%20Drag'n'Drop"></A>
+<P>
+<HR>
+<H2>
+<A NAME="BMessage%20Formats%20in%20Negotiated%20Drag'n'Drop"><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>essage <FONT SIZE=6>F</FONT>ormats in <FONT SIZE=6>N</FONT>egotiated <FONT SIZE=6>D</FONT>rag'n'<FONT SIZE=6>D</FONT>rop</A>
+</H2>
+<P>
+With simple drag and drop, you are free to use <B><TT>BMessage</TT></B>s more or less as you wish; you simply define a <B><TT>what</TT></B> member constant which will uniquely identify your dropped message to the target, and put whatever data you wish into the body of the message. The receiver will examine the <B><TT>what</TT></B> member of the message and, assuming it understands it at all, should then know how to extract the data (if any) in the body of the message.
+<P>
+Negotiated drag and drop is different, since it assumes that the sender and receiver have no implicit knowledge of each other. In order for the two ends of the action to communicate effectively, they must agree on a standard protocol between them. This protocol takes the form of an agreed-up structure for each of the drag message, negotiation message, and data message, as described in the following sections.
+<P>
+<B>Hint</B>:  There's a great little utility called <I>ViewIt</I>, which should be available (as part of a package of utilities called <I>Geb's Goodies</I>) on the usual download sites, such as www.bebits.com. You can drag anything onto <I>ViewIt</I>, and it will display the contents of the drag message.
+<P>
+<A NAME="21113:%20head2:%20Protocol%20for%20the%20drag%20message"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Protocol%20for%20the%20Drag%20Message">Protocol for the Drag Message</A>
+</H3>
+<P>
+The drag message is the one initially sent out by the sender application. It must be assigned a <B><TT>what</TT></B> member of <B><TT>B_SIMPLE_DATA</TT></B> by you, the programmer. The message fields in the drag message can be split into those that are provided by you, and those that are filled in automatically by the system. Let's take a look at each of these.
+<P>
+<H4>
+<A NAME="Drag%20Message%20Fields%20Filled%20In%20by%20Your%20Code">Drag Message Fields Filled In by Your Code</A>
+</H4>
+<P>
+The following drag message fields will need to be filled in by your code. Detailed descriptions of these fields are found below.
+<P>
+"<B>be:types</B>", "<B>be:filetypes</B>", and "<B>be:type_descriptions</B>":  These fields indicates the formats the sender is willing to provide data in, and are filled in together.
+<P>
+"<B>be:actions</B>":  A list of actions the sender is willing to perform on its data, at the request of the receiver.
+<P>
+"<B>be:clip_name</B>":  A suggested name for the data being sent, which may be used at the option of the receiver. This field is optional.
+<P>
+"<B>be:originator</B>", "<B>be:originator_data</B>":  used to preserve context information across asynchronous message sendings.
+<P>
+"<B>be:data</B>":  This was used by the old [obsolete] drag'n'drop protocol, to contain the data being dragged. You don't need to use it with modern applications.
+<P>
+<H4>
+<A NAME="Drag%20Message%20Fields%20Filled%20In%20by%20the%20System">Drag Message Fields Filled In by the System</A>
+</H4>
+<P>
+"<B>_drop_point_</B>", "<B>_drop_offset_</B>":  The values in these fields are set automatically by the system; do not set them yourself. They give information about where the drop took place on the screen.
+<P>
+<H4>
+<A NAME="Detailed%20Description%20of%20the%20Drag%20Message%20Fields">Detailed Description of the Drag Message Fields</A>
+</H4>
+<P>
+<H5>
+<A NAME=""be:types",%20"be:filetypes",%20and%20"be:type_descriptions"%20Fields">"be:types", "be:filetypes", and "be:type_descriptions" Fields</A>
+</H5>
+<P>
+The main purpose of negotiated drag'n'drop is to come up with an optimal compromise between the data formats the sender application can provide something in, and the data formats the receiver can accept that data in. Accordingly, the three most important message fields in the drag message are the <B>"be:types"</B> and <B>"be:filetypes" </B>fields; <B>"be:type_descriptions"</B> accompanies the "be:filetypes" field, so we'll describe it here also.. Each of these fields is filled with a list of string values.
+<P>
+Values for these fields will typically be obtained from the Translation Kit, by asking the Translation Kit which data formats it can provide the dragged data in, and filling the fields in with the information returned by the calls to the Translation Kit. (For example, if appropriate translators are installed on the system, the Translation Kit might be able to translate a bitmap into any of JPEG, GIF, PNG, or TIFF images.)
+<P>
+The specific meanings of these three fields are as follows:
+<P>
+<UL>
+<LI><B>"be:types"</B>:  each value in this field indicates a data format the sender is willing to provide its sent data in. This is a string value (a MIME string, actually), but you won't normally need to know what the string actually is, since you'll obtain it from the Translation Kit, or from a predefined constant. If "be:types" consists of a single element whose value is equal to that in the global variable <B><TT>B_FILE_MIME_TYPE</TT></B>, then the sender application is not willing to provide its data in a BMessage; the receiver must accept the data through a file, in one of the formats specified in the "be:filetypes" field of this message. If you want to indicate that your application is willing to send its data via either of a <B><TT>BMessage</TT></B> or a file, then add <B><TT>B_FILE_MIME_TYPE</TT></B> as the last element of "be:types", after all of the types which can be sent in a <B><TT>BMessage</TT></B>.
+<P>
+<LI><B>"be:filetypes"</B>:  similar "be:types", but a values in this field indicate formats in which the sender is willing to provide its data <I>via a file</I>. This can make a lot of sense; for example, if what the user is dragging around is a 30 megabyte video clip, you probably don't want to pass this in a <B><TT>BMessage</TT></B>. In most cases, "be:filetypes" will be identical to "be:types". If your application isn't willing to pass data via a file, then it doesn't matter what (if anything) you put into "be:filetypes". <B>Important</B>: See the section below in "Passing Data Via a File" for further notes on this, if you plan to make use of it.<I>
+<P>
+</I><LI><B>"be:type_descriptions"</B>: this is just a user-friendly description of the corresponding format in "be:filetypes". It may be displayed onscreen to the user when the user can choose between several different data formats during a file save operation. It is not used otherwise.
+<P>
+</UL>
+<P>
+<H5>
+<A NAME="The%20"be:actions"%20Field">The "be:actions" Field</A>
+</H5>
+<P>
+In negotiated drag'n'drop, the sender and receiver negotiate not only the format of the sent data, but also the action performed on that data. Should the data be copied from the sender to the receiver, moved from the sender to the receiver, or something else? The first part of this "actions negotiation" takes place in the drag message via the "be:actions" field.
+<P>
+"be:actions" contains a list of values (32-bit integers actually) which define the actions the sender is will to perform at the request of the receiver. No action will actually be carried out  until and unless the receiver requests it. The possible action requests are given by the following constants:
+<P>
+<UL>
+<LI><B>B_COPY_TARGET</B> : the sender is willing to provide a copy of the dragged object.
+<P>
+<LI><B>B_MOVE_TARGET</B> : The sender is willing to move the target over to the receiver; if the receiver requests this, then after the sender sends a copy of the data, it will delete its own copy.
+<P>
+<LI><B>B_LINK_TARGET</B> : The sender is willing to provide a link to the target. <I>[xxx what does this mean exactly? If the sender is the Tracker, I can understand it, but in Chris' document, B_LINK_TARGET is listed as a general action, not one that is Tracker-specific.]
+<P>
+</I><LI><B>B_TRASH_TARGET</B> : The sender is willing to delete its data without even sending it. This is useful if, for example, you want your user to be able to drag something from the application to the Tracker's wastebasket icon, and have the object removed from the application as a result.
+<P>
+</UL>
+<P>
+In addition to the above four "standard" actions, there are a few actions which can be carried out specifically when the Tracker is the sender application <I>[xxx does the Tracker have to be the receiver as well? If so, should we even document these actions?]</I>:
+<P>
+<UL>
+<LI><B>B_COPY_SELECTION_TO</B> : One or more elements (files, directories) are selected in a Tracker window; the Tracker is willing to copy these files to an <B><TT>entry_ref</TT></B> type destination, which will be supplied in a "refs" field in the negotiation message, should the receiver application choose this action.
+<P>
+<LI><B>B_MOVE_SELECTION_TO</B> : One or more elements (files, directories) are selected in a Tracker window; the Tracker is willing to move these files to an <B><TT>entry_ref</TT></B> type destination, which will be supplied in a "refs" field in the negotiation message, should the receiver application choose this action.
+<P>
+</UL>
+<P>
+<I>[xxx Chris' document implies the Tracker can also make links due to a specific Tracker action, is there something like a B_LINK_SELECTION_TO?]
+<P>
+</I><H5>
+<A NAME="The%20"be:clip_name"%20Field">The "be:clip_name" Field</A>
+</H5>
+<P>
+This is an easy one. If present (it doesn't have to be), it contains a string suggesting a name for the data which will be sent. This name may be used by the receiver; for example, if data is dragged onto the Tracker, the Tracker will try to use the value in "be:clip_name" as the basis for the name of the clipping file it creates from the data. However, the receiver is under no obligation to pay attention to "be:clip_name".
+<P>
+<H5>
+<A NAME=""be:originator"%20and%20"be:originator_data"%20Fields">"be:originator" and "be:originator_data" Fields</A>
+</H5>
+<P>
+Let's say you're a sender application, and you've asynchronously sent off a drag message. Then you receive a <B><TT>BMessage</TT></B>. Is it the reply to your original message? And if so, how do you access data about the original drag (such as where the mouse was clicked) you might need in order to complete the data message? Since the original drag message was sent asynchronously, your application went merrily on its way immediately after sending, and no longer remembers what the heck it dragged off before. What do you do? This is where "be:originator" and "be:originator_data" come in.
+<P>
+<UL>
+<LI>"<B>be:originator</B>" should be filled in with something that identifies your application to itself; it doesn't really matter what. We'll see how this is used in a second... 
+<P>
+<LI>"<B>be:originator_data</B>" can be filled in with data about the drag that you'll need to use later on in the drag'n'drop negotiation. This could be something as simple as the mouse position, or it could be a much more complex piece of information about the context of the application at the time the drag was started. It's up to you, and of course, you don't have to use "be:orginator_data" at all.
+<P>
+</UL>
+<P>
+If you fill in "be:originator" and "be:originator_data" properly on all of your outgoing drag messages, then here is what your app can do when it receives a <B><TT>BMessage</TT></B> that <I>may</I> be a negotiation message responding to a previously sent (asynchronous) drag message:
+<P>
+<B>1. </B>&nbsp;&nbsp;&nbsp;Your app checks to ensure that the incoming message has the correct format for a negotiation message (we'll describe the format of negotiation messages in a bit). If it does, then go on...
+<P>
+<B>2. </B>&nbsp;&nbsp;&nbsp;Your app uses <B><TT>BMessage::IsReply()</TT></B> to check if the incoming message is a reply to a previous message.
+<P>
+<B>3. </B>&nbsp;&nbsp;&nbsp;If the incoming message is in fact a reply, your app uses <B><TT>BMessage::Previous()</TT></B> to obtain the original message; the message the incoming message was sent in reply to.
+<P>
+<B>4. </B>&nbsp;&nbsp;&nbsp;Now, your app can examine "be:originator" in the original message, to see if it recognizes that value as indicating a drag message sent out by itself. If it does, then the incoming <B><TT>BMessage</TT></B> is in fact a negotiation message in response to your original drag message; your app can extract necessary context data from "be:originator_data", and go on to construct and send the data message.
+<P>
+<H5>
+<A NAME="The%20"be:data"%20Field">The "be:data" Field</A>
+</H5>
+<P>
+This field was used in the original drag'n'drop protocol to carry the dragged data. It is not used in the negotiated drag'n'drop protocol.
+<P>
+<H5>
+<A NAME="The%20"_drop_point_"%20Field">The "_drop_point_" Field</A>
+</H5>
+<P>
+This field contains a <B><TT>BPoint</TT></B> giving the <I>screen</I> coordinate of the mouse cursor, when the drag was ended (i.e. when the mouse button was released and the data dropped.) It's added automatically by the system--you don't create or add to it yourself.
+<P>
+<H5>
+<A NAME="The%20"_drop_offset_"%20Field">The "_drop_offset_" Field</A>
+</H5>
+<P>
+Whether you have your application display a bitmap or a rectangular outline during a drag, the dragged area occupies a rectangle. (Though it may not appear so to the user, since with a bitmap, sections of the bitmap can be transparent). "<B>_drop_offset_</B>" gives as a <B><TT>BPoint</TT></B> the distance from the top left point of the dragged area to the position of the mouse cursor within that dragged area. <I>[xxx I think this is correct but just want to be sure.]</I>It's added automatically by the system--you don't create or add to it yourself.<I>
+<P>
+</I><H4>
+<A NAME="Passing%20Data%20in%20a%20File">Passing Data in a File</A>
+</H4>
+<P>
+Using a <B><TT>BMessage</TT></B> to pass a large amount of data from one application to another may not be desirable; at the extreme, you may not have enough memory to accommodate the entire <B><TT>BMessage</TT></B>. If you need to pass large amounts of data in a drag'n'drop operation, you may prefer to do so via a file.
+<P>
+As far as passing data by a file goes, the sender application can indicate one of two things when sending the drag message to the receiver:
+<P>
+<UL>
+<LI>The sender can offer to pass the data in a file, as well as via a <B><TT>BMessage</TT></B>. The receiver then has the option of accepting the data either through a <B><TT>BMessage</TT></B>, or through a file.
+<P>
+<LI>The sender can state that it will only pass the data via a file. The receiver app, if it wants the data, had better agree.
+<P>
+</UL>
+<P>
+<I>In both cases, the sender's ability to send data via a file is indicated by a value in the drag message's </I>"be:types" <I>field of</I> <B><TT>B_FILE_MIME_TYPE</TT></B>. If <B><TT>B_FILE_MIME_TYPE</TT></B> is the <I>first</I> entry in the "be:types" field, than the sender will pass data <I>only</I> in a file, and anything else in "be:types" will be ignored; if there are entries in "be:types" <I>before</I> a value of <B><TT>B_FILE_MIME_TYPE</TT></B>, then those entries are types with which the sender is prepared to send data <I>directly in</I> the data message.<I>
+<P>
+</I>If the sender has indicated, via the presence of a <B><TT>B_FILE_MIME_TYPE</TT></B> value in "be:types", that it is willing to pass data via a file, then the formats in which it can provide that file are listed in the "be:filetypes" field. If a value if <B><TT>B_FILE_MIME_TYPE</TT></B> is not present somewhere in the "be:types" field, then the sender is not able to pass data via a file, and any values in the "be:filetypes" field will be ignored.
+<P>
+<A NAME="40424:%20head2:%20Protocol%20for%20the%20Negotiation%20Message"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Protocol%20for%20the%20Negotiation%20Message">Protocol for the Negotiation Message</A>
+</H3>
+<P>
+When the receiver application receives the initial drag message from the sender application, it examines the data message in that message, to ascertain what actions the sender application can carry out, and how it can provide the desired data in the final drag message. Using this information, the receiver application formulates the negotiation message, which it sends back as a reply to the original drag message using the <B><TT>BMessage::SendReply()</TT></B> function. 
+<P>
+<H4>
+<A NAME="A%20Negotiation%20Message%20is%20Characterized%20by%20its%20'what'%20Member">A Negotiation Message is Characterized by its 'what' Member</A>
+</H4>
+<P>
+Recall that the drag message constructed by the sender application contained (among other things) a "be:actions" message field, which indicated the actions the sender was willing to perform upon the dragged data. The allowable actions (at the time of this writing--further actions may be added in the future) are given by the following constants:
+<P>
+<UL>
+<LI><B><TT>B_COPY_TARGET
+<P>
+</TT></B><LI><B><TT>B_MOVE_TARGET
+<P>
+</TT></B><LI><B><TT>B_LINK_TARGET
+<P>
+</TT></B><LI><B><TT>B_TRASH_TARGET
+<P>
+</TT></B><LI><B><TT>B_MOVE_SELECTION_TO</TT></B> (for Tracker drags only.)
+<P>
+<LI><B><TT>B_COPY_SELECTION_TO</TT></B> (for Tracker drags only.)
+<P>
+</UL>
+<P>
+When constructing the negotiation message, the receiver application will choose one of the actions listed in the data message's "be:types" message field (remember, not all allowable actions will necessarily be listed in this message field), and use that action as the value of the what member in the negotiation message. This will inform the sender application of which of the possible actions is desired by the receiver.
+<P>
+<H5>
+<A NAME="Message%20Fields%20in%20the%20Negotiation%20Message">Message Fields in the Negotiation Message</A>
+</H5>
+<P>
+In addition to the action contained in the <B><TT>what</TT></B> member, the negotiation message may also contain a number of message fields; exactly which message fields are defined depends somewhat on the requested action. The allowable message fields are:
+<P>
+<UL>
+<LI>"<B>be:types</B>":  One or more strings denoting the data formats the receiver is willing to accept the dragged data in, as part of the data message. These should be chosen from the "be:types" field of the drag message. If the "be:types" field of the negotiation message contains more than one value, then the first value is the format the receiver would prefer to get data in, but the sender may choose any of the formats, at its discretion. Of course, if the sender has indicated in the drag message that it will only pass data through a file, values in the negotiation message's "be:types" message field will be ignored when the negotiation message gets back to the sender.
+<P>
+<LI>"<B>be:filetypes</B>":  One or more strings denoting the data formats the receiver is willing to accept file data in, assuming of course that the sender indicated in its drag message that it was willing to provide the dragged data via a file. The values in the negotiation message's "be:filetypes" field should be chosen from those provided in the drag message's "be:filetypes" field. It the negotiation message contains more than one value in "be:filetypes", then it would prefer to be given a file in the first listed format, but the sender is free to use any of the listed formats.
+<P>
+<LI>"<B>directory</B>":  If the sender decides to (or is forced to) pass data to the receiver via a file, the <B><TT>entry_ref</TT></B> stored in the "directory" field of the negotiation message indicates the directory that the file should be created in.
+<P>
+<LI>"<B>name</B>": If the sender decides to (or is forced to) pass data to the receiver via a file, the string in this field should be used as the name of the file. <B>Note</B>: the receiver should create the file before deciding on a file name, to ensure that file name is in fact available, and will remain available.
+<P>
+</UL>
+<P>
+Of course, you can leave out fields that don't apply to a particular action. For example, if the receiver chooses <B><TT>B_TRASH_TARGET</TT></B> as the action (by putting a value of <B><TT>B_TRASH_TARGET</TT></B> into the <B><TT>what</TT></B> member of the negotiation message), no message fields are required; in fact, the sender doesn't even need to respond to a request of <B><TT>B_TRASH_TARGET</TT></B> with a data message, it simply has to delete the dragged data.
+<P>
+<A NAME="39988:%20head2:%20Protocol%20for%20the%20Data%20Message"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Protocol%20for%20the%20Data%20Message">Protocol for the Data Message</A>
+</H3>
+<P>
+The data message is the third and final message sent as part of a negotiated drag'n'drop. It is sent in response to a negotiation message, using the <B><TT>BMessage::SendReply()</TT></B> function, and is sent only if the sender application has elected to pass the dragged data directly in a message. If the sender application passes data to the receiver via a file, no data message is sent. [<I>xxx just want to check, is this correct? It would seem you'd want to at least send confirmation that the write was successful. Or should the receiver just do a node monitor kind of thing?]</I> 
+<P>
+<H4>
+<A NAME="When%20Data%20Is%20Sent%20in%20the%20Data%20Message">When Data Is Sent in the Data Message</A>
+</H4>
+<P>
+If the sender elects to send the dragged data directly in the data message, then the data message will be constructed with the following structure:
+<P>
+<UL>
+<LI>A <B><TT>what</TT></B> member set to the value of the <B><TT>B_MIME_DATA</TT></B> constant.
+<P>
+<LI>A single message field, whose name indicates the type of mime data being sent, and whose contents consist of the data itself. For example, if you drag some text from one text processing window to another, the final data message (after the drop and negotiation messages have been sent) might contain a message field named "text/plain", which contains the text being dragged. Alternatively, if you dragged text from an HTML viewer, the data message might (depending on the negotiations) have a single field called "text/html", which would contain the text <I>including</I> the html formatting statements.
+<P>
+</UL>
+<P>
+Note that when the data messages arrives at the receiver, it may contain more than the single message field described above; other message fields might be added automatically, by parts of the system. However, the message field above is the only one <I>you</I> add. 
+<P>
+<HR>
+<H2>
+<A NAME="Handling%20Drops%20from%20'Old'%20Applications"><FONT SIZE=6>H</FONT>andling <FONT SIZE=6>D</FONT>rops from '<FONT SIZE=6>O</FONT>ld' <FONT SIZE=6>A</FONT>pplications</A>
+</H2>
+<P>
+Negotiated drag'n'drop was defined relatively recently; older applications may still use the "old-style" drag'n'drop. It's simple for your application to take into the account that it might be a receiver for such a drop.
+<P>
+Under the old style drag'n'drop, a single message was sent from the sender to the receiver, with a what member of <B><TT>B_MIME_DATA</TT></B>, and the value of the dragged data in the "be:data" message field. <I>[xxx how is the type of the enclosed data determined?] </I>Since your receiver application will need to monitor for <B><TT>BMessages</TT></B> with a what field of <B><TT>B_MIME_DATA</TT></B> (i.e. your application will need to look for the data messages that might occur as part of a negotiated drag'n'drop), it's simple to add in a bit more code that handles the fact that such a message may occur without being part of a negotiation, and may contain a "be:data" field.
+<P>
+<A NAME="14568:%20head1:%20Summary%20of%20the%20Negotiated%20Drag'n'Drop%20Protocol"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Summary%20of%20the%20Negotiated%20Drag'n'Drop%20Protocol"><FONT SIZE=6>S</FONT>ummary of the <FONT SIZE=6>N</FONT>egotiated <FONT SIZE=6>D</FONT>rag'n'<FONT SIZE=6>D</FONT>rop <FONT SIZE=6>P</FONT>rotocol</A>
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Drag%20Message">Drag Message</A>
+</H3>
+<P>
+The structure of a drag message is as follows:
+<P>
+<UL>
+<LI>A <B><TT>what</TT></B> member of <B><TT>B_SIMPLE_DATA
+<P>
+</TT></B><LI>Three message fields "<B>be:types</B>", "<B>be:filetypes</B>" and "<B>be:type_descriptions</B>", which contain (respectively) formats the sender is willing to pass data in via the data message, formats the sender is willing to pass data via a file, and user-friendly descriptions of the different formats.
+<P>
+<LI>A message field "<B>be:actions</B>" containing a list of actions the sender is willing to perform at the request of the receiver.
+<P>
+<LI>An optional field "<B>be:clip_name</B>" indicating a suggested name for a clipping.
+<P>
+<LI>Optional fields "<B>be:originator</B>" and "<B>be:originator_data</B>", which may be used to pass store context information during an asynchronous drag'n'drop.
+<P>
+<LI>"<B>_drop_point_</B>" and "<B>_drop_offset_</B>", which are filled in by the system, and provide information about where the mouse cursor was positioned when the drop took place.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Negotiation%20Message">Negotiation Message</A>
+</H3>
+<P>
+The structure of a negotiation message is as follows:
+<P>
+<UL>
+<LI>A <B><TT>what</TT></B> member, which is one of the values extracted from the "be:actions" field of the drag message to which this negotiation message is a reply.
+<P>
+<LI>A list of formats in the "<B>be:types</B>" message field, chosen from the list provided in the "be:types" of the drag message. This indicates the formats the receiver is willing to accept data in. If the value given by the global constant <B><TT>B_FILE_MIME_TYPE</TT></B> is in the list, then the receiver is willing to accept data through a file, as well as through the data message. Note that values after an entry of <B><TT>B_FILE_MIME_TYPE</TT></B> will be ignored; thus, if <B><TT>B_FILE_MIME_TYPE</TT></B> is the first element of "be:types", then the receiver is willing to accept data <I>only</I> through a file. If there is more than one value in "be:types", the first value is the preferred format.
+<P>
+<LI>A list of formats in the "<B>be:filetypes</B>" message field, which indicates file formats the receiver is willing to accept, if data is passed in a file. This is meaningful only if "be:types" contains a value of <B><TT>B_FILE_MIME_TYPE</TT></B> as one of its values. If there is more than one value in "be:filetypes", the first value is the preferred format.
+<P>
+<LI>"<B>directory</B>" and "<B>name</B>" fields, which should be provided if the negotiation message has stated that the receiver is willing to accept data via a file. "directory" is an entry_ref specifying where the file should be placed, and "name" is a string specifying the desired name of the file.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Data%20Message">Data Message</A>
+</H3>
+<P>
+The structure of a data message is as follows:
+<P>
+<UL>
+<LI>A <B><TT>what</TT></B> member of <B><TT>B_MIME_DATA</TT></B>.
+<P>
+<LI>A single <B>data message field</B> added by the program code; the <I>name</I> of this field is the mime type of the enclosed data, and the <I>value</I> of this field is the data itself. For example, a block of plain text would be sent in a message field named "text/plain". The mime type for the enclosed data is chosen from the list of formats in the "be:types" field of the negotiation message to which this message is a reply.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="../index.html"><FONT face=HELVETICA>Be Book Table of Contents</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved.
+<p>Text last modified </font>January 26, 2000.
+</body>
+</html>
+

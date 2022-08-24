@@ -1,0 +1,141 @@
+<HTML><HEAD><TITLE>Keyboard: Modifier Keys</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Keyboard Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Keyboard%20Master%20Index.html"><FONT face=HELVETICA>Keyboard Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Modifier%20Keys"></A>Modifier Keys
+</H1>
+<P>
+Conceptually, there are eight modifier keys.  The global <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#modifiers()">modifiers()</A></TT></B> function returns a value that encodes the current status of all eight of these keys.  You can test for the state of a particular modifier key by comparing <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#modifiers()">modifiers()</A></TT></B> with the constants listed in the table below.  For example, here's how you can see if the user is holding down one of the <B><U>Shift</B></U> keys:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if (modifiers() | B_SHIFT_KEY) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* a shift key is down */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The modifier mask is also included in the "modifiers" field in BMessages that report keyboard and mouse events.
+<P>
+How your application uses modifier keys is up to you.  The table below lists the eight keys and how they're typically used.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>
+</UL>
+<B>Function</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_SHIFT_KEY"></A>B_SHIFT_KEY
+</TT></B></TD>
+<TD>Maps character keys to their uppercase or alternative versions.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_COMMAND_KEY"></A>B_COMMAND_KEY
+</TT></B></TD>
+<TD>In combination with a character key, performs a keyboard shortcut. </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_KEY"></A>B_CONTROL_KEY
+</TT></B></TD>
+<TD>Turns alphabetic keys into control characters.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_KEY"></A>B_OPTION_KEY
+</TT></B></TD>
+<TD>Maps keys to alternative characters, typically characters in an extended set&mdash;multibyte UTF-8 characters.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MENU_KEY"></A>B_MENU_KEY
+</TT></B></TD>
+<TD>Pops open a menu.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CAPS_LOCK"></A>B_CAPS_LOCK
+</TT></B></TD>
+<TD>Reverses the effect of the <B><U>Shift</B></U> key on alphabetic characters.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NUM_LOCK"></A>B_NUM_LOCK
+</TT></B></TD>
+<TD>Reverses the effect of the <B><U>Shift</B></U> key on numeric characters.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SCROLL_LOCK"></A>B_SCROLL_LOCK
+</TT></B></TD>
+<TD>Stops the display from scrolling.</TD>
+</TABLE>
+<P>
+If you're interested in whether the left or right modifer key of a given type was pressed, you can check against these additional values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_LEFT_SHIFT_KEY"></A>B_LEFT_SHIFT_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_SHIFT_KEY%20"></A>B_RIGHT_SHIFT_KEY 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_LEFT_CONTROL_KEY"></A>B_LEFT_CONTROL_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_CONTROL_KEY%20"></A>B_RIGHT_CONTROL_KEY 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_LEFT_OPTION_KEY"></A>B_LEFT_OPTION_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_OPTION_KEY%20"></A>B_RIGHT_OPTION_KEY 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_LEFT_COMMAND_KEY"></A>B_LEFT_COMMAND_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_COMMAND_KEY%20"></A>B_RIGHT_COMMAND_KEY 
+</TD>
+</TABLE></TT></B>
+<P>
+Most of the modifiers map to single, specific keys: <B><U>Shift</B></U> and <B><U>Caps Lock</B></U> are examples.  But others don't: the <B><U>Menu</B></U> key maps to Shortcut+<B><U>Escape</B></U> (either <B><U>Alt</B></U>-<B><U>Escape</B></U>,  <B><U>Command</B></U>-<B><U>Escape</B></U>, or <B><U>Control</B></U>-<B><U>Escape</B></U>, depending on your preferences and the keyboard the user is using).
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Keyboard Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Keyboard%20Master%20Index.html"><FONT face=HELVETICA>Keyboard Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

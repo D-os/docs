@@ -1,0 +1,323 @@
+<HTML><HEAD><TITLE>The Support Kit: BArchivable</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BArchivable"></A>BArchivable
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/support/Archivable.h">be/support/Archivable.h</A>
+<P>
+<H6><A HREF="Archivable.summary.html"><i>Summary</i></A></H6>
+<P>
+BArchivable is a protocol for <I>archiving</I> and <I>unarchiving</I> objects.  When you archive an object, you record its state into a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> that can be sent to another application, flattened and saved as a file, cached in memory, and so on.  Unarchiving does the opposite:  It takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive and turns it into a functioning object.
+<P>
+<A NAME="38778:%20head2:%20Archiving"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Archiving"></A>Archiving
+</H3>
+<P>
+To archive an object, you create a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> and pass it to the object's <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage message;
+&nbsp;&nbsp;&nbsp;theObject->Archive(&amp;message);</PRE>
+<P>
+It's the job of the <B><TT><A HREF="#Archive()">Archive()</A></TT></B> implementation to write a description of the object into the message.  Each class is responsible for archiving the parts of the object that it defines.  To incorporate properties archived by its base classes, it should begin its implementation of the function by calling the version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B> that it inherits from its base class.
+<P>
+The chain of calls to inherited functions ends at the BArchivable root class.  Its version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B> puts the object's class name into the archive under the field named "class".  This information is used later when instantiating objects from the archive.  It's good practice for derived classes to put their own class names in the "class" array as well, provided that instances of the class can be initialized from the archive.  An abstract class should not put its name in the array.  (See <B><TT><A HREF="Functions.html#validate_instantiation()">validate_instantiation()</A></TT></B> for more on this issue.)
+<P>
+If a class doesn't have any data to add to the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive, it doesn't need to implement an <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function; it can rely on the version it inherits.  However, it must implement the constructor and static <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> function for its objects to be successfully unarchived.
+<P>
+<A NAME="39530:%20head3:%20Deep%20and%20Shallow%20Archives"></A>
+<P>
+<H4>
+<A NAME="Deep%20and%20Shallow%20Archives"></A>Deep and Shallow Archives
+</H4>
+<P>
+<B><TT><A HREF="#Archive()">Archive()</A></TT></B>'s second argument, a <B><TT>bool</TT></B> flag, indicates whether the archive should be <I>deep</I> or <I>shallow</I>.  By default the flag is <B><TT>true</TT></B> (deep).
+<P>
+For a deep archive, a class should include in its archive any other objects that it "owns."  For a shallow archive, it should exclude these objects.  For example a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> object archives its children for a deep archive, but not for a shallow one.
+<P>
+To perform a deep archive, an object invokes <B><TT><A HREF="#Archive()">Archive()</A></TT></B> on the objects it owns, and adds the resulting archives to its own archive.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t TheClass::Archive(BMessage *archive, bool deep)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    <I>baseClass</I>::Archive(archive, deep);
+&nbsp;&nbsp;&nbsp;    archive->AddString("class", "TheClass");
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;    if ( deep ) {
+&nbsp;&nbsp;&nbsp;        BMessage cronyArchive;
+&nbsp;&nbsp;&nbsp;        if ( crony->Archive(&amp;cronyArchive, deep) == B_OK )
+&nbsp;&nbsp;&nbsp;            archive->AddMessage("crony", &amp;cronyArchive);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Neither a deep nor a shallow archive should include objects that the target object is associated with but doesn't own.  For example, a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> doesn't archive its parent or the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> to which it's attached.
+<P>
+<H4>
+<A NAME="Names"></A>Names
+</H4>
+<P>
+Name collisions in an archive are not automatically detected and corrected.  For example, if both class A and subclass B add fields named "dog", the unarchiving mechanism will get confused.
+<P>
+To try to avoid collisions, all the <B><TT><A HREF="#Archive()">Archive()</A></TT></B> functions implemented in the Be kits use names beginning with an underbar ("_name") or the "be:" prefix ("be:name").  Use a different convention for naming archived data in the classes you define.
+<P>
+<A NAME="14694:%20head2:%20Instantiation"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiability"></A>Instantiability
+</H3>
+<P>
+To be unarchivable, a class must implement a constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive as an argument.  The constructor is a counterpart to the <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function: it begins by calling the constructor for its immediate base class, and then looks in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> for the fields that were added by its <B><TT>Archive(</TT></B>) function. 
+<P>
+The class must also implement the static <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> function (declared in BArchivable), which needn't do much more than call the archive-accepting constructor, and return a BArchivable pointer.   For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BArchivable *TheClass::Instantiate(BMessage *archive)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( validate_instantiation(archive, "TheClass"))
+&nbsp;&nbsp;&nbsp;        return new TheClass(archive);
+&nbsp;&nbsp;&nbsp;    return NULL;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="Functions.html#validate_instantiation()">validate_instantiation()</A></TT></B> function, provided by the Support Kit, is a safety check that makes sure the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object is, in fact, an archive for the named class.  
+<P>
+<HR>
+<H3>
+<A NAME="Unarchiving"></A>Unarchiving
+</H3>
+<P>
+To unarchive a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>, you call the <B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A> </TT></B>function.  When passed a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive, <B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A></TT></B> looks for the first name in the "class" array, finds the <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> function for that class, and calls it.  Failing that, it picks another name from the "class" array (working up the inheritance hierarchy) and tries again.  
+<P>
+<B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A></TT></B> returns a BArchivable instance.  You then use <B><TT><A HREF="Functions.html#cast_as()">cast_as()</A></TT></B> to cast the object to a more interesting class.  A typical unarchiving session looks something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* archive is the BMessage that we want to turn into an object. 
+&nbsp;&nbsp;&nbsp; * In this case, we want to turn it into a BView.
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;BArchivable *unarchived = instantiate_object(archive);
+&nbsp;&nbsp;&nbsp;if ( unarchived ) {
+&nbsp;&nbsp;&nbsp;    BView *view = cast_as(unarchived, BView);
+&nbsp;&nbsp;&nbsp;    if ( view ) {
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The BArchivable-derived class must be exported for unarchiving to work:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;class _EXPORT MyArchivableView : public BView {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;static BArchivable *Instantiate(BMessage *data);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+<H4>
+<A NAME="Dynamic%20Loading"></A>Dynamic Loading
+</H4>
+<P>
+As described so far, an application can only unarchive objects that it knows about&mdash;it can't unarchive an object that it doesn't have the code to run.
+<P>
+An additional convention gets around this restriction:  A <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive can include a <B><TT><A HREF="misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B> field named "add-on" that contains the signature of an add-on that defines the archived object.  If <B><TT><A HREF="Functions.html#instantiate_object()">instantiate_object()</A></TT></B> fails to unarchive an object on its first try, it will look for the add-on image, load it, and try again.
+<P>
+It's not defined how a host will interact with an unarchived instance of a previously unknown class.  It's up to the parties to define entry points and protocols, just as it is for any other add-on module.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BArchivable()"></A>BArchivable()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BArchivable(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BArchivable(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Does nothing. 
+<P>
+<HR>
+<H3>
+<A NAME="~BArchivable()"></A>~BArchivable()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BArchivable()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Does nothing. 
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static BArchivable *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Derived classes should implement <B><TT>Instantiate() </TT></B>to return a new BArchivable object that was constructed from the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BArchivable *TheClass::Instantiate(BMessage *archive)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( !validate_instantiation(archive, "TheClass") )
+&nbsp;&nbsp;&nbsp;        return NULL;
+&nbsp;&nbsp;&nbsp;    return new TheClass(archive);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>Instantiate()</TT></B> must return a BArchivable *, regardless of the actual class in which it's implemented.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+This function depends on a constructor that can initialize the new object from the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> BMessage.  See <a href="#Instantiability">"Instantiability"</a>, above, for more information.
+<P>
+The default implementation returns <B><TT>NULL</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The default implementation adds the name of the object's class to <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>'s  "class" field.  Derived classes must override <B><TT><A HREF="#Archive()">Archive()</A></TT></B> to augment this implementation by adding, to the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>, data that describes the current state of the object.  Each implementation of this function should begin by incorporating the inherited version:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* We'll assume that MyView inherits from BView. */
+&nbsp;&nbsp;&nbsp;status_t MyView::Archive(BMessage *archive, bool deep)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    BView::Archive(archive, deep);
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If the class can be instantiated directly from a derived class, it should also add its name to the "class" array:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;archive->AddString("class", "MyView");</PRE>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> flag declares whether <B><TT><A HREF="#Archive()">Archive()</A></TT></B> should include objects that "belong" to the archiving object.  For example, a deep <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> archive would include archived forms of the view's children.  An example is given under <a href="#Deep%20and%20Shallow%20Archives">"Deep and Shallow Archives"</a>, above.
+<P>
+<B><TT><A HREF="#Archive()">Archive()</A></TT></B> should return <B><TT><A HREF="ErrorCodes.html#B_OK">B_OK</A> </TT></B>if it's successful; otherwise, it should return <B><TT><A HREF="ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> or a more descriptive error code.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

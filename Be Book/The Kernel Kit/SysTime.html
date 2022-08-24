@@ -1,0 +1,344 @@
+<HTML><HEAD><TITLE>The Kernel Kit: System and Time Information</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="System%20and%20Time%20Information"></A>System and Time Information
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/OS.h">be/kernel/OS.h</A>
+<P>
+Library:  libroot.so
+<P>
+The following functions, types, and structures are used to convey basic information about the system, such as the number of CPUs, when the kernel was built, what time it is now and whether your computer is on fire.  
+<P>
+<HR>
+<H2>
+<A NAME="System%20Info%20Functions%20and%20Structures"></A><FONT SIZE=6>S</FONT>ystem <FONT SIZE=6>I</FONT>nfo <FONT SIZE=6>F</FONT>unctions and <FONT SIZE=6>S</FONT>tructures
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="get_system_info()"></A>get_system_info()
+, 
+<A NAME="system_info"></A>system_info
+, 
+<A NAME="cpu_info"></A>cpu_info
+, 
+<A NAME="cpu_type"></A>cpu_type
+, 
+<A NAME="platform_type"></A>platform_type
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_system_info(</TT></B></FONT>system_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+struct {} <B><TT><FONT  color=000022 size=+1>system_info
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+struct {} <B><TT><FONT  color=000022 size=+1>cpu_info
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+enum <B><TT><FONT  color=000022 size=+1>cpu_type
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+enum <B><TT><FONT  color=000022 size=+1>platform_type
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>get_system_info()</TT></B> function tells you more than you want to know about the physical capacities and other statistics of your operating system.   The function takes a pointer to an allocated <B><TT>system_info</TT></B> structure and fills it in.  
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;machine_id  id;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t  boot_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  cpu_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cpu_type  cpu_type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  cpu_revision;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cpu_info  cpu_infos[B_MAX_CPU_NUM];&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64  cpu_clock_speed;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64  bus_clock_speed;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;platform_type  platform_type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  max_pages;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  used_pages;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  page_faults;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  max_sems;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  used_sems;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  max_ports;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  used_ports;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  max_threads;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  used_threads;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  max_teams;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32  used_teams;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char  kernel_name[B_FILE_NAME_LENGTH];  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char  kernel_build_date[B_OS_NAME_LENGTH]; 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char  kernel_build_time[B_OS_NAME_LENGTH]; 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64  kernel_version;   
+&nbsp;&nbsp;&nbsp;} system_info</PRE>
+<P>
+The <B><TT>system_info</TT></B> structure holds information about the machine and the state of the kernel.  The structure's fields are:
+<P>
+<UL>
+<LI><B><TT>id.  </TT></B>The 64-bit number (encoded as two <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B>s) that uniquely identifies this machine.
+<P>
+<LI><B><TT>boot_time</TT></B>.  The time at which the computer was last booted, measured in microseconds since January 1st, 1970. 
+<P>
+<LI><B><TT>cpu_count</TT></B>.  The number of CPUs.
+<P>
+<LI><B><TT>cpu_type</TT></B> and <B><TT>cpu_revision.  </TT></B>The type constant and revision number of the CPUs.
+<P>
+<LI><B><TT>cpu_infos</TT></B>.  An array of <B><TT><A HREF="#cpu_info">cpu_info</A></TT></B> structures, one for each CPU.
+<P>
+<LI><B><TT>cpu_clock_speed</TT></B>.  The speed (in Hz) at which the CPUs operate.
+<P>
+<LI><B><TT>bus_clock_speed</TT></B>.  The speed (in Hz) at which the bus operates.
+<P>
+<LI><B><TT>platform_type</TT></B>.  One of the platform type constants.
+<P>
+<LI><B><TT>max_<I>resources</TT></B></I> and <B><TT>used_<I>resources</TT></B></I>.  The five pairs of <B><TT>max</TT></B>/<B><TT>used</TT></B> fields give the total number of RAM pages, semaphores, and so on, that the system can create, and the number that are currently in use.
+<P>
+<LI><B><TT>page_faults</TT></B>.  The number of times the system a read a page of memory into RAM due to a page fault.  
+<P>
+<LI><B><TT>kernel_name</TT></B>.  The (leaf) name of the kernel.
+<P>
+<LI><B><TT>kernel_build_date</TT></B> and <B><TT>kernel_build_time</TT></B>.  Human-readable strings that tell you when the kernel was built.
+<P>
+<LI><B><TT>kernel_version.  </TT></B>A number that identifies the kernel version.
+<P>
+</UL>
+<P>
+The <B><TT>cpu_info</TT></B> structure is:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t active_time;  
+&nbsp;&nbsp;&nbsp;} cpu_info;</PRE>
+<P>
+<UL>
+<LI><B><TT>active_time</TT></B> is the number of microseconds spent doing useful work since the machine was booted.
+<P>
+</UL>
+<P>
+Relatedly, <B><TT>B_MAX_CPU_COUNT</TT></B> is currently 8.
+<P>
+The <B><TT>machine_id</TT></B> type is:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef int32 machine_id[2];</PRE>
+<P>
+The <B><TT>cpu_type</TT></B> constants are:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef enum {
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_PPC_601 = 1,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_PPC_603 = 2,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_PPC_603e = 3,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_PPC_604 = 4,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_PPC_604e = 5,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_PPC_686 = 13,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_AMD_29K,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_X86,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_MC6502,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_Z80,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_ALPHA,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_MIPS,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_HPPA,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_M68K,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_ARM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_SH,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CPU_SPARC
+&nbsp;&nbsp;&nbsp;} cpu_type;</PRE>
+<P>
+The <B><TT>platform_type</TT></B> constants are:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef enum {
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_BEBOX_PLATFORM = 0,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_MAC_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_AT_CLONE_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_ENIAC_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_APPLE_II_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_CRAY_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_LISA_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_TI_994A_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_TIMEX_SINCLAIR_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_ORAC_1_PLATFORM,
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;B_HAL_PLATFORM
+&nbsp;&nbsp;&nbsp;} platform_type;</PRE>
+<P>
+I haven't tried it, but I really don't think the BeOS would work at all well on a Timex Sinclair (see <B><TT><A HREF="#is_computer_on_fire()">is_computer_on_fire()</A></TT></B>).
+<P>
+<B><TT>get_system_info()</TT></B> always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="is_computer_on()"></A>is_computer_on()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32<B><TT><FONT  color=000022 size=+1> is_computer_on(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns 1 if the computer is on.  If the computer isn't on, the value returned by this function is undefined.
+<P>
+<HR>
+<H3>
+<A NAME="is_computer_on_fire()"></A>is_computer_on_fire()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+double<B><TT><FONT  color=000022 size=+1> is_computer_on_fire(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the temperature of the motherboard if the computer is currently on fire.  Smoldering doesn't count.  If the computer isn't on fire, the function returns some other value. 
+<P>
+<HR>
+<H2>
+<A NAME="Time%20Functions"></A><FONT SIZE=6>T</FONT>ime <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="real_time_clock()"></A>real_time_clock()
+, 
+<A NAME="real_time_clock_usecs()"></A>real_time_clock_usecs()
+, 
+<A NAME="set_real_time_clock()"></A>set_real_time_clock()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>real_time_clock (</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>real_time_clock_usecs (</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>set_real_time_clock (</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>secs_since_jan1_1970</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>real_time_clock()</TT></B> returns the number of seconds that have elapsed since January 1, 1970.  
+<P>
+<B><TT>real_time_clock_usecs()</TT></B> measures the same time span in microseconds.
+<P>
+<B><TT>set_real_time_clock()</TT></B> sets the value that the other two functions refer to.
+<P>
+<HR>
+<H3>
+<A NAME="system_time()"></A>system_time()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bigtime_t<B><TT><FONT  color=000022 size=+1> system_time(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the number of microseconds that have elapsed since the computer was booted.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

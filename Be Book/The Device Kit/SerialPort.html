@@ -1,0 +1,683 @@
+<HTML><HEAD><TITLE>The Device Kit: BSerialPort</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Device Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Device%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Device Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BSerialPort"></A>BSerialPort
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/device/SerialPort.h">be/device/SerialPort.h</A>
+<P>
+Library:  libdevice.so
+<P>
+<H6><A HREF="SerialPort.summary.html"><i>Summary</i></A></H6>
+<P>
+A BSerialPort object represents an RS-232 serial connection to the computer.  Through BSerialPort functions, you can read data received at a serial ports and write data over the connection.  You can also configure the connection&mdash;for example, set the number of data and stop bits, determine the rate at which data is sent and received, and select the type of flow control (hardware or software) that should be used.
+<P>
+To read and write data, a BSerialPort object must first open one of the serial ports by name.  To find the names of all the serial ports on the computer, use the <B><TT><A HREF="Joystick.html#CountDevices()">CountDevices()</A></TT></B> and <B><TT><A HREF="Joystick.html#GetDeviceName()">GetDeviceName()</A></TT></B> functions:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BSerialPort serial;
+&nbsp;&nbsp;&nbsp;char devName[B_OS_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;int32 n = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;for (int32 n = serial.CountDevices()-1; n >= 0; n--) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;serial.GetDeviceName(n, devName);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ( serial.Open(devName) > 0 ) 
+&nbsp;&nbsp;&nbsp;    &nbsp;&nbsp;&nbsp;....
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The BSerialPort object communicates with the driver for the port it has open.  The driver maintains an input buffer to collect incoming data and a smaller output buffer to hold outgoing data.  When the object reads and writes data, it reads from and writes to these buffers.
+<P>
+The serial port drivers, and therefore BSerialPort objects, send and receive data asynchronously only. 
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BSerialPort()"></A>BSerialPort()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSerialPort(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes the BSerialPort object to the following default values:
+<P>
+<UL>
+<LI>Hardware flow control (see <B><TT><A HREF="#SetFlowControl()">SetFlowControl()</A></TT></B>)
+<P>
+<LI>A data rate of 19,200 bits per second (see <B><TT><A HREF="#SetDataRate()">SetDataRate()</A></TT></B>)
+<P>
+<LI>A serial unit with 8 bits of data, 1 stop bit, and no parity (see <B><TT><A HREF="#SetDataBits()">SetDataBits()</A></TT></B>)
+<P>
+<LI>Blocking with no time limit&mdash;an infinite timeout&mdash;for reading data (see <B><TT><A HREF="#Read()">Read()</A></TT></B>)
+<P>
+</UL>
+<P>
+The new object doesn't represent any particular serial port.  After construction, it's necessary to open one of the ports by name.
+<P>
+The type of flow control must be decided before a port is opened.  But the other default settings listed above can be changed before or after opening a port.
+<P>
+<B>See also:  <TT><A HREF="#Open()">Open()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BSerialPort()"></A>~BSerialPort()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BSerialPort()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Makes sure the port is closed before the object is destroyed.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="ClearInput()"></A>ClearInput()
+, 
+<A NAME="ClearOutput()"></A>ClearOutput()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ClearInput(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ClearOutput(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions empty the serial port driver's input and output buffers, so that the contents of the input buffer won't be read (by the <B><TT><A HREF="#Read()">Read()</A></TT></B> function) and the contents of the output buffer (after having been written by <B><TT><A HREF="#Write()">Write()</A></TT></B>) won't be transmitted over the connection.
+<P>
+The buffers are cleared automatically when a port is opened.
+<P>
+<B>See also:  <TT><A HREF="#Read()">Read()</A></TT></B>, <B><TT><A HREF="#Write()">Write()</A></TT></B>, <B><TT><A HREF="#Open()">Open()</A></TT></B> 
+<P>
+<HR>
+<H3>Close()   see <A HREF="#Open()">Open()</A></H3>
+<P>
+<HR>
+<H3>DataBits()   see <A HREF="#SetDataBits()">SetDataBits()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsCTS()"></A>IsCTS()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsCTS(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the Clear to Send (CTS) pin is asserted, and <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>
+<A NAME="IsDCD()"></A>IsDCD()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsDCD(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the Data Carrier Detect (DCD) pin is asserted, and <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>
+<A NAME="IsDSR()"></A>IsDSR()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsDSR(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the Data Set Ready (DSR) pin is asserted, and <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>
+<A NAME="IsRI()"></A>IsRI()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsRI(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the Ring Indicator (RI) pin is asserted, and <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>
+<A NAME="Open()"></A>Open()
+, 
+<A NAME="Close()"></A>Close()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Open(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Close(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions open the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> serial port and close it again.  To get a serial port name, use the GetDeviceName() function; an example is shown in the introduction.
+<P>
+To be able to read and write data, the BSerialPort object must have a port open.  It can open first one port and then another, but it can have no more than one open at a time.  If it already has a port open when <B><TT><A HREF="#Open()">Open()</A></TT></B> is called, that port is closed before an attempt is made to open the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> port.  (Thus, both <B><TT><A HREF="#Open()">Open()</A></TT></B> and <B><TT><A HREF="#Close()">Close()</A></TT></B> close the currently open port.)
+<P>
+<B><TT><A HREF="#Open()">Open()</A></TT></B> can't open the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> port if some other entity already has it open.  (If the BSerialPort itself has <I><FONT  color=991122 face=HELVETICA>name</I></FONT> open, <B><TT><A HREF="#Open()">Open()</A></TT></B> first closes it, then opens it again.)
+<P>
+When a serial port is opened, its input and output buffers are emptied and the Data Terminal Ready (DTR) pin is asserted.
+<P>
+<b>RETURN CODES</b>
+<P>
+<I>positive integers</I> (not 0).  Success.
+<P>
+<UL>
+<LI><B><TT>B_PERMISSION_DENIED.  The port is already open.
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H3>ParityMode()   see <A HREF="#SetDataBits()">SetDataBits()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Read()"></A>Read()
+, 
+<A NAME="SetBlocking()"></A>SetBlocking()
+, 
+<A NAME="SetTimeout()"></A>SetTimeout()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>Read(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>maxBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetBlocking(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>shouldBlock</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTimeout(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Read()">Read()</A></TT></B> takes incoming data from the serial port driver and places it in the data <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT> provided.  In no case will it read more than <I><FONT  color=991122 face=HELVETICA>maxBytes</I></FONT>&mdash;a value that should reflect the capacity of the <I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>.  The input buffer of the driver, from which <B><TT><A HREF="#Read()">Read()</A></TT></B> takes the data, holds a maximum of 2,024 bytes (2048 on Mac hardware).  This function fails if the BSerialPort object doesn't have a port open.
+<P>
+The number of bytes that <B><TT><A HREF="#Read()">Read()</A></TT></B> will read before returning depends not only on <I><FONT  color=991122 face=HELVETICA>maxBytes</I></FONT>, but also on the <I><FONT  color=991122 face=HELVETICA>shouldBlock</I></FONT> flag and the <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> set by the other two functions.
+<P>
+<UL>
+<LI><B><TT><A HREF="#SetBlocking()">SetBlocking()</A></TT></B> determines whether <B><TT><A HREF="#Read()">Read()</A></TT></B> should block and wait for <I><FONT  color=991122 face=HELVETICA>maxBytes</I></FONT> of data to arrive at the serial port if that number isn't already available to be read.  If the <I><FONT  color=991122 face=HELVETICA>shouldBlock</I></FONT> flag is <B><TT>true</TT></B>, <B><TT><A HREF="#Read()">Read()</A></TT></B> will block.  However, if <I><FONT  color=991122 face=HELVETICA>shouldBlock</I></FONT> is <B><TT>false</TT></B>, <B><TT><A HREF="#Read()">Read()</A></TT></B> will take however many bytes are waiting to be read, up to the maximum asked for, then return immediately.  If no data is waiting at the serial port, it returns without reading anything.
+<P>
+The default <I><FONT  color=991122 face=HELVETICA>shouldBlock</I></FONT> setting is <B><TT>true</TT></B>.
+<P>
+<LI><B><TT><A HREF="#SetTimeout()">SetTimeout()</A></TT></B> sets a time limit on how long <B><TT><A HREF="#Read()">Read()</A></TT></B> will block while waiting for data to arrive at the port's input buffer.  The <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> is relevant to <B><TT><A HREF="#Read()">Read()</A></TT></B> only if the <I><FONT  color=991122 face=HELVETICA>shouldBlock</I></FONT> flag is <B><TT>true</TT></B>.  However, the time limit also applies to the <B><TT><A HREF="#WaitForInput()">WaitForInput()</A></TT></B> function, which always blocks, regardless of the <I><FONT  color=991122 face=HELVETICA>shouldBlock</I></FONT> setting.
+<P>
+There is no time limit if the <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> is set to <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B>&mdash;<B><TT><A HREF="#Read()">Read()</A></TT></B> (and <B><TT><A HREF="#WaitForInput()">WaitForInput()</A></TT></B>) will block forever.  Otherwise, the <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT> is expressed in microseconds and can range from a minimum of 100,000 (0.1 second) through a maximum of 25,500,000 (25.5&nbsp;seconds); differences less than 100,000 microseconds are not recognized; they're rounded to the nearest tenth of a second.  
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#Read()">Read()</A></TT></B> returns...
+<P>
+<UL>
+<LI><I>non-negative integer</I>.  Success; the value is the number of bytes that were read.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#SetTimeout()">SetTimeout()</A></TT></B> returns...
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Success.
+<P>
+</UL>
+<P>
+<HR>
+<H3>SetBlocking()   see <A HREF="#Read()">Read()</A></H3>
+<P>
+<br>
+<P>
+<HR>
+<H3>
+<A NAME="SetDataBits()"></A>SetDataBits()
+, 
+<A NAME="SetStopBits()"></A>SetStopBits()
+, 
+<A NAME="SetParityMode()"></A>SetParityMode()
+, 
+<A NAME="DataBits()"></A>DataBits()
+, 
+<A NAME="StopBits()"></A>StopBits()
+, 
+<A NAME="ParityMode()"></A>ParityMode()
+, 
+<A NAME="data_bits"></A>data_bits
+, 
+<A NAME="stop_bits"></A>stop_bits
+, 
+<A NAME="parity_mode"></A>parity_mode
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetDataBits(</TT></B></FONT>data_bits <I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetStopBits(</TT></B></FONT>stop_bits <I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT><B><TT><FONT  color=000022 size=+1>
+
+<TR><TD>
+data_bits </TT></B></FONT><B><TT><FONT  color=000022 size=+1>DataBits(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+stop_bits <B><TT><FONT  color=000022 size=+1>StopBits(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT><B><TT><FONT  color=000022 size=+1>
+
+<TR><TD>
+typedef enum { </TT></B></FONT><B><TT><FONT  color=000022 size=+1>B_DATA_BITS_7</TT></B></FONT>,  <B><TT><FONT  color=000022 size=+1>B_DATA_BITS_8</TT></B></FONT> } <B><TT><FONT  color=000022 size=+1>data_bits</TT></B></FONT> 
+<P>
+
+<TR><TD>
+typedef enum { <B><TT><FONT  color=000022 size=+1>B_STOP_BITS_1</TT></B></FONT>,  <B><TT><FONT  color=000022 size=+1>B_STOP_BITS_2</TT></B></FONT> } <B><TT><FONT  color=000022 size=+1>stop_bits</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return characteristics of the serial unit used to send and receive data.  
+<P>
+<UL>
+<LI><B><TT><A HREF="#SetDataBits()">SetDataBits()</A></TT></B> sets the number of bits of data in each unit; the default is <B><TT>B_DATA_BITS_8</TT></B>.  
+<P>
+<LI><B><TT><A HREF="#SetStopBits()">SetStopBits()</A></TT></B> sets the number of stop bits in each unit; the default is <B><TT>B_STOP_BITS_2</TT></B>.
+<P>
+<LI><B><TT><A HREF="#SetParityMode()">SetParityMode()</A></TT></B> sets whether the serial unit contains a parity bit and, if so, the type of parity used; the default is <B><TT>B_NO_PARITY</TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetDataRate()"></A>SetDataRate()
+, 
+<A NAME="DataRate()"></A>DataRate()
+, 
+<A NAME="data_rate"></A>data_rate
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetDataRate(</TT></B></FONT>data_rate <I><FONT  color=991122 face=HELVETICA>bitsPerSecond</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+data_rate <B><TT><FONT  color=000022 size=+1>DataRate(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and return the rate (in bits per second) at which data is both transmitted and received.
+<P>
+The default data rate is <B><TT>B_19200_BPS</TT></B>.  If the rate is set to 0 (<B><TT>B_0_BPS</TT></B>), data will be sent and received at an indeterminate number of bits per second.  
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT>SetDataRate() returns...
+<P>
+</TT></B><UL>
+<LI><B><TT>B_OK. The rate was successfully set.
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetDTR()"></A>SetDTR()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A> <B><TT><FONT  color=000022 size=+1>SetDTR(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>pinAsserted</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Asserts the Data Terminal Ready (DTR) pin if the <I><FONT  color=991122 face=HELVETICA>pinAsserted</I></FONT> flag is <B><TT>true</TT></B>, and de-asserts it if the flag is <B><TT>false</TT></B>.  The function should always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="SetFlowControl()"></A>SetFlowControl()
+, 
+<A NAME="FlowControl()"></A>FlowControl()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetFlowControl(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>mask</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>FlowControl(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and return the type of flow control the driver should use.  There are four possibilities:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Control Code</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_SOFTWARE_CONT"></A>B_SOFTWARE_CONT
+ROL</TT></B></TD>
+<TD>Control is maintained through XON and XOFF characters inserted into the data stream.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HARDWARE_CONT"></A>B_HARDWARE_CONT
+ROL</TT></B></TD>
+<TD>Control is maintained through the Clear to Send (CTS) and Request to Send (RTS) pins.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SOFTWARE_CONT"></A>B_SOFTWARE_CONT
+ROL </TT></B>+
+<br>
+<B><TT><A NAME="B_HARDWARE_CONT"></A>B_HARDWARE_CONT
+ROL</TT></B></TD>
+<TD>Both of the above.</TD>
+<TR>
+<TD>0 (zero)</TD>
+<TD>No control.</TD>
+</TABLE>
+<P>
+<B><TT><A HREF="#SetFlowControl()">SetFlowControl()</A></TT></B> should be called before a specific serial port is opened.  You can't change the type of flow control the driver uses in midstream.
+<P>
+<HR>
+<H3>SetParityMode()   see <A HREF="#SetDataBits()">SetDataBits()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetRTS()"></A>SetRTS()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetRTS(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>pinAsserted</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Asserts the Request to Send (RTS) pin if the <I><FONT  color=991122 face=HELVETICA>pinAsserted</I></FONT> flag is <B><TT>true</TT></B>, and de-asserts it if the flag is <B><TT>false</TT></B>.  The function always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>SetStopBits()   see <A HREF="#SetDataBits()">SetDataBits()</A></H3>
+<P>
+<HR>
+<H3>SetTimeout()   see <A HREF="#Read()">Read()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="WaitForInput()"></A>WaitForInput()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>WaitForInput(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Waits for input data to arrive at the serial port and returns the number of bytes available to be read.  If data is already waiting, the function returns immediately.
+<P>
+This function doesn't respect the flag set by <B><TT><A HREF="#SetBlocking()">SetBlocking()</A></TT></B>; it blocks even if blocking is turned off for the <B><TT><A HREF="#Read()">Read()</A></TT></B> function.  However, it does respect the timeout set by <B><TT><A HREF="#SetTimeout()">SetTimeout()</A></TT></B>.  If the timeout expires before input data arrives at the serial port, it returns 0.
+<P>
+<HR>
+<H3>
+<A NAME="Write()"></A>Write()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>Write(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Writes up to <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> of <I><FONT  color=991122 face=HELVETICA>data</I></FONT> to the serial port's output buffer.  This function will be successful in writing the data only if the BSerialPort object has a port open.  The output buffer holds a maximum of 512 bytes (1024 on Mac hardware).
+<P>
+<b>RETURN CODES</b>
+<P>
+<I>non-negative integer</I>.  Success; the value is the number of bytes that were written.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>.  The operation was interrupted by a signal.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Device Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Device%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Device Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

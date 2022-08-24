@@ -1,0 +1,664 @@
+<HTML><HEAD><TITLE>Screen Saver: BScreenSaver</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Screen Saver Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Screen%20Saver%20Master%20Index.html"><FONT face=HELVETICA>Screen Saver Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BScreenSaver"></A>BScreenSaver
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/add-ons/screen_saver/ScreenSaver.h">be/add-ons/screen_saver/ScreenSaver.h</A>
+<P>
+Library:  the 
+<P>
+<H6><A HREF="ScreenSaver.summary.html"><i>Summary</i></A></H6>
+<P>
+BScreenSaver provides an interface for developers creating their own screen saver modules.  Classes derived from BScreenSaver implement the functions defined here in order to draw on the screen while it&gt;s being saved, and to draw into <B>ScreenSaver</B>'s <I>preview screen</I> (see <a href="ScreenSaverPref.html#Talking%20to%20ScreenSaver">"Talking to ScreenSaver"</a> for an illustration of the preview screen).
+<P>
+The BScreenSaver class is abstract&mdash;it must be subclassed to be used.  Furthermore, you never construct BScreenSaver (subclass) objects yourself; they're created automatically as needed by the screen saver engine.  
+<P>
+<HR>
+<H2>
+<A NAME="Screen%20Saver%20Lifetime"></A><FONT SIZE=6>S</FONT>creen <FONT SIZE=6>S</FONT>aver <FONT SIZE=6>L</FONT>ifetime
+</H2>
+<P>
+When the screen saver engine wants to use your screen saver to save the screen, it constructs an instance of your BScreenSaver subclass (through the <B><TT><A HREF="ScreenSaverAddOn.html#instantiate_screen_saver()">instantiate_screen_saver()</A></TT></B> function, as explained in <a href="ScreenSaverAddOn.html#Screen%20Saver%20Add-ons">"Screen Saver Add-ons"</a>), and then calls the object's hook functions, in this order:
+<P>
+<UL>
+<LI><B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B>; if this returns a value other than <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>, your object is deleted (and the add-on is unloaded).
+<P>
+<LI><B><TT><A HREF="#StartSaver()">StartSaver()</A></TT></B> is called just before your screen saver starts drawing.  You implement it to perform any pre-drawing setup.
+<P>
+<LI><B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> is called as soon as your module is in control of the screen, and then periodically whenever the display changes.  It's also called when you're about to lose control of the screen.
+<P>
+<LI><B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> draws to the screen by drawing directly to the frame buffer (in the manner of a BDirectWindow).  It's called every <B><TT><A HREF="#TickSize()">TickSize()</A></TT></B> microseconds while your saver is in control.
+<P>
+<LI><B><TT><A HREF="#Draw()">Draw()</A></TT></B> also draws to the screen, although not directly to the frame buffer.  It's also called once every <B><TT><A HREF="#TickSize()">TickSize()</A></TT></B> microseconds.  Typically, you implement <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> <I>or</I> <B><TT><A HREF="#Draw()">Draw()</A></TT></B>, but not both.  If you do implement both, <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> is called first.
+<P>
+<LI><B><TT><A HREF="#StopSaver()">StopSaver()</A></TT></B> is called when the screen no longer needs to be saved, and just before the screen is restored to its former glory.
+<P>
+</UL>
+<P>
+When the <B>ScreenSavers</B> preferences app loads your module, the series of calls is similar, but with these differences:
+<P>
+<UL>
+<LI>Just after the <B><TT><A HREF="#StartSaver()">StartSaver()</A></TT></B> call, you get a <B><TT><A HREF="#StartConfig()">StartConfig()</A></TT></B> call that lets you set up <B>ScreenSavers</B>' configuration view.
+<P>
+<LI>All drawing is done through <B><TT><A HREF="#Draw()">Draw()</A></TT></B>&mdash;You don't get <B><TT><A HREF="#DirectConnected()">DirectConnected()</A> </TT></B>or <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> calls.
+<P>
+<LI><B><TT><A HREF="#StopConfig()">StopConfig()</A></TT></B>, called just after <B><TT><A HREF="#StopSaver()">StopSaver()</A></TT></B>, lets you clean up the configuration view.
+<P>
+</UL>
+<P>
+The following functions can be called at any time:
+<P>
+<UL>
+<LI><B><TT><A HREF="#SupplyInfo()">SupplyInfo()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#ModulesChanged()">ModulesChanged()</A>
+<P>
+</TT></B><LI><B><TT><A HREF="#SaveState()">SaveState()</A>
+<P>
+</TT></B></UL>
+<P>
+<H4>
+<A NAME="What%20If%20I%20Don't%20Want%20a%20Draw()%20Function?"></A>What If I Don't Want a Draw() Function?
+</H4>
+<P>
+You don't have to use the <B><TT><A HREF="#Draw()">Draw()</A></TT></B>/<B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> functions; they're provided as a convenience to make simple screen savers easy to write.  
+<P>
+One approach to handling your own drawing is to spawn a drawing thread in <B><TT><A HREF="#StartSaver()">StartSaver()</A></TT></B> and shut it down in <B><TT><A HREF="#StopSaver()">StopSaver()</A></TT></B>.  You should implement the <B><TT><A HREF="#Draw()">Draw()</A></TT></B> function to notify the drawing thread when the screen is available (<I><FONT  color=991122 face=HELVETICA>frame</I></FONT> is 0). After that, you can handle drawing any way you want.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>ScreenSavers</B>' preview monitor won't work properly unless you do your drawing in the <B><TT><A HREF="#Draw()">Draw()</A></TT></B> function
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If you need direct access to the frame buffer, you'll have to handle synchronization with <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> yourself, because that's the only time the screen saver is holding a lock on the display for you (this is handled automatically if you use <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B>).
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#InitCheck()">InitCheck()</A>
+<br>
+</TT></B>Can be implemented to let the screen saver engine know if your add-on was initialized properly.
+<P>
+<B><TT><A HREF="#StartSaver()">StartSaver()</A>
+<br>
+</TT></B>Can be implemented to do things that need to be done just before the screen saver starts drawing.
+<P>
+<B><TT><A HREF="#StopSaver()">StopSaver()</A>
+<br>
+</TT></B>Can be implemented to do things that need to be done when the screen saver stops drawing.
+<P>
+<B><TT><A HREF="#Draw()">Draw()</A>
+<br>
+</TT></B>Can be implemented to draw the screen saver&gt;s entertaining display (to the screen, as well as in the preview displayed by the <B>ScreenSaver</B> preferences application).
+<P>
+<B><TT><A HREF="#DirectConnected()">DirectConnected()</A>
+<br>
+</TT></B>Called when the connection to the screen has been made, when the size or format of the frame buffer changes, when the position, size, or shape of the visible part of the content area of the window changes, or when the connection to the screen is terminated.
+<P>
+<B><TT><A HREF="#DirectDraw()">DirectDraw()</A>
+<br>
+</TT></B>Can be implemented to draw the screen saver&gt;s entertaining display when you need to directly access the pixels (as in a BDirectWindow).
+<P>
+<B><TT><A HREF="#StartConfig()">StartConfig()</A>
+<br>
+</TT></B>Can be implemented to display the screen saver&gt;s copyright and configuration information in the <B>ScreenSaver</B> preferences application.
+<P>
+<B><TT><A HREF="#StopConfig()">StopConfig()</A>
+<br>
+</TT></B>Can be implemented to handle things that need to be done just before the <B>ScreenSaver</B> configuration view goes away.
+<P>
+<B><TT><A HREF="#SupplyInfo()">SupplyInfo()</A>
+<br>
+</TT></B>Can be implemented to supply the screen saver system with information about this add-on.  The system then passes the info to other screen saver add-ons (by invoking their  <B><TT><A HREF="#ModulesChanged()">ModulesChanged()</A></TT></B> functions).
+<P>
+<B><TT><A HREF="#ModulesChanged()">ModulesChanged()</A>
+<br>
+</TT></B>Can be implemented to learn about other screen saver add-ons.
+<P>
+<B><TT><A HREF="#SaveState()">SaveState()</A>
+<br>
+</TT></B>Can be implemented to save the current state of the screen saver, allowing it to be reconstituted later.
+<P>
+<HR>
+<H3>
+<A NAME="Constructor%20and%20Destructor"></A>Constructor and Destructor
+</H3>
+<P>
+<HR>
+<H3>
+<A NAME="BScreenSaver()"></A>BScreenSaver()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BScreenSaver(<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A></TT></B></FONT>&nbsp;*<I><FONT  color=991122 face=HELVETICA>state</I></FONT>, <B><TT>image_id</TT></B>&nbsp;<I><FONT  color=991122 face=HELVETICA>image</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Builds a BScreenSaver object from the state information stored in <I><FONT  color=991122 face=HELVETICA>state</I></FONT> (if any, as explained below).  Freshly constructed, your screen saver isn&gt;t connected to a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A>, so you can&gt;t do anything that requires one. There&gt;ll be plenty of time for that later, as described in <B><TT><A HREF="#StartSaver()">StartSaver()</A></TT></B> and <B><TT><A HREF="#StartConfig()">StartConfig()</A></TT></B>.  To gauge the success of the construction, the screen saver engine calls <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>state</I></FONT> argument contains whatever items you added when <B><TT><A HREF="#SaveState()">SaveState()</A></TT></B> was invoked on a previous instantiation of your object&mdash;in other words, <I><FONT  color=991122 face=HELVETICA>state</I></FONT> is a record of the state of your object when it last ran.  If this is the very first time your screen saver is being constructed, <I><FONT  color=991122 face=HELVETICA>state</I></FONT> will be empty, and you&gt;ll need some sensible default values.  The <I><FONT  color=991122 face=HELVETICA>state</I></FONT> format is up to you&mdash;you write it, you read it, nobody else is going to touch it.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>image</I></FONT> argument is the image (in the Kernel Kit sense) of the add-on itself.  This is particularly useful if your screen saver needs to find some resources stored in the add-on.  For example, imagine that your BScreenSaver subclass (SpiffySaver) has a <A HREF="../The%20Storage%20Kit/Resources.html#BResources">BResources</A>&nbsp;*<B><TT>my_rsrc</TT></B> member; here's how you'd retrieve the resource:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#include &lt;kernel/OS.h>
+&nbsp;&nbsp;&nbsp;#include &lt;storage/Resources.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;SpiffySaver::SpiffySaver( BMessage *info, image_id id )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    /* Initialization... */
+&nbsp;&nbsp;&nbsp;    ...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* Find SpiffySaver&gt;s resources so we can use them later. */
+&nbsp;&nbsp;&nbsp;    image_info the_info;
+&nbsp;&nbsp;&nbsp;    status_t retval = get_image_info( id, &amp;the_info );
+&nbsp;&nbsp;&nbsp;    if( retval != B_OK ) {
+&nbsp;&nbsp;&nbsp;        /* gripe at the user or bail out. */
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    my_rsrc = new BResources;
+&nbsp;&nbsp;&nbsp;    retval = my_rsrc->SetTo( new BFile( the_info.name, O_RDONLY ) );
+&nbsp;&nbsp;&nbsp;    if( retval != B_OK ) {
+&nbsp;&nbsp;&nbsp;        /* gripe at the user or bail out. */
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /*
+&nbsp;&nbsp;&nbsp;     * Anything else you need in the constructor, such as
+&nbsp;&nbsp;&nbsp;     * finding strings in your resources.
+&nbsp;&nbsp;&nbsp;     */
+&nbsp;&nbsp;&nbsp;    ...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="~BScreenSaver()"></A>~BScreenSaver()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><FONT  color=000022 size=+1>~BScreenSaver()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Destroys your screen saver; this is what happens when the user wants to get back to digital content creation.  By the time the destructor is called, you won&gt;t be drawing on the screen anymore, and <B><TT><A HREF="#StopConfig()">StopConfig()</A></TT></B> and <B><TT><A HREF="#StopSaver()">StopSaver()</A></TT></B> will already have been called.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+, 
+<A NAME="DirectDraw()"></A>DirectDraw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>Draw(<A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A></TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>DirectDraw(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These are the hook functions that draw to the screen.  For "normal" drawing, you override <B><TT><A HREF="#Draw()">Draw()</A></TT></B>; if you want to bang the bits directly (such as you would in a BDirectWindow), you should use <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B>.  In general, you should only implement one function or the other.  If you implement both functions, they&gt;ll both be called.  <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> will always be called before <B><TT><A HREF="#Draw()">Draw()</A></TT></B> if you implement both of them.
+<P>
+<B><TT><A HREF="#Draw()">Draw()</A></TT></B> is called once every <B><TT><A HREF="#TickSize()">TickSize()</A></TT></B> microseconds.  <I><FONT  color=991122 face=HELVETICA>view</I></FONT> is the view to draw into;  <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> is a frame counter that starts at 0 and is incremented each time <B><TT><A HREF="#Draw()">Draw()</A></TT></B> is called.  The view starts with a view color of <B><TT><A HREF="../The%20Interface%20Kit/misc.html#Transparency%20Constants">B_TRANSPARENT_32_BIT</A></TT></B>, which means the desktop will be showing through it.  If you don&gt;t want to see the Desktop (maybe your add-on draws some nice line patterns that look best on a black background), you should clear the view on the first frame (<I><FONT  color=991122 face=HELVETICA>frame</I></FONT> == 0).
+<P>
+<B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B>'s protocol (and calling frequency) is the same as for <B><TT><A HREF="#Draw()">Draw()</A></TT></B>, but, since it draws directly to the screen, <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> lacks a <I><FONT  color=991122 face=HELVETICA>view</I></FONT> parameter.  See <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> for more direct drawing information.
+<P>
+The longer you spend in your <B><TT><A HREF="#Draw()">Draw()</A></TT></B>/<B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> function, the longer the user will have to wait to un-save their system, and that&gt;ll annoy everyone.  Do your drawing and get out as quickly as possible.
+<P>
+<HR>
+<H3>
+<A NAME="DirectConnected()"></A>DirectConnected()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>DirectConnected(<A HREF="../The%20Game%20Kit/DirectWindow.html#direct_buffer_info">direct_buffer_info</A></TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's called when direct window access is enabled or suspended, or when the state of the display that you'll be (direct) drawing on changes.  The <I><FONT  color=991122 face=HELVETICA>info</I></FONT> argument describes the display state; see the <A HREF="../The%20Game%20Kit/DirectWindow.html#BDirectWindow">BDirectWindow</A> class (in the Game Kit) for more information about the <B><TT><A HREF="../The%20Game%20Kit/DirectWindow.html#direct_buffer_info">direct_buffer_info</A></TT></B> structure.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Unlike <B><TT><A HREF="../The%20Game%20Kit/DirectWindow.html#DirectConnected()">BDirectWindow::DirectConnected()</A></TT></B>, you don&gt;t need to worry about synchronizing with your drawing thread; the screen saver engine handles that for you.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Your <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> code should be as short as possible, because what it does can affect the performance of the entire system.  <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> should only handle the immediate task of dealing with changes in the direct drawing context, and shouldn&gt;t normally do any actual drawing&mdash;that&gt;s what <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> is for.
+<P>
+<B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> should only return when it can guarantee that the request specified by <I><FONT  color=991122 face=HELVETICA>info</I></FONT> will be strictly obeyed.
+<P>
+The structure pointed to by <I><FONT  color=991122 face=HELVETICA>info</I></FONT> goes away after <B><TT><A HREF="#DirectConnected()">DirectConnected()</A></TT></B> returns, so you should cache the information that interests you. 
+<P>
+<HR>
+<H3>DirectDraw()  see <A HREF="#Draw()">Draw()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>InitCheck(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that the screen saver engine uses to assess the success of your object's construction.  Your version of <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> should return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the object constructed itself properly, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if there was a problem.  The default <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> is called after the constructor, but before the object has been asked to provide any services.  Use it to examine the runtime environment, and let the screen saver engine know if you don&gt;t like what&gt;s going on.  For example, if your screen saver requires hardware-accelerated OpenGL, this would be the place to report an error if the hardware can't be found. 
+<P>
+<HR>
+<H3>LoopOffCount() see <A HREF="#SetLoop()">SetLoop()</A></H3>
+<P>
+<HR>
+<H3>LoopOnCount() see <A HREF="#SetLoop()">SetLoop()</A></H3>
+<P>
+<HR>
+<H3>ModulesChanged() see <A HREF="#SupplyInfo()">SupplyInfo()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SaveState()"></A>SaveState()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SaveState(<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A></TT></B></FONT>&nbsp;*<I><FONT  color=991122 face=HELVETICA>state</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Implement this hook function to save the current state of your screen saver so it can be reconstituted the next time your object is constructed.  You save the state into the <I><FONT  color=991122 face=HELVETICA>state</I></FONT> message, which will be passed to your object's constructor.
+<P>
+If your version of <B><TT><A HREF="#SaveState()">SaveState()</A></TT></B> returns anything other than <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>, the screen saver engine will ignore anything you&gt;ve put into the <I><FONT  color=991122 face=HELVETICA>state</I></FONT> message.
+<P>
+<B><TT><A HREF="#SaveState()">SaveState()</A></TT></B> can be called at any time, and is not guarenteed to be called from <B><TT><A HREF="#StopSaver()">StopSaver()</A></TT></B>; your saver can't depend on it to handle updates to variables being controlled from the configuration view.  You should handle these directly (and immediately) so the user can see their changes happening.
+<P>
+<HR>
+<H3>
+<A NAME="SetLoop()"></A>SetLoop()
+, 
+<A NAME="LoopOnCount()"></A>LoopOnCount()
+, 
+<A NAME="LoopOffCount()"></A>LoopOffCount()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SetLoop(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>on_count</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>off_count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <B><TT><FONT  color=000022 size=+1>LoopOnCount(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>) const
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <B><TT><FONT  color=000022 size=+1>LoopOffCount(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>) const
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions are used for controlling animation loop cycles.  For some screen savers, it makes sense to draw repeatedly, and then to sleep.  For example, a saver to draw ink-blot patterns could draw pixels every frame until enough of them are on the screen, and then spend some time sleeping before clearing the screen and starting over.
+<P>
+Use <B><TT><A HREF="#SetLoop()">SetLoop()</A></TT></B> to implement a screen saver that uses a cycle like this.  Your <B><TT><A HREF="#Draw()">Draw()</A></TT></B> and/or <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> method will be called for <I><FONT  color=991122 face=HELVETICA>on_count</I></FONT> frames (and the frame count will always be 0 to <I><FONT  color=991122 face=HELVETICA>on_count</I></FONT> - 1), and then the saver engine will sleep (for <B><TT><A HREF="#TickSize()">TickSize()</A></TT></B> microseconds) for <I><FONT  color=991122 face=HELVETICA>off_count</I></FONT> frames.
+<P>
+For example, if you <B><TT>SetLoop( 10, 5 )</TT></B>, your saver will draw on frames 0 to 9, and then sleep for the <B><TT><A HREF="#TickSize()">TickSize()</A></TT></B> microseconds 5 times.
+<P>
+The <B><TT><A HREF="#LoopOnCount()">LoopOnCount()</A></TT></B> function returns the current number of drawing frames (the <I><FONT  color=991122 face=HELVETICA>on_count</I></FONT>).
+<P>
+The <B><TT><A HREF="#LoopOffCount()">LoopOffCount()</A></TT></B> function returns the current number of sleep frames (the <I><FONT  color=991122 face=HELVETICA>off_count</I></FONT>).
+<P>
+<HR>
+<H3>
+<A NAME="SetTickSize()"></A>SetTickSize()
+, 
+<A NAME="TickSize()"></A>TickSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SetTickSize(<A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>TickSize(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetTickSize()">SetTickSize()</A></TT></B> sets the drawing frequency to <I><FONT  color=991122 face=HELVETICA>size</I></FONT> microseconds.  This lets you control how often your <B><TT><A HREF="#Draw()">Draw()</A></TT></B> and/or <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> function is called.  The default tick size is 50000 (50 milliseconds).
+<P>
+Setting the tick size to 0 causes <B><TT><A HREF="#Draw()">Draw()</A></TT></B>/<B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> to be called with almost no delay; in reality, there will be some variable delay depending on scheduling latency.  This is actually a good thing because it gives other threads a chance to run, and also lets the screen saver stay responsive when the user wants to get back to work.
+<P>
+If you set tick size to 0, do <I>not</I> call <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#snooze()">snooze()</A></TT></B>, <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#snooze_until()">snooze_until()</A></TT></B>, <B><TT>sleep()</TT></B> or anything that could block indefinitely.  This sort of misbehavior will cause users to delete your screen saver immediately because nobody appreciates a locked up system.  If you do need some sort of delay, call <B><TT><A HREF="#SetTickSize()">SetTickSize()</A></TT></B> before you return from drawing and reset it to 0 during the next frame.
+<P>
+<B><TT><A HREF="#TickSize()">TickSize()</A></TT></B> returns the drawing frequency in microseconds.
+<P>
+<HR>
+<H3>
+<A NAME="StartConfig()"></A>StartConfig()
+, 
+<A NAME="StopConfig()"></A>StopConfig()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>StartConfig(<A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A></TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>configView</I><B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>StopConfig(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Your <B><TT><A HREF="#StartConfig()">StartConfig()</A></TT></B> function is called when the <B>ScreenSaver</B> preference is about to display your module's configuration view.  Any controls that you need to create to let the user fine-tune your module should be added to <I><FONT  color=991122 face=HELVETICA>configView</I></FONT>.  Remember to set the targets of any controls that you add; a good way to do this is to add a custom <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> and <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetTarget()">SetTarget()</A></TT></B> your controls to that custom view in the view's <B><TT><A HREF="../The%20Interface%20Kit/MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B> function.
+<P>
+Don't draw your screen saver's funky display inside <I><FONT  color=991122 face=HELVETICA>configView</I></FONT>; it's for displaying information about your module, and controls for fiddling with its settings.  <B><TT><A HREF="#StartSaver()">StartSaver()</A></TT></B> will be called (with its <I><FONT  color=991122 face=HELVETICA>preview</I></FONT> argument set to <B><TT>true</TT></B>) to give you a chance to show off.
+<P>
+<B><TT><A HREF="#StopConfig()">StopConfig()</A></TT></B> is called when the configuration view of the <B>ScreenSaver </B>prefs is about to vanish.
+<P>
+<HR>
+<H3>
+<A NAME="StartSaver()"></A>StartSaver()
+, 
+<A NAME="StopSaver()"></A>StopSaver()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>StartSaver(<A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A></TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <I><FONT  color=991122 face=HELVETICA>preview</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>StopSaver(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+An invocation of <B><TT><A HREF="#StartSaver()">StartSaver()</A></TT></B> means that the screen saver engine is about to start saving the screen (if <I><FONT  color=991122 face=HELVETICA>preview</I></FONT> is <B><TT>false</TT></B>), or that <B>ScreenSavers</B> is about to display the module in its preview monitor (if <I><FONT  color=991122 face=HELVETICA>preview</I></FONT> is <B><TT>true</TT></B>).
+<P>
+In your implementation of StartSaver(), you can&gt;t add children to the view, and you can&gt;t draw on the screen yet.  Wait for calls to <B><TT><A HREF="#Draw()">Draw()</A></TT></B> or <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B> for that.  The view will become visible after <B><TT><A HREF="#StartSaver()">StartSaver()</A></TT></B> returns.
+<P>
+<B><TT><A HREF="#StartSaver()">StartSaver()</A></TT></B> gives you an opportunity to set up your saver because it tells you exactly how large an area you'll be saving via the <I><FONT  color=991122 face=HELVETICA>view</I></FONT> argument.  You can also use <I><FONT  color=991122 face=HELVETICA>view</I></FONT> to figure out your color space (indirectly, by creating a <A HREF="../Release%20Notes/InterfaceKit.html#BScreen">BScreen</A> with<B><TT> view&ndash;>Window()</TT></B> in the constructor).
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if all is well, or <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if you&gt;re not prepared to draw on the screen.  Screen savers with no preview should return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> when asked to provide one:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t SpiffySaver::StartSaver( BView *view, bool preview )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    /* SpiffySaver has no preview... it&gt;s not THAT spiffy. */
+&nbsp;&nbsp;&nbsp;    if( preview ) return B_ERROR;
+&nbsp;&nbsp;&nbsp;    
+&nbsp;&nbsp;&nbsp;    ...
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#StopSaver()">StopSaver()</A></TT></B> is called when the screen saver is done displaying.  It's called after the very last call to <B><TT><A HREF="#Draw()">Draw()</A></TT></B> or <B><TT><A HREF="#DirectDraw()">DirectDraw()</A></TT></B>.
+<P>
+<HR>
+<H3>StopConfig() see <A HREF="#StartConfig()">StartConfig()</A></H3>
+<P>
+<HR>
+<H3>StopSaver()  see <A HREF="#StartSaver()">StartSaver()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SupplyInfo()"></A>SupplyInfo()
+, 
+<A NAME="ModulesChanged()"></A>ModulesChanged()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SupplyInfo(<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A></TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>ModulesChanged(const</TT></B></FONT> <B><TT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A></TT></B> *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions aren&gt;t currently used by the screen saver system.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+These functions are used for communication between screen saver modules.
+<P>
+The screen saver engine calls <B><TT><A HREF="#SupplyInfo()">SupplyInfo()</A></TT></B> when it wants you to supply  information about your screen saver.  Stuff any information you want other modules to know about into the <I><FONT  color=991122 face=HELVETICA>info</I></FONT> message.  The message is then passed to other screen saver modules through their <B><TT><A HREF="#ModulesChanged()">ModulesChanged()</A></TT></B> functions.
+<P>
+The <B><TT><A HREF="#ModulesChanged()">ModulesChanged()</A></TT></B> hook function is called whenever the list of known screen saver modules changes.  The <I><FONT  color=991122 face=HELVETICA>info</I></FONT> <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> contains an embedded <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> for every valid module.  Each embedded <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> is named after its module's add-on, and contains the information that's returned by the module's <B><TT><A HREF="#SupplyInfo()">SupplyInfo()</A></TT></B> implementation.
+<P>
+As an example&mdash;although not a very useful one&mdash;here we print the name and contents of each embedded message:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void SpiffySaver::ModulesChanged( const BMessage *info )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    int32 num_addons = info->CountNames( B_MESSAGE_TYPE );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    for( int idx = 0; idx &lt; num_addons; idx ++ ) {
+&nbsp;&nbsp;&nbsp;        status_t retval;
+&nbsp;&nbsp;&nbsp;        type_code found_type;
+&nbsp;&nbsp;&nbsp;        char *name;
+&nbsp;&nbsp;&nbsp;        
+&nbsp;&nbsp;&nbsp;        retval = info->GetInfo( B_MESSAGE_TYPE, idx,
+&nbsp;&nbsp;&nbsp;                                &amp;name, &amp;found_type );
+&nbsp;&nbsp;&nbsp;        if( retval == B_OK ) {
+&nbsp;&nbsp;&nbsp;            BMessage msg;
+&nbsp;&nbsp;&nbsp;            retval = info->GetMessage( name, &amp;msg );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;            if( retval == B_OK ) {
+&nbsp;&nbsp;&nbsp;                printf( "A module named "%s" sent this info:n", name );
+&nbsp;&nbsp;&nbsp;              msg.PrintToStream();
+&nbsp;&nbsp;&nbsp;            }
+&nbsp;&nbsp;&nbsp;        }
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Screen Saver Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Screen%20Saver%20Master%20Index.html"><FONT face=HELVETICA>Screen Saver Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

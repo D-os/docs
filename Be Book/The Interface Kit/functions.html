@@ -1,0 +1,686 @@
+<HTML><HEAD><TITLE>The Interface Kit: Global Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Global%20Functions"></A>Global Functions
+</H1>
+<P>
+Library:  libbe.so
+<P>
+This section describes the global C functions defined in the Interface Kit.  All these functions deal with aspects of the systemwide environment for the user interface&mdash;the screen, workspaces, installed fonts, the list of possible colors, and various user preferences.  For mouse and keyboard functions, see <a href="../Input ServerDeviceStateFunctions.html#Input%20Server%20Environment%20Functions">"Input Server Environment Functions"</a>.
+<P>
+In almost all cases, you need a valid (but not necessarily running) <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> object in order to call these functions.
+<P>
+<HR>
+<H3>
+<A NAME="activate_workspace()"></A>activate_workspace()
+, 
+<A NAME="current_workspace()"></A>current_workspace()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>activate_workspace(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>workspace</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>current_workspace(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and return the active workspace, the one that's currently displayed on-screen.  The workspace is identified by an index, 0-based.
+<P>
+<B>See also:  <TT><A HREF="Window.html#WorkspaceActivated()">BWindow::WorkspaceActivated()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="bitmaps_support_space()"></A>bitmaps_support_space()
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>bitmaps_support_space(</TT></B></FONT>color_space <I><FONT  color=991122 face=HELVETICA>space</I></FONT>, uint32 *<I><FONT  color=991122 face=HELVETICA>supportFlags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if BBitmaps can contain graphics in the specified color space, or <B><TT>false</TT></B> if not.
+<P>
+The uint32 pointed to by <I><FONT  color=991122 face=HELVETICA>supportFlags</I></FONT> will be set to a bit field of flags, further describing the support for the specified color space by the <A HREF="Bitmap.html#BBitmap">BBitmap</A> class.  The flags are:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>
+</UL>
+<B><TT>B_VIEWS_SUPPORT_DRAW_BITMAP</TT></B> </TD>
+<TD><B><TT>BView::DrawBitmap()</TT></B> supports drawing BBitmaps of the specified color space.</TD>
+<TR>
+<TD><B><TT>B_BITMAPS_SUPPORT_ATTACHED_VIEWS</TT></B> </TD>
+<TD>Indicates that BBitmaps in the specified color space support attached BViews.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>count_font_families()   see <A HREF="#get_font_family()">get_font_family()</A></H3>
+<P>
+<HR>
+<H3>count_font_styles()   see <A HREF="#get_font_style()">get_font_style()</A></H3>
+<P>
+<HR>
+<H3>count_workspaces()   see <A HREF="#set_workspace_count()">set_workspace_count()</A></H3>
+<P>
+<HR>
+<H3>current_workspace()   see <A HREF="#activate_workspace()">activate_workspace()</A></H3>
+<P>
+<HR>
+<H3>get_click_speed()   see <A HREF="../The%20Input%20Server/InputFunctions.html#set_click_speed()">set_click_speed()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="get_deskbar_frame()"></A>get_deskbar_frame()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_deskbar_frame(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>frame</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Writes the screen coordinates of the current frame of the Deskbar window into <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>.  Returns <B><TT>B_OK</TT></B> on success or an appropriate error code on failure.
+<P>
+<br>
+<P>
+<HR>
+<H3>
+<A NAME="get_font_family()"></A>get_font_family()
+, 
+<A NAME="count_font_families()"></A>count_font_families()
+, 
+<A NAME="get_font_style()"></A>get_font_style()
+, 
+<A NAME="count_font_styles()"></A>count_font_styles()
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_font_family(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, font_family&nbsp;*<I><FONT  color=991122 face=HELVETICA>family</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;*<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>count_font_families(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_font_style(</TT></B></FONT>font_family&nbsp;<I><FONT  color=991122 face=HELVETICA>family</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, font_style&nbsp;*<I><FONT  color=991122 face=HELVETICA>style</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;*<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>count_font_styles(</TT></B></FONT>font_family <I><FONT  color=991122 face=HELVETICA>family</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions are used in combination to get the names of the families and styles of all installed fonts.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 numFamilies = count_font_families();
+&nbsp;&nbsp;&nbsp;for ( int32 i = 0; i &lt; numFamilies; i++ ) {
+&nbsp;&nbsp;&nbsp;    font_family family;
+&nbsp;&nbsp;&nbsp;    uint32 flags;
+&nbsp;&nbsp;&nbsp;    if ( get_font_family(i, &amp;family, &amp;flags) == B_OK ) {
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;        int32 numStyles = count_font_styles(family);
+&nbsp;&nbsp;&nbsp;        for ( int32 j = 0; j &lt; numStyles; j++ ) {
+&nbsp;&nbsp;&nbsp;            font_style style;
+&nbsp;&nbsp;&nbsp;            if ( get_font_style(family, j, &amp;style, &amp;flags)
+&nbsp;&nbsp;&nbsp;                                              == B_OK ) {
+&nbsp;&nbsp;&nbsp;                . . .
+&nbsp;&nbsp;&nbsp;            }
+&nbsp;&nbsp;&nbsp;        }
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#get_font_family()">get_font_family()</A></TT></B> reads one family name from the list of installed fonts, the name at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, and copies it into the <I><FONT  color=991122 face=HELVETICA>family</I></FONT> buffer; <B><TT><A HREF="#count_font_families()">count_font_families()</A></TT></B> returns the number of font families currently installed.  Similarly, <B><TT><A HREF="#get_font_style()">get_font_style()</A></TT></B> reads the name of the style at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> and copies into the <I><FONT  color=991122 face=HELVETICA>style</I></FONT> buffer.  Since each family can have a different set of styles, a <I><FONT  color=991122 face=HELVETICA>family</I></FONT> name must be passed to <B><TT><A HREF="#get_font_style()">get_font_style()</A></TT></B>; <B><TT><A HREF="#count_font_styles()">count_font_styles()</A></TT></B> returns the number of styles for the particular <I><FONT  color=991122 face=HELVETICA>family</I></FONT>.  Family and style names can be up to 64 bytes long including a null terminator.  Indices begin at 0.
+<P>
+The names of installed font families and styles are not indexed in any particular order.  You might want to alphabetize them before displaying them to the user in a menu or list.
+<P>
+If you pass a <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> argument to <B><TT><A HREF="#get_font_family()">get_font_family()</A></TT></B> and <B><TT><A HREF="#get_font_style()">get_font_style()</A></TT></B>, they will place a mask with useful information about the particular family or style in the variable that the argument refers to.  Currently there are just two flags:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_IS_FIXED">B_IS_FIXED</A></TT></B> </TD>
+<TD>Indicates that the font is a nonproportional, or fixed-width, font&mdash;one for which all characters have the same width.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_HAS_TUNED_FONT">B_HAS_TUNED_FONT</A></TT></B> </TD>
+<TD>Indicates that the family or style has versions of the font especially adapted or "tuned" for on-screen display.</TD>
+</TABLE>
+<P>
+If neither flag applies, the variable that <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> points to will be set to 0.
+<P>
+If you find a family and style that has a tuned font, you can set a <A HREF="Font.html#BFont">BFont</A> object to that family and style, then call the object's <B><TT><A HREF="Font.html#GetTunedInfo()">GetTunedInfo()</A></TT></B> function to get details about exactly which combination of font properties (for example, which font sizes) have tuned counterparts.  If you set a <A HREF="Font.html#BFont">BFont</A> so that it has those properties and make it a BView's current font, the tuned version will be used when the <A HREF="View.html#BView">BView</A> draws to the screen.
+<P>
+It's possible for the user to install or remove fonts while the application is running.  However, unless <B><TT><A HREF="#update_font_families()">update_font_families()</A></TT></B> has been called to get the updated list, <B><TT><A HREF="#get_font_family()">get_font_family()</A></TT></B> will provide information on the same set of fonts each time it's called.  The list isn't automatically updated.
+<P>
+<B>See also:  <TT><A HREF="#update_font_families()">update_font_families()</A></TT></B>, <B><TT>BView::SetFont()</TT></B>, <B><TT><A HREF="Font.html#SetFamilyAndStyle()">BFont::SetFamilyAndStyle()</A></TT></B> 
+<P>
+<HR>
+<H3>get_key_repeat_delay()   see   <A HREF="../The%20Input%20Server/InputFunctions.html#set_key_repeat_rate()">set_key_repeat_rate()</A></H3>
+<P>
+<HR>
+<H3>get_key_repeat_rate()   see   <A HREF="../The%20Input%20Server/InputFunctions.html#set_key_repeat_rate()">set_key_repeat_rate()</A></H3>
+<P>
+<HR>
+<H3>get_key_info()  see <A HREF="../The%20Input%20Server/InputFunctions.html#get_key_info()">get_key_info()</A></H3>
+<P>
+<HR>
+<H3>get_key_map() see <A HREF="../The%20Input%20Server/InputFunctions.html#get_key_map()">get_key_map()</A></H3>
+<P>
+<HR>
+<H3>get_menu_info()   see <A HREF="#set_menu_info()">set_menu_info()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="get_pixel_size_for()"></A>get_pixel_size_for()
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_pixel_size_for(</TT></B></FONT>color_space <I><FONT  color=991122 face=HELVETICA>space</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>pixelChunk</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t *<I><FONT  color=991122 face=HELVETICA>rowAlignment</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>pixelsPerChunk</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given the specified color space, returns information about pixel and row alignment for that color space.
+<P>
+On return, <I><FONT  color=991122 face=HELVETICA>pixelChunk</I></FONT> indicates 
+<P>
+<HR>
+<H3>get_mouse_map()   see <A HREF="../The%20Input%20Server/InputFunctions.html#set_mouse_map()">set_mouse_map()</A></H3>
+<P>
+<HR>
+<H3>get_mouse_speed()   see <A HREF="../The%20Input%20Server/InputFunctions.html#set_mouse_map()">set_mouse_map()</A></H3>
+<P>
+<HR>
+<H3>get_mouse_type()   see <A HREF="../The%20Input%20Server/InputFunctions.html#set_mouse_map()">set_mouse_map()</A></H3>
+<P>
+<HR>
+<H3>set_scroll_bar_info() </H3>
+<P>
+<HR>
+<H3>
+<A NAME="idle_time()"></A>idle_time()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>idle_time(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of microseconds since the user last manipulated the mouse or keyboard.  This information isn't specific to a particular application; <B><TT>idle_time()<A HREF="#idle_time()">set_scroll_bar_info() </A></TT></B> tells you when the user last directed an action at <I>any</I> application, not just yours.
+<P>
+<HR>
+<H3>
+<A NAME="keyboard_navigation_color()"></A>keyboard_navigation_color()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+rgb_color <B><TT><FONT  color=000022 size=+1>keyboard_navigation_color(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the color that should be used to mark the <A HREF="View.html#BView">BView</A> that's currently in focus, when the user can change the focus from the keyboard.  The keyboard navigation color is typically used to underline the labels of control devices and to outline text fields where the user can type.
+<P>
+<B>See also:  </B>the <A HREF="View.html#BView">BView</A> class 
+<P>
+<HR>
+<H3>modifiers()  see <A HREF="../The%20Input%20Server/InputFunctions.html#modifiers()">modifiers()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="run_add_printer_panel()"></A>run_add_printer_panel()
+, 
+<A NAME="run_select_printer_panel()"></A>run_select_printer_panel()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>run_add_printer_panel(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>run_select_printer_panel(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These two functions have the Print Server place panels on-screen where the user can set up a printer and choose which printer to use.  <B><TT><A HREF="#run_add_printer_panel()">run_add_printer_panel()</A></TT></B> displays a panel that informs the server about a new printer.  <B><TT><A HREF="#run_select_printer_panel()">run_select_printer_panel()</A></TT></B> displays a panel that lists all known printers and lets the user select one.
+<P>
+<B>See also:  </B>the <A HREF="PrintJob.html#BPrintJob">BPrintJob</A> class 
+<P>
+<HR>
+<H3>set_click_speed()  see <A HREF="../The%20Input%20Server/InputFunctions.html#set_click_speed()">set_click_speed()</A></H3>
+<P>
+<HR>
+<H3>set_key_repeat_rate()  see <A HREF="../The%20Input%20Server/InputFunctions.html#set_key_repeat_rate()">set_key_repeat_rate()</A></H3>
+<P>
+<HR>
+<H3>set_keyboard_locks()  see <A HREF="../The%20Input%20Server/InputFunctions.html#set_keyboard_locks()">set_keyboard_locks()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="set_menu_info()"></A>set_menu_info()
+, 
+<A NAME="get_menu_info()"></A>get_menu_info()
+</H3>
+<P>
+Declared in:  be/interface/Menu.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_menu_info(</TT></B></FONT>menu_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_menu_info(</TT></B></FONT>menu_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and get the user's preferences for how menus should look and work.  User's express their preferences with the Menu application, which calls <B><TT><A HREF="#set_menu_info()">set_menu_info()</A></TT></B>.  <B><TT><A HREF="#get_menu_info()">get_menu_info()</A></TT></B> writes the current preferences into the <B><TT>
+<A NAME="menu_info"></A>menu_info
+</TT></B> structure that into refers to.  This structure contains the following fields:
+<P>
+float <B><TT>
+<A NAME="font_size"></A>font_size
+<br>
+</TT></B>The size of the font that will be used to display menu items.
+<P>
+font_name <B><TT>
+<A NAME="font"></A>font
+<br>
+</TT></B>The name of the font that's used to display menu items.
+<P>
+rgb_color <B><TT>
+<A NAME="background_color"></A>background_color
+<br>
+</TT></B>The background color of the menu.
+<P>
+int32 <B><TT>
+<A NAME="separator"></A>separator
+<br>
+</TT></B>The style of horizontal line that separates groups of items in a menu.  The value is an index ranging from 0 through 2; there are three possible separators.
+<P>
+bool <B><TT>
+<A NAME="click_to_open"></A>click_to_open
+<br>
+</TT></B>Whether it's possible to open a menu by clicking in the item that controls it.  The default value is <B><TT>true</TT></B>.
+<P>
+bool <B><TT>
+<A NAME="triggers_always_shown"></A>triggers_always_shown
+<br>
+</TT></B>Whether trigger characters are always marked in menus and menu bars, regardless of whether the menu hierarchy is the target for keyboard actions.  The default value is <B><TT>false</TT></B>.
+<P>
+(At present, both functions always return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.)
+<P>
+<B>See also:  </B>the <A HREF="Menu.html#BMenu">BMenu</A> class 
+<P>
+<HR>
+<H3>set_modifier_key()  see <A HREF="../The%20Input%20Server/InputFunctions.html#set_modifier_key()">set_modifier_key()</A></H3>
+<P>
+<HR>
+<H3>set_mouse_map()  see <A HREF="../The%20Input%20Server/InputFunctions.html#set_mouse_map()">set_mouse_map()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="set_screen_space()"></A>set_screen_space()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_screen_space(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>space</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>makeDefault</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Changes the configuration of the screen&mdash;its depth and dimensions&mdash;to match the values specified in the <I><FONT  color=991122 face=HELVETICA>space</I></FONT> constant, which can be any of the following:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_8_BIT_640x400</TT></B> </TD>
+<TD></TD>
+<TD></TD>
+<TD></TD>
+<TR>
+<TD><B><TT>B_8_BIT_640x480</TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_15_BIT_640x480">B_15_BIT_640x480</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_16_BIT_640x480">B_16_BIT_640x480</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_640x480</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_800x600</TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_15_BIT_800x600">B_15_BIT_800x600</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_16_BIT_800x600">B_16_BIT_800x600</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_800x600</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_1024x768</TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_15_BIT_1024x768">B_15_BIT_1024x768</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_16_BIT_1024x768">B_16_BIT_1024x768</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_1024x768</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_1152x900</TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_15_BIT_1152x900">B_15_BIT_1152x900</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_16_BIT_1152x900">B_16_BIT_1152x900</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_1152x900</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_1280x1024</TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_15_BIT_1280x1024">B_15_BIT_1280x1024</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_16_BIT_1280x1024">B_16_BIT_1280x1024</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_1280x1024</TT></B> </TD>
+<TR>
+<TD><B><TT>B_8_BIT_1600x1200</TT></B> </TD>
+<TD><B><TT><A HREF="misc.html#B_15_BIT_1600x1200">B_15_BIT_1600x1200</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_16_BIT_1600x1200">B_16_BIT_1600x1200</A></TT></B></TD>
+<TD><B><TT>B_32_BIT_1600x1200</TT></B> </TD>
+</TABLE>
+<P>
+The first part of the constant designates the screen depth and color space.  <B><TT>B_8_BIT</TT></B>... refers to the <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space.  The other values correspond to the  <B><TT><A HREF="misc.html#B_RGB15">B_RGB15</A></TT></B>, <B><TT><A HREF="misc.html#B_RGB16">B_RGB16</A></TT></B>, and <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B> color spaces, as appropriate.  Although constants are defined for 15-bit screen depths, the operating system currently doesn't support them.  The second part of the constant designates the pixel resolution of the screen.  For example, <B><TT>B_32_BIT_1280x1024</TT></B> means that the frame buffer is 32 bits deep (<B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B>) while the screen grid is 1,280 pixels wide and 1,024 pixels high.
+<P>
+This function affects the screen at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>.  Since the BeOS currently doesn't support more than one screen, the only index that makes sense is 0.
+<P>
+The change to the screen takes effect immediately.  If the <I><FONT  color=991122 face=HELVETICA>makeDefault</I></FONT> flag is <B><TT>true</TT></B>, the new configuration also becomes the default and will be used the next time the machine is turned on.  If <I><FONT  color=991122 face=HELVETICA>makeDefault</I></FONT> is <B><TT>false</TT></B>, the configuration is in effect for the current session only.
+<P>
+Since not all configurations are possible for all graphics cards, <B><TT><A HREF="#set_screen_space()">set_screen_space()</A></TT></B> can fail.  It returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if successful, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if not.
+<P>
+This function is designed for preferences applications&mdash;like the Screen application&mdash;that permit users to make system-wide choices about the screen.  Other applications should respect those choices and refrain from modifying them.
+<P>
+The current screen configuration can be obtained from the <A HREF="Screen.html#BScreen">BScreen</A> object.
+<P>
+<B>See also:  </B>the <A HREF="Screen.html#BScreen">BScreen</A> class, <B><TT><A HREF="Window.html#ScreenChanged()">BWindow::ScreenChanged()</A></TT></B>, <B>The Game Kit</B> chapter
+<P>
+<HR>
+<H3>
+<A NAME="set_scroll_bar_info()"></A>set_scroll_bar_info()
+, 
+<A NAME="get_scroll_bar_info()"></A>get_scroll_bar_info()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_scroll_bar_info(</TT></B></FONT>scroll_bar_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_scroll_bar_info(</TT></B></FONT>scroll_bar_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and report preferences that the <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> class uses when it creates a new scroll bar.  <B><TT><A HREF="#set_scroll_bar_info()">set_scroll_bar_info()</A></TT></B> reads the values contained in the <B><TT><A HREF="misc.html#scroll_bar_info">scroll_bar_info</A></TT></B> structure that <I><FONT  color=991122 face=HELVETICA>info</I></FONT> refers to and sets the system-wide preferences accordingly; <B><TT><A HREF="#get_scroll_bar_info()">get_scroll_bar_info()</A></TT></B> writes the current preferences into the structure provided.
+<P>
+The <B><TT><A HREF="misc.html#scroll_bar_info">scroll_bar_info</A></TT></B> structure contains the following fields:
+<P>
+bool <B><TT>
+<A NAME="proportional"></A>proportional
+<br>
+true</TT></B> if scroll bars should have a knob that grows and shrinks to show what proportion of the document is currently visible on-screen, and <B><TT>false</TT></B> if not.  Scroll knobs are proportional by default.
+<P>
+bool <B><TT>
+<A NAME="double_arrows"></A>double_arrows
+<br>
+true</TT></B> if a set of double arrows (for scrolling in both directions) should appear at each end of the scroll bar, or <B><TT>false</TT></B> if only single arrows (for scrolling in one direction only) should be used.  Double arrows are the default.
+<P>
+int32 <B><TT>
+<A NAME="knob"></A>knob
+<br>
+</TT></B>An index that picks the pattern for the knob.  Only values of 0, 1, and 2 are currently valid.  The patterns can be seen in the ScrollBar preferences application.  The pattern at index 1 is the default.
+<P>
+int32 <B><TT>
+<A NAME="min_knob_size"></A>min_knob_size
+<br>
+</TT></B>The length of the scroll knob, in pixels.  This is the minimum size for a proportional knob and the fixed size for one that's not proportional.  The default is&nbsp;15.
+<P>
+The user can set these preferences with the ScrollBar application.  Applications can call <B><TT><A HREF="#get_scroll_bar_info()">get_scroll_bar_info()</A></TT></B> to find out what choices the user made, but should refrain from calling <B><TT><A HREF="#set_scroll_bar_info()">set_scroll_bar_info()</A></TT></B>.  That function is desigined for utilities, like the ScrollBar application, that enable users to set preferences that are respected system-wide.
+<P>
+If successful, these functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>; if not, they return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<B>See also:  </B>the <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> class
+<P>
+<HR>
+<H3>
+<A NAME="set_workspace_count()"></A>set_workspace_count()
+, 
+<A NAME="count_workspaces()"></A>count_workspaces()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>set_workspace_count(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>numWorkspaces</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>count_workspaces(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and return the number of workspaces the user has available.  There can be as many as 32 workspaces and as few as 1.  The choice of how many there should be is usually left to the user and the Workspaces application.
+<P>
+<B>See also:  <TT><A HREF="#activate_workspace()">activate_workspace()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="system_colors()"></A>system_colors()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const color_map *<B><TT><FONT  color=000022 size=+1>system_colors(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the system color map.  This function duplicates the <A HREF="Screen.html#BScreen">BScreen</A> <B><TT><A HREF="Screen.html#ColorMap()">ColorMap()</A></TT></B> function, but it permits software that isn't concerned about the on-screen display to get the color map without referring to a particular screen.  (Actually it returns the color map for the main screen.)
+<P>
+The <B><TT><A HREF="misc.html#color_map">color_map</A></TT></B> structure returned by this function belongs to the operating system.
+<P>
+<B>See also:  <TT><A HREF="Screen.html#ColorMap()">BScreen::ColorMap()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="update_font_families()"></A>update_font_families()
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>update_font_families(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>checkOnly</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Updates the list of installed fonts, so that it reflects any that have been added or removed since the last time the list was updated.  Until the list is updated, <B><TT><A HREF="#get_font_family()">get_font_family()</A></TT></B> operates assuming the set of fonts that were installed when the application started up.  If the list is unchanged since the last update (or since startup), this function returns <B><TT>false</TT></B>; if a font has been installed or an installed font has been removed, it returns <B><TT>true</TT></B>.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>checkOnly</I></FONT> flag is <B><TT>true</TT></B>, <B><TT><A HREF="#get_font_family()">get_font_family()</A></TT></B> only reports whether the list has changed; it doesn't modify the current list.  If the flag is <B><TT>false</TT></B>, it contacts the Application Server to get the updated list, a much more expensive operation.
+<P>
+<B>See also:  <TT><A HREF="#get_font_family()">get_font_family()</A></TT></B> 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

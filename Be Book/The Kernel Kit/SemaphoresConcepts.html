@@ -1,0 +1,204 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Semaphore Concepts</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Semaphore%20Concepts"></A>Semaphore Concepts
+</H1>
+<P>
+A semaphore acts as a key that a thread must acquire in order to continue execution.  Any thread that can identify a particular semaphore can attempt to acquire it by passing its <B><TT><A HREF="Semaphores.html#sem_id">sem_id</A></TT></B> identifier&mdash;a system-wide number that's assigned when the semaphore is created&mdash;to the <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> function.  The function blocks until the semaphore is actually acquired.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+An alternate function, <B><TT><A HREF="Semaphores.html#acquire_sem_etc()">acquire_sem_etc()</A></TT></B> lets you specify the amount of time you're willing to wait for the semaphore to be acquired, and let you acquire the semaphore more than once in a single go.  Unless otherwise noted, characteristics ascribed to <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> apply to <B><TT><A HREF="Semaphores.html#acquire_sem_etc()">acquire_sem_etc()</A></TT></B> as well.) 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+When a thread acquires a semaphore, that semaphore (typically) becomes unavailable for acquisition by other threads.  The semaphore remains unavailable until it's passed in a call to the <B><TT><A HREF="Semaphores.html#release_sem()">release_sem()</A></TT></B> function.
+<P>
+The code that a semaphore "protects" lies between the calls to <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> and <B><TT><A HREF="Semaphores.html#release_sem()">release_sem()</A></TT></B>.  The disposition of these functions in your code usually follows this pattern:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if (acquire_sem(my_semaphore) == B_NO_ERROR) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Protected code goes here. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;release_sem(my_semaphore);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Keep in mind that...
+<P>
+<UL>
+<LI>The calls to the acquire and release functions needn't be locally balanced (although this is by far the most common use).  A semaphore can be acquired within one function and released in another.  Acquisition and release of the same semaphore can even be performed by two different threads.
+<P>
+<LI>Checking the value returned by <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> is <I>extremely</I> important.  If an acquire-blocked thread is unblocked by a signal (a return o f <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>), the thread shouldn't procede to the critical section.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Thread%20Queue"></A>The Thread Queue
+</H3>
+<P>
+Every semaphore has its own <I>thread queue</I>:  This is a list that identifies the threads that are waiting to acquire the semaphore.  A thread that attempts to acquire an unavailable semaphore is placed at the tail of the semaphore's thread queue where it sits blocked in the <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> call.  Each call to<B> <TT><A HREF="Semaphores.html#release_sem()">release_sem()</A></TT></B> umblocks the thread at the head of that semaphore's queue, thus allowing the thread to return from its call to <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B>.
+<P>
+Semaphores don't discriminate between acquisitive threads&mdash;they don't prioritize or otherwise reorder the threads in their queues&mdash;the oldest waiting thread is always the next to acquire the semaphore.  
+<P>
+<A NAME="15658:%20head2:%20The%20Thread%20Count"></A>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Thread%20Count"></A>The Thread Count
+</H3>
+<P>
+To assess availability, a semaphore looks at its <I>thread count</I>.  This is a counting variable that's initialized when the semaphore is created.  Ostensibly, a thread count's initial value (which is passed as the first argument to <B><TT><A HREF="Semaphores.html#create_sem()">create_sem()</A></TT></B>) is the number of threads that can acquire the semaphore at a time.  (As we'll see later, this isn't the entire story, but it's good enough for now.)  For example, a semaphore that's used as a mutually exclusive lock takes an initial thread count of 1&mdash;in other words, only one thread can acquire the semaphore at a time.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+An initial thread count of 1 is by far the most common use; a thread count of 0 is also useful.  Other counts are much less common.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Calls to <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> and <B><TT><A HREF="Semaphores.html#release_sem()">release_sem()</A> </TT></B>alter the semaphore's thread count:  <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A> </TT></B>decrements the count, and <B><TT><A HREF="Semaphores.html#release_sem()">release_sem()</A></TT></B> increments it.  When you call <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B>, the function looks at the thread count (before decrementing it) to determine if the semaphore is available:  
+<P>
+<UL>
+<LI>If the count is greater than zero, the semaphore is available for acquisition, so the function returns immediately.  
+<P>
+<LI>If the count is zero or less, the semaphore is unavailable, and the thread is placed in the semaphore's thread queue.
+<P>
+</UL>
+<P>
+The initial thread count isn't an inviolable limit on the number of threads that can acquire a given semaphore&mdash;it's simply the initial value for the sempahore's thread count variable.  For example, if you create a semaphore with an initial thread count of 1 and then immediately call <B><TT><A HREF="Semaphores.html#release_sem()">release_sem()</A></TT></B> five times, the semaphore's thread count will increase to 6.  Furthermore, although you can't initialize the thread count to less-than-zero, an initial value of zero itself is common&mdash;it's an integral part of using semaphores to impose an execution order (as demonstrated later).
+<P>
+Summarizing the description above, there are three significant thread count value ranges:
+<P>
+<UL>
+<LI>A positive thread count (<I>n</I>) means that there are no threads in the semaphore's queue, and the next <I>n</I> <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A> </TT></B>calls will return without blocking.
+<P>
+<LI>If the count is 0, there are no queued threads, but the next <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> call will block.
+<P>
+<LI>A negative count (-<I>n</I>) means there are <I>n</I> threads in the semaphore's thread queue, and the next call to <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> will block.
+<P>
+</UL>
+<P>
+Although it's possible to retrieve the value of a semaphore's thread count (by looking at a field in the semaphore's <B><TT><A HREF="Semaphores.html#sem_info">sem_info</A></TT></B> structure, as described later), you should only do so for amusement&mdash;while you're debugging, for example.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+You should never predicate your code on the basis of a semaphore's thread count. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Deleting%20a%20Semaphore"></A>Deleting a Semaphore
+</H3>
+<P>
+Every semaphore is owned by a team (the team of the thread that called<B><TT> create_sem()</TT></B>).   When the last thread in a team dies, it takes the team's semaphores with it.  
+<P>
+Prior to the death of a team, you can explicitly delete a semaphore through the <B><TT><A HREF="Semaphores.html#delete_sem()">delete_sem()</A></TT></B> call.  Note, however, that <B><TT><A HREF="Semaphores.html#delete_sem()">delete_sem()</A></TT></B> must be called from a thread that's a member of the team that owns the semaphore&mdash;you can't delete another team's semaphores.
+<P>
+You're allowed to delete a semaphore even if it still has threads in its queue.  However, you usually want to avoid this, so deleting a semaphore may require some thought:  When you delete a semaphore (or when it dies naturally), all its queued threads are immediately allowed to continue&mdash;they all return from<B><TT> <A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> at once.  You can distinguish between a "normal" acquisition and a "semaphore deleted" acquisition by the value that's returned by <B><TT><A HREF="Semaphores.html#acquire_sem()">acquire_sem()</A> </TT></B>(the specific return values are listed in the function descriptions, below).
+<P>
+<HR>
+<H3>
+<A NAME="Inter-application%20Semaphores"></A>Inter-application Semaphores
+</H3>
+<P>
+The <B><TT><A HREF="Semaphores.html#sem_id">sem_id</A></TT></B> number that identifies a semaphore is a system-wide token&mdash;the <B><TT><A HREF="Semaphores.html#sem_id">sem_id</A> </TT></B>values that you create in your application will identify your semaphores in all other applications as well.  It's possible, therefore, to broadcast the<B><TT> <A HREF="Semaphores.html#sem_id">sem_id</A></TT></B> numbers of the semaphores that you create and so allow other applications to acquire and release them&mdash;but it's not a very good idea.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+A semaphore is best controlled if it's created, acquired, released, and deleted within the same team.  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If you want to provide a protected service or resource to other applications, you should accept messages from other applications and then spawn threads that acquire and release the appropriate semaphores.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

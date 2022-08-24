@@ -1,0 +1,301 @@
+<HTML><HEAD><TITLE>Backgrounds: Background Images</TITLE></HEAD><BODY BGCOLOR=#ffffff><!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="../index.html"><FONT face=HELVETICA>The Be Book Table of Contents</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+<HR>
+<H1><A NAME="">Background Images</A></H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/be_apps/Tracker/Background.h">be/be_apps/Tracker/Background.h</A>
+<P>
+Tracker lets you put background images on each workspace on your desktop and in the background of individual Tracker folder windows.
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/warningBullet.gif"></TD>
+<TD>Currently, Tracker only paints the background of a folder window when the window is in icon (or mini-icon) view mode.
+</TD>
+</TR>
+</TABLE>
+<P>
+<HR>
+<H3><A NAME="">Background Attributes</A></H3>
+<P>
+Information about the background image for a folder is stored as a flattened <A HREF="../The%20Application%20Kit/Message.html#BMessage">BMessage</A> in the folder's <B><TT>B_BACKGROUND_INFO</TT></B> file attribute.  The <B><TT>B_DESKTOP_FOLDER</TT></B> directory holds the background info for the workspaces (one flattened message per workspace).
+<P>
+The <B><TT>B_BACKGROUND_INFO</TT></B> attribute's data is a flattened <A HREF="../The%20Application%20Kit/Message.html#BMessage">BMessage</A> with these fields:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Name</B></TH>
+<TH>Type</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_BACKGROUND_IMAGE</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Media%20Kit/misc_api.html#The%20media_format%20structure%20can%20describe%20any%20media%20data%20format%20the%20BeOS%20can%20support.">B_STRING_TYPE</A></TT></B></TD>
+<TD>The full path to the image.  The image needs to be in a format understood by one of the translators (see the Translation Kit) installed on the system.</TD>
+<TR>
+<TD><B><TT>B_BACKGROUND_MODE</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Media%20Kit/misc_api.html#The%20media_format%20structure%20can%20describe%20any%20media%20data%20format%20the%20BeOS%20can%20support.">B_INT32_TYPE</A></TT></B></TD>
+<TD>Specifies how the background is placed (tiled, centered, etc).  See the list of mode constants after this table.</TD>
+<TR>
+<TD><B><TT>B_BACKGROUND_ORIGIN</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>If <B><TT>B_BACKGROUND_MODE</TT></B> is <B><TT>B_BACKGROUND_MODE_USE_ORIGIN</TT></B>, the image will be drawn with the upper left corner at this point (which can be anything, even negative).</TD>
+<TR>
+<TD><B><TT>B_BACKGROUND_ERASE_TEXT</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD>If <B><TT><A HREF="../The%20Interface%20Kit/Font.html#true">true</A></TT></B> the icon label will have its background erased to the window's background color, otherwise the label will be drawn on top of the image (which could make it difficult to read).</TD>
+<TR>
+<TD><B><TT>B_BACKGROUND_WORKSPACES</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_UINT32_TYPE">B_UINT32_TYPE</A></TT></B></TD>
+<TD>A bitmask indicating which workspaces the image should be drawn on. This only applies to Desktop images.</TD>
+</TABLE>
+<P>
+The <B><TT>B_BACKGROUND_MODE</TT></B> values are:
+<P>
+<UL>
+<LI><B><TT>B_BACKGROUND_MODE_USE_ORIGIN</TT></B>.  Draw the image once at the location specified by <B><TT>B_BACKGROUND_ORIGIN</TT></B>, relative to the upper-left corner of the window or Desktop.
+<P>
+<LI><B><TT>B_BACKGROUND_MODE_CENTERED</TT></B> (only works on Desktop)  Center the image.
+<P>
+<LI><B><TT>B_BACKGROUND_MODE_SCALED</TT></B> (only works on Desktop)  Scale the image to fit.
+<P>
+<LI><B><TT>B_BACKGROUND_MODE_TILED</TT></B> Tile the image to cover the entire window/Desktop.
+</UL>
+<P>
+You can write multiple sets of these message fields into the Desktop's <B><TT>B_BACKGROUND_INFO</TT></B> attribute message in order to put different images on different workspaces.  The fields are correlated by index.  Don't put different <B><TT>B_BACKGROUND_IMAGE</TT></B> paths onto the same workspace though, the behavior is undefined.
+<P>
+For example, this is OK:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;/* ALMOST_ALL_WORKSPACES is every workspace except the first */
+&nbsp;&nbsp;&nbsp;const int32 ALMOST_ALL_WORKSPACES = 0xffffffff - 0x00000001;
+&nbsp;&nbsp;&nbsp;const int32 OTHER_WORKSPACE = 0x00000001;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;BMessage backgrounds;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Add the first image to ALMOST_ALL_WORKSPACES */
+&nbsp;&nbsp;&nbsp;backgrounds.AddString( B_BACKGROUND_IMAGE, "/boot/home/nice.jpg" );
+&nbsp;&nbsp;&nbsp;backgrounds.AddInt32( B_BACKGROUND_WORKSPACES, ALMOST_ALL_WORKSPACES );
+&nbsp;&nbsp;&nbsp;backgrounds.AddInt32( B_BACKGROUND_MODE, B_BACKGROUND_MODE_TILED );
+&nbsp;&nbsp;&nbsp;backgrounds.AddPoint( B_BACKGROUND_ORIGIN, BPoint( 0.0, 0.0 ) );
+&nbsp;&nbsp;&nbsp;backgrounds.AddBool( B_BACKGROUND_ERASE_TEXT, true );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Add the second image to the OTHER_WORKSPACE */
+&nbsp;&nbsp;&nbsp;backgrounds.AddString( B_BACKGROUND_IMAGE, "/boot/home/nicer.jpg" );
+&nbsp;&nbsp;&nbsp;backgrounds.AddInt32( B_BACKGROUND_WORKSPACES, OTHER_WORKSPACE );
+&nbsp;&nbsp;&nbsp;backgrounds.AddInt32( B_BACKGROUND_MODE, B_BACKGROUND_MODE_SCALED );
+&nbsp;&nbsp;&nbsp;backgrounds.AddPoint( B_BACKGROUND_ORIGIN, BPoint( 0.0, 0.0 ) );
+&nbsp;&nbsp;&nbsp;backgrounds.AddBool( B_BACKGROUND_ERASE_TEXT, true );
+&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+This is <I>not</I> OK, and results in undefined behaviour:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;const int32 ALL_WORKSPACES = 0xffffffff;
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;BMessage backgrounds;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;backgrounds.AddString( B_BACKGROUND_IMAGE, "/boot/home/nice.jpg" );
+&nbsp;&nbsp;&nbsp;backgrounds.AddInt32( B_BACKGROUND_WORKSPACES, ALL_WORKSPACES );
+&nbsp;&nbsp;&nbsp;/* ... other B_BACKGROUND_* data here ... */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;backgrounds.AddString( B_BACKGROUND_IMAGE, "/boot/home/nicer.jpg" );
+&nbsp;&nbsp;&nbsp;backgrounds.AddInt32( B_BACKGROUND_WORKSPACES, ALL_WORKSPACES );
+&nbsp;&nbsp;&nbsp;/* ... other B_BACKGROUND_* data here ... */
+&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+<TABLE  cellpadding=4>
+<TR><TD></TD>
+<TD VALIGN=TOP><IMG SRC="../art/featureBullet.gif"></TD>
+<TD>The <B><TT>B_BACKGROUND_INFO</TT></B> attribute's contents might be extended in the future (but will remain compatible with the existing attribute data). Be prepared to preserve any data you don't recognize by reading in the existing <B><TT>B_BACKGROUND_INFO</TT></B> attribute (if one exists).
+</TD>
+</TR>
+</TABLE>
+<P>
+<HR>
+<H3><A NAME="">Special Folders</A></H3>
+<P>
+There are two special folders you can apply attributes to:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Directory</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_DESKTOP_DIRECTORY</TT></B></TD>
+<TD>Applying the <B><TT>B_BACKGROUND_INFO</TT></B> attribute to <B><TT>B_DESKTOP_DIRECTORY</TT></B> (see <B><TT><A HREF="../The%20Storage%20Kit/Directory.html#find_directory()">find_directory()</A></TT></B> in the Storage Kit) will change the Desktop's background image (but see below to find out how to tell the Tracker to update the image).</TD>
+<TR>
+<TD><B>Tracker/DefaultFolderTemplate</B> inside <B><TT>B_USER_SETTINGS_DIRECTORY</TT></B></TD>
+<TD>Applying the <B><TT>B_BACKGROUND_INFO</TT></B> attribute to this directory sets the default folder background.  Any folder that doesn't have its own <B><TT>B_BACKGROUND_INFO</TT></B> will display this image.</TD>
+</TABLE>
+<P>
+<HR>
+<H3><A NAME="">Notifying Tracker</A></H3>
+<P>
+Once you've written an appropriate <B><TT>B_BACKGROUND_INFO</TT></B> attribute, you'll want to tell the Tracker to pick up the new background image.
+<P>
+Send the Tracker's main looper (remember, the Tracker's signature is "application/x-vnd.Be-TRAK") a <A HREF="../The%20Application%20Kit/Message.html#BMessage">BMessage</A> with a <I><FONT  color=991122 face=HELVETICA>what</I></FONT> of <B><TT>B_RESTORE_BACKGROUND_IMAGE</TT></B> to tell it to reload the desktop background image.
+<P>
+Sending the same message to the looper for a specific Tracker window will tell <I>that window</I> to reload its background image.  This is a little trickier because you need to find the right window.
+<P>
+<H4><A NAME="">Refreshing All Windows</A></H4>
+<P>
+Taking the shotgun approach, you can tell all of the open Tracker windows to repaint their backgrounds by using Tracker scripting (see Scripting in the Application Kit).  You'll need to do this if you change the default folder background image.
+<P>
+This code asks the Tracker for windows that have a "Poses" property and sends them a <B><TT>B_RESTORE_BACKGROUND_IMAGE</TT></B>.  This updates every Tracker window that's displaying a folder's contents.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessenger tracker( "application/x-vnd.Be-TRAK" );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;int32 i = 0;
+&nbsp;&nbsp;&nbsp;BMessage reply;
+&nbsp;&nbsp;&nbsp;int32 err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;do {
+&nbsp;&nbsp;&nbsp;    /* scripting message */
+&nbsp;&nbsp;&nbsp;    BMessage msg( B_GET_PROPERTY );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* look at the "Poses" in every Tracker window */
+&nbsp;&nbsp;&nbsp;    msg.AddSpecifier( "Poses" );
+&nbsp;&nbsp;&nbsp;    msg.AddSpecifier( "Window", i++ );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    reply.MakeEmpty();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    tracker.SendMessage( &amp;msg, &amp;reply );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* break out of the loop when we're at the end of 
+&nbsp;&nbsp;&nbsp;     * the windows
+&nbsp;&nbsp;&nbsp;     */
+&nbsp;&nbsp;&nbsp;    if( reply.what == B_MESSAGE_NOT_UNDERSTOOD &amp;&amp;
+&nbsp;&nbsp;&nbsp;        reply.FindInt32( "error", &amp;err ) == B_OK &amp;&amp;
+&nbsp;&nbsp;&nbsp;        err == B_BAD_INDEX )
+&nbsp;&nbsp;&nbsp;        break;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* don't stop for windows that don't understand
+&nbsp;&nbsp;&nbsp;     * a request for "Poses"; they're not displaying
+&nbsp;&nbsp;&nbsp;     * folders
+&nbsp;&nbsp;&nbsp;     */
+&nbsp;&nbsp;&nbsp;    if( reply.what == B_MESSAGE_NOT_UNDERSTOOD &amp;&amp;
+&nbsp;&nbsp;&nbsp;        reply.FindInt32( "error", &amp;err ) == B_OK &amp;&amp;
+&nbsp;&nbsp;&nbsp;        err != B_BAD_SCRIPT_SYNTAX )
+&nbsp;&nbsp;&nbsp;        continue;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    BMessenger m;
+&nbsp;&nbsp;&nbsp;    if( reply.FindMessenger( "result", &amp;m ) == B_OK) {
+&nbsp;&nbsp;&nbsp;        /* m is the messenger of a Tracker window with
+&nbsp;&nbsp;&nbsp;         * a folder inside
+&nbsp;&nbsp;&nbsp;         */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;        m.SendMessage( B_RESTORE_BACKGROUND_IMAGE );
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;} while( true );</PRE>
+<P>
+<H4><A NAME="">Refreshing One Window</A></H4>
+<P>
+If want to refresh the background of the folder you've changed, you scan through the open folders using code similar to the above, until you find the folder with the "Path" you're interested in.  Once you've got the right window, you send it a <B><TT>B_RESTORE_BACKGROUND_IMAGE</TT></B> message.  Using this technique is nicer (from the user's point of view) because only one Tracker window gets updated.
+<P>
+Here's the same code, modified to target a specific path.  Assume you've still got the path in question in <I><FONT  color=991122 face=HELVETICA>the_path</I></FONT> (you just used it as a <B><TT>B_BACKGROUND_IMAGE</TT></B>):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessenger tracker( "application/x-vnd.Be-TRAK" );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* CHANGE: we'll increment "i" at the start of the loop
+&nbsp;&nbsp;&nbsp; *         now; this lets us use it later when we find
+&nbsp;&nbsp;&nbsp; *         a Window with a Poses
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;int32 i = -1;
+&nbsp;&nbsp;&nbsp;BMessage reply;
+&nbsp;&nbsp;&nbsp;int32 err;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;do {
+&nbsp;&nbsp;&nbsp;    /* CHANGE: */
+&nbsp;&nbsp;&nbsp;    i++;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* scripting message */
+&nbsp;&nbsp;&nbsp;    BMessage msg( B_GET_PROPERTY );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* look at the "Poses" in every Tracker window */
+&nbsp;&nbsp;&nbsp;    msg.AddSpecifier( "Poses" );
+&nbsp;&nbsp;&nbsp;    msg.AddSpecifier( "Window", i ); /* CHANGE */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    reply.MakeEmpty();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    tracker.SendMessage( &amp;msg, &amp;reply );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* break out of the loop when we're at the end of 
+&nbsp;&nbsp;&nbsp;     * the windows
+&nbsp;&nbsp;&nbsp;     */
+&nbsp;&nbsp;&nbsp;    if( reply.what == B_MESSAGE_NOT_UNDERSTOOD &amp;&amp;
+&nbsp;&nbsp;&nbsp;        reply.FindInt32( "error", &amp;err ) == B_OK &amp;&amp;
+&nbsp;&nbsp;&nbsp;        err == B_BAD_INDEX )
+&nbsp;&nbsp;&nbsp;        break;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* don't stop for windows that don't understand
+&nbsp;&nbsp;&nbsp;     * a request for "Poses"; they're not displaying
+&nbsp;&nbsp;&nbsp;     * folders
+&nbsp;&nbsp;&nbsp;     */
+&nbsp;&nbsp;&nbsp;    if( reply.what == B_MESSAGE_NOT_UNDERSTOOD &amp;&amp;
+&nbsp;&nbsp;&nbsp;        reply.FindInt32( "error", &amp;err ) == B_OK &amp;&amp;
+&nbsp;&nbsp;&nbsp;        err != B_BAD_SCRIPT_SYNTAX )
+&nbsp;&nbsp;&nbsp;        continue;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* CHANGE: everything from here down is new */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* make a messenger to this window */
+&nbsp;&nbsp;&nbsp;    BMessenger m;
+&nbsp;&nbsp;&nbsp;    if( reply.FindMessenger( "result", &amp;m ) != B_OK) continue;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* found a Window with a Poses, ask for its Path */
+&nbsp;&nbsp;&nbsp;    msg.MakeEmpty();
+&nbsp;&nbsp;&nbsp;    msg.what = B_GET_PROPERTY;
+&nbsp;&nbsp;&nbsp;    msg.AddSpecifier( "Path" );
+&nbsp;&nbsp;&nbsp;    msg.AddSpecifier( "Poses" );
+&nbsp;&nbsp;&nbsp;    msg.AddSpecifier( "Window", i );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    reply.MakeEmpty();
+&nbsp;&nbsp;&nbsp;    
+&nbsp;&nbsp;&nbsp;    tracker.SendMessage( &amp;msg, &amp;reply );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* go on with the next if this din't have a Path */
+&nbsp;&nbsp;&nbsp;    if( reply.what == B_MESSAGE_NOT_UNDERSTOOD ) continue;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* dig out the Path */
+&nbsp;&nbsp;&nbsp;    entry_ref ref;
+&nbsp;&nbsp;&nbsp;    if( reply.FindRef( "result", &amp;ref ) == B_OK ) {
+&nbsp;&nbsp;&nbsp;        BEntry ent( &amp;ref );
+&nbsp;&nbsp;&nbsp;        BPath path( &amp;ent );
+&nbsp;&nbsp;&nbsp;    
+&nbsp;&nbsp;&nbsp;        /* these are not the Paths you're looking for */
+&nbsp;&nbsp;&nbsp;        if( strcmp( the_path, path.Path() ) ) continue;
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;    /* if you got this far, you have a messenger to a valid Tracker
+&nbsp;&nbsp;&nbsp;     * window displaying a folder with the path you were after,
+&nbsp;&nbsp;&nbsp;     * so tell it to refresh its background
+&nbsp;&nbsp;&nbsp;     */
+&nbsp;&nbsp;&nbsp;    m.SendMessage( B_RESTORE_BACKGROUND_IMAGE );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;} while( true );</PRE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="../index.html"><FONT face=HELVETICA>The Be Book Table of Contents</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+<!-- Footer for Release 4 HTML Be Book -->
+<hr>
+<br>
+<p>
+
+<center><i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font>
+<FONT size=6>B</FONT>ook</i>,<br>...in lovely HTML...<br>for BeOS Release 5.<center><br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved.
+</body>
+</html>
+

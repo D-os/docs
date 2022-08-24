@@ -1,0 +1,102 @@
+<HTML><HEAD><TITLE>The Game Kit: The Game Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Game%20Kit"></A>The Game Kit
+</H1>
+<P>
+The Game Kit provides features that game developers will find particularly useful:
+<P>
+There are two types of functionality provided by the Game Kit:
+<P>
+<UL>
+<LI>Low-level graphics access
+<P>
+<LI>High-performance and convenient sound playback
+<P>
+</UL>
+<P>
+There's also one global function, <B><TT><A HREF="gameAPI.html#set_mouse_position()">set_mouse_position()</A></TT></B>, which lets you move the mouse cursor programatically.
+<P>
+Although designed with games in mind, nothing in the Game Kit is restricted to game applications, except that the user will have to deposit another 50 cents every three minutes.  
+<P>
+<HR>
+<H2>
+<A NAME="Low-Level%20Graphics%20Access"></A><FONT SIZE=6>L</FONT>ow-<FONT SIZE=6>L</FONT>evel <FONT SIZE=6>G</FONT>raphics <FONT SIZE=6>A</FONT>ccess
+</H2>
+<P>
+There are two classes provided for direct access to the underlying graphics hardware: <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A> and BDirectWindow.  These two classes both give you direct access to the graphics card's frame buffer; the difference between them is that <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A> always takes over the entire screen, bypassing the Application Server, while <A HREF="DirectWindow.html#BDirectWindow">BDirectWindow</A> can draw in a window on most graphics hardware.
+<P>
+Although <A HREF="DirectWindow.html#BDirectWindow">BDirectWindow</A> can do everything <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A> can do, <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A> can be a little easier to use.
+<P>
+<HR>
+<H2>
+<A NAME="High-Performance%20Audio"></A><FONT SIZE=6>H</FONT>igh-<FONT SIZE=6>P</FONT>erformance <FONT SIZE=6>A</FONT>udio
+</H2>
+<P>
+Several classes are provided for high-performance audio playback:
+<P>
+<UL>
+<LI><A HREF="GameSound.html#BGameSound">BGameSound</A>
+<P>
+<LI><A HREF="FileGameSound.html#BFileGameSound">BFileGameSound</A>
+<P>
+<LI><A HREF="SimpleGameSound.html#BSimpleGameSound">BSimpleGameSound</A>
+<P>
+<LI><A HREF="StreamingGameSound.html#BStreamingGameSound">BStreamingGameSound</A>
+<P>
+<LI><A HREF="PushGameSound.html#BPushGameSound">BPushGameSound</A>
+<P>
+</UL>
+<P>
+<A HREF="GameSound.html#BGameSound">BGameSound</A> is a base class and isn't used directly; it's the foundation for all the other audio classes in the Game Kit.
+<P>
+<A HREF="FileGameSound.html#BFileGameSound">BFileGameSound</A> is used to represent a sound effect stored in a disk file, and provides functions for playing the sound.  It can be used for playing music loops from audio files, or for playing the occasional large sound effect.  <A HREF="SimpleGameSound.html#BSimpleGameSound">BSimpleGameSound</A>, on the other hand, preloads the sound into memory, so that it can be played back with extremely low latency and low overhead (at the expense of memory space).
+<P>
+<A HREF="PushGameSound.html#BPushGameSound">BPushGameSound</A> are used to let you fill buffers flowing to the speakers (or headphones, or whatever audio output device is being used).  Their missions are the same, but their methods are different; <A HREF="PushGameSound.html#BPushGameSound">BPushGameSound</A> also provides a way to play sound in a cyclic loop, keeping ahead of the playback point in the buffer.  This is the extreme in high-performance, low-latency audio, but does require some extra work on the programmer's part.
+<P>
+<A HREF="StreamingGameSound.html#BStreamingGameSound">BStreamingGameSound</A> requires magic powers to use; its functionality is closely tied to the implementation of the Kit, especially when hardware sound acceleration is involved.  So don't touch it, we beg you.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

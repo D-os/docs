@@ -1,0 +1,872 @@
+<HTML><HEAD><TITLE>The Application Kit: BApplication</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BApplication"></A>BApplication
+</H1>
+<P>
+Derived from:  <A HREF="Looper.html#BLooper">BLooper</A> > <A HREF="Handler.html#BHandler">BHandler</A> > <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Application.h">be/app/Application.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Application.summary.html"><i>Summary</i></A></H6>
+<P>
+The BApplication class defines an object that represents your application, creates a connection to the App Server, and runs your app's main message loop.  An app can only create one BApplication object; the system automatically set the global <B><TT><A HREF="#be_app">be_app</A></TT></B> object to point to the BApplication object you create.
+<P>
+A BApplication object's most pervasive task is to handle messages that are sent to your app, a subject that's described in detail below.  But message handling aside, you can also use your BApplication object to...
+<P>
+<LI><I>Control the cursor</I>.  BApplication defines functions that hide and show the cursor, and set the cursor's image.  See <B><TT><A HREF="#SetCursor()">SetCursor()</A></TT></B>.
+<P>
+<LI><I>Access the window list</I>.  You can iterate through the windows that your application has created with <B><TT><A HREF="#WindowAt()">WindowAt()</A></TT></B>.
+<P>
+<LI><I>Get information about your application</I>. Your app's signature, executable location, and launch flags can be retrieved through <B><TT><A HREF="#GetAppInfo()">GetAppInfo()</A></TT></B>.  Additional information&mdash;icons, version strings, recognized file types&mdash;can be retrieved by creating an <A HREF="../The%20Storage%20Kit/NodeInfo.html#BAppFileInfo">BAppFileInfo</A> object based on your app's executable file.  <A HREF="../The%20Storage%20Kit/NodeInfo.html#BAppFileInfo">BAppFileInfo</A> is defined in the Storage Kit.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="be_app%20and%20Subclassing%20BApplication"></A>be_app and Subclassing BApplication
+</H3>
+<P>
+Because of its importance, the BApplication object that you create is automatically assigned to the global <B><TT><A HREF="#be_app">be_app</A></TT></B> variable.  Anytime you need to refer to your BApplication object&mdash;from anywhere in your code&mdash;you can use <B><TT><A HREF="#be_app">be_app</A></TT></B> instead.
+<P>
+Unless you're creating a very simple application, you should subclass BApplication.  But be aware that the <B><TT><A HREF="#be_app">be_app</A></TT></B> variable is typed as (BApplication *).  You'll have to cast <B><TT><A HREF="#be_app">be_app</A></TT></B> when you call a function that's declared by your subclass:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;((MyApp *)be_app)->MyAppFunction();</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="Constructing%20the%20Object%20and%20Running%20the%20Message%20Loop"></A>Constructing the Object and Running the Message Loop
+</H3>
+<P>
+As with all BLoopers, to use a BApplication you construct the object and then tell it to start its message loop by calling the <B><TT><A HREF="#Run()">Run()</A> </TT></B>function.  However, unlike other loopers, BApplication's  <B><TT><A HREF="#Run()">Run()</A></TT></B> doesn't return until the application is told to quit.  And after <B><TT><A HREF="#Run()">Run()</A> </TT></B>returns, you delete the object&mdash;it isn't deleted for you.
+<P>
+Typically, you create your BApplication object in your <B><TT>main()</TT></B> function&mdash;it's usually the first object you create.  The barest outline of a typical <B><TT>main()</TT></B> function looks something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#include &lt;Application.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;main()<SUP>1</SUP>
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SUP>2</SUP>new BApplication("application/x-vnd.your-app-sig")<SUP>3</SUP>;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Further initialization goes here -- read settings, set globals, etc. */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be_app->Run()<SUP>4</SUP>;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Clean up -- write settings, etc. */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete be_app;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><SUP>1 </B></SUP>&nbsp;&nbsp;&nbsp;The <B><TT>main()</TT></B> function doesn't declare <I>argc</I> and <I>argv </I>parameters (used for passing along command line arguments).  If the user passes command line arguments to your app, they'll show up in the <B><TT><A HREF="#ArgvReceived()">ArgvReceived()</A></TT></B> hook function.
+<P>
+<B><SUP>2 </B></SUP>&nbsp;&nbsp;&nbsp;Why no pointer assignment?  The constructor automatically assigns the object to <B><TT><A HREF="#be_app">be_app</A></TT></B>, so you don't have to assign it yourself.
+<P>
+<B><SUP>3 </B></SUP>&nbsp;&nbsp;&nbsp;The string passed to the constructor sets the application's signature.  This is a precautionary measure&mdash;it's better to add the signature as a resource than to define it here (a resource signature overrides the constructor signature). Use the <B><TT>FileTypes</TT></B> app to set the signature as a resource.
+<P>
+<B><SUP>4 </B></SUP>&nbsp;&nbsp;&nbsp;As explained in the <A HREF="Looper.html#BLooper">BLooper</A> class, <B><TT><A HREF="#Run()">Run()</A></TT></B> is almost always called from the same thread in which you construct the BApplication object.  (More accurately, the constructor locks the object, and <B><TT><A HREF="#Run()">Run()</A></TT></B> unlocks it.  Since locks are scoped to threads, the easiest thing to do is to construct and <B><TT><A HREF="#Run()">Run()</A> </TT></B>in the same thread.)
+<P>
+<HR>
+<H3>
+<A NAME="Application%20Messages"></A>Application Messages
+</H3>
+<P>
+After you tell your BApplication to run, its message loop begins to receive messages.  In general, the messages are handled in the expected fashion:  They show up in BApplication's <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function (or that of a designated BHandler; for more on how messages are dispatched to handlers, see &lt;x>).  
+<P>
+But BApplication also recognizes a set of application messages that it handles by invoking corresponding hook functions.  The hook functions are invoked by <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> so the application messages never show up in <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B>.
+<P>
+Overriding the hook functions that correspond to the application messages is an important part of the implementation of a BApplication subclass.  
+<P>
+In the table below, the application messages (identified by their command constants) are listed in roughly the order your BApplication can expect to receive them. 
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Command Constant</B></TH>
+<TH>Hook function</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ARGV_RECEIVED">B_ARGV_RECEIVED</A></TT></B></TD>
+<TD><B><TT><A HREF="#ArgvReceived()">ArgvReceived()</A></TT></B></TD>
+<TD>Command line arguments are delivered through this message.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_REFS_RECEIVED">B_REFS_RECEIVED</A></TT></B></TD>
+<TD><B><TT><A HREF="#RefsReceived()">RefsReceived()</A></TT></B></TD>
+<TD>Files (entry_refs) that are dropped on your app's icon, or that are double-clicked to launch your app are delivered through this message. </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_READY_TO_RUN">B_READY_TO_RUN</A></TT></B></TD>
+<TD><B><TT><A HREF="#ReadyToRun()">ReadyToRun()</A></TT></B></TD>
+<TD>Invoked from within <B><TT><A HREF="#Run()">Run()</A></TT></B>, the application has finished configuring itself and is ready to go.   If you haven't already created and displayed an initial window, you should do so here.  </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_APP_ACTIVATED">B_APP_ACTIVATED</A></TT></B></TD>
+<TD><B><TT><A HREF="#AppActivated()">AppActivated()</A></TT></B></TD>
+<TD>The application has just become the active application, or has relinquished that status.<B> </TD>
+<TR>
+<TD><TT><A HREF="misc.html#B_PULSE">B_PULSE</A></TT></B></TD>
+<TD><B><TT><A HREF="#Pulse()">Pulse()</A></TT></B></TD>
+<TD>If requested, pulse messages are sent at regular intervals by the system. </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ABOUT_REQUESTED">B_ABOUT_REQUESTED</A></TT></B></TD>
+<TD><B><TT><A HREF="#AboutRequested()">AboutRequested()</A></TT></B></TD>
+<TD>The user wants to see the app's About... box. </TD>
+</TABLE>
+<P>
+The protocols for the application messages are described &lt;x>.
+<P>
+For more information on the details of when and why the hook functions are invoked, see the individual function descriptions.
+<P>
+A BApplication can also receive the <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> looper message.  As explained in <A HREF="Looper.html#BLooper">BLooper</A>, <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> causes <B><TT><A HREF="#Quit()">Quit()</A></TT></B> to be called, contingent on the value returned by the <B><TT><A HREF="#QuitRequested()">QuitRequested()</A></TT></B> hook function.  However, BApplication's implementation of <B><TT><A HREF="#Quit()">Quit()</A></TT></B> is different from BLooper's version.  Don't miss it.
+<P>
+<HR>
+<H3>
+<A NAME="Other%20Topics"></A>Other Topics
+</H3>
+<P>
+<UL>
+<LI><I>Locking</I>.  As a <A HREF="Looper.html#BLooper">BLooper</A>, a BApplication mustt be locked before calling certain protected functions.  The BApplication locking mechanism is inherited without modification from BLooper. 
+<P>
+<LI><I>FileTypes settings</I>.  The BApplication object represents your application at run-time.  However, some of the characteristics of your app&mdash;whether it can be launched more than once, the file types it can open, its icon&mdash;are not run-time decisions. 
+<P>
+</UL>
+<A NAME="30148:%20head1:%20xa5%20%20Hook%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#AboutRequested()">AboutRequested()</A>
+<P>
+<A HREF="#AppActivated()">AppActivated()</A>
+<P>
+<A HREF="#ArgvReceived()">ArgvReceived()</A>
+<P>
+<A HREF="#Pulse()">Pulse()</A>
+<P>
+<A HREF="#ReadyToRun()">ReadyToRun()</A>
+<P>
+<A HREF="#RefsReceived()">RefsReceived()</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<A NAME="21498:%20funcNameFirst:%20BApplication()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="BApplication()"></A>BApplication()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BApplication(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>signature</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BApplication(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, status_t *<I><FONT  color=991122 face=HELVETICA>error</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BApplication(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The constructor creates a new object, locks it, sets the global variable <B><TT>be_app</TT></B> to point to it, and establishes a connection to the Application Server.  From this point on, your app can receive messages, although it won't start processing them until you call <B><TT><A HREF="#Run()">Run()</A></TT></B>.  You can also begin creating and displaying <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> objects&mdash;even before you call <B><TT><A HREF="#Run()">Run()</A></TT></B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>signature</I></FONT> constructors assign the argument as the app's application signature.  The argument is ignored if a signature is already specified in a resource or attribute of the application's executable (serious apps should always set the signature as both an attribute and a resource).  The signature is a MIME type string that must have the supertype "application".  For more information on application signatures and how to set them, see &lt;x>.
+<P>
+If you specify <I><FONT  color=991122 face=HELVETICA>error</I></FONT>, a pointer to a status_t, any error that occurs while constructing the BApplication will be returned in that variable.  Alternately, you can call <B><TT><A HREF="MessageRunner.html#InitCheck()">InitCheck()</A></TT></B> to check the results.  If an error is returned by the constructor, you shouldn't call <B><TT><A HREF="#Run()">Run()</A></TT></B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> constructor is an implementation detail; see the <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> class.
+<P>
+<HR>
+<H3>
+<A NAME="~BApplication()"></A>~BApplication()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual<B><TT><FONT  color=000022 size=+1> ~BApplication()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Closes and deletes the application's BWindows (and the BViews they contain), and severs the application's connection to the Application Server.
+<P>
+Never delete a BApplication object while it's running&mdash;wait until <B><TT><A HREF="#Run()">Run()</A></TT></B> returns.  To stop a BApplication (and so cause <B><TT><A HREF="#Run()">Run()</A></TT></B> to return), send it a <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> message:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;be_app->PostMessage(B_QUIT_REQUESTED);</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AppResources()"></A>AppResources()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>static</TT></B> <B><TT><A HREF="../The%20Storage%20Kit/Resources.html#BResources">BResources</A></TT></B> *<B><TT><FONT  color=000022 size=+1>AppResources(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a <A HREF="../The%20Storage%20Kit/Resources.html#BResources">BResources</A> object that's configured from your application's executable file.  You may read the data in the <A HREF="../The%20Storage%20Kit/Resources.html#BResources">BResources</A> object, but you're not allowed to write it; see the <A HREF="../The%20Storage%20Kit/Resources.html#BResources">BResources</A> class for details.  The <A HREF="../The%20Storage%20Kit/Resources.html#BResources">BResources</A> object belongs to the BApplication class and mustn't be freed.
+<P>
+You needn't have a <B><TT><A HREF="#be_app">be_app</A></TT></B> object to invoke this function.
+<P>
+<HR>
+<H3>Instantiate()  see <A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AboutRequested()"></A>AboutRequested()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AboutRequested(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's invoked when the BApplication receives a <B><TT><A HREF="misc.html#B_ABOUT_REQUESTED">B_ABOUT_REQUESTED</A> </TT></B>message, undoubtedly because the user clicked an <I>About...</I> menu item.  You should implement the function to put a window on-screen that provides the user with information about the application (version number, license restrictions, authors' names, etc).
+<P>
+<HR>
+<H3>
+<A NAME="AppActivated()"></A>AppActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AppActivated(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's invoked when the application receives a <B><TT><A HREF="misc.html#B_APP_ACTIVATED">B_APP_ACTIVATED</A></TT></B> message.  The message is sent when the app gains or loses active application status.   The <I><FONT  color=991122 face=HELVETICA>active</I></FONT> flag tells you which way the wind blows:  <B><TT>true</TT></B> means your app is now active; <B><TT>false</TT></B> means it isn't.
+<P>
+The user can activate an app by clicking on or unhiding one of its windows; you can activate an app programmatically by calling <B><TT><A HREF="../The%20Interface%20Kit/Window.html#Activate()">BWindow::Activate()</A></TT></B> or  <B><TT><A HREF="Roster.html#ActivateApp()">BRoster::ActivateApp()</A></TT></B>.  (With regard to the latter:  This function is called only if the app has an "activatable" window&mdash;i.e. a non-modal, non-floating window).
+<P>
+During launch, this function is called after <B><TT><A HREF="#ReadyToRun()">ReadyToRun()</A></TT></B> (provided the app is displaying an activatable window). 
+<P>
+<a href="#be_app">"be_app"</a>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+, 
+<A NAME="see"></A>see
+</H3>
+<P>
+<HR>
+<H3>
+<A NAME="ArgvReceived()"></A>ArgvReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ArgvReceived(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>argc</I></FONT>, char **<I><FONT  color=991122 face=HELVETICA>argv</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's invoked when the application receives a <B><TT><A HREF="misc.html#B_ARGV_RECEIVED">B_ARGV_RECEIVED</A></TT></B> message.  The message is sent if command line arguments are used in launching the app from the shell, or if <I><FONT  color=991122 face=HELVETICA>argv</I></FONT>/<I><FONT  color=991122 face=HELVETICA>argc</I></FONT> values are passed to <B><TT><A HREF="Roster.html#Launch()">BRoster::Launch()</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+This function isn't called if there were no command line arguments, or if <B><TT><A HREF="Roster.html#Launch()">BRoster::Launch()</A></TT></B> was called without <I><FONT  color=991122 face=HELVETICA>argv</I></FONT>/<I><FONT  color=991122 face=HELVETICA>argc</I></FONT> values.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+When the app is launched from the shell, <B><TT><A HREF="#ArgvReceived()">ArgvReceived()</A></TT></B>'s arguments are identical to the traditional <B><TT>main()</TT></B> arguments:  The number of command line arguments is passed as <I><FONT  color=991122 face=HELVETICA>argc</I></FONT>; the arguments themselves are passed as an array of strings in <I><FONT  color=991122 face=HELVETICA>argv</I></FONT>.  The first <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> string identifes the executable file; the other strings are the command line arguments proper.  For example, this...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;$ MyApp file1 file2</PRE>
+<P>
+...produces the <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> array {"./MyApp", "file1", "file2"}.
+<P>
+<B><TT><A HREF="Roster.html#Launch()">BRoster::Launch()</A></TT></B> forwards its <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> and <I><FONT  color=991122 face=HELVETICA>argc</I></FONT> arguments, but adds the executable name to the front of the <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> array and increments the <I><FONT  color=991122 face=HELVETICA>argc</I></FONT> value.
+<P>
+Normally, the <B><TT><A HREF="misc.html#B_ARGV_RECEIVED">B_ARGV_RECEIVED</A></TT></B> message (if sent at all) is sent once, just before <B><TT><A HREF="misc.html#B_READY_TO_RUN">B_READY_TO_RUN</A></TT></B> is sent.  However, if the user tries to re-launch (from the command line and with arguments) an already-running app that's set to <B><TT><A HREF="misc.html#B_EXCLUSIVE_LAUNCH">B_EXCLUSIVE_LAUNCH</A></TT></B> or <B><TT><A HREF="misc.html#B_SINGLE_LAUNCH">B_SINGLE_LAUNCH</A></TT></B>, the re-launch will generate a <B><TT><A HREF="misc.html#B_ARGV_RECEIVED">B_ARGV_RECEIVED</A></TT></B> message that's sent to the already-running image.  Thus, for such apps, the <B><TT><A HREF="misc.html#B_ARGV_RECEIVED">B_ARGV_RECEIVED</A></TT></B> message can show up at any time.
+<P>
+<HR>
+<H3>CountWindows()   see <A HREF="#WindowAt()">WindowAt()</A></H3>
+<P>
+<HR>
+<H3>DispatchMessage()  see <A HREF="Looper.html#DispatchMessage()">BLooper::DispatchMessage()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetAppInfo()"></A>GetAppInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAppInfo(</TT></B></FONT>app_info *<I><FONT  color=991122 face=HELVETICA>theInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns information about the application.  This is a cover for
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;be_roster&ndash;>GetRunningAppInfo(be_app->Team(), theInfo);</PRE>
+<P>
+See <B><TT><A HREF="Roster.html#GetAppInfo()">BRoster::GetAppInfo()</A></TT></B> for more information.
+<P>
+<HR>
+<H3>HideCursor()   see <A HREF="#SetCursor()">SetCursor()</A></H3>
+<P>
+<HR>
+<H3>IsCursorHidden()   see <A HREF="#SetCursor()">SetCursor()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsLaunching()"></A>IsLaunching()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Support%20Kit/misc.html#bool">bool</A> <B><TT><FONT  color=000022 size=+1>IsLaunching(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the app is still launching.  An app is considered to be in its launching phase until <B><TT><A HREF="#ReadyToRun()">ReadyToRun()</A></TT></B> returns.  Invoked from within <B><TT><A HREF="#ReadyToRun()">ReadyToRun()</A></TT></B>, <B><TT>IsLaunching()</TT></B> returns <B><TT>true</TT></B>.
+<P>
+<HR>
+<H3>MessageReceived()  see <A HREF="Handler.html#MessageReceived()">BHandler::MessageReceived()</A></H3>
+<P>
+<HR>
+<H3>ObscureCursor()   see <A HREF="#SetCursor()">SetCursor()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Pulse()"></A>Pulse()
+, 
+<A NAME="SetPulseRate()"></A>SetPulseRate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> <B><TT><FONT  color=000022 size=+1>Pulse(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetPulseRate(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>rate</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Pulse()</TT></B> is a hook function that's called when the app receives a <B><TT><A HREF="misc.html#B_PULSE">B_PULSE</A></TT></B> message.  The message is sent once every <I><FONT  color=991122 face=HELVETICA>rate</I></FONT> microseconds, as set in <B><TT>SetPulseRate()</TT></B>.  The first <B><TT><A HREF="#Pulse()">Pulse()</A></TT></B> message is sent after <B><TT><A HREF="#ReadyToRun()">ReadyToRun()</A></TT></B> returns.  If the pulse rate is 0 (the default), the <B><TT><A HREF="misc.html#B_PULSE">B_PULSE</A></TT></B> messages aren't sent.  
+<P>
+You can implement <B><TT><A HREF="#Pulse()">Pulse()</A></TT></B> to do whatever you want (the default version does nothing), but don't try to use it for precision timing:  The pulse granularity is no better than 100,000 microseconds.  
+<P>
+Keep in mind that <B><TT>Pulse()</TT></B> executes in the app's message loop thread along with all other message handling functions.  Your app won't receive any <B><TT>Pulse()</TT></B> invocations while it's waiting for some other handler function (including <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B>) to finish.  In the meantime, <B><TT><A HREF="misc.html#B_PULSE">B_PULSE</A></TT></B> messages will be stacking up in the message queue; when the loop becomes "unblocked", you'll see a burst of <B><TT>Pulse()</TT></B> invocations.
+<P>
+<HR>
+<H3>Quit()  see <A HREF="#Run()">Run()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="QuitRequested()"></A>QuitRequested()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>QuitRequested(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's invoked when the app receives a <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> message.  As described in the <A HREF="Looper.html#BLooper">BLooper</A> class (which declares this function), the request to quit is confirmed if <B><TT>QuitRequested()</TT></B> returns <B><TT>true</TT></B>, and denied if it returns <B><TT>false</TT></B>.
+<P>
+In its implementation, BApplication sends <B><TT>BWindow::QuitRequested()</TT></B> to each of its <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> objects.  If they all agree to quit, the windows are all destroyed (through <B><TT><A HREF="../The%20Interface%20Kit/Window.html#Quit()">BWindow::Quit()</A></TT></B>) and this <B><TT><A HREF="#QuitRequested()">QuitRequested()</A></TT></B> returns <B><TT>true</TT></B>.  But if any <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> refuses to quit, that window and all surviving windows are saved, and this <B><TT>QuitRequested()</TT></B> returns <B><TT>false</TT></B>.  
+<P>
+Augment this function as you will, but be sure to call the BApplication version in your implementation.
+<P>
+<HR>
+<H3>
+<A NAME="ReadyToRun()"></A>ReadyToRun()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ReadyToRun(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's called when the app receives a <B><TT><A HREF="misc.html#B_READY_TO_RUN">B_READY_TO_RUN</A></TT></B> message.  The message is sent automatically during the <B><TT><A HREF="#Run()">Run()</A></TT></B> function, and is sent after the initial <B><TT><A HREF="misc.html#B_REFS_RECEIVED">B_REFS_RECEIVED</A></TT></B> and <B><TT><A HREF="misc.html#B_ARGV_RECEIVED">B_ARGV_RECEIVED</A></TT></B> messages (if any) have been handled.  This is the only application message that every running app is guaranteed to receive.
+<P>
+What you do with <B><TT>ReadyToRun()</TT></B> is up to you&mdash;if your app hasn't put up a window by the time this function is called, you'll probably want to do it here. The default version of <B><TT><A HREF="#ReadyToRun()">ReadyToRun()</A></TT></B> is empty.
+<P>
+<HR>
+<H3>
+<A NAME="RefsReceived()"></A>RefsReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>RefsReceived(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's called when the app receives a <B><TT><A HREF="misc.html#B_REFS_RECEIVED">B_REFS_RECEIVED</A></TT></B> message.  The message is sent when the user drops a file (or files) on your app's icon, or double clicks a file that's handled by your app.  The message can arrive either at launch time, or while your app is already running&mdash;use <B><TT><A HREF="#IsLaunching()">IsLaunching()</A></TT></B> to tell which.  
+<P>
+<I><FONT  color=991122 face=HELVETICA>message</I></FONT> contains a single field named "refs" that contains one or more <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> (<B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B>) items&mdash;one for each file that was dropped or double-clicked.  Do with them what you will; the default implementation is empty.  Typically, you would use the refs to create <A HREF="../The%20Storage%20Kit/Entry.html#BEntry">BEntry</A> or <A HREF="../The%20Storage%20Kit/File.html#BFile">BFile</A> objects.
+<P>
+<a href="#Scripting%20Suites%20and%20Properties">"Scripting Suites and Properties"</a>
+<P>
+<HR>
+<H3>
+<A NAME="ResolveSpecifier()"></A>ResolveSpecifier()
+, 
+<A NAME="see"></A>see
+</H3>
+<P>
+<HR>
+<H3>
+<A NAME="Run()"></A>Run()
+, 
+<A NAME="Quit()"></A>Quit()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual thread_id <B><TT><FONT  color=000022 size=+1>Run(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Quit(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions, inherited from <A HREF="Looper.html#BLooper">BLooper</A>, are different enough from their parent versions to warrant description:  
+<P>
+<UL>
+<LI><B><TT>Run()</TT></B> doesn't spawn a new thread&mdash;it runs the message loop in the thread that it's called from, and doesn't return until the message loop stops. 
+<P>
+<LI><B><TT>Quit()</TT></B> doesn't kill the looper thread&mdash;it tells the thread to finish processing the message queue (disallowing new messages) at which point <B><TT>Run()</TT></B> will be able to return.  After so instructing the thread, <B><TT>Quit()</TT></B> returns&mdash;it doesn't wait for the message queue to empty.  
+<P>
+<LI>Also, <B><TT>Quit()</TT></B> doesn't delete the BApplication object.  It's up to you to delete it after <B><TT>Run()</TT></B> returns.  (However, <B><TT>Quit()</TT></B> <I>does</I> delete the object if it's called before the message loop starts&mdash;i.e. before <B><TT>Run()</TT></B> is called.)
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetCursor()"></A>SetCursor()
+, 
+<A NAME="HideCursor()"></A>HideCursor()
+, 
+<A NAME="ShowCursor()"></A>ShowCursor()
+, 
+<A NAME="ObscureCursor()"></A>ObscureCursor()
+, 
+<A NAME="IsCursorHidden()"></A>IsCursorHidden()
+</H3>
+<P>
+<B><TT>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void </TT></B><B><TT><FONT  color=000022 size=+1>SetCursor(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>cursor</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetCursor(</TT></B></FONT>const <A HREF="Cursor.html#BCursor">BCursor</A> *<I><FONT  color=991122 face=HELVETICA>cursor</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>HideCursor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ShowCursor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ObscureCursor(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsCursorHidden(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Cursor functions:
+<P>
+<UL>
+<LI><B><TT><A HREF="#SetCursor()">SetCursor()</A></TT></B> sets the cursor image that's used when this is the active application.  You can pass one of the Be-defined cursor constants (<B><TT><A HREF="misc.html#Cursor%20Constants">B_HAND_CURSOR</A></TT></B> and <B><TT><A HREF="misc.html#Cursor%20Constants">B_I_BEAM_CURSOR</A></TT></B>) or create your own cursor image.  The cursor data format is described below.
+<P>
+<LI>You can also call <B><TT><A HREF="#SetCursor()">SetCursor()</A></TT></B> passing a <A HREF="Cursor.html#BCursor">BCursor</A> object; specifying <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> as <B><TT>true</TT></B> forces the Application Server to immediately resynchronize, thereby ensuring that the cursor change takes place immediately.  The default BCursors are <B><TT>B_CURSOR_SYSTEM_DEFAULT</TT></B> for the hand cursor and <B><TT>B_CURSOR_I_BEAM</TT></B> for the I-beam text editing cursor.
+<P>
+<LI><B><TT>HideCursor()</TT></B> removes the cursor from the screen. 
+<P>
+<LI><B><TT>ShowCursor()</TT></B> restores it.  
+<P>
+<LI><B><TT>ObscureCursor()</TT></B> hides the cursor until the user moves the mouse.  
+<P>
+<LI><B><TT>IsCursorHidden() </TT></B>returns <B><TT>true</TT></B> if the cursor is hidden (but not obscured), and <B><TT>false</TT></B> if not.
+<P>
+</UL>
+<P>
+The cursor data format is described in the <a href="Cursor.html#Cursor%20Data%20Format">"Cursor Data Format"</a> section under BCursor.
+<P>
+<HR>
+<H3>ShowCursor()   see <A HREF="#SetCursor()">SetCursor()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="WindowAt()"></A>WindowAt()
+, 
+<A NAME="CountWindows()"></A>CountWindows()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> *<B><TT><FONT  color=000022 size=+1>WindowAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountWindows(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>WindowAt()</TT></B> returns the <I><FONT  color=991122 face=HELVETICA>index</I></FONT>'th <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> object in the application's window list.  If <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is out of range, the function returns <B><TT>NULL</TT></B>.  
+<P>
+<B><TT>CountWindows()</TT></B> returns the number of windows in the window list.
+<P>
+<UL>
+<LI>The windows list includes all windows explicitly created by the app&mdash;whether they're normal, floating, or modal, and whether or not they're actually displayed&mdash;but excludes private windows created by Be classes.
+<P>
+<LI>The order of windows in the list has no signficance.
+<P>
+<LI>Locking the BApplication object <I>doesn't</I> lock the window list.  If you need coordinated access to the list, you'll have to provide your own locking mechanism that protects these functions and all <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> construction and deletion. 
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Global%20Variables"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>V</FONT>ariables
+</H2>
+<P>
+<B><A NAME="31092:%20head1:%20xa5%20%20x01%20Archived%20Fields"></A>
+</B><P>
+<HR>
+<H3>
+<A NAME="be_app"></A>be_app
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="#BApplication">BApplication</A> *</TT></B><B><TT><FONT  color=000022 size=+1>be_app</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#be_app">be_app</A></TT></B> is the global variable that represents your BApplication object.  You can refer to <B><TT><A HREF="#be_app">be_app</A></TT></B> anywhere you need a reference to the BApplication object that you created.  If you want to call a function that's declared by your BApplication subclass, you have to cast be_app to your subclass:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;((MyApp *)be_app)->MyAppFunction();</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="be_app_messenger"></A>be_app_messenger
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="Messenger.html#BMessenger">BMessenger</A> *</TT></B><B><TT><FONT  color=000022 size=+1>be_app_messenger</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#be_app_messenger">be_app_messenger</A></TT></B> is a global <A HREF="Messenger.html#BMessenger">BMessenger</A> that targets your <B><TT><A HREF="#be_app">be_app</A></TT></B> object.  It's created in the BApplication constructor.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Meaning</TH>
+<TR>
+<TD>"mime_sig"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Application signature.</TD>
+</TABLE>
+<P>
+<A NAME="11857:%20head2:%20Scripting%20Support"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Scripting%20Suites%20and%20Properties"></A><FONT SIZE=6>S</FONT>cripting <FONT SIZE=6>S</FONT>uites and <FONT SIZE=6>P</FONT>roperties
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME=""Name""></A>"Name"
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Command</TH>
+<TH>Specifier</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Gets the name of the application's main thread.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME=""Window""></A>"Window"
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Command</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="topic_Scripting.html#B_COUNT_PROPERTIES">B_COUNT_PROPERTIES</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns CountWindows().</TD>
+<TR>
+<TD>Not applicable.</TD>
+<TD><B><TT><A HREF="misc.html#B_NAME_SPECIFIER">B_NAME_SPECIFIER</A>,
+<br>
+B_INDEX_SPECIFIER,
+<br>
+B_REVERSE_INDEX_SPECIFIER</TT></B></TD>
+<TD>The message is forwarded to the specified BWindow.</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

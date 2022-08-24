@@ -1,0 +1,298 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Image Concepts</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Image%20Concepts"></A>Image Concepts
+</H1>
+<P>
+An <I>image</I> is compiled code.  There are three types of image:
+<P>
+<UL>
+<LI>An <I>app image</I> is an application.  Every application has a single app image.
+<P>
+<LI>A <I>library image</I> is a dynamically linked library (a "shared library").  Most applications link against the system libraries (<B>libroot.so</B>, <B>libbe.so</B>, and so on) that Be provides.  
+<P>
+<LI>An <I>add-on image </I>is an image that you load into your application as it's running.  Symbols from the add-on image are linked and references are resolved when the image is loaded.  An add-on image provides a sort of "heightened dynamic linking" beyond that of a DLL.
+<P>
+</UL>
+<P>
+The following sections explain how to load and run an app image, how to create a shared library, and how to create and load an add-on image.
+<P>
+<A NAME="39592:%20head2:%20Loading%20an%20App%20Image"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Loading%20an%20App%20Image"></A>Loading an App Image
+</H3>
+<P>
+Loading an app image is like running a "sub-program."  The image that you load is launched in much the same way as had you double-clicked it in the Tracker, or launched it from the command line.  It runs in its own team&mdash;it doesn't share the address space of the application from which it was launched&mdash;and, generally, leads its own life.
+<P>
+Any application can be loaded as an app image; you don't need to issue special compile instructions or otherwise manipulate the binary.  The one requirement of an app image is that it must have a <B><TT>main()</TT></B> function.
+<P>
+To load an app image, you call the <B><TT><A HREF="Images.html#load_image()">load_image()</A> </TT></B>function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;thread_id load_image(int32 argc,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char **argv,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char **env)</PRE>
+<P>
+The function's first two arguments identify the app image (file) that you want to launch&mdash;we'll return to this in a moment.  Having located the file, the function creates a new team, spawns a main thread in that team, and returns the <B><TT><A HREF="Threads.html#thread_id">thread_id</A></TT></B> of the thread to you.  The thread isn't running:  To make it run you pass the <B><TT><A HREF="Threads.html#thread_id">thread_id</A> </TT></B>to <B><TT><A HREF="Threads.html#resume_thread()">resume_thread()</A></TT></B> or <B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B> (as explained in <a href="Threads.html#Threads%20and%20Teams">"Threads and Teams"</a>).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>argc</I></FONT>/<I><FONT  color=991122 face=HELVETICA>argv</I></FONT> argument pair is copied and forwarded to the new thread's <B><TT>main() </TT></B>function:
+<P>
+<UL>
+<LI>The first string in the <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> array must be the name of the image file that you want to launch; <B><TT><A HREF="Images.html#load_image()">load_image()</A></TT></B> uses this string to find the file.  You then install any other arguments you want in the array, and terminate the array with a <B><TT>NULL</TT></B> entry.  <I><FONT  color=991122 face=HELVETICA>argc</I></FONT> is set to the number of entries in the <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> array (not counting the terminating <B><TT>NULL</TT></B>).  It's the caller's responsibility to free the <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> array after <B><TT><A HREF="Images.html#load_image()">load_image()</A></TT></B> returns (remember&mdash;the array is copied before it's passed to the new thread). 
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>envp</I></FONT> is an array of environment variables that are also passed to <B><TT>main()</TT></B>.  Typically, you use the global <B><TT>environ</TT></B> pointer (which you must declare as an <B><TT>extern</TT></B>&mdash;see the example, below).  You can, of course, create your own environment variable array:  As with the <I><FONT  color=991122 face=HELVETICA>argv</I></FONT> array, the <I><FONT  color=991122 face=HELVETICA>envp</I></FONT> array should be terminated with a <B><TT>NULL</TT></B> entry, and you must free the array when<B><TT> <A HREF="Images.html#load_image()">load_image()</A></TT></B> returns (that is, if you allocated it yourself&mdash;don't try to free <B><TT>environ</TT></B>).
+<P>
+</UL>
+<P>
+The following example demonstrates a typical use of <B><TT><A HREF="Images.html#load_image()">load_image()</A></TT></B>.  First, we include the appropriate files and declare the necessary variables:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#include &lt;image.h>  /* load_executable() */
+&nbsp;&nbsp;&nbsp;#include &lt;OS.h>     /* wait_for_thread() */
+&nbsp;&nbsp;&nbsp;#include &lt;stdlib.h> /* malloc() */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;char **arg_v; /* choose a name that doesn&gt;t collide with argv */
+&nbsp;&nbsp;&nbsp;int32 arg_c; /* same here vis a vis argc */
+&nbsp;&nbsp;&nbsp;thread_id exec_thread;
+&nbsp;&nbsp;&nbsp;int32 return_value;</PRE>
+<P>
+Install, in the <B><TT>arg_v</TT></B> array, the "command line" arguments.  Let's pretend we're launching a program found in <B>/boot/home/apps/adder</B> that takes two integers, adds them together, and returns the result as <B><TT>main()</TT></B>'s exit code.  Thus, there are three arguments:  The name of the program, and the values of the two addends converted to strings.  Since there are three arguments, we allocate <B><TT>arg_v</TT></B> to hold four pointers (to accommodate the final <B><TT>NULL</TT></B>).  Then we allocate and copy the arguments.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;arg_c = 3;
+&nbsp;&nbsp;&nbsp;arg_v = (char **)malloc(sizeof(char *) * (arg_c + 1));
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;arg_v[0] = strdup("/boot/home/apps/adder");
+&nbsp;&nbsp;&nbsp;arg_v[1] = strdup("5");
+&nbsp;&nbsp;&nbsp;arg_v[2] = strdup("3");
+&nbsp;&nbsp;&nbsp;arg_v[3] = NULL;</PRE>
+<P>
+Now that everything is properly set up, we call <B><TT><A HREF="Images.html#load_image()">load_image()</A></TT></B>.  After the function returns, it's safe to free the allocated <B><TT>arg_v</TT></B> array:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;exec_thread = load_image(arg_c, arg_v, environ);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (--arg_c >= 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free(arg_v[arg_c]);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;free(arg_v);</PRE>
+<P>
+At this point, <B><TT>exec_thread</TT></B> is suspended (the natural state of a newly-spawned thread).  In order to retrieve its return value, we use<B><TT> <A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B> to tell the thread to run:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;wait_for_thread(exec_thread, &amp;return_value);</PRE>
+<P>
+After <B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B> returns, the value of <B><TT>return_value</TT></B> should be 8 (i.e. 5 + 3). 
+<P>
+<HR>
+<H3>
+<A NAME="Creating%20a%20Shared%20Library"></A>Creating a Shared Library
+</H3>
+<P>
+The primary documentation for creating a shared library is provided by MetroWerks in their CodeWarrior manual.  Beyond the information that you find there, you should be aware of the following amendments and caveats:
+<P>
+<UL>
+<LI>You mustn't export your library's symbols through the <B><TT>-export all</TT></B> linker flag.  Instead, use the <B><TT>__declspec()</TT></B> directive to export each symbol.  The macro is described below.  If you're compiling for the PPC, you must also export <B><TT>#pragma</TT></B> symbols; to do this from the BeIDE, go to the <B>Linker/PEF</B> portion of the <B>Settings</B> window and set "Export Symbols" to "Use #pragma".
+<P>
+<LI>The loader looks for libraries by following the <B><TT>LIBRARY_PATH</TT></B> environment variable.  The default library path looks like this:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$ echo $LIBRARY_PATH
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%A/lib:/boot/home/config/lib:/boot/beos/system/lib</PRE>
+<P>
+where "%A" means the directory that contains the app that the user is lauching. 
+<P>
+<H4>
+<A NAME="Exporting%20and%20Importing%20Symbols"></A>Exporting and Importing Symbols
+</H4>
+<P>
+If you're developing a shared library you should explicitly export every global symbol in your library by using the <B><TT>__declspec()</TT></B> macro.  To export a symbol, you declare it thus...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;__declspec(dllexport) <I>type</I> <I>name</PRE>
+<P>
+</I>...where "_declspec(dllexport)" is literal, and <I>type</I> and <I>name</I> declare the symbol.  Some examples:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;__declspec(dllexport) char *some_name;
+&nbsp;&nbsp;&nbsp;__declspec(dllexport) void some_func() {...} 
+&nbsp;&nbsp;&nbsp;class __declspec(dllexport) MyView {...}</PRE>
+<P>
+To import these symbols, an app that wants to use your library must "reverse" the declaration by replacing <B><TT>dllexport</TT></B> with <B><TT>dllimport</TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;__declspec(dllimport) char *some_name;
+&nbsp;&nbsp;&nbsp;__declspec(dllimport) void some_func();
+&nbsp;&nbsp;&nbsp;class __declspec(dllimport) MyView;</PRE>
+<P>
+The trouble with this system is that it implies two sets of headers, one for exporting (for building your library) and another for importing (that the library client would use).  The Be libraries use macros, defined in be/<B>BeBuild.h</B>, that throw the import/export switch so the header files can be unified.  For example, here's the macro for <B>libbe</B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#if _BUILDING_be
+&nbsp;&nbsp;&nbsp;#define _IMPEXP_BE&nbsp;&nbsp;&nbsp;  __declspec(dllexport)
+&nbsp;&nbsp;&nbsp;#else 
+&nbsp;&nbsp;&nbsp;#define _IMPEXP_BE __declspec(dllimport)
+&nbsp;&nbsp;&nbsp;#endif</PRE>
+<P>
+When <B>libbe</B> is being built, a private compiler directive defines <B><TT>_BUILDING_be</TT></B> to be non-zero, and <B><TT>_IMPEXP_BE</TT></B> exports symbols.  When a developer includes <B>BeBuild.h,  </B>the <B><TT>_BUILDING_be</TT></B> variable is set to zero, so <B><TT>_IMPEXP_BE</TT></B> is set to import symbols.  
+<P>
+You may want to emulate this system by defining macros for your own libraries.  This implies that you have to define a compiler switch (analogous to <B>_BUILDING_be</B>) yourself.  Set the switch to non-zero when you're building your library, and then set it to zero when you publish your headers for use by library clients.
+<P>
+<HR>
+<H3>
+<A NAME="Creating%20and%20Using%20an%20Add-on%20Image"></A>Creating and Using an Add-on Image
+</H3>
+<P>
+An add-on image is indistinguishable from a shared library image.  Creating an add-on is exactly like creating a shared library, a topic that we breezed through above, but with a couple of minor tweaks:  
+<P>
+<UL>
+<LI>The loader looks for add-ons by following the paths in the <B><TT>ADDON_PATH</TT></B> environment variable.  The default <B><TT>ADDON_PATH</TT></B> looks like this:  
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$ echo $ADDON_PATH
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%A/add-ons:/boot/home/config/add-ons:/boot/beos/system/add-ons</PRE>
+<P>
+<UL>
+<LI>You have to export your add-on symbols, <I>and</I> you also must <B><TT>extern</TT></B> "C" them.   This ensures that the symbol names won't be mangled by the compiler.
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="Exporting%20Add-on%20Symbols"></A>Exporting Add-on Symbols
+</H4>
+<P>
+To export your add-on's symbols, declare them thus:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;extern "C" __declspec(dllexport) void some_func();
+&nbsp;&nbsp;&nbsp;extern "C" __declspec(dllexport) int32 some_global_data;</PRE>
+<P>
+To extern a C++ class takes more work.  You can't extern the class directly; typically what you do is create (and extern) a C function that covers the class constructor:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;extern "C" __declspec(dllexport) MyClass *instantiate_my_class();</PRE>
+<P>
+<B><TT>instantiate_my_class()</TT></B> is implemented to call the MyClass constructor:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;MyClass *instantiate_my_class()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;  return new MyClass();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<A NAME="19334:%20head3:%20Loading%20an%20Add-on%20Image"></A>
+<P>
+<H4>
+<A NAME="Loading%20an%20Add-on%20Image"></A>Loading an Add-on Image
+</H4>
+<P>
+To load an add-on into your application, you call the <B><TT><A HREF="Images.html#load_add_on()">load_add_on()</A> </TT></B>function.  The function takes a pathname (absolute or relative to the current working directory) to the add-on file, and returns an <B><TT>image_id</TT></B> number that uniquely identifies the image across the entire system.
+<P>
+For example, let's say you've created an add-on image that's stored in the file <B>/boot/home/add-ons/adder</B>. The code that loads the add-on would look like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* For brevity, we won&gt;t check errors.  */
+&nbsp;&nbsp;&nbsp;image_id addon_image;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Load the add-on. */
+&nbsp;&nbsp;&nbsp;addon_image = load_add_on("/boot/home/add-ons/adder");</PRE>
+<P>
+Unlike loading an executable, loading an add-on doesn't create a separate team, nor does it spawn another thread.  The whole point of loading an add-on is to bring the image into your application's address space so you can call the functions and fiddle with the variables that the add-on defines.  
+<P>
+<A NAME="18934:%20head3:%20Symbols"></A>
+<P>
+<H4>
+<A NAME="Symbols"></A>Symbols
+</H4>
+<P>
+After you've loaded an add-on into your application, you'll want to examine the symbols (variables and functions) that it has brought with it.  To get information about a symbol, you call the <B><TT><A HREF="Images.html#get_image_symbol()">get_image_symbol()</A> </TT></B>function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t get_image_symbol(image_id image,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *symbol_name,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 symbol_type,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void **location)</PRE>
+<P>
+ The function's first three arguments identify the symbol that you want to get:
+<P>
+<UL>
+<LI>The first argument is the<B><TT> image_id </TT></B>of the add-on that owns the symbol.
+<P>
+<LI>The second argument is the symbol's name.  This assumes, of course, that you know the name, and that the add-on has declared the name as <B><TT>extern</TT></B>.  In general, using an add-on implies just this sort of cooperation. 
+<P>
+<LI>The third argument is a constant that gives the symbol's <I>symbol type</I>.  There are three types, as given below.  If the executable format doesn't distinguish between text and data symbols, then you can use any of these three types&mdash;they'll all be the same.  If the format <I>does</I> distinguish between text and data, then you can either ask for the specific type, or you can ask for <B><TT>B_SYMBOL_TYPE_ANY</TT></B>. 
+</UL>
+<B><P>
+</B><TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_SYMBOL_TYPE_DATA</TT></B></TD>
+<TD>Global data (variables)</TD>
+<TR>
+<TD><B><TT>B_SYMBOL_TYPE_TEXT</TT></B></TD>
+<TD>Functions</TD>
+<TR>
+<TD><B><TT>B_SYMBOL_TYPE_ANY</TT></B></TD>
+<TD>The symbol lives anywhere</TD>
+</TABLE>
+<P>
+The function returns, by reference in its final argument, a pointer to the symbol's address.  For example, let's say the <B><TT>adder</TT></B> add-on code looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;extern "C" int32 a1 = 0;
+&nbsp;&nbsp;&nbsp;extern "C" int32 a2 = 0;
+&nbsp;&nbsp;&nbsp;extern "C" int32 adder(void);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;int32 adder(void)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return (a1 + a2);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+To examine the variables (<B><TT>a1</TT></B> and <B><TT>a2</TT></B>), you would call <B><TT><A HREF="Images.html#get_image_symbol()">get_image_symbol()</A></TT></B> thus:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 *var_a1, *var_a2; 
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;get_image_symbol(addon_image, "a1", B_SYMBOL_TYPE_DATA, &amp;var_a1);
+&nbsp;&nbsp;&nbsp;get_image_symbol(addon_image, "a2", B_SYMBOL_TYPE_DATA, &amp;var_a2);</PRE>
+<P>
+Here we get the symbol for the <B><TT>adder() </TT></B>function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 (*func_add)();
+&nbsp;&nbsp;&nbsp;get_image_symbol(addon_image, "adder", B_SYMBOL_TYPE_TEXT, &amp;func_add);</PRE>
+<P>
+Now that we've retrieved all the symbols, we can set the values of the two addends and call the function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;*var_a1 = 5;
+&nbsp;&nbsp;&nbsp;*var_a2 = 3;
+&nbsp;&nbsp;&nbsp;int32 return_value = (*func_add)();</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

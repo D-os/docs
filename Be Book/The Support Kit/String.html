@@ -1,0 +1,1339 @@
+<HTML><HEAD><TITLE>The Support Kit: BString</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BString"></A>BString
+</H1>
+<P>
+Derived from:  (none)
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/support/String.h">be/support/String.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor or on the stack
+<P>
+<H6><A HREF="String.summary.html"><i>Summary</i></A></H6>
+<P>
+BString is a string allocation and manipulation class.  The object takes care of allocating and freeing memory for you, and provides a number of character search, comparison, and manipulation functions in a variety of flavors:  <B><TT><A HREF="#FindFirst()">FindFirst()</A></TT></B>, <B><TT><A HREF="#FindLast()">FindLast()</A></TT></B>, <B><TT><A HREF="#Prepend()">Prepend()</A></TT></B>, <B><TT><A HREF="#Append()">Append()</A></TT></B>, <B><TT><A HREF="#Insert()">Insert()</A></TT></B>, <B><TT><A HREF="#Remove()">Remove()</A></TT></B>, <B><TT><A HREF="#RemoveSet()">RemoveSet()</A></TT></B>, and so on.  The class also defines a number of operators that map to these functions; for example, the <B><TT><A HREF="#+=">+=</A></TT></B> operator is the same as the <B><TT><A HREF="#Append()">Append()</A></TT></B> function.  The operators make BString objects particularly easy to work with. 
+<P>
+This document describes some global C functions and operators that act like BString functions.  The global <B><TT><A HREF="#Compare()">Compare()</A></TT></B> and <B><TT><A HREF="#ICompare()">ICompare()</A></TT></B> functions let you compare two BStrings that are passed as arguments; they're meant to be used as hook functions that are called from within a sorting routine (such as <B><TT>qsort()</TT></B>).  The global operators are defined so you don't have to worry about the order of the operands. 
+<P>
+<HR>
+<H3>
+<A NAME="Assigning%20and%20Retrieving%20String%20Data"></A>Assigning and Retrieving String Data
+</H3>
+<P>
+To assign a BString's string, you pass the string to the object's constructor, to <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>, or you use the <B><TT><A HREF="#=">=</A></TT></B> or <B><TT><A HREF="#&lt;&lt;">&lt;&lt;</A></TT></B> operators:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BString string("8 Bits");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* or */
+&nbsp;&nbsp;&nbsp;BString string;
+&nbsp;&nbsp;&nbsp;string.SetTo("8 Bits");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* or */
+&nbsp;&nbsp;&nbsp;BString string = "8 Bits";
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* or */
+&nbsp;&nbsp;&nbsp;BString string;
+&nbsp;&nbsp;&nbsp;string &lt;&lt; (int32)8 &lt;&lt; " Bits";</PRE>
+<P>
+There's also an <B><TT><A HREF="#Adopt()">Adopt()</A></TT></B> function that let's you move data from one BString object to another.  In all cases, the BString object takes care of allocating storage for you&mdash;the object is guaranteed to be "big enough" to contain the string data.
+<P>
+The <B><TT><A HREF="#String()">String()</A></TT></B> function retrieves the object's string:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myButton->SetLabel(string.String());</PRE>
+<P>
+<B><TT><A HREF="#ByteAt()">ByteAt()</A></TT></B> returns a single character, located by index.  You can also get a character by using the <B><TT>[]</TT></B> operator; the following returns the string's first character:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;char c = string[0];</PRE>
+<P>
+<A NAME="23982:%20head2:%20Direct%20Data%20Access"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Direct%20Data%20Access"></A>Direct Data Access
+</H3>
+<P>
+If you want to access a BString's data directly, you call <B><TT><A HREF="#LockBuffer()">LockBuffer()</A></TT></B>, and then call <B><TT><A HREF="#UnlockBuffer()">UnlockBuffer()</A></TT></B> when you're finished.  Between these two calls, you can manipulate the string data, but you mustn't call any other BString function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 len = string.Length()+1
+&nbsp;&nbsp;&nbsp;char *stringData = string.LockBuffer(len);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* While the buffer is locked you can manipulate the string by hand, or through standard C functions, but you mustn't call BString functions. */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;stringData[0] = 'd';
+&nbsp;&nbsp;&nbsp;strcat(stringData, " button");
+&nbsp;&nbsp;&nbsp;string.UnlockBuffer(len+strlen(" button"));
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* The object can once again receive BString functions. */</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Restrictions"></A><FONT SIZE=6>R</FONT>estrictions
+</H2>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+BString is not thread safe. You shouldn't try to access the same BString object from two different threads at the same time.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, BString only supports assignment and retrieval of strings that contain single-byte characters.  If you want to use a BString to store a string that contains multi-byte (UTF8) characters, you have to flatten the string yourself and adjust the character count arguments accordingly.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BString()"></A>BString()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BString(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>maxLength</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BString(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates a new BString object that allocates enough storage to accommodate <I><FONT  color=991122 face=HELVETICA>string</I></FONT> (or <I><FONT  color=991122 face=HELVETICA>string</I></FONT>-><B><TT><A HREF="#String()">String()</A></TT></B>, or up to <I><FONT  color=991122 face=HELVETICA>maxLength</I></FONT> bytes), and then copies the string into the storage.  Without an argument, the new BString is empty.  You can also set a BString's data by using <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>, <B><TT><A HREF="#Adopt()">Adopt()</A></TT></B>, or the <B><TT><A HREF="#=">=</A></TT></B> operator.
+<P>
+<HR>
+<H3>
+<A NAME="~BString()"></A>~BString()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BString()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Frees the object's allocated memory, and destroys the object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>Adopt()  see <A HREF="#SetTo()">SetTo()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Append()"></A>Append()
+, 
+<A NAME="Prepend()"></A>Prepend()
+, 
+<A NAME="Insert()"></A>Insert()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline BString &amp;<B><TT><FONT  color=000022 size=+1>Append(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Append(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+inline BString &amp;<B><TT><FONT  color=000022 size=+1>Append(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Append(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Append(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Prepend(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Prepend(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Prepend(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Prepend(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Prepend(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Insert(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Insert(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Insert(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>sourceOffset</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Insert(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Insert(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Insert(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>sourceOffset</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Insert(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions add characters to the end (append), beginning (prepend), or middle (insert) of the BString's string.  In each case, the BString automatically reallocates to accommodate the new data.  All of these functions return *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.
+<P>
+<B><TT><A HREF="#Append()">Append()</A></TT></B> copies <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> characters from <I><FONT  color=991122 face=HELVETICA>source</I></FONT> and adds them to the end of this BString.  If <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> isn't specified, the entire string is copied; this is the same as the <B><TT><A HREF="#+=">+=</A></TT></B> operator.  The single character version of <B><TT><A HREF="#Append()">Append()</A></TT></B> adds <I><FONT  color=991122 face=HELVETICA>count</I></FONT> copies of the character <I><FONT  color=991122 face=HELVETICA>c</I></FONT> to the end of the object.
+<P>
+<B><TT><A HREF="#Prepend()">Prepend()</A></TT></B> does the same as <B><TT><A HREF="#Append()">Append()</A></TT></B>, except it adds the characters to the beginning of this <A HREF="#BString">BString</A>, shifting the existing data "to the right" to make room.
+<P>
+<B><TT><A HREF="#Insert()">Insert()</A></TT></B> adds the designated characters at <I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT> (zero-based) in this BString.  The BString's existing data (at location <I><FONT  color=991122 face=HELVETICA>insertAt</I></FONT> and higher) is shifted right to make room for the new data.  The <I><FONT  color=991122 face=HELVETICA>sourceOffset</I></FONT> argument is an offset (zero-based) into the source string.
+<P>
+<HR>
+<H3>
+<A NAME="CharacterEscape()"></A>CharacterEscape()
+, 
+<A NAME="CharacterDeescape()"></A>CharacterDeescape()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ BString &amp;<B><TT><FONT  color=000022 size=+1>CharacterEscape(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>original</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>setOfCharsToEscape</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <I><FONT  color=991122 face=HELVETICA>escapeWithChar</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+<TR><TD>
+ BString &amp;<B><TT><FONT  color=000022 size=+1>CharacterEscape(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>setOfCharsToEscape</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <I><FONT  color=991122 face=HELVETICA>escapeWithChar</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+ BString &amp;<B><TT><FONT  color=000022 size=+1>CharacterDeescape(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>original</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <I><FONT  color=991122 face=HELVETICA>escapeWithChar</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+<TR><TD>
+ BString &amp;<B><TT><FONT  color=000022 size=+1>CharacterDeescape(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>escapeWithChar</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#CharacterEscape()">CharacterEscape()</A></TT></B> scans a string for occurrences of the individual characters in the string <I><FONT  color=991122 face=HELVETICA>setOfCharsToEscape</I></FONT> and inserts into the string the byte indicated by <I><FONT  color=991122 face=HELVETICA>escapeWithChar</I></FONT> before each such occurrence.  The first form copies the original string into the BString; the second form operates on the existing BString.
+<P>
+<B><TT><A HREF="#CharacterDeescape()">CharacterDeescape()</A></TT></B> undoes this operation by scanning the string and removing all occurrences of the byte <I><FONT  color=991122 face=HELVETICA>escapeWithChar</I></FONT>.  The first form copies the <I><FONT  color=991122 face=HELVETICA>original</I></FONT> string into the <A HREF="#BString">BString</A>, while the second form operates on the existing BString.
+<P>
+<HR>
+<H3>CharacterDeescape()  see <A HREF="#CharacterEscape()">CharacterEscape()</A></H3>
+<P>
+<HR>
+<H3>ByteAt()  see <A HREF="#String()">String()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Compare()"></A>Compare()
+, 
+<A NAME="ICompare()"></A>ICompare()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>Compare(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>Compare(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>range</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>Compare(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>Compare(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>range</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>Compare(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>as</I></FONT><I><FONT  color=991122 face=HELVETICA>tring</I></FONT>, const BString &amp;<I><FONT  color=991122 face=HELVETICA>bs</I></FONT><I><FONT  color=991122 face=HELVETICA>tring</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>Compare(</TT></B></FONT>const BString *<I><FONT  color=991122 face=HELVETICA>as</I></FONT><I><FONT  color=991122 face=HELVETICA>tring</I></FONT>, const BString *<I><FONT  color=991122 face=HELVETICA>bs</I></FONT><I><FONT  color=991122 face=HELVETICA>tring</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>ICompare(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>ICompare(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>range</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>ICompare(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>ICompare(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>range</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>ICompare(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>as</I></FONT><I><FONT  color=991122 face=HELVETICA>tring</I></FONT>, const BString &amp;<I><FONT  color=991122 face=HELVETICA>bs</I></FONT><I><FONT  color=991122 face=HELVETICA>tring</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>ICompare(</TT></B></FONT>const BString *<I><FONT  color=991122 face=HELVETICA>as</I></FONT><I><FONT  color=991122 face=HELVETICA>tring</I></FONT>, const BString *<I><FONT  color=991122 face=HELVETICA>bs</I></FONT><I><FONT  color=991122 face=HELVETICA>tring</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions compare this BString with the argument string (<B><TT><A HREF="#Compare()">Compare()</A></TT></B> is case-sensitive,<B><TT> <A HREF="#ICompare()">ICompare()</A></TT></B> is case-insensitive); they return 0 if the two strings are the same, 1 if this BString is "greater than" the argument, and -1 if the argument is greater than this BString.  Two strings are compared by comparing the ASCII or UTF-8 values of their respective characters.  A longer string is greater than a shorter (but otherwise similar) string&mdash;"abcdef" is greater than "abcde".  
+<P>
+Given a <I><FONT  color=991122 face=HELVETICA>range</I></FONT> argument, the functions only compare the first <I><FONT  color=991122 face=HELVETICA>range</I></FONT> characters.  
+<P>
+The global functions return 0 if the arguments are equal, 1 if <I><FONT  color=991122 face=HELVETICA>astring</I></FONT> is greater than <I><FONT  color=991122 face=HELVETICA>bstring</I></FONT>, and -1 if <I><FONT  color=991122 face=HELVETICA>bstring</I></FONT> is greater than <I><FONT  color=991122 face=HELVETICA>astring</I></FONT>. 
+<P>
+You can also compare two strings through the comparison operators, <B><TT><A HREF="#==">==</A></TT></B>, <B><TT><A HREF="#!=">!=</A></TT></B>, <B><TT><A HREF="#&lt;">&lt;</A></TT></B>, <B><TT><A HREF="#&lt;=">&lt;=</A></TT></B>, <B><TT><A HREF="#>">></A></TT></B>, and <B><TT>=></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="CopyInto()"></A>CopyInto()
+, 
+<A NAME="MoveInto()"></A>MoveInto()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ BString &amp;<B><TT><FONT  color=000022 size=+1>CopyInto(</TT></B></FONT>BString &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>sourceOffset</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+ void <B><TT><FONT  color=000022 size=+1>CopyInto(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>sourceOffset</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+ BString &amp;<B><TT><FONT  color=000022 size=+1>MoveInto(</TT></B></FONT>BString &amp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>sourceOffset</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+ void <B><TT><FONT  color=000022 size=+1>MoveInto(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>sourceOffset</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#CopyInto()">CopyInto()</A></TT></B> copies a substring from this BString into <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>. <B><TT> <A HREF="../The%20Interface%20Kit/Shape.html#MoveTo()">MoveTo()</A></TT></B> does the same, but it removes the original substring (from this BString).  If <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> is a <A HREF="#BString">BString</A>, storage for the substring is automatically allocated; if the destination is a <B><TT>char&nbsp;*</TT></B>, the caller is responsible for allocating sufficient storage. 
+<P>
+The substring comprises <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> characters starting at character <I><FONT  color=991122 face=HELVETICA>sourceOffset</I></FONT> (zero-based).  After the substring is removed, the remaining characters move (to the left) to fill in the gap (<B><TT><A HREF="../The%20Interface%20Kit/Shape.html#MoveTo()">MoveTo()</A></TT></B> only).  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BString source, destination;
+&nbsp;&nbsp;&nbsp;source.SetTo("abcdefg");
+&nbsp;&nbsp;&nbsp;source.MoveInto(&amp;destination, 2, 3);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* source.String() == "abfg" */
+&nbsp;&nbsp;&nbsp;/* destination.String() == "cde" */</PRE>
+<P>
+The functions return <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> (or void).
+<P>
+<HR>
+<H3>
+<A NAME="CountChars()"></A>CountChars()
+, 
+<A NAME="Length()"></A>Length()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountChars(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+
+<TR><TD>
+inline int32 <B><TT><FONT  color=000022 size=+1>Length(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#CountChars()">CountChars()</A></TT></B> returns the length of the object's string measured in characters; <B><TT><A HREF="#Length()">Length()</A></TT></B> returns the length measured in bytes.
+<P>
+<HR>
+<H3>
+<A NAME="FindFirst()"></A>FindFirst()
+, 
+<A NAME="IFindFirst()"></A>IFindFirst()
+, 
+<A NAME="FindLast()"></A>FindLast()
+, 
+<A NAME="IFindLast()"></A>IFindLast()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="misc.html#Integer%20Types">int32</A> <B><TT><FONT  color=000022 size=+1>FindFirst(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindFirst(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindFirst(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindFirst(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindFirst(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindFirst(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindLast(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindLast(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindLast(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindLast(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindLast(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>FindLast(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IFindFirst(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IFindFirst(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IFindFirst(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IFindFirst(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IFindLast(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IFindLast(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IFindLast(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IFindLast(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return the index of the first or last occurrence (within this BString) of a substring or character.  <B><TT><A HREF="#FindFirst()">FindFirst()</A></TT></B> and <B><TT><A HREF="#FindLast()">FindLast()</A></TT></B> are case-sensitive; <B><TT><A HREF="#IFindFirst()">IFindFirst()</A></TT></B> and <B><TT><A HREF="#IFindLast()">IFindLast()</A></TT></B> are case-insensitive.  The functions return <B><TT><A HREF="ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if the character isn't found.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> versions only look in the portion of this BString that starts at character <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> (for [<B><TT>I</TT></B>]<B><TT><A HREF="#FindFirst()">FindFirst()</A></TT></B>), or that ends at character <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> (for [<B><TT>I</TT></B>]<B><TT><A HREF="#FindLast()">FindLast()</A></TT></B>).   For example, in this example...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BString astring("AbcAbcAbc");
+&nbsp;&nbsp;&nbsp;astring.FindLast("Abc", 7);</PRE>
+<P>
+...the <B><TT><A HREF="#FindLast()">FindLast()</A></TT></B> call returns 3, the index of the last complete instance of "Abc" that occurs before character 7.
+<P>
+<HR>
+<H3>ICompare()  see <A HREF="#Compare()">Compare()</A></H3>
+<P>
+<HR>
+<H3>Insert()  see <A HREF="#Append()">Append()</A></H3>
+<P>
+<HR>
+<H3>Length()  see <A HREF="#CountChars()">CountChars()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="LockBuffer()"></A>LockBuffer()
+, 
+<A NAME="UnlockBuffer()"></A>UnlockBuffer()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+char *<B><TT><FONT  color=000022 size=+1>LockBuffer(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>maxLength</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>UnlockBuffer(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT> = -1<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#LockBuffer()">LockBuffer()</A></TT></B> returns a pointer to the object's string; you're allowed to manipulate this pointer directly.  The <I><FONT  color=991122 face=HELVETICA>maxLength</I></FONT> argument lets you ask the object to allocate some extra space at the end of the string before passing you the pointer.  If <I><FONT  color=991122 face=HELVETICA>maxLength</I></FONT> is less than the string's current length, the argument is ignored (pass 0 if you want to lock the buffer but don't need to pre-allocate extra space).
+<P>
+<B><TT><A HREF="#UnlockBuffer()">UnlockBuffer()</A></TT></B> tells the object that you're done manipulating the string pointer.  <I><FONT  color=991122 face=HELVETICA>length</I></FONT> is the string's new length; if you pass -1, the BString gets the length by calling <B><TT>strlen()</TT></B> on the string.  The functions returns *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.
+<P>
+Every <B><TT><A HREF="#LockBuffer()">LockBuffer()</A></TT></B> must be balanced by a subsequent <B><TT><A HREF="#UnlockBuffer()">UnlockBuffer()</A></TT></B>.  In between the two calls, you may not call any BString functions.  Many of the BString functions assert an error if they're called while the buffer is locked.
+<P>
+See <a href="#Direct%20Data%20Access">"Direct Data Access"</a> for an example.
+<P>
+<HR>
+<H3>MoveInto()  see <A HREF="#CopyInto()">CopyInto()</A></H3>
+<P>
+<HR>
+<H3>Prepend()  see <A HREF="#Append()">Append()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Remove()"></A>Remove()
+, 
+<A NAME="RemoveFirst()"></A>RemoveFirst()
+, 
+<A NAME="RemoveLast()"></A>RemoveLast()
+, 
+<A NAME="RemoveAll()"></A>RemoveAll()
+, 
+<A NAME="RemoveSet()"></A>RemoveSet()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Remove(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>startingAt</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>RemoveFirst(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>RemoveFirst(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>RemoveLast(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>RemoveLast(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>RemoveAll(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>RemoveAll(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>RemoveSet(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>charSet</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions remove characters from the BString and reallocate the object's storage so it fits the new (smaller) data.  The functions return *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.
+<P>
+<B><TT><A HREF="#Remove()">Remove()</A></TT></B> removes <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> characters, starting with character <I><FONT  color=991122 face=HELVETICA>startingAt</I></FONT> (zero-based).
+<P>
+<B><TT><A HREF="#RemoveFirst()">RemoveFirst()</A></TT></B>, <B><TT><A HREF="#RemoveLast()">RemoveLast()</A></TT></B>, and <B><TT><A HREF="#RemoveAll()">RemoveAll()</A></TT></B> remove, respectively, the first, last and every occurrence of <I><FONT  color=991122 face=HELVETICA>string</I></FONT> within the object.
+<P>
+<B><TT><A HREF="#RemoveSet()">RemoveSet()</A></TT></B> removes all occurrences of every character in the <I><FONT  color=991122 face=HELVETICA>charSet</I></FONT> string.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BString string("ab abc abcd");
+&nbsp;&nbsp;&nbsp;string.RemoveSet("db");
+&nbsp;&nbsp;&nbsp;/* 'string' now contains "a ac ac" */</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="Replace()"></A>Replace()
+, 
+<A NAME="ReplaceFirst()"></A>ReplaceFirst()
+, 
+<A NAME="ReplaceLast()"></A>ReplaceLast()
+, 
+<A NAME="ReplaceSet()"></A>ReplaceSet()
+, 
+<A NAME="IReplace()"></A>IReplace()
+, 
+<A NAME="IReplaceFirst()"></A>IReplaceFirst()
+, 
+<A NAME="IReplaceLast()"></A>IReplaceLast()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Replace(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>old</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>count</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>offset&nbsp;</I></FONT>=&nbsp;0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Replace(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>old</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>count</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>offset&nbsp;</I></FONT>=&nbsp;0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ReplaceFirst(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>old</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ReplaceFirst(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>old</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ReplaceLast(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>old</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ReplaceLast(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>old</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ReplaceAll(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>old</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>offset&nbsp;</I></FONT>=&nbsp;0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ReplaceAll(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>old</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>offset&nbsp;</I></FONT>=&nbsp;0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ReplaceSet(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>oldSet</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ReplaceSet(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>oldSet</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>IReplace(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>old</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>count</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>offset&nbsp;</I></FONT>=&nbsp;0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>IReplace(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>old</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>count</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>offset&nbsp;</I></FONT>=&nbsp;0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>IReplaceFirst(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>old</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>IReplaceFirst(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>old</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>IReplaceLast(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>old</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>IReplaceLast(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>old</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>IReplaceAll(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>old</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>new</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>offset&nbsp;</I></FONT>=&nbsp;0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>IReplaceAll(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>old</I></FONT>, char <I><FONT  color=991122 face=HELVETICA>new</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>offset&nbsp;</I></FONT>=&nbsp;0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions find occurrences of <I><FONT  color=991122 face=HELVETICA>old</I></FONT> within the <A HREF="#BString">BString</A>, and replace them with <I><FONT  color=991122 face=HELVETICA>new</I></FONT>.  In the <B><TT>Replace...()</TT></B> functions, the search for <I><FONT  color=991122 face=HELVETICA>old</I></FONT> is case-insensitive; in the <B><TT>IReplace...()</TT></B> functions, the search is case-insensitive.  The functions return *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.
+<P>
+<B><TT><A HREF="#[I]Replace()">[I]Replace()</A></TT></B> replaces the first <I><FONT  color=991122 face=HELVETICA>count</I></FONT> occurrences that start on or after the character at <I><FONT  color=991122 face=HELVETICA>offset</I></FONT>.  
+<P>
+<B><TT><A HREF="#[I]ReplaceFirst()">[I]ReplaceFirst()</A></TT></B> and <B><TT><A HREF="#[I]ReplaceLast()">[I]ReplaceLast()</A></TT></B> replace only the first and last occurrence (respectively). <B><TT> 
+<P>
+[I]ReplaceAll()</TT></B> replaces all occurrence that start on or after the character at <I><FONT  color=991122 face=HELVETICA>offset</I></FONT>.
+<P>
+<B><TT>[I]ReplaceSet()</TT></B> is slightly different from the others:  It replaces <I>each</I> occurrence of <I>any</I> character in <I><FONT  color=991122 face=HELVETICA>oldSet</I></FONT> with the character or the entire string given by <I><FONT  color=991122 face=HELVETICA>new</I></FONT>.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BString astring("a-b-c");
+&nbsp;&nbsp;&nbsp;astring.ReplaceSet("abc", "ABC");
+&nbsp;&nbsp;&nbsp;/* astring is now "ABC-ABC-ABC" */</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+, 
+<A NAME="Adopt()"></A>Adopt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline BString &amp;<B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Adopt(</TT></B></FONT>BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Adopt(</TT></B></FONT>BString &amp;<I><FONT  color=991122 face=HELVETICA>source</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions initialize a BString's string data.  Storage for the data is automatically allocated by the functions.  The object's current data is wholly replaced by the new data.  The functions return *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.
+<P>
+<B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> copies <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> characters from <I><FONT  color=991122 face=HELVETICA>source</I></FONT> into this object.  If <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> isn't given, the entire string is copied; this form is equivalent to the <B><TT><A HREF="#=">=</A></TT></B> operator.  The single character version of <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> sets the object's data to a <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT>-length string that consists entirely of the character <I><FONT  color=991122 face=HELVETICA>c</I></FONT>.
+<P>
+<B><TT><A HREF="#Adopt()">Adopt()</A></TT></B> moves<I><FONT  color=991122 face=HELVETICA> charCount</I></FONT> characters from <I><FONT  color=991122 face=HELVETICA>source</I></FONT> into this object, and then clears <I><FONT  color=991122 face=HELVETICA>source</I></FONT>'s data (pointer).  Note that <I><FONT  color=991122 face=HELVETICA>source</I></FONT> will be empty after you call <B><TT><A HREF="#Adopt()">Adopt()</A></TT></B>, even if <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> is less than <I><FONT  color=991122 face=HELVETICA>source</I></FONT>'s full length.
+<P>
+<HR>
+<H3>
+<A NAME="String()"></A>String()
+, 
+<A NAME="ByteAt()"></A>ByteAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline const char *<B><TT><FONT  color=000022 size=+1>String()</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+inline char <B><TT><FONT  color=000022 size=+1>ByteAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#String()">String()</A></TT></B> returns a pointer to the object's string, guaranteed to be <B><TT>NULL</TT></B> terminated.  You may not modify or free the pointer.  If the BString is deleted, the pointer becomes invalid.
+<P>
+<B><TT><A HREF="#ByteAt()">ByteAt()</A></TT></B> returns the <I><FONT  color=991122 face=HELVETICA>index</I></FONT>'th character in the string.  If <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is out of bounds, the function returns 0.  Except for the boundary check, this function is the same as the <B><TT>[]</TT></B> operator.
+<P>
+<HR>
+<H3>
+<A NAME="ToLower()"></A>ToLower()
+, 
+<A NAME="ToUpper()"></A>ToUpper()
+, 
+<A NAME="Capitalize()"></A>Capitalize()
+, 
+<A NAME="CapitalizeEachWord()"></A>CapitalizeEachWord()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ToLower(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>ToUpper(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Capitalize(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>CapitalizeEachWord(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#ToLower()">ToLower()</A></TT></B> converts every character in the string to lower case; <B><TT><A HREF="#ToUpper()">ToUpper()</A></TT></B> converts them all to upper case.  Non-alphabetic characters aren't affected.
+<P>
+<B><TT><A HREF="#Capitalize()">Capitalize()</A></TT></B> converts the first alphabetic character in the word to upper case, and the rest to lower case.  <B><TT><A HREF="#CapitalizeEachWord()">CapitalizeEachWord()</A></TT></B> converts the first alphabetic character in each "word" to upper case, and the rest to lower case.  A word is a group of alphabetic characters delimited by non-alphabetic characters. 
+<P>
+The functions return *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#Capitalize()">Capitalize()</A></TT></B> and <B><TT><A HREF="#CapitalizeEachWord()">CapitalizeEachWord()</A></TT></B> are broken in Release 4.0.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Truncate()"></A>Truncate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>Truncate(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>lazy</I></FONT> = <B><TT>true</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Truncate()">Truncate()</A></TT></B> shrinks the object's string so that it's <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> characters long.  This function will not lengthen the string:  If <I><FONT  color=991122 face=HELVETICA>charCount</I></FONT> is equal to or greater than the string's current character count, the function does nothing. 
+<P>
+If <I><FONT  color=991122 face=HELVETICA>lazy</I></FONT> is <B><TT>false</TT></B>, the string is immediately reallocated to trim it to the new size (and the excess is immediately freed).  If it's <B><TT>true</TT></B>, the string is set to the new size, but the excess isn't freed until the next storage manipulating function is called.  It's slightly more efficient to be lazy; otherwise, the two forms of the function are identical. 
+<P>
+The function returns *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.
+<P>
+<HR>
+<H3>LockBuffer()  </H3>
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BString&amp; operator<B><TT><FONT  color=000022 size=+1>=(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString&amp; operator<B><TT><FONT  color=000022 size=+1>=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString&amp; operator<B><TT><FONT  color=000022 size=+1>=(</TT></B></FONT>const char <I><FONT  color=991122 face=HELVETICA>character</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the contents of the BString to <I><FONT  color=991122 face=HELVETICA>string</I></FONT> or <I><FONT  color=991122 face=HELVETICA>character</I></FONT>, and returns *<B><TT>this<A HREF="../The%20Media%20Kit/BufferProducer.html#this">LockBuffer()  </A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="+="></A>+=
+ (append)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline BString&amp; operator<B><TT><FONT  color=000022 size=+1>+=(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString&amp; operator<B><TT><FONT  color=000022 size=+1>+=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString&amp; operator<B><TT><FONT  color=000022 size=+1>+=(</TT></B></FONT>const char <I><FONT  color=991122 face=HELVETICA>character</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Appends <I><FONT  color=991122 face=HELVETICA>string</I></FONT> or <I><FONT  color=991122 face=HELVETICA>character</I></FONT> to this <A HREF="#BString">BString</A>, and returns *<B><TT><A HREF="../The%20Media%20Kit/BufferProducer.html#this">this</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="&lt;&lt;"></A>&lt;&lt;
+ (formatted append)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>operator&lt;&lt;(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>operator&lt;&lt;(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>operator&lt;&lt;(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>operator&lt;&lt;(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>val</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>operator&lt;&lt;(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>val</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>operator&lt;&lt;(</TT></B></FONT>uint64 <I><FONT  color=991122 face=HELVETICA>val</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>operator&lt;&lt;(</TT></B></FONT>int64 <I><FONT  color=991122 face=HELVETICA>val</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BString &amp;<B><TT><FONT  color=000022 size=+1>operator&lt;&lt;(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>val</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Converts the right operand to a string (if necessary), and appends it to the left operand.  Floating point values are always written with two decimal digits:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BString astring("The result is: "), bstring(" bps");
+&nbsp;&nbsp;&nbsp;float result = 12.5;
+&nbsp;&nbsp;&nbsp;astring &lt;&lt; result &lt;&lt; bstring;</PRE>
+<P>
+Here, <I><FONT  color=991122 face=HELVETICA>astring</I></FONT> becomes "The result is: 12.50 bps".
+<P>
+Multiple append operations are evaluated from left to right, so that only the leftmost operand is modified.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BString astring("a"), bstring("b"), cstring("c");
+&nbsp;&nbsp;&nbsp;astring &lt;&lt; bstring &lt;&lt; cstring;</PRE>
+<P>
+Here, <I><FONT  color=991122 face=HELVETICA>bstring</I></FONT> is appended to <I><FONT  color=991122 face=HELVETICA>astring</I></FONT>, and then <I><FONT  color=991122 face=HELVETICA>cstring</I></FONT> is appended to the result; thus, <I><FONT  color=991122 face=HELVETICA>astring</I></FONT> is "abc", and <I><FONT  color=991122 face=HELVETICA>bstring</I></FONT> is still "b".
+<P>
+<HR>
+<H3>
+<A NAME="[]"></A>[]
+ (indexing)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+char operator<B><TT><FONT  color=000022 size=+1>[](</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline char &amp;operator<B><TT><FONT  color=000022 size=+1>[](</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the character at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> in the string.  No boundary checking is done &ndash;&ndash; it's up to the caller to ensure that <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is in bounds.
+<P>
+<HR>
+<H3>
+<A NAME="=="></A>==
+, 
+<A NAME="!="></A>!=
+, 
+<A NAME="&lt;"></A>&lt;
+, 
+<A NAME=">"></A>>
+, 
+<A NAME="&lt;="></A>&lt;=
+, 
+<A NAME=">="></A>>=
+ (comparison)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string, </I></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>!=(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>!=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>!=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string, </I></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>&lt;(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>&lt;(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>&lt;(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string, </I></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>&lt;=(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>&lt;=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>&lt;=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string, </I></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>>(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>>(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>>(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string, </I></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>>=(</TT></B></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool operator<B><TT><FONT  color=000022 size=+1>>=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+inline bool operator<B><TT><FONT  color=000022 size=+1>>=(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string, </I></FONT>const BString &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const <I><FONT  color=008844 face=HELVETICA>global
+<P>
+</I></FONT>
+</TABLE></TABLE>
+
+<P>
+Case-sensitive comparison of two strings.  Two strings are compared by comparing the ASCII or UTF-8 values of their respective characters.  A longer string is greater than a shorter (but otherwise similar) string&mdash;"abcdef" is greater than "abcde".  
+<P>
+The global versions of these operators are provided so you don't have to worry about the order of the operands; for example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if (astring == "Okay")
+&nbsp;&nbsp;&nbsp;/* ...is equivalent to... */
+&nbsp;&nbsp;&nbsp;if ("Okay" == astring)</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

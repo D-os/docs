@@ -1,0 +1,74 @@
+<HTML><HEAD><TITLE>Messages: Data Containers</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Messages Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Messages%20Master%20Index.html"><FONT face=HELVETICA>Messages Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Data%20Containers"></A>Data Containers
+</H1>
+<P>
+A few constants identify messages as data containers.  The system currently uses these constants to mark the containers it constructs for drag-and-drop operations.
+<P>
+<A NAME="14606:%20head3:%20B_MIME_DATA"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_MIME_DATA"></A>B_MIME_DATA
+</H3>
+<P>
+This message constant indicates that all the data in the message is identified by MIME type names.  The type code of every data field is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MIME_TYPE">B_MIME_TYPE</A></TT></B> and the name of each field is the MIME type string.
+<P>
+As an example, a <A HREF="../Release%20Notes/InterfaceKit.html#BTextView">BTextView</A> object puts together a <B><TT><A HREF="#B_MIME_DATA">B_MIME_DATA</A></TT></B> message for drag-and-drop operations.  The message has the text itself in a field named "text/plain"; the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#text_run_array">text_run_array</A></TT></B> structure that describes the character formats of the text is in a field named "application/x-vnd.Be-text_run_array".
+<P>
+<A NAME="21107:%20head3:%20B_SIMPLE_DATA"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_SIMPLE_DATA"></A>B_SIMPLE_DATA
+</H3>
+<P>
+This message is a package for a single data element.  If there are multiple data fields in the message, they present the same data in various formats.
+<P>
+For example, when the user drags selected files and directories from a Tracker window, the Tracker packages <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> references to them in a <B><TT><A HREF="#B_SIMPLE_DATA">B_SIMPLE_DATA</A></TT></B> message.  The references are in a "refs" array with a type code of <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B>.  In other words, the message has the same structure as a <B><TT><A HREF="GeneralMessages.html#B_REFS_RECEIVED">B_REFS_RECEIVED</A></TT></B> message, but a different <B><TT>what</TT></B> constant.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Messages Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Messages%20Master%20Index.html"><FONT face=HELVETICA>Messages Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

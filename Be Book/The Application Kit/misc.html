@@ -1,0 +1,672 @@
+<HTML><HEAD><TITLE>The Application Kit: Global Variables, Constants, and Defined Types</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Global%20Variables,%20Constants,%20and%20Defined%20Types"></A>Global Variables, Constants, and Defined Types
+</H1>
+<P>
+This section lists the global variables, constants, and defined types that are defined in the Application Kit.  Error codes are documented in the chapter on the Support Kit.
+<P>
+Although the Application Kit defines the constants for all system messages (such as <B><TT><A HREF="#B_REFS_RECEIVED">B_REFS_RECEIVED</A></TT></B> and <B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B>), only those that objects in this kit handle are listed here.  Those that designate interface messages are documented in the chapter on the Interface Kit. 
+<P>
+<HR>
+<H2>
+<A NAME="Global%20Variables"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>V</FONT>ariables
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="be_app"></A>be_app
+</H3>
+<P>
+Declared in:  be/app/Application.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Application.html#BApplication">BApplication</A> *<B><TT><FONT  color=000022 size=+1>be_app
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This variable provides global access to the <A HREF="Application.html#BApplication">BApplication</A> object.  It's initialized by the <A HREF="Application.html#BApplication">BApplication</A> constructor.
+<P>
+<B>See also:  </B>the <A HREF="Application.html#BApplication">BApplication</A> class
+<P>
+<HR>
+<H3>
+<A NAME="be_app_messenger"></A>be_app_messenger
+</H3>
+<P>
+Declared in:  be/app/Application.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Messenger.html#BMessenger">BMessenger</A> *<B><TT><FONT  color=000022 size=+1>be_app_messenger
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This variable provides global access to a <A HREF="Messenger.html#BMessenger">BMessenger</A> object whose target is <B><TT><A HREF="#be_app">be_app</A></TT></B>. It's initialized by the <A HREF="Application.html#BApplication">BApplication</A> constructor.
+<P>
+<B>See also:  </B>the <A HREF="Application.html#BApplication">BApplication</A> class
+<P>
+<HR>
+<H3>
+<A NAME="be_clipboard"></A>be_clipboard
+</H3>
+<P>
+Declared in:  be/app/Clipboard.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Clipboard.html#BClipboard">BClipboard</A> *<B><TT><FONT  color=000022 size=+1>be_clipboard</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This variable gives applications access to the system clipboard&mdash;the shared repository of data for cut, copy, and paste operations.  It's initialized at startup.
+<P>
+<B>See also:  </B>the <A HREF="Clipboard.html#BClipboard">BClipboard</A> class
+<P>
+<HR>
+<H3>
+<A NAME="be_roster"></A>be_roster
+</H3>
+<P>
+Declared in:  be/app/Roster.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const <A HREF="Roster.html#BRoster">BRoster</A> *<B><TT><FONT  color=000022 size=+1>be_roster</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This variable points to the application's global <A HREF="Roster.html#BRoster">BRoster</A> object.  The <A HREF="Roster.html#BRoster">BRoster</A> keeps a roster of all running applications and can add applications to the roster by launching them.  It's initialized when the application starts up.
+<P>
+<B>See also:  </B>the <A HREF="Roster.html#BRoster">BRoster</A> class
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<A NAME="30474:%20funcNameFirst:%20Application%20Flags"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Application%20Flags"></A>Application Flags
+</H3>
+<P>
+Declared in:  be/app/Roster.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</TH>
+<TR>
+<TD></B><B><TT>
+<A NAME="B_BACKGROUND_APP"></A>B_BACKGROUND_APP
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_ARGV_ONLY"></A>B_ARGV_ONLY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LAUNCH_MASK"></A>B_LAUNCH_MASK
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants are used to get information from the <B><TT>flags</TT></B> field of an <B><TT><A HREF="#app_info">app_info</A></TT></B> structure.
+<P>
+<B>See also:  <TT><A HREF="Roster.html#GetAppInfo()">BRoster::GetAppInfo()</A></TT></B>, "Launch Constants" below
+<P>
+<A NAME="21123:%20funcName:%20Application%20Messages"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Application%20Messages"></A>Application Messages
+</H3>
+<P>
+Declared in:  be/app/AppDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_QUIT_REQUESTED"></A>B_QUIT_REQUESTED
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_READY_TO_RUN"></A>B_READY_TO_RUN
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_APP_ACTIVATED"></A>B_APP_ACTIVATED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ABOUT_REQUESTED"></A>B_ABOUT_REQUESTED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_QUIT_REQUESTED"></A>B_QUIT_REQUESTED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ARGV_RECEIVED"></A>B_ARGV_RECEIVED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_REFS_RECEIVED"></A>B_REFS_RECEIVED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PULSE"></A>B_PULSE
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants represent the system messages that are recognized and given special treatment by <A HREF="Application.html#BApplication">BApplication</A> and <A HREF="Looper.html#BLooper">BLooper</A> dispatchers.  Application messages concern the application as a whole, rather than any particular window thread.  See the introduction to this chapter and the <A HREF="Application.html#BApplication">BApplication</A> class for details.
+<P>
+<B>See also:  </B>"Application Messages" on page&nbsp;30 of the <A HREF="Application.html#BApplication">BApplication</A> class 
+<P>
+<HR>
+<H3>
+<A NAME="Cursor%20Constants"></A>Cursor Constants
+</H3>
+<P>
+Declared in:  be/app/AppDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const unsigned char <B><TT><FONT  color=000022 size=+1>
+<A NAME="Cursor%20Constants"></A>B_HAND_CURSOR
+</TT></B></FONT>[]
+<P>
+
+
+<TR><TD>
+const unsigned char <B><TT><FONT  color=000022 size=+1>
+<A NAME="Cursor%20Constants"></A>B_I_BEAM_CURSOR
+</TT></B></FONT>[]
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These constants contain all the data needed to set the cursor to the default hand image or to the standard I-beam image for text selection.
+<P>
+<B>See also:  <TT><A HREF="Application.html#SetCursor()">BApplication::SetCursor()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="filter_result%20Constants"></A>filter_result Constants
+</H3>
+<P>
+Declared in:  be/app/MessageFilter.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_SKIP_MESSAGE"></A>B_SKIP_MESSAGE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DISPATCH_MESSAGE"></A>B_DISPATCH_MESSAGE
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants list the possible return values of a filter function.
+<P>
+<B>See also:  <TT><A HREF="MessageFilter.html#Filter()">BMessageFilter::Filter()</A></TT></B> 
+<P>
+<A NAME="35823:%20funcName:%20Launch%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Launch%20Constants"></A>Launch Constants
+</H3>
+<P>
+Declared in:  be/app/Roster.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_MULTIPLE_LAUNCH"></A>B_MULTIPLE_LAUNCH
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_SINGLE_LAUNCH"></A>B_SINGLE_LAUNCH
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EXCLUSIVE_LAUNCH"></A>B_EXCLUSIVE_LAUNCH
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants explain whether an application can be launched any number of times, only once from a particular executable file, or only once for a particular application signature.  This information is part of the <B><TT>flags</TT></B> field of an <B><TT><A HREF="#app_info">app_info</A></TT></B> structure and can be extracted using the <B><TT><A HREF="#B_LAUNCH_MASK">B_LAUNCH_MASK</A></TT></B> constant.
+<P>
+<B>See also:  <TT><A HREF="Roster.html#GetAppInfo()">BRoster::GetAppInfo()</A></TT></B>, "Application Flags" above
+<P>
+<HR>
+<H3>
+<A NAME="Looper%20Port%20Capacity"></A>Looper Port Capacity
+</H3>
+<P>
+Declared in:  be/app/Looper.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_LOOPER_PORT_DEFAULT_CAPACITY"></A>B_LOOPER_PORT_DEFAULT_CAPACITY
+</TT></B> </TD>
+</TABLE>
+<P>
+This constant records the default capacity of a BLooper's port.  The default is 100 slots; a greater or smaller number can be specified when constructing the BLooper.
+<P>
+<B>See also:  </B>the <A HREF="Looper.html#BLooper">BLooper</A> constructor 
+<P>
+<HR>
+<H3>
+<A NAME="Message%20Constants"></A>Message Constants
+</H3>
+<P>
+Declared in:  be/app/AppDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_REPLY"></A>B_REPLY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NO_REPLY"></A>B_NO_REPLY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MESSAGE_NOT_UNDERSTOOD"></A>B_MESSAGE_NOT_UNDERSTOOD
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SAVE_REQUESTED"></A>B_SAVE_REQUESTED
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_CANCEL"></A>B_CANCEL
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SIMPLE_DATA"></A>B_SIMPLE_DATA
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MIME_DATA"></A>B_MIME_DATA
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ARCHIVED_OBJECT"></A>B_ARCHIVED_OBJECT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UPDATE_STATUS_BAR"></A>B_UPDATE_STATUS_BAR
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RESET_STATUS_BAR"></A>B_RESET_STATUS_BAR
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NODE_MONITOR"></A>B_NODE_MONITOR
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_QUERY_UPDATE"></A>B_QUERY_UPDATE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CUT"></A>B_CUT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_COPY"></A>B_COPY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PASTE"></A>B_PASTE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SELECT_ALL"></A>B_SELECT_ALL
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SET_PROPERTY"></A>B_SET_PROPERTY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_PROPERTY"></A>B_GET_PROPERTY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CREATE_PROPERTY"></A>B_CREATE_PROPERTY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DELETE_PROPERTY"></A>B_DELETE_PROPERTY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GET_SUPPORTED_SUITES"></A>B_GET_SUPPORTED_SUITES
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants mark messages that the system sometimes puts together, but that aren't dispatched like system messages.  See "Standard Messages" in the <B>Message Protocols</B> appendix for details.
+<P>
+<B>See also:  <TT><A HREF="Message.html#SendReply()">BMessage::SendReply()</A></TT></B>, the <A HREF="../Release%20Notes/InterfaceKit.html#BTextView">BTextView</A> class in the Interface Kit 
+<P>
+<HR>
+<H3>
+<A NAME="message_delivery%20Constants"></A>message_delivery Constants
+</H3>
+<P>
+Declared in:  be/app/MessageFilter.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_ANY_DELIVERY"></A>B_ANY_DELIVERY
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_DROPPED_DELIVERY"></A>B_DROPPED_DELIVERY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PROGRAMMED_DELIVERY"></A>B_PROGRAMMED_DELIVERY
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants distinguish the delivery criterion for filtering a BMessage.
+<P>
+<B>See also:  </B>the <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> constructor
+<P>
+<HR>
+<H3>
+<A NAME="message_source%20Constants"></A>message_source Constants
+</H3>
+<P>
+Declared in:  be/app/MessageFilter.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_ANY_SOURCE"></A>B_ANY_SOURCE
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_REMOTE_SOURCE"></A>B_REMOTE_SOURCE
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_LOCAL_SOURCE"></A>B_LOCAL_SOURCE
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants list the possible constraints that a <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> might impose on the source of the messages it filters.
+<P>
+<B>See also:  </B>the <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> constructor
+<P>
+<HR>
+<H3>
+<A NAME="Message%20Specifiers"></A>Message Specifiers
+</H3>
+<P>
+Declared in:  be/app/Message.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_NO_SPECIFIER"></A>B_NO_SPECIFIER
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_DIRECT_SPECIFIER"></A>B_DIRECT_SPECIFIER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INDEX_SPECIFIER"></A>B_INDEX_SPECIFIER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_REVERSE_INDEX_SPECIFIER"></A>B_REVERSE_INDEX_SPECIFIER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RANGE_SPECIFIER"></A>B_RANGE_SPECIFIER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_REVERSE_RANGE_SPECIFIER"></A>B_REVERSE_RANGE_SPECIFIER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NAME_SPECIFIER"></A>B_NAME_SPECIFIER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ID_SPECIFIER"></A>B_ID_SPECIFIER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SPECIFIERS_END"></A>B_SPECIFIERS_END
+</TT></B>&nbsp;=&nbsp;128 </TD>
+</TABLE>
+<P>
+These constants fill the <B><TT>what</TT></B> slot of specifier BMessages.  Each constant indicates what other information the specifer contains and how it should be interpreted.  For example, a <B><TT><A HREF="#B_REVERSE_INDEX_SPECIFIER">B_REVERSE_INDEX_SPECIFIER</A></TT></B> message has an "index" field with an index that counts backwards from the end of a list.  A <B><TT><A HREF="#B_NAME_SPECIFIER">B_NAME_SPECIFIER</A></TT></B> message includes a "name" field that names the requested item.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="app_info"></A>app_info
+</H3>
+<P>
+Declared in:  be/app/Roster.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thread_id <B><TT><FONT  color=000022 size=+1>thread</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id <B><TT><FONT  color=000022 size=+1>team</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;port_id <B><TT><FONT  color=000022 size=+1>port</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref <B><TT><FONT  color=000022 size=+1>ref</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>signature</TT></B></FONT>[<FONT  face=HELVETICA>B_MIME_TYPE_LENGTH</FONT>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>app_info(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>~app_info(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>app_info</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure is used by BRoster's <B><TT><A HREF="Application.html#GetAppInfo()">GetAppInfo()</A></TT></B>, <B><TT><A HREF="Roster.html#GetRunningAppInfo()">GetRunningAppInfo()</A></TT></B>, and <B><TT><A HREF="Roster.html#GetActiveAppInfo()">GetActiveAppInfo()</A></TT></B> functions to report information about an application.  Its constructor ensures that its fields are initialized to invalid values.  To get meaningful values for an actual application, you must pass the structure to one of the <A HREF="Roster.html#BRoster">BRoster</A> functions.  See those functions for a description of the various fields.
+<P>
+<B>See also:  <TT><A HREF="Roster.html#GetAppInfo()">BRoster::GetAppInfo()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="filter_result"></A>filter_result
+</H3>
+<P>
+Declared in:  be/app/MessageFilter.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum { . . . } <B><TT><FONT  color=000022 size=+1>filter_result</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type distinguishes between the <B><TT>B_SKIP_MESSAGE</TT></B> and <B><TT>B_DISPATCH_MESSAGE</TT></B> return values for a filter function.
+<P>
+<B>See also:  <TT><A HREF="MessageFilter.html#Filter()">BMessageFilter::Filter()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="message_delivery"></A>message_delivery
+</H3>
+<P>
+Declared in:  be/app/MessageFilter.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum { . . . } <B><TT><FONT  color=000022 size=+1>message_delivery</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type enumerates the delivery criteria for filtering a message.
+<P>
+<B>See also:  </B>the <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> constructor 
+<P>
+<HR>
+<H3>
+<A NAME="message_source"></A>message_source
+</H3>
+<P>
+Declared in:  be/app/MessageFilter.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum { . . . } <B><TT><FONT  color=000022 size=+1>message_source</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type enumerates the source criteria for filtering a message.
+<P>
+<B>See also:  </B>the <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> constructor 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,413 @@
+<HTML><HEAD><TITLE>The Media Kit: BMediaEncoder</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMediaEncoder"></A>BMediaEncoder
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaEncoder.h">be/media/MediaEncoder.h</A>
+<P>
+Library:  libmedia.so
+<P>
+<H6><A HREF="MediaEncoder.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMediaEncoder class is a base class from which encoder classes may be derived.  It handles all the work of locating an appropriate encoder add-on and interfacing with it.  All you have to do is implement the <B><TT><A HREF="#WriteChunk()">WriteChunk()</A></TT></B> and <B><TT><A HREF="#AddTrackInfo()">AddTrackInfo()</A></TT></B> functions to write a chunk of encoded data to the destination and to write information about the track into the file.
+<P>
+The <A HREF="MediaBufferEncoder.html#BMediaBufferEncoder">BMediaBufferEncoder</A> class is  provided for you; it's a derived class that implements <B><TT><A HREF="#WriteChunk()">WriteChunk()</A></TT></B> to write encoded data into a memory buffer.
+<P>
+An application that wants to encode a stream of data that's not originating from a file should use a subclass of BMediaEncoder (such as BMediaBufferEncoder) to do so.
+<P>
+<A NAME="30148:%20head1:%20xa5%20%20Hook%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#AddTrackInfo()">AddTrackInfo()</A>
+<P>
+<A HREF="#WriteChunk()">WriteChunk()</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMediaEncoder()"></A>BMediaEncoder()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BMediaEncoder()">BMediaEncoder()</A></TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaEncoder(const media_format *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>outputFormat</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The constructor sets up the BMediaEncoder.  If you use the empty form of the constructor, you'll have to call <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> to establish the format to be encoded before calling <B><TT>encode()</TT></B>.
+<P>
+The second form accepts a media_format structure, <I><FONT  color=991122 face=HELVETICA>inFormat</I></FONT>, that indicates the type of media data that will be input into the encoder.
+<P>
+The third form of the constructor accepts a media_codec_info structure, <I><FONT  color=991122 face=HELVETICA>mci</I></FONT>, that determines which codec should be used.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you use either the media_format or media_codec_info form of the constructor, you must call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to ensure that construction was successful before using any other functions in this class.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="~BMediaEncoder()"></A>~BMediaEncoder()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT>virtual</TT></B><B><TT><FONT  color=000022 size=+1> ~BMediaEncoder()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Releases the encoder add-on being used by the BMediaEncoder.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddTrackInfo()"></A>AddTrackInfo()
+</H3>
+<P>
+<B><TT>protected:
+<P>
+</TT></B>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>AddTrackInfo(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>code</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+</TABLE></TABLE>
+
+<P>
+In derived classes, you should implement this function to write track information into the output file.  <I><FONT  color=991122 face=HELVETICA>code</I></FONT> indicates the type of information being added, and <I><FONT  color=991122 face=HELVETICA>data</I></FONT> is the information data itself.  <I><FONT  color=991122 face=HELVETICA>size</I></FONT> indicates the size of the data to be written.
+<P>
+By default, this function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Your implementation should return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the information was written successfully; otherwise it should return an appropriate error code.
+<P>
+<HR>
+<H3>
+<A NAME="Encode()"></A>Encode()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>Encode(void</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>inBuffer</I></FONT>, int64 <I><FONT  color=991122 face=HELVETICA>frameCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_encode_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Encodes a chunk of media data from the input buffer by <I><FONT  color=991122 face=HELVETICA>inBuffer</I></FONT>, which contains <I><FONT  color=991122 face=HELVETICA>frameCount</I></FONT> frames of data.
+<P>
+The media_encode_info structure <I><FONT  color=991122 face=HELVETICA>info</I></FONT> is used on input to specify encoding parameters.
+<P>
+After the data is encoded, the encoder will call the derived class' <B><TT><A HREF="#WriteChunk()">WriteChunk()</A></TT></B> function to write the data into the file.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>. The BMediaEncoder hasn't been initialized.
+<P>
+<LI>Other errors. The encoder's <B><TT>StartEncoder()</TT></B> and <B><TT>Encode()</TT></B> functions can return errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetEncodeParameters()"></A>GetEncodeParameters()
+, 
+<A NAME="SetEncodeParameters()"></A>SetEncodeParameters()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetEncodeParameters(</TT></B></FONT>encode_parameters *<I><FONT  color=991122 face=HELVETICA>inParameters</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetEncodeParameters(</TT></B></FONT>encode_parameters *<I><FONT  color=991122 face=HELVETICA>outParameters</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#GetEncodeParameters()">GetEncodeParameters()</A></TT></B> returns in inParameters the <B><TT><A HREF="misc_api.html#encode_parameters">encode_parameters</A></TT></B> describing how the encoder add-on is configured.
+<P>
+<B><TT><A HREF="#SetEncodeParameters()">SetEncodeParameters()</A></TT></B> let you specify the <B><TT><A HREF="misc_api.html#encode_parameters">encode_parameters</A></TT></B> for the add-on.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI>Other errors.  The encoder's <B><TT>GetEncodeParameters()</TT></B> or <B><TT>SetEncodeParameters()</TT></B> function can return errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>InitCheck(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a status_t value indicating whether or not construction was successful.  You must call this function after construction before calling any other BMediaEncoder functions.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. The constructor was successful.
+<P>
+<LI><B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetFormat()"></A>SetFormat()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetInputFormat(media_format *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>inputFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>outputFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_file_format *<I><FONT  color=991122 face=HELVETICA>mfi</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetFormat()">SetFormat()</A> </TT></B>sets the input and output formats to be used by the encoder, as well as the media_file_format describing the file to which the encoded data will be written.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>. The BMediaEncoder hasn't been initialized yet.
+<P>
+<LI>Other errors. The encoder's <B><TT>SetFormat()</TT></B> function can return errors through <B><TT><A HREF="#SetFormat()">SetFormat()</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>SetEncodeParameters()   see <A HREF="#GetEncodeParameters()">GetEncodeParameters()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetTo(const media_format *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>outputFormat</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>
+<P>
+</I></FONT>
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetTo(const media_codec_info *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>mci</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> sets the format of media data that will be encoded by the BMediaEncoder object.  This also causes the BMediaEncoder to locate an appropriate codec to use.
+<P>
+The first form accepts a media_format structure, <I><FONT  color=991122 face=HELVETICA>outputFormat</I></FONT>, that indicates the type of media data that the encoder should output.
+<P>
+The second form of <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> accepts a media_codec_info structure, <I><FONT  color=991122 face=HELVETICA>mci</I></FONT>, that determines which codec should be used.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>. The BMediaEncoder isn't initialized.
+<P>
+<LI><B><TT><A HREF="MediaFormats.html#get_next_encoder()">get_next_encoder()</A></TT></B> errors.
+<P>
+<LI><B><TT><A HREF="../The%20Kernel%20Kit/Images.html#get_image_symbol()">get_image_symbol()</A></TT></B> errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="WriteChunk()"></A>WriteChunk()
+</H3>
+<P>
+<B><TT>protected:
+<P>
+</TT></B>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>WriteChunk(const void *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>chunkData</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>chunkLength</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_encode_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> = 0<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+In derived classes, you should implement this function to write the chunk of encoded data pointed to by <I><FONT  color=991122 face=HELVETICA>chunkData</I></FONT> into the destination file or buffer.  <I><FONT  color=991122 face=HELVETICA>chunkLength</I></FONT> indicates the size of the buffer, and <I><FONT  color=991122 face=HELVETICA>info</I></FONT> provides information about the encoding process that you might need to reference.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the data is successfully written; otherwise return an appropriate error code.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

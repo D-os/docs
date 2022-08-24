@@ -1,0 +1,791 @@
+<HTML><HEAD><TITLE>The Storage Kit: Global Constants and Defined Types </TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Global%20Constants%20and%20Defined%20Types%20"></A>Global Constants and Defined Types 
+</H1>
+<P>
+This section lists parts of the Storage Kit that aren't contained in classes.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Limits%20Constants"></A>Limits Constants
+</H3>
+<P>
+Declared in:  be/storage/StorageDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_FILE_NAME_LENGTH</TT></B></TD>
+<TD>Number of characters allowed in a file name.</TD>
+<TR>
+<TD><B><TT>B_PATH_NAME_LENGTH</TT></B></TD>
+<TD>Number of characters allowed in a path name.</TD>
+<TR>
+<TD><B><TT>B_ATTR_NAME_LENGTH</TT></B></TD>
+<TD>Number of characters allowed in an attribute name.</TD>
+<TR>
+<TD><B><TT>B_MIME_TYPE_LENGTH</TT></B></TD>
+<TD>Number of characters allowed in a MIME type name.</TD>
+<TR>
+<TD><B><TT>B_MAX_SYMLINKS</TT></B></TD>
+<TD>Number of nested symlinks allowed.</TD>
+</TABLE>
+<P>
+These constants define the maximum values for several Storage Kit related items, including file and path name strings, attribute name strings, and MIME type strings.  <B><TT>B_MAX_SYMLINKS</TT></B> specifies how many symbolic links may be linked through each other.
+<P>
+<HR>
+<H3>
+<A NAME="File%20Open%20Mode%20Constants"></A>File Open Mode Constants
+</H3>
+<P>
+Declared in:  be/storage/StorageDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_READ_ONLY</TT></B></TD>
+<TD>Open the file with read-only access.</TD>
+<TR>
+<TD><B><TT>B_WRITE_ONLY</TT></B></TD>
+<TD>Open the file with write-only access.</TD>
+<TR>
+<TD><B><TT>B_READ_WRITE</TT></B></TD>
+<TD>Open the file for both reading and writing.</TD>
+<TR>
+<TD><B><TT>B_FAIL_IF_EXISTS</TT></B></TD>
+<TD>Don't open the file if it already exists.</TD>
+<TR>
+<TD><B><TT>B_CREATE_FILE</TT></B></TD>
+<TD>Create the file before opening it.</TD>
+<TR>
+<TD><B><TT>B_ERASE_FILE</TT></B></TD>
+<TD>Erase the previous contents before opening the file.</TD>
+<TR>
+<TD><B><TT>B_OPEN_AT_END</TT></B></TD>
+<TD>Open with the pointer at the end of the file.</TD>
+</TABLE>
+<P>
+These constants are used when opening files using either the POSIX <B><TT>open()</TT></B> function or using the <A HREF="File.html#BFile">BFile</A> class.  They specify the mode in which the file is to be opened.  For instance, if write-only access is desired, and you want the operation to fail if the file exists, you would do the following:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;fd = open("foobar.data", B_WRITE_ONLY | B_FAIL_IF_EXISTS);</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="Node%20Flavors"></A>Node Flavors
+</H3>
+<P>
+Declared in:  be/storage/StorageDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_FILE_NODE</TT></B></TD>
+<TD>Files only.</TD>
+<TR>
+<TD><B><TT>B_SYMLINK_NODE</TT></B></TD>
+<TD>Symbolic links only.</TD>
+<TR>
+<TD><B><TT>B_DIRECTORY_NODE</TT></B></TD>
+<TD>Directories only.</TD>
+<TR>
+<TD><B><TT>B_ANY_NODE</TT></B></TD>
+<TD>Matches any node.</TD>
+</TABLE>
+<P>
+These constants are used when making a request that can be qualified based on the "flavor" of a node&mdash;in other words, whenever you wish to perform an operation on only files, directories, or symbolic links.  This is used when opening a file panel, for instance, so that you can specify what types of items you want the user to be able to select.
+<P>
+<HR>
+<H3>
+<A NAME="Version%20Kinds"></A>Version Kinds
+</H3>
+<P>
+Declared in:  be/storage/AppFileInfo.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_APP_VERSION_KIND</TT></B></TD>
+<TD>Records information about a specific application.</TD>
+<TR>
+<TD><B><TT>B_SYSTEM_VERSION_KIND</TT></B></TD>
+<TD>Records information about a "suite," or other grouping of applications, that the application belongs to.</TD>
+</TABLE>
+<P>
+These constants are used when setting or retrieving the version information attached to an application.  There are two version information records for each application, and these two constants select which one you wish to reference.  Although there is no prescribed use for these structures or their constants, it is suggested that <B><TT>B_APP_VERSION_KIND</TT></B> be used for application-specific version information, and <B><TT>B_SYSTEM_VERSION_KIND</TT></B> be used for information about the suite of applications to which the application belongs.
+<P>
+<HR>
+<H3>
+<A NAME="Directories"></A>Directories
+</H3>
+<P>
+Declared in:  be/storage/FindDirectory.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_DESKTOP_DIRECTORY</TT></B></TD>
+<TD>Desktop directory.</TD>
+<TR>
+<TD><B><TT>B_TRASH_DIRECTORY</TT></B></TD>
+<TD>Trash directory.</TD>
+<TR>
+<TD><B><TT>B_APPS_DIRECTORY</TT></B></TD>
+<TD>Applications directory.</TD>
+<TR>
+<TD><B><TT>B_PREFERENCES_DIRECTORY</TT></B></TD>
+<TD>Preferences directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_DIRECTORY</TT></B></TD>
+<TD>BeOS directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_SYSTEM_DIRECTORY</TT></B></TD>
+<TD>System directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_ADDONS_DIRECTORY</TT></B></TD>
+<TD>BeOS add-ons directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_BOOT_DIRECTORY</TT></B></TD>
+<TD>Boot volume's root directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_FONTS_DIRECTORY</TT></B></TD>
+<TD>BeOS fonts directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_LIB_DIRECTORY</TT></B></TD>
+<TD>BeOS libraries directory.</TD>
+<TR>
+<TD> <B><TT>B_BEOS_SERVERS_DIRECTORY</TT></B></TD>
+<TD>BeOS servers directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_APPS_DIRECTORY</TT></B></TD>
+<TD>BeOS applications directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_BIN_DIRECTORY</TT></B></TD>
+<TD><B>/bin</B> directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_ETC_DIRECTORY</TT></B></TD>
+<TD><B>/etc</B> directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_DOCUMENTATION_DIRECTORY</TT></B></TD>
+<TD>BeOS documentation directory.</TD>
+<TR>
+<TD><B><TT>B_BEOS_PREFERENCES_DIRECTORY</TT></B></TD>
+<TD>BeOS preferences directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_DIRECTORY</TT></B></TD>
+<TD>The common directory, shared by all users.</TD>
+<TR>
+<TD><B><TT>B_COMMON_SYSTEM_DIRECTORY</TT></B></TD>
+<TD>The shared system directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_ADDONS_DIRECTORY</TT></B></TD>
+<TD>The shared addons directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_BOOT_DIRECTORY</TT></B></TD>
+<TD>The shared boot directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_FONTS_DIRECTORY</TT></B></TD>
+<TD>The shared fonts directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_LIB_DIRECTORY</TT></B></TD>
+<TD>The shared libraries directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_SERVERS_DIRECTORY</TT></B></TD>
+<TD>The shared servers directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_BIN_DIRECTORY</TT></B></TD>
+<TD>The shared <B>/bin</B> directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_ETC_DIRECTORY</TT></B></TD>
+<TD>The shared <B>/etc</B> directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_DOCUMENTATION_DIRECTORY</TT></B></TD>
+<TD>The shared documentation directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_SETTINGS_DIRECTORY</TT></B></TD>
+<TD>The shared settings directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_DEVELOP_DIRECTORY</TT></B></TD>
+<TD>The shared develop directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_LOG_DIRECTORY</TT></B></TD>
+<TD>The shared log directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_SPOOL_DIRECTORY</TT></B></TD>
+<TD>The shared spool directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_TEMP_DIRECTORY</TT></B></TD>
+<TD>The shared temporary items directory.</TD>
+<TR>
+<TD><B><TT>B_COMMON_VAR_DIRECTORY</TT></B></TD>
+<TD>The shared <B>/var</B> directory.</TD>
+<TR>
+<TD><B><TT>B_USER_DIRECTORY</TT></B></TD>
+<TD>The user's home directory.</TD>
+<TR>
+<TD><B><TT>B_USER_CONFIG_DIRECTORY</TT></B></TD>
+<TD>The user's config directory.</TD>
+<TR>
+<TD><B><TT>B_USER_ADDONS_DIRECTORY</TT></B></TD>
+<TD>The user's add-ons directory.</TD>
+<TR>
+<TD><B><TT>B_USER_BOOT_DIRECTORY</TT></B></TD>
+<TD>The user's <B>/boot</B> directory.</TD>
+<TR>
+<TD><B><TT>B_USER_FONTS_DIRECTORY</TT></B></TD>
+<TD>The user's fonts directory.</TD>
+<TR>
+<TD><B><TT>B_USER_LIB_DIRECTORY</TT></B></TD>
+<TD>The user's libraries directory.</TD>
+<TR>
+<TD><B><TT>B_USER_SETTINGS_DIRECTORY</TT></B></TD>
+<TD>The user's settings directory.</TD>
+<TR>
+<TD><B><TT>B_USER_DESKBAR_DIRECTORY</TT></B></TD>
+<TD>The user's Deskbar directory.</TD>
+</TABLE>
+<P>
+These constants are used when calling the <B><TT><A HREF="Directory.html#find_directory()">find_directory()</A></TT></B> function to determine the pathname of a particular directory of interest.
+<P>
+<B><TT>B_DESKTOP_DIRECTORY</TT></B> and <B><TT>B_TRASH_DIRECTORY</TT></B> are per-volume directories; if you don't specify the volume you wish to locate these directories on,  <B><TT><A HREF="Directory.html#find_directory()">find_directory()</A></TT></B> will assume you mean the boot disk.
+<P>
+<B><TT>B_APPS_DIRECTORY</TT></B> and <B><TT>B_PREFERENCES_DIRECTORY</TT></B> are global directories, and always refer to the standard <B>apps</B> and <B>preferences</B> directories.
+<P>
+The <B><TT>B_BEOS_*</TT></B> constants refer to BeOS-owned directories, the <B><TT>B_COMMON_*</TT></B> constants refer to directories that are common to all users of the system, and the <B><TT>B_USER_*</TT></B> constants refer to the current user's directories (currently these are all in a subtree rooted at <B>/boot/home</B>, but when multiuser support is implemented in a future version of BeOS, these won't necessarily all be the same anymore).
+<P>
+In general, global application and system settings should be kept in <B><TT>B_COMMON_*</TT></B>; while settings that each user should be able to configure individually should be kept in <B><TT>B_USER_*</TT></B>.
+<P>
+By using these constants properly, your code will be compatible with future generations of the BeOS.
+<P>
+<HR>
+<H3>
+<A NAME="Icon%20Sizes"></A>Icon Sizes
+</H3>
+<P>
+Declared in:  be/storage/Mime.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_LARGE_ICON</TT></B></TD>
+<TD>Large (32x32) icon.</TD>
+<TR>
+<TD><B><TT>B_MINI_ICON</TT></B></TD>
+<TD>Small (16x16) icon.</TD>
+</TABLE>
+<P>
+These constants are used when selecting icons from a meta MIME file; they let you fetch the large and small variations of a file's icon.
+<P>
+<HR>
+<H3>
+<A NAME="watch_node()%20Flags"></A>watch_node() Flags
+</H3>
+<P>
+Declared in:  be/storage/NodeMonitor.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_STOP_WATCHING</TT></B></TD>
+<TD>Stop watching the node.</TD>
+<TR>
+<TD><B><TT>B_WATCH_NAME</TT></B></TD>
+<TD>Watch for changes to the name of the node.</TD>
+<TR>
+<TD><B><TT>B_WATCH_STAT</TT></B></TD>
+<TD>Watch for stat changes.</TD>
+<TR>
+<TD><B><TT>B_WATCH_ATTR</TT></B></TD>
+<TD>Watch for attribute changes.</TD>
+<TR>
+<TD><B><TT>B_WATCH_DIRECTORY</TT></B></TD>
+<TD>Watch for changes to the directory's contents.</TD>
+<TR>
+<TD><B><TT>B_WATCH_ALL</TT></B></TD>
+<TD>Watch everything (except mounting).</TD>
+<TR>
+<TD><B><TT>B_WATCH_MOUNT</TT></B></TD>
+<TD>Watch for disk mounts and unmounts.</TD>
+</TABLE>
+<P>
+These constants are used to control what type of monitoring to perform on a node.  <B><TT>B_WATCH_ALL</TT></B> is a convenience constant that allows you to monitor changes to the name, stat information, attributes, and directory of a node.  <B><TT>B_WATCH_MOUNT</TT></B>, which is not included in <B><TT>B_WATCH_ALL</TT></B>, monitors volumes being mounted and unmounted.
+<P>
+<B><TT>B_WATCH_DIRECTORY</TT></B> applies only to directory nodes.
+<P>
+<HR>
+<H3>
+<A NAME="Node%20Monitor%20Opcodes"></A>Node Monitor Opcodes
+</H3>
+<P>
+Declared in:  be/storage/NodeMonitor.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_ENTRY_CREATED</TT></B></TD>
+<TD>A new entry has been created.</TD>
+<TR>
+<TD><B><TT>B_ENTRY_REMOVED</TT></B></TD>
+<TD>An entry has been removed.</TD>
+<TR>
+<TD><B><TT>B_ENTRY_MOVED</TT></B></TD>
+<TD>An entry has been moved.</TD>
+<TR>
+<TD><B><TT>B_STAT_CHANGED</TT></B></TD>
+<TD>Stat information has changed.</TD>
+<TR>
+<TD><B><TT>B_ATTR_CHANGED</TT></B></TD>
+<TD>An attribute has been changed.</TD>
+<TR>
+<TD><B><TT>B_DEVICE_MOUNTED</TT></B></TD>
+<TD>A volume has been mounted.</TD>
+<TR>
+<TD><B><TT>B_DEVICE_UNMOUNTED</TT></B></TD>
+<TD>A volume has been unmounted.</TD>
+</TABLE>
+<P>
+These constants are returned in the "opcode" field of messages sent by the Node Monitor to let you know what sort of change has occurred to a node being monitored.
+<P>
+<HR>
+<H3>
+<A NAME="Query%20Operation%20Constants"></A>Query Operation Constants
+</H3>
+<P>
+Declared in:  be/storage/Query.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Operation</TH>
+<TR>
+<TD><B><TT>B_EQ</TT></B></TD>
+<TD>=</TD>
+<TR>
+<TD><B><TT>B_NE</TT></B></TD>
+<TD>!=</TD>
+<TR>
+<TD><B><TT>B_GT</TT></B></TD>
+<TD>></TD>
+<TR>
+<TD><B><TT>B_LT</TT></B></TD>
+<TD>&lt;</TD>
+<TR>
+<TD><B><TT>B_GE</TT></B></TD>
+<TD>>=</TD>
+<TR>
+<TD><B><TT>B_LE</TT></B></TD>
+<TD>&lt;=</TD>
+<TR>
+<TD><B><TT>B_CONTAINS</TT></B></TD>
+<TD>string contains value ("*<I>value</I>*")</TD>
+<TR>
+<TD><B><TT>B_BEGINS_WITH</TT></B></TD>
+<TD>string begins with value ("<I>value*</I>")</TD>
+<TR>
+<TD><B><TT>B_ENDS_WITH</TT></B></TD>
+<TD>string ends with value ("*<I>value</I>")</TD>
+<TR>
+<TD><B><TT>B_AND</TT></B></TD>
+<TD>&amp;&amp;</TD>
+<TR>
+<TD><B><TT>B_OR</TT></B></TD>
+<TD>||</TD>
+<TR>
+<TD><B><TT>B_NOT</TT></B></TD>
+<TD>!</TD>
+</TABLE>
+<P>
+These constants define the operations that can be used to specify a query.  They are used in conjunction with the push functions for constructing a query.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="entry_ref"></A>entry_ref
+</H3>
+<P>
+Declared in:  be/storage/Entry.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT>entry_ref</TT></B> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>entry_ref</TT></B>();
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>entry_ref</TT></B>(dev_t <I><FONT  color=991122 face=HELVETICA>device</I></FONT>, ino_t <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>entry_ref</TT></B>(const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<B><TT>entry_ref</TT></B>();
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>set_name</TT></B>(const char *name);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;operator==(const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>) const;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;operator!=(const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>) const;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref &amp;&nbsp;&nbsp;&nbsp;operator=(const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;directory;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*name;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT>entry_ref</TT></B> structure describes a single entry in a directory.
+<P>
+<B><TT>entry_ref()
+<br>
+entry_ref</TT></B>(dev_t <I><FONT  color=991122 face=HELVETICA>device</I></FONT>, ino_t <I><FONT  color=991122 face=HELVETICA>dir</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>)
+<br>
+<B><TT>entry_ref</TT></B>(const entry_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>)
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+The constructor for the <B><TT>entry_ref</TT></B> structure.  The first of these creates an empty <B><TT>entry_ref</TT></B>, the second accepts a device number, directory inode number, and a file name and constructs an <B><TT>entry_ref</TT></B> referring to that entry, and the last version of the constructor duplicates an existing <B><TT>entry_ref</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>~entry_ref()
+<P>
+</TT></B><TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+The destructor for <B><TT>entry_ref</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+status_t <B><TT>set_name</TT></B>(const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>)
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+Lets you change the name of the file referred to by the <B><TT><A HREF="#entry_ref">entry_ref</A></TT></B> structure.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+operator ==
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+Lets you perform comparisons of <B><TT>entry_ref</TT></B> structures to see if they refer to the same entry.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+operator !=
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+Lets you test to see if two <B><TT>entry_ref</TT></B> structures refer to different entries.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<I><FONT  color=991122 face=HELVETICA>device</I></FONT> contains the device number on which the entry's target is located.
+<P>
+<I><FONT  color=991122 face=HELVETICA>directory</I></FONT> contains the inode of the directory that contains the entry's target.
+<P>
+<I><FONT  color=991122 face=HELVETICA>name</I></FONT> contains the name of the entry.
+<P>
+<HR>
+<H3>
+<A NAME="node_ref"></A>node_ref
+</H3>
+<P>
+Declared in:  be/storage/Node.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT>node_ref</TT></B> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>node_ref</TT></B>();
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>node_ref</TT></B>(const node_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~<B><TT>node_ref</TT></B>();
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;operator==(const node_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>) const;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;operator!=(const node_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>) const;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node_ref &amp;&nbsp;&nbsp;&nbsp;operator=(const node_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>);
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;device;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT>node_ref</TT></B> structure describes a node in a file system.
+<P>
+<B><TT>node_ref()
+<br>
+node_ref</TT></B>(const node_ref &amp;<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>)
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+The constructor for the <B><TT>node_ref</TT></B> structure.  The first of these creates an empty <B><TT>node_ref</TT></B>, and the second duplicates an existing <B><TT>node_ref</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>~node_ref()
+<P>
+</TT></B><TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+The destructor for <B><TT>node_ref</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+operator ==
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+Lets you perform comparisons of <B><TT>node_ref</TT></B> structures to see if they refer to the same node.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+operator !=
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+Lets you test to see if two <B><TT>node_ref</TT></B> structures refer to different nodes.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<I><FONT  color=991122 face=HELVETICA>device</I></FONT> contains the device number on which the node is located.
+<P>
+<I><FONT  color=991122 face=HELVETICA>node</I></FONT> contains the inode of the node.
+<P>
+<HR>
+<H3>
+<A NAME="version_info"></A>version_info
+</H3>
+<P>
+Declared in:  be/storage/AppFileInfo.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><A HREF="#version_info">version_info</A></TT></B> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;major;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;middle;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minor;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;variety;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;internal;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short_info[64];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long_info[256];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The version_info structure is used to contain version information about an application.  Although none of these fields have prescribed uses, and you can use them for anything you want, their names do hint at their suggested uses. 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

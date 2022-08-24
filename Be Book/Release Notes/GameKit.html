@@ -1,0 +1,170 @@
+<HTML><HEAD><TITLE>Release Notes: The Game Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Game%20Kit"></A>The Game Kit
+</H1>
+<P>
+<HR>
+<H2>
+<A NAME="BFileGameSound"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>F</FONT>ile<FONT SIZE=6>G</FONT>ame<FONT SIZE=6>S</FONT>ound
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/game/FileGameSound.h">game/FileGameSound.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="BFileGameSound()"></A>BFileGameSound()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BFileGameSound(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>pathname</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <I><FONT  color=991122 face=HELVETICA>looping</I></FONT> = <B><TT>true</TT></B>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>BGameSoundDevice *</TT></B><I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This new constructor lets you set the file as a pathname (instead of as an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B>) .  
+<P>
+<HR>
+<H3>
+<A NAME="SetPaused()"></A>SetPaused()
+, 
+<A NAME="IsPaused()"></A>IsPaused()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetPaused(<A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>pauseIt</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#bigtime_t">bigtime_t</A></TT></B> <I><FONT  color=991122 face=HELVETICA>rampTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <B><TT><FONT  color=000022 size=+1>IsPaused(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetPaused()">SetPaused()</A></TT></B> lets you pause and resume the sound as <I><FONT  color=991122 face=HELVETICA>pauseIt</I></FONT> is <B><TT>true</TT></B> or <B><TT>false</TT></B>.  <I><FONT  color=991122 face=HELVETICA>rampTime</I></FONT> is the amount of time, in microseconds, that will be used to fade in or fade out.  
+<P>
+<B><TT><A HREF="#IsPaused()">IsPaused()</A></TT></B> returns a value that describes the current paused state:
+<P>
+<UL>
+<LI><B><TT>B_NOT_PAUSED</TT></B>.  The sound isn't paused.
+<P>
+<LI><B><TT>B_PAUSED</TT></B>.  The sound is currently paused.
+<P>
+<LI><B><TT>B_PAUSE_IN_PROGRESS</TT></B>.  The sound is fading out but isn't yet paused.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#SetPaused()">SetPaused()</A></TT></B> returns:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. The sound was successfully paused or resumed.
+<P>
+<LI><B><TT>EALREADY</TT></B>.  Can't pause a paused sound, or unpause one that's playing.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Resource error.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="BSimpleGameSound"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>S</FONT>imple<FONT SIZE=6>G</FONT>ame<FONT SIZE=6>S</FONT>ound
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/game/SimpleGameSound.h">game/SimpleGameSound.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="BSimpleGameSound()"></A>BSimpleGameSound()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSimpleGameSound(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>pathname</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>BGameSoundDevice *</TT></B><I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This new constructor lets you set the file as a pathname (instead of as an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B>) .  
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

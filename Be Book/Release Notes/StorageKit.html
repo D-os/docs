@@ -1,0 +1,295 @@
+<HTML><HEAD><TITLE>Release Notes: The Storage Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Storage%20Kit"></A>The Storage Kit
+</H1>
+<P>
+<HR>
+<H2>
+<A NAME="BMimeType"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>ime<FONT SIZE=6>T</FONT>ype
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/storage/Mime.h">storage/Mime.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="GetSnifferRule()"></A>GetSnifferRule()
+, 
+<A NAME="SetSnifferRule()"></A>SetSnifferRule()
+, 
+<A NAME="CheckSnifferRule()"></A>CheckSnifferRule()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A> </TT></B><B><TT><FONT  color=000022 size=+1>GetSnifferRule(<A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>result</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetSnifferRule(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>rule</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>static status_t </TT></B><B><TT><FONT  color=000022 size=+1>CheckSnifferRule(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>rule</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>parseError</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#GetSnifferRule()">GetSnifferRule()</A></TT></B> and <B><TT><A HREF="#SetSnifferRule()">SetSnifferRule()</A></TT></B> get and set the pattern-matching rule that the file type sniffer uses to detect the MIME type represented by this object.  The sniffer <I><FONT  color=991122 face=HELVETICA>rule</I></FONT> is a string that follows this format:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;rating [begin:end] ( [begin:end] 'pattern1' | [begin:end] 'pattern2' | ... )</PRE>
+<P>
+<UL>
+<LI><I>rating</I> is a mandatory float between 0.0 and 1.0 that describes the priority of the rule, compared to other rules for the same type.
+<P>
+<LI><I>[begin:end]</I> is the optional  "global byte range" declaration.  The sniffer will look for a matching pattern that begins within this range of data.  The <I>[begin:end]</I> that appears outside the parenthesis (i.e. just after <I><FONT  color=991122 face=HELVETICA>rating</I></FONT>) applies to all the patterns for this rule.  If a pattern must begin at a particular byte offset, you can exclude the ":end" declaration.
+<P>
+<LI><I>'pattern1'</I>, <I>'pattern2'</I>, etc.  These are the patterns themselves.  You can OR patterns with the "|" operator.  (You can't AND patterns.)  An immediately preceding byte range declaration applies to the following pattern (only), and overrides the global byte range declaration.
+<P>
+</UL>
+<P>
+If no byte range declaration is provided, [0:0] is assumed&mdash;i.e. the pattern(s) must start at the first byte.
+<P>
+For example, the following rule strings says that the content of an examined file must begin with the characters 'ABCD':
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"1.0 ('ABCD')"</PRE>
+<P>
+This rule says that the content must contain the characters 'ABCD' or 'abcd' starting somewhere in the first three bytes:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"1.0 [0:3] ('ABCD' | 'abcd')"</PRE>
+<P>
+Here the content must contain 'ABCD' or 'abcd' starting in the first three bytes, or it must contain 'EFGH' starting at byte 13:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"1.0 [0:3] ('ABCD' | 'abcd' | [13] 'EFGH')"</PRE>
+<P>
+The <B><TT><A HREF="#CheckSnifferRule()">CheckSnifferRule()</A></TT></B> function is a debugging tool that checks your sniffer rule (independent of MIME type) and returns a string that describes the error.  If the rule is correct, you get back (in <I><FONT  color=991122 face=HELVETICA>result</I></FONT>) a string that says "rule is correct".  Otherwise, the result string contains an error message with a pointer to the offending part of the rule.  The string is meant to be viewed in a monospace font.
+<P>
+<HR>
+<H3>
+<A NAME="B_SNIFFER_RULE_CHANGED"></A>B_SNIFFER_RULE_CHANGED
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>enum</TT></B> { ... B_SNIFFER_RULE_CHANGED, ... };
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#B_SNIFFER_RULE_CHANGED">B_SNIFFER_RULE_CHANGED</A></TT></B> is a new MIME database-watching bit vector value.  If your application has called <B><TT><A HREF="../The%20Storage%20Kit/MimeType.html#StartWatching()">BMimeType::StartWatching()</A></TT></B> and someone changes a sniffer rule, your target will receive a <B><TT>B_META_MIME_CHANGED</TT></B> message that has, as in its "be:which" field, the value <B><TT><A HREF="#B_SNIFFER_RULE_CHANGED">B_SNIFFER_RULE_CHANGED</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="GuessMimeType()"></A>GuessMimeType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>static status_t </TT></B><B><TT><FONT  color=000022 size=+1>GuessMimeType(const entry_ref *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>file</I></FONT>, <B><TT><A HREF="#BMimeType">BMimeType</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>result</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>static status_t </TT></B><B><TT><FONT  color=000022 size=+1>GuessMimeType(const void *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, <B><TT><A HREF="#BMimeType">BMimeType</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>result</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT>static status_t </TT></B><B><TT><FONT  color=000022 size=+1>GuessMimeType(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>filename</I></FONT>, <B><TT><A HREF="#BMimeType">BMimeType</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>result</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These new class functions ask the sniffer to identify the MIME type of a file or data.  <I><FONT  color=991122 face=HELVETICA>result</I></FONT> must be allocated before it's passed in.
+<P>
+<HR>
+<H2>
+<A NAME="BNode"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>N</FONT>ode
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/storage/Node.h">storage/Node.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="WriteAttrString()"></A>WriteAttrString()
+, 
+<A NAME="ReadAttrString()"></A>ReadAttrString()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>WriteAttrString(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>attr</I></FONT>, <B><TT>const <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>ReadAttrString(const char *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>attr</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *</TT></B><I><FONT  color=991122 face=HELVETICA>result</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+New functions to more easily work with string-valued file attributes.  <B><TT><A HREF="#WriteAttrString()">WriteAttrString()</A></TT></B> writes a <B><TT>NULL</TT></B>-terminator at the end of the string.
+<P>
+<HR>
+<H2>
+<A NAME="BPath"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>P</FONT>ath
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/storage/Path.h">storage/Path.h</A>
+<P>
+<A HREF="#BPath">BPath</A> has new versions of the constructor and the <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function that accepts <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> arguments.
+<P>
+<HR>
+<H3>
+<A NAME="BPath()"></A>BPath()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPath(const entry_ref *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetTo(const entry_ref *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="BQuery"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>Q</FONT>uery
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/storage/Query.h">storage/Query.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="GetPredicate()"></A>GetPredicate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetPredicate(<A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>result</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This new version of <B><TT><A HREF="#GetPredicate()">GetPredicate()</A></TT></B> returns the query's predicate string as a <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> object.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

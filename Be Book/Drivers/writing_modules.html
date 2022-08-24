@@ -1,0 +1,115 @@
+<HTML><HEAD><TITLE>Drivers: Writing Modules</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Writing%20Modules"></A>Writing Modules
+</H1>
+<P>
+Modules provide services that can be used by other modules, by device drivers, and by the kernel itself.  They can be dynamically loaded and unloaded by the kernel, as needed.  If a client can't find a module it needs, it will still load, which gives it the opportunity to find another way to perform the desired tasks, or to disable those features of itself.
+<P>
+Modules, like drivers, export an API through a structure that provides pointers to the functions provided by the module, along with other information about the module.  You do this by expanding upon the basic module definition in <B>be/drivers/module.h</B>.  For example, you might define your module information structure like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#define MY_MODULE_NAME "generic/mymodule/v1"
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct my_module_info {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;module_info module;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 (*function1)();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 (*function2)();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void (*configure)(int32 parameter, int32 value);
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+Note that the first field in your module information structure is a module_info, which looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct module_info {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *name;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 flags;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t (*std_ops);
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>name</I></FONT> field should be a pointer to the driver's name as indicated in your module's header file (in this example, <B><TT>MY_MODULE_NAME</TT></B>).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> field specifies which flags should be in effect for your module.  Currently, the <B><TT>B_KEEP_LOADED</TT></B> flag is the only one available; as expected, it tells the kernel not to unload your module when nobody is using it; normally, the first time your module is requested by someone calling <B><TT>get_module()</TT></B>, the kernel loads it.  With each subsequent call to <B><TT>get_module()</TT></B>, a reference count is incremented.  Every time <B><TT>put_module()</TT></B> is called to release the module, the reference count is decremented.  When the counter reaches zero, the module is unloaded.  <B><TT>B_KEEP_LOADED</TT></B> prevents unloading from taking place.
+<P>
+<I><FONT  color=991122 face=HELVETICA>std_ops</I></FONT> is a pointer to a function that your module must provide.  This function is called to handle standard module operations.  Currently, there are only two of these operations (initialization and uninitialization).  Your module's <B><TT>std_ops()</TT></B> function will probably look something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;static status_t std_ops(int32 op, ...) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch(op) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case B_MODULE_INIT:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* do whatever you need to do */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case B_MODULE_UNINIT:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* do whatever you need to do */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;&nbsp;&nbsp;&nbsp;/* necessary, for future expansion */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+It's important to return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> for any unknown operations, in case future versions of the kernel define additional operations.
+<P>
+Exporting your module to the outside world is similar to publishing device driver hooks, but since you define the hooks yourself, it's slightly more involved.  Your module needs to have a filled-out version of your module's information structure, like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;static struct my_module_info my_module {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MY_MODULE_NAME,&nbsp;&nbsp;&nbsp;/* module name */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0,&nbsp;&nbsp;&nbsp;/* flags */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;std_ops
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function1,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function2,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;configure
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+When loading your module, the kernel looks for a symbol called "modules" that contains a list of pointers to the modules you export, terminated by a <B><TT>NULL</TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;_EXPORT module_info *modules[] = {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(module_info *) &amp;my_module,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NULL
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+This is how the kernel finds out what modules are available for use by drivers (or by other modules).  See the <a href="using_modules.html#Using%20Modules">"Using Modules"</a> section for details on how modules are accessed by other drivers or modules.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

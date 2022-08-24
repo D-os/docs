@@ -1,0 +1,709 @@
+<HTML><HEAD><TITLE>The Interface Kit: BBitmap</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BBitmap"></A>BBitmap
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Bitmap.h">be/interface/Bitmap.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="Bitmap.summary.html"><i>Summary</i></A></H6>
+<P>
+A BBitmap describes a rectangular image as a two-dimensional array of pixel data (or <I>bitmap</I>).  The BBitmap class lets you create a bitmap by specifying raw pixel data (through the <B><TT><A HREF="#Bits()">Bits()</A></TT></B> and <B><TT><A HREF="#SetBits()">SetBits()</A></TT></B> functions), or you can add a <A HREF="View.html#BView">BView</A> to your BBitmap and use the view's drawing operations (<B><TT><A HREF="ViewDrawing.html#FillRect()">FillRect()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeLine()">StrokeLine()</A></TT></B>, etc) to draw into the BBitmap object (see <a href="#Using%20a%20View%20to%20Draw%20into%20a%20Bitmap">"Using a View to Draw into a Bitmap"</a>, below).
+<P>
+The BBitmap class doesn't provide a way to actually display bitmap data.  Displaying a bitmap is the task of <A HREF="View.html#BView">BView</A> functions such as <B><TT><A HREF="ViewDrawing.html#DrawBitmap()">DrawBitmap()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Bitmap%20Data"></A><FONT SIZE=6>B</FONT>itmap <FONT SIZE=6>D</FONT>ata
+</H2>
+<P>
+A bitmap records the color values of every pixel within a rectangular area.  The data is specified in rows, beginning with the top row of pixels in the image and working downward to the bottom row.  Each row is aligned on a long word boundary.
+<P>
+When you construct a BBitmap object, you give it a bounds rectangle (integer coordinates only!) and a color space.  For example, this code
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BBitmap *image = new BBitmap(BRect(0.0, 0.0, 79.0, 39.0), B_CMAP8);</PRE>
+<P>
+constructs a 40 x 80 bitmap of 8-bit color data.
+<P>
+The data in a BBitmap object isn't initialized&mdash;a BBitmap has no default background color.  When you set the bitmap's data (however you set it) you must "paint" every pixel within the bitmap's boudns rectangle. 
+<P>
+<A NAME="37007:%20head1:%20Attaching%20a%20BBitmap%20to%20a%20BView"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Using%20a%20View%20to%20Draw%20into%20a%20Bitmap"></A><FONT SIZE=6>U</FONT>sing a <FONT SIZE=6>V</FONT>iew to <FONT SIZE=6>D</FONT>raw into a <FONT SIZE=6>B</FONT>itmap
+</H2>
+<P>
+If you're going to use a view to draw into your bitmap, you must tell the BBitmap constructor by setting the third argument to true:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BBitmap *image = new BBitmap(BRect(...), B_CMAP8, true);</PRE>
+<P>
+You then add the view to the bitmap (you don't have to do anything special when constructing the BView): 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;bitmap->AddChild(view);</PRE>
+<P>
+When the view draws, the drawing operations are rendered into the bitmap.  Note that you must explicitly tell the <A HREF="View.html#BView">BView</A> to draw&mdash;the BViews that you use to draw into a BBitmap aren't part of the user interface, so they won't receive user event messages.  When you're done drawing, you should call BBitmap's <B><TT><A HREF="ViewDrawing.html#Sync()">Sync()</A></TT></B> function to make sure the drawing has all been performed.  If the bitmap that you've created is static&mdash;if it doesn't need to change after you've drawn into it&mdash;you can throw away the <A HREF="View.html#BView">BView</A> that you used create the bitmap data.
+<P>
+A BBitmap can contain more than one <A HREF="View.html#BView">BView</A>&mdash;it can act as the root of an entire view hierarchy.  The BBitmap class defines a number of BWindow-like functions&mdash;<B><TT><A HREF="#AddChild()">AddChild()</A></TT></B>, <B><TT><A HREF="#FindView()">FindView()</A></TT></B>, <B><TT><A HREF="#ChildAt()">ChildAt()</A></TT></B>, and so on&mdash;to help you create and manage the hierarchy.
+<P>
+<HR>
+<H3>
+<A NAME="Transparency"></A>Transparency
+</H3>
+<P>
+Color bitmaps can have transparent pixels.  When the bitmap is imaged in a drawing mode other than <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B>, its transparent pixels won't be transferred to the destination view.  The destination image will show through wherever the bitmap is transparent.
+<P>
+To introduce transparency into a <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> bitmap, a pixel can be assigned one of the following values, as appropriate for the bitmap's color space.
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="1_Drawing.html#B_TRANSPARENT_MAGIC_CMAP8">B_TRANSPARENT_MAGIC_CMAP8</A></TT></B></TD>
+<TD>8-bit indexed color transparent pixel.</TD>
+<TR>
+<TD><B><TT><A HREF="1_Drawing.html#B_TRANSPARENT_MAGIC_RGBA15">B_TRANSPARENT_MAGIC_RGBA15</A></TT></B></TD>
+<TD>15-bit transparent pixel.</TD>
+<TR>
+<TD><B><TT>B_TRANSPARENT_MAGIC_RGBA15_BIG</TT></B></TD>
+<TD>15-bit transparent pixel, big-endian.</TD>
+<TR>
+<TD><B><TT><A HREF="1_Drawing.html#B_TRANSPARENT_MAGIC_RGBA32">B_TRANSPARENT_MAGIC_RGBA32</A></TT></B></TD>
+<TD>32-bit transparent pixel.</TD>
+<TR>
+<TD><B><TT>B_TRANSPARENT_MAGIC_RGBA32_BIG</TT></B></TD>
+<TD>32-bit transparent pixel, big-endian.</TD>
+</TABLE>
+<P>
+Opaque pixels should have an alpha value of 255 for 8-bit alpha channels or 1 for 1-bit alpha channels; values of 0 indicate 100% transparent pixels.  Values in between (for 8-bit alpha channels) represent varying degrees of transparency.
+<P>
+Transparency is covered in more detail under &nbsp;<a href="#Drawing%20Modes%20on%20page26">"Drawing Modes" on page26</a>.
+<P>
+<B>See also:  <TT><A HREF="functions.html#system_colors()">system_colors()</A></TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BBitmap()"></A>BBitmap()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BBitmap(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>bounds</I></FONT>, color_space <I><FONT  color=991122 face=HELVETICA>space</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>acceptsViews</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>needsContiguousMemory</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BBitmap(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The BBitmap class insists that a <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> object be present (but not necessarily running).
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Creates a new BBitmap object that can hold a bitmap whose size and depth are described by <I><FONT  color=991122 face=HELVETICA>bounds</I></FONT> and <I><FONT  color=991122 face=HELVETICA>space</I></FONT>.  The bitmap data is uninitialized; you set the data through <B><TT><A HREF="#Bits()">Bits()</A></TT></B>/<B><TT><A HREF="#SetBits()">SetBits()</A></TT></B>, or by drawing into an attached <A HREF="View.html#BView">BView</A> (see <a href="#Using%20a%20View%20to%20Draw%20into%20a%20Bitmap">"Using a View to Draw into a Bitmap"</a>).   
+<P>
+If BViews are to be used, the <I><FONT  color=991122 face=HELVETICA>acceptsViews</I></FONT> argument must be set to <B><TT>true</TT></B>.  Furthermore (in this case), the origin of the <I><FONT  color=991122 face=HELVETICA>bounds</I></FONT> rectangle must be 0.0.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>needsContiguousMemory</I></FONT> flag is <B><TT>true</TT></B>, the BBitmap will make sure that the (physical) memory it allocates is one contiguous physical chunk.  This should matter only to drivers doing direct DMA into physical memory. 
+<P>
+The possible color spaces are enumerated in the section above titled <a href="#The%20Color%20Space">"The Color Space"</a>.
+<P>
+<HR>
+<H3>
+<A NAME="~BBitmap()"></A>~BBitmap()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BBitmap()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees all memory allocated to hold image data, deletes any BViews used to create the image, gets rid of the off-screen window that held the views, and severs the BBitmap's connection to the Application Server.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BBitmap object&mdash;or <B><TT>NULL</TT></B>, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message doesn't contain data for a BBitmap object.  The new object is allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddChild()"></A>AddChild()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AddChild(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>aView</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> (and all its children) to this BBitmap's view hierarchy, and causes <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B> to be sent to the newly add children.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> already has a parent, the application may crash.  Be sure to remove the view from a previous parent before trying to add it to a bitmap.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#AddChild()">AddChild()</A></TT></B> fails if the BBitmap was not constructed to accept views.
+<P>
+<B>See also:  <TT><A HREF="Window.html#AddChild()">BWindow::AddChild()</A></TT></B>, <B><TT>BView::AttachedToWindow()</TT></B>, <B><TT><A HREF="#RemoveChild()">RemoveChild()</A></TT></B>, the BBitmap constructor
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B> and stores the BBitmap in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="Bits()"></A>Bits()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>Bits(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the bitmap data.  The length of the data can be obtained by calling <B><TT><A HREF="#BitsLength()">BitsLength()</A></TT></B>&mdash;or it can be calculated from the height of the bitmap (the number of rows) and <B><TT><A HREF="#BytesPerRow()">BytesPerRow()</A></TT></B>.
+<P>
+The data is in the format specified by <B><TT><A HREF="#ColorSpace()">ColorSpace()</A></TT></B>.
+<P>
+This pointer is valid throughout the entire lifespan of the object.
+<P>
+<B>See also:  <TT><A HREF="#Bounds()">Bounds()</A></TT></B>, <B><TT><A HREF="#BytesPerRow()">BytesPerRow()</A></TT></B>, <B><TT><A HREF="#BitsLength()">BitsLength()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="BitsLength()"></A>BitsLength()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>BitsLength(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of bytes that were allocated to store the bitmap data.
+<P>
+<B>See also:  <TT><A HREF="#Bits()">Bits()</A></TT></B>, <B><TT><A HREF="#BytesPerRow()">BytesPerRow()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="Bounds()"></A>Bounds()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>Bounds(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the bounds rectangle that defines the size and coordinate system of the bitmap.  This should be identical to the rectangle used in constructing the object.
+<P>
+<HR>
+<H3>
+<A NAME="BytesPerRow()"></A>BytesPerRow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>BytesPerRow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns how many bytes of data are required to specify a row of pixels.  This may include slop space required by the graphics hardware; you should always use this call to determine the width of a row of pixels in bytes instead of assuming that it will be the number of pixels multiplied by the size of a pixel in bytes.
+<P>
+<HR>
+<H3>
+<A NAME="ChildAt()"></A>ChildAt()
+, 
+<A NAME="CountChildren()"></A>CountChildren()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>ChildAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountChildren(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#ChildAt()">ChildAt()</A></TT></B> returns the child <A HREF="View.html#BView">BView</A> at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, or <B><TT>NULL</TT></B> if there's no child at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>.  Indices begin at 0 and count only BViews that were added to the BBitmap (added as children of the top view of the BBitmap's off-screen window) and not subsequently removed.
+<P>
+<B><TT><A HREF="#CountChildren()">CountChildren()</A></TT></B> returns the number of BViews the BBitmap currently has.  (It counts only BViews that were added directly to the <A HREF="#BBitmap">BBitmap</A>, not BViews farther down the view hierarchy.) 
+<P>
+These functions fail if the BBitmap wasn't constructed to accept views.
+<P>
+<HR>
+<H3>
+<A NAME="ColorSpace()"></A>ColorSpace()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+color_space <B><TT><FONT  color=000022 size=+1>ColorSpace(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the color space of the data being stored (not necessarily the color space of the data passed to the <B><TT><A HREF="#SetBits()">SetBits()</A></TT></B> function).  Once set by the BBitmap constructor, the color space doesn't change.
+<P>
+<HR>
+<H3>CountChildren()   see <A HREF="#ChildAt()">ChildAt()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="FindView()"></A>FindView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>FindView(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>FindView(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="View.html#BView">BView</A> located at <I><FONT  color=991122 face=HELVETICA>point</I></FONT> within the bitmap or the <A HREF="View.html#BView">BView</A> tagged with <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  The point must be somewhere within the BBitmap's bounds rectangle, which must have the coordinate origin, (0.0, 0.0), at its left top corner.
+<P>
+If the BBitmap doesn't accept views, this function fails.  If no view draws at the <I><FONT  color=991122 face=HELVETICA>point</I></FONT> given, or no view associated with the BBitmap has the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> given, it returns <B><TT>NULL</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="IsValid()"></A>IsValid()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsValid(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if there's memory for the bitmap (if the address returned by <B><TT><A HREF="#Bits()">Bits()</A></TT></B> is valid), and <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>
+<A NAME="Lock()"></A>Lock()
+, 
+<A NAME="Unlock()"></A>Unlock()
+, 
+<A NAME="IsLocked()"></A>IsLocked()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Lock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Unlock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsLocked(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions lock and unlock the off-screen window where BViews associated with the BBitmap draw.  Locking works for this window and its views just as it does for ordinary on-screen windows.
+<P>
+<B><TT><A HREF="#Lock()">Lock()</A></TT></B> returns <B><TT>false</TT></B> if the BBitmap doesn't accept views or if its off-screen window is unlockable (and therefore unusable) for some reason.  Otherwise, it doesn't return until it has the window locked and can return <B><TT>true</TT></B>.
+<P>
+<B><TT><A HREF="#IsLocked()">IsLocked()</A></TT></B> returns <B><TT>false</TT></B> if the BBitmap doesn't accept views.  Otherwise, it returns the lock status of its off-screen window.
+<P>
+<HR>
+<H3>
+<A NAME="RemoveChild()"></A>RemoveChild()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>RemoveChild(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>aView</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Removes <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> from the hierarchy of views associated with the <A HREF="#BBitmap">BBitmap</A>, but only if <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> was added to the hierarchy by calling BBitmap's version of the <B><TT><A HREF="#AddChild()">AddChild()</A></TT></B> function.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> is successfully removed, <B><TT><A HREF="#RemoveChild()">RemoveChild()</A></TT></B> returns <B><TT>true</TT></B>.  If not, it returns <B><TT>false</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="SetBits()"></A>SetBits()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetBits(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>offset</I></FONT>, color_space <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Assigns <I><FONT  color=991122 face=HELVETICA>length</I></FONT> bytes of <I><FONT  color=991122 face=HELVETICA>data</I></FONT> to the BBitmap object.  The new data is copied into the bitmap beginning <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> bytes (<I>not</I> pixels) from the start of allocated memory.  To set data beginning with the first (left top) pixel in the image, the <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> should be 0; to set data beginning with, for example, the sixth pixel in the first row of a <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B> image, the offset should be 20.  The offset counts any padding required to align rows of data.
+<P>
+This function is intended to be used for importing existing data from a different format rather than for setting individual pixels in the bitmap.  If you're interested in coloring individual pixels, use <B><TT><A HREF="#Bits()">Bits()</A></TT></B> to obtain direct access to the bitmap data.
+<P>
+The source data is specified in the <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> color space, which may or may not be the same as the color space that the BBitmap uses to store the data.  If not, the following conversions are automatically made:
+<P>
+<UL>
+<LI><B><TT><A HREF="misc.html#B_GRAY1">B_GRAY1</A></TT></B> and <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B> to <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B>.
+<P>
+<LI><B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> and <B><TT><A HREF="misc.html#B_GRAY1">B_GRAY1</A></TT></B> to <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B>.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+These are the <I>only</I> color conversions SetBits() understands; all other conversions must be performed manually.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Colors may be dithered in a conversion to <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> so that the resulting image will match the original as closely as possible, despite the lost information.
+<P>
+If the color space <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> is <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B>, the <I><FONT  color=991122 face=HELVETICA>data</I></FONT> should be triplets of three 8-bit components&mdash;red, green, and blue, in that order&mdash;without an alpha component.  Although stored as 32-bit quantities with the components in BGRA order, the input data is only 24 bits in RGB order.  Rows of source data do not need to be aligned.
+<P>
+However, if the source data is in any <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> other than <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B>, padding must be added so that each row is aligned on a <B><TT>int32</TT></B> word boundary.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>SetBits()</TT></B> works only on BBitmaps in B_GRAY1, B_CMAP8, and B_RGB32 color spaces; all other conversions must be carried out manually.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+This function works for all BBitmaps, whether or not BViews are also enlisted to produce the image.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_frame"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RECT_TYPE">B_RECT_TYPE</A></TT></B></TD>
+<TD>The BBitmap's bounds rectangle.</TD>
+<TR>
+<TD>"_cspace"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The color_space of the data.</TD>
+<TR>
+<TD>"_view_ok"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD>Always <B><TT>true</TT></B>, indicating the BBitmap accepts views (only present in deep copy archives of BBitmaps accepting views).</TD>
+<TR>
+<TD>"_data"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>The bitmap data (present only if "_view_ok" not present).</TD>
+<TR>
+<TD>"_continguous"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD>Whether the BBitmap requires memory in one contiguous chunk.</TD>
+</TABLE>
+<P>
+If the "_view_ok" field is present, the child views of the BBitmap are additionally archived in the "_views" array of BMessages.  See the description of the <A HREF="View.html#BView">BView</A> Archived Fields for more information on those fields.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

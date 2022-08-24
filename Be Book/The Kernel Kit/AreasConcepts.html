@@ -1,0 +1,189 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Areas Concepts</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Areas%20Concepts"></A>Areas Concepts
+</H1>
+<P>
+An area is a chunk of virtual memory.  As such, it has all the expected properties of virtual memory:  It has a starting address, a size, the addresses it comprises are contiguous, and it maps to (possibly non-contiguous) physical memory.  The features that an area provides that you <I>don't</I> get with "standard" memory are these:
+<P>
+<UL>
+<LI><B>Areas can be shared</B>.  Different areas can refer to the same physical memory.  Put another way, different virtual memory addresses can map to the same physical locations.  Furthermore, the different areas needn't belong to the same application.  By creating and "cloning" areas, applications can easily share the same data.
+<P>
+<LI><B>Areas can be locked into RAM</B>.  You can specify that the area's physical memory be locked into RAM when it's created, locked on a page-by-page basis as pages are swapped in, or that it be swapped in and out as needed.
+<P>
+<LI><B>Areas can be read- and write-protected</B>. 
+<P>
+<LI><B>Areas are page-aligned</B>.  Areas always start on a page boundary, and are allocated in integer multiples of the size of a page.  (A page is 4096 bytes, as represented by the <B><TT><A HREF="misc.html#B_PAGE_SIZE">B_PAGE_SIZE</A> </TT></B>constant.)
+<P>
+<LI><B>You can specify the starting address of the area's virtual memory</B>.  The specification can require that the area start precisely at a certain address, anywhere above a certain address, or anywhere at all.
+<P>
+</UL>
+<P>
+Because areas are large&mdash;one page, minimum&mdash;you don't create them arbitrarily.  The two most compelling reasons to create an area are the two first points listed above:  To share data among different applications, and to lock memory into RAM.  
+<P>
+In all particulars (but one) you treat the memory that an area gives you exactly as you would treat any allocated memory:  You can read and write it through pointer manipulation, or through standard functions such as <B><TT>memcpy()</TT></B> and <B><TT>strcpy()</TT></B>.  The one difference is between areas and malloc'd memory is...
+<P>
+<UL>
+<LI>You never <B><TT><A HREF="../Drivers/area_malloc.html#free()">free()</A> </TT></B>the memory that an area allocates for you.  If you want to get rid of an area, use the <B><TT><A HREF="Areas.html#delete_area()">delete_area()</A></TT></B> function, instead.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Area%20IDs%20and%20Area%20Names"></A>Area IDs and Area Names
+</H3>
+<P>
+Each area that you create is tagged with an <B><TT>area_id</TT></B> number:
+<P>
+<UL>
+<LI>An <B><TT>area_id</TT></B> number is a positive integer that's global and unique within the scope of the computer.  They're not unique across the network, nor are they persistent across boots.
+<P>
+<LI>The <B><TT>area_id</TT></B> numbers are generated and assigned automatically by the <B><TT><A HREF="Areas.html#create_area()">create_area()</A></TT></B> and <B><TT><A HREF="Areas.html#clone_area()">clone_area()</A></TT></B> functions.  The other area functions operate on these <B><TT>area_id</TT></B> numbers (they're required as arguments). 
+<P>
+<LI>Although they are global, <B><TT>area_id</TT></B> numbers have little meaning outside of the address space (application) in which they were created.
+<P>
+<LI>Once assigned, the <B><TT>area_id</TT></B> number doesn't change; the number is invalidated when  <B><TT><A HREF="Areas.html#delete_area()">delete_area()</A></TT></B> is called or when the application (team) that created it dies.
+<P>
+<LI>Don't worry about recycled <B><TT>area_id</TT></B> numbers.  When an area is deleted, it's <B><TT>area_id</TT></B>  goes with it.  (<B><TT>area_id</TT></B> values <I>are</I> recycled, but the turnover is at 2^31.)
+<P>
+</UL>
+<P>
+Areas can also be (loosely) identified by name:
+<P>
+<UL>
+<LI>When you create an area (through <B><TT><A HREF="Areas.html#create_area()">create_area()</A></TT></B> or <B><TT><A HREF="Areas.html#clone_area()">clone_area()</A></TT></B>), you get to name it.  
+<P>
+<LI>Area names are not unique&mdash;any number of areas can be assigned the same name. 
+<P>
+<LI>To look up an area by name, use the <B><TT>FindArea()</TT></B> function.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Sharing%20an%20Area%20Between%20Applications"></A>Sharing an Area Between Applications
+</H3>
+<P>
+For multiple applications to share a common area, one of the applications has to <I>create</I> the area, and the other applications <I>clone</I> the area.  You clone an area by calling <B><TT><A HREF="Areas.html#clone_area()">clone_area()</A></TT></B>.  The function takes, as its last argument, the <B><TT>area_id</TT></B> of the source area and returns a new (unique) <B><TT>area_id</TT></B> number.  All further references to the cloned area (in the cloning application) must be based on the area_id that's returned by <B><TT><A HREF="Areas.html#clone_area()">clone_area()</A></TT></B>.
+<P>
+So how does a cloner find a source <B><TT>area_id</TT></B> in the first place?
+<P>
+<UL>
+<LI>The source application can pass the "original" <B><TT>area_id</TT></B> number to the cloners.
+<P>
+<LI>The cloners can find the area by name, by calling <B><TT><A HREF="Areas.html#find_area()">find_area()</A></TT></B>.
+<P>
+</UL>
+<P>
+Keep in mind that area names are not forced to be unique, so the <B><TT><A HREF="Areas.html#find_area()">find_area()</A></TT></B> method has some amount of uncertainty.  But this can be minimized through clever name creation. 
+<P>
+<H4>
+<A NAME="Cloned%20Memory"></A>Cloned Memory
+</H4>
+<P>
+The physical memory that lies beneath an area is never implicitly copied&mdash;for example, the area mechanism doesn't perform a  "copy-on-write."  If two areas refer to the same memory because of cloning, a data modification that's affected through one area will be seen by the other area. 
+<P>
+<HR>
+<H3>
+<A NAME="Locking%20an%20Area"></A>Locking an Area
+</H3>
+<P>
+When you're working with moderately large amounts of data, it's often the case that you would prefer that the data remain in RAM, even if the rest of your application needs to be swapped out.  An argument to <B><TT><A HREF="Areas.html#create_area()">create_area()</A> </TT></B>lets you declare, through the use of one of the following constants, the locking scheme that you wish to apply to your area:<B>
+<P>
+</B><TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_FULL_LOCK</TT></B></TD>
+<TD>The area's memory is locked into RAM when the area is created, and won't be swapped out.</TD>
+<TR>
+<TD><B><TT>B_CONTIGUOUS</TT></B></TD>
+<TD>Not only is the area's memory locked into RAM, it's also guaranteed to be contiguous.  This is particularly&mdash;and perhaps exclusively&mdash;useful to designers of certain types of device drivers. </TD>
+<TR>
+<TD><B><TT>B_LAZY_LOCK</TT></B></TD>
+<TD>Allows individual pages of memory to be brought into RAM through the natural order of things and <I>then</I> locks them.</TD>
+<TR>
+<TD><B><TT>B_NO_LOCK</TT></B></TD>
+<TD>Pages are never locked, they're swapped in and out as needed.</TD>
+<TR>
+<TD><B><TT>B_LOMEM</TT></B></TD>
+<TD>This is a special constant that's used for  for areas that need to be locked, contiguous, and that fit within the first 16MB of physical memory.  The folks that need this constant know who they are.</TD>
+</TABLE>
+<P>
+Keep in mind that locking an area essentially reduces the amount of RAM that can be used by other applications, and so increases the likelihood of swapping.  So you shouldn't lock simply because you're greedy.  But if the area that you're locking is going to be shared among some number of other applications, or if you're writing a real-time application that processes large chunks of data, then locking can be a justifiable excess.  
+<P>
+The locking scheme is set by the <B><TT><A HREF="Areas.html#create_area()">create_area()</A></TT></B> function and is thereafter immutable.  You can't re-declare the lock when you clone an area.
+<P>
+<HR>
+<H3>
+<A NAME="Area%20Info"></A>Area Info
+</H3>
+<P>
+Ultimately, you use an area for the virtual memory that it represents:  You create an area because you want some memory to which you can write and from which you can read data.  These acts are performed in the usual manner, through references to specific addresses.  Setting a pointer to a location within the area, and checking that you haven't exceeded the area's memory bounds as you increment the pointer (while reading or writing) are your own responsibility.  To do this properly, you need to know the area's starting address and its extent:
+<P>
+<UL>
+<LI>An area's starting address is maintained as the <B><TT>address</TT></B> field in its <B><TT><A HREF="Areas.html#area_info">area_info</A></TT></B> structure; you retrieve the <B><TT><A HREF="Areas.html#area_info">area_info</A></TT></B> for a particular area through the <B><TT><A HREF="Areas.html#get_area_info()">get_area_info()</A></TT></B> function.  
+<P>
+<LI>The size of the area (in bytes) is given as the <B><TT>size</TT></B> field of its <B><TT><A HREF="Areas.html#area_info">area_info</A> </TT></B>structure.  
+<P>
+</UL>
+<P>
+An important point, with regard to <B><TT><A HREF="Areas.html#area_info">area_info</A></TT></B>, is that the <B><TT>address</TT></B> field is only valid for the application that created or cloned the area (in other words, the application that created the <B><TT>area_id</TT></B> that was passed to <B><TT><A HREF="Areas.html#get_area_info()">get_area_info()</A></TT></B>).  Although the memory that underlies an area is global, the address that you get from an <B><TT><A HREF="Areas.html#area_info">area_info</A></TT></B> structure refers to a specific address space.  
+<P>
+If there's any question about whether a particular <B><TT>area_id</TT></B> is "local" or "foreign," you can compare the <B><TT>area_info.team</TT></B> field to your thread's team.   
+<P>
+<HR>
+<H3>
+<A NAME="Deleting%20an%20Area"></A>Deleting an Area
+</H3>
+<P>
+When your application quits, the areas (the <B><TT>area_id</TT></B> numbers) that it created through <B><TT><A HREF="Areas.html#create_area()">create_area()</A></TT></B> or <B><TT><A HREF="Areas.html#clone_area()">clone_area()</A></TT></B> are automatically rendered invalid.  The memory underlying these areas, however, isn't necessarily freed.  An area's memory is freed only when (and as soon as) there are no more areas that refer to it.  
+<P>
+You can force the invalidation of an <B><TT>area_id</TT></B> by passing it to the <B><TT><A HREF="Areas.html#delete_area()">delete_area()</A></TT></B> function.  Again, the underlying memory is only freed if yours is the last area to refer to the memory.
+<P>
+Deleting an area, whether explicitly through <B><TT><A HREF="Areas.html#delete_area()">delete_area()</A></TT></B>, or because your application quit, never affects the status of other areas that were cloned from it.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

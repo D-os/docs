@@ -1,0 +1,419 @@
+<HTML><HEAD><TITLE>Deskbar: BDeskbar</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="../index.html"><FONT face=HELVETICA>Be Book Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Deskbar%20Master%20Index.html"><FONT face=HELVETICA>Deskbar Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BDeskbar"></A>BDeskbar
+</H1>
+<P>
+Derived from:  (none)
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/be_apps/Deskbar/Deskbar.h">be/be_apps/Deskbar/Deskbar.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor or on the stack
+<P>
+<H6><A HREF="Deskbar.summary.html"><i>Summary</i></A></H6>
+<P>
+BDeskbar lets you query for the <B>Deskbar</B>'s location, orientation (expanded or contracted), and frame, and lets you add and remove items from the shelf.  The class lets you expand/contract the <B>Deskbar</B> and move it to one of the pre-defined locations, but it doesn't let you remove or hide the <B>Deskbar</B>, nor does it let you replace it with a UI object of your own.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You don't need a <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> object to create and use a BDeskbar.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BDeskbar()"></A>BDeskbar()
+, 
+<A NAME="~Deskbar()"></A>~Deskbar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BDeskbar(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BDeskbar()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The constructor creates and returns a new BDeskbar object.  The destructor destroys it.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddItem()"></A>AddItem()
+, 
+<A NAME="RemoveItem()"></A>RemoveItem()
+, 
+<A NAME="CountItems()"></A>CountItems()
+, 
+<A NAME="HasItem()"></A>HasItem()
+, 
+<A NAME="GetItemInfo()"></A>GetItemInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddItem(</TT></B></FONT><A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>id</I></FONT>=<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddItem(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>addon</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>id</I></FONT>=<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveItem(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveItem(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountItems(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasItem(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasItem(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetItemInfo(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>for_id, </I></FONT>const char **<I><FONT  color=991122 face=HELVETICA>found_name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetItemInfo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>for_name, </I></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>found_id</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+A view that's sitting on the <B>Deskbar</B>'s shelf may not call any of these functions.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The <B>Deskbar</B> contains a shelf that contains replicants (archivable BViews).  Typically, these replicants monitor or control some service.  For example, the BeOS provides shelf items that monitor and control the input method mechanism, PPP, and the mail daemon (the date/time view is <I><FONT  color=991122 face=HELVETICA>not</I></FONT> a shelf replicant):
+<P>
+<IMG SRC="art/Shelf.GIF" ALIGN="bottom">
+<P>
+<B><TT><A HREF="#AddItem()">AddItem()</A></TT></B> puts a new item on the <B>Deskbar</B>'s shelf.  <I><FONT  color=991122 face=HELVETICA>view</I></FONT>, the <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> that will be displayed on the shelf, must be archivable (see BArchivable).  An item on the shelf is identified by name and an integer id.  The name is that of the view itself (i.e., as assigned in the <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> constructor); the id is generated by the <B><TT><A HREF="../Release%20Notes/Deskbar.html#Deskbar">Deskbar</A></TT></B> and is guaranteed to be unique.  <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, if supplied, is set to the added item's unique id number.
+<P>
+You can also add an item to the <B>Deskbar</B> by passing an entry_ref, <I><FONT  color=991122 face=HELVETICA>addon</I></FONT>, to the <B>Deskbar</B> add-on to place there.
+<P>
+<B><TT><A HREF="#RemoveItem()">RemoveItem()</A></TT></B> removes the shelf item identified by <I><FONT  color=991122 face=HELVETICA>name</I></FONT> or <I><FONT  color=991122 face=HELVETICA>id</I></FONT>.
+<P>
+<B><TT><A HREF="#CountItems()">CountItems()</A></TT></B> returns the number of items currently on the shelf (keep in mind that it doesn't count the date/time view).
+<P>
+<B><TT><A HREF="#HasItem()">HasItem()</A></TT></B> returns true if the Deskbar shelf contains the item identified by <I><FONT  color=991122 face=HELVETICA>name</I></FONT> or <I><FONT  color=991122 face=HELVETICA>id</I></FONT>.
+<P>
+<B><TT><A HREF="#GetItemInfo()">GetItemInfo()</A></TT></B> points *<I><FONT  color=991122 face=HELVETICA>found_name</I></FONT> to the name of the item identified by <I><FONT  color=991122 face=HELVETICA>for_id</I></FONT>, or sets <I><FONT  color=991122 face=HELVETICA>found_id</I></FONT> of the item identified by <I><FONT  color=991122 face=HELVETICA>for_name</I></FONT>.   
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The caller is responsible for freeing <I><FONT  color=991122 face=HELVETICA>found_name</I></FONT>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The request to add, remove, or get info on the item was successfully communicated to the <B>Deskbar</B>.  Note that this doesn't mean that the function actually did what it was supposed to do. 
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  (<B><TT><A HREF="#GetItemInfo()">GetItemInfo()</A></TT></B>) *<I><FONT  color=991122 face=HELVETICA>found_name</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+<LI>Negative values.  A message-sending error occurred.
+<P>
+</UL>
+<P>
+<HR>
+<H3>CountItems()  see  <A HREF="#AddItem()">AddItem()</A></H3>
+<P>
+<HR>
+<H3>Expand()  see  <A HREF="#Location()">Location()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Frame()"></A>Frame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>Frame(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the <B>Deskbar</B>'s frame in screen coordinates.
+<P>
+<HR>
+<H3>GetItemInfo()  see <A HREF="#AddItem()">AddItem()</A></H3>
+<P>
+<HR>
+<H3>Additem()</H3>
+<P>
+<HR>
+<H3>IsExpanded()  see <A HREF="#Location()">Location()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Location()"></A>Location()
+, 
+<A NAME="IsExpanded()"></A>IsExpanded()
+, 
+<A NAME="SetLocation()"></A>SetLocation()
+, 
+<A NAME="Expand()"></A>Expand()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="#deskbar_location">deskbar_location</A></TT></B> <B><TT><FONT  color=000022 size=+1>Location(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>*isExpanded</I></FONT>=<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsExpanded(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetLocation(<A HREF="#deskbar_location">deskbar_location</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>location</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>expanded</I></FONT>=<FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Expand(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>expand</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Location()">Location()</A></TT></B> returns a symbolic description of the <B>Deskbar</B>'s current location; see <B><TT><A HREF="#deskbar_location">deskbar_location</A></TT></B> for the list of pre-defined locations.  <I><FONT  color=991122 face=HELVETICA>isExpanded</I></FONT> (if supplied) is set to <B><TT>true</TT></B> if the <B>Deskbar</B> is expanded, and <B><TT>false</TT></B> if it's contracted; <B><TT><A HREF="#IsExpanded()">IsExpanded()</A></TT></B> returns the expansion value directly.  Expansion and contraction is variable only if the <B><TT><A HREF="../Release%20Notes/Deskbar.html#Deskbar">Deskbar</A></TT></B>'s location is left-top or right-top; for all other locations, the expansion state is hard-wired.  See <B><TT><A HREF="#deskbar_location">deskbar_location</A></TT></B> for illustrations.
+<P>
+<B><TT><A HREF="#SetLocation()">SetLocation()</A></TT></B> sets the <B>Deskbar</B>'s location <I>and</I> expands/contracts the <B>Deskbar</B>; for some locations, the expansion/contraction is hard-wired. <B><TT> <A HREF="#Expand()">Expand()</A></TT></B> expands/contracts the <B>Deskbar</B> (if the setting isn't hard-wired) without setting its location.  You should very rarely need to call these functions.  Moving and expanding the <B>Deskbar</B> is in the user's domain.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="#SetLocation()">SetLocation()</A></TT></B> and <B><TT><A HREF="#Expand()">Expand()</A></TT></B> return...
+<P>
+<UL>
+<LI>B_OK.  The new location or expansion request was successfully communicated to the <B>Deskbar</B>.  Whether the new parameters were actually enforced isn't indicated.
+<P>
+<LI><I>Negative values</I>.  The <B>Deskbar</B> isn't running, or some other message-sending error occurred.
+<P>
+</UL>
+<P>
+<HR>
+<H3>Additem()</H3>
+<P>
+<HR>
+<H3>SetLocation()  see  <A HREF="#Location()">Location()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Deskbar%20Constants"></A><FONT SIZE=6>D</FONT>eskbar <FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Deskbar%20Location"></A>Deskbar Location
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+enum <B><TT><FONT  color=000022 size=+1>
+<A NAME="Deskbar%20Location"></A>deskbar_location
+</TT></B></FONT> { ... }
+</TABLE></TABLE>
+
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_DESKBAR_TOP"></A>B_DESKBAR_TOP
+</TT></B></TD>
+<TD>Expanded (only) along the top.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DESKBAR_BOTTOM"></A>B_DESKBAR_BOTTOM
+</TT></B></TD>
+<TD>Expanded (only) along the bottom.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DESKBAR_LEFT_BOTTOM"></A>B_DESKBAR_LEFT_BOTTOM
+</TT></B></TD>
+<TD>Contracted (only) in bottom left corner.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DESKBAR_RIGHT_BOTTOM"></A>B_DESKBAR_RIGHT_BOTTOM
+</TT></B></TD>
+<TD>Contracted (only) in bottom right corner.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DESKBAR_LEFT_TOP"></A>B_DESKBAR_LEFT_TOP
+</TT></B></TD>
+<TD>In the top left corner (expanded or contracted).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DESKBAR_RIGHT_TOP"></A>B_DESKBAR_RIGHT_TOP
+</TT></B></TD>
+<TD>In the top right corner (expanded or contracted).</TD>
+</TABLE>
+<P>
+The <B><TT><A HREF="#deskbar_location">deskbar_location</A></TT></B> constants are used to set and return the Deskbar's location (see <B><TT><A HREF="#Location()">Location()</A></TT></B>).  The six locations are shown in the two illustrations below:
+<P>
+<IMG SRC="art/TopBottom.GIF" ALIGN="bottom">
+<P>
+<IMG SRC="art/LeftRight.GIF" ALIGN="bottom">
+<P>
+The <B><TT><A HREF="#deskbar_location">deskbar_location</A></TT></B> value affects the Deskbar's expanded state:  The Deskbar can be expanded <I>or</I> contracted in <B><TT><A HREF="#B_DESKBAR_LEFT_TOP">B_DESKBAR_LEFT_TOP</A></TT></B> and <B><TT><A HREF="#B_DESKBAR_RIGHT_TOP">B_DESKBAR_RIGHT_TOP</A></TT></B> locations only.  In the other locations, the expansion/contraction is hard-wired.  The illustration below shows a left-top Deskbar in its expanded and contracted states:
+<P>
+<IMG SRC="art/ContractExpand.GIF" ALIGN="bottom">
+ 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="../index.html"><FONT face=HELVETICA>Be Book Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Deskbar%20Master%20Index.html"><FONT face=HELVETICA>Deskbar Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

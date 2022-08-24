@@ -1,0 +1,277 @@
+<HTML><HEAD><TITLE>The Storage Kit: File System Info C Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="File%20System%20Info%20C%20Functions"></A>File System Info C Functions
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/fs_info.h">be/kernel/fs_info.h</A>
+<P>
+Library:  libroot.so
+<P>
+From time to time, it can be useful to know certain information about the capabilities of the file system on a device.  While the <A HREF="Volume.html#BVolume">BVolume</A> class provides you easy access to this information, it can occasionally be helpful to have more direct access to this information.
+<P>
+This section describes three C functions which can be used to obtain information about the file system on a device.  One of these functions, <B><TT><A HREF="#fs_stat_dev()">fs_stat_dev()</A></TT></B>, returns this information given a device number.  The other two functions, <B><TT><A HREF="#dev_for_path()">dev_for_path()</A></TT></B> and <B><TT><A HREF="#next_dev()">next_dev()</A></TT></B>, provide two ways to obtain a device number for use with <B><TT><A HREF="#fs_stat_dev()">fs_stat_dev()</A></TT></B>.
+<P>
+Note that these functions <I>don't</I> set <B><TT>errno</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="C%20Functions"></A><FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="dev_for_path()"></A>dev_for_path()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+dev_t<B><TT><FONT  color=000022 size=+1> dev_for_path(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given a pathname, returns the device number of the device on which the path is located.  If the result is negative, it is a return code specifying an error.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT>B_ENTRY_NOT_FOUND.,</TT></B><I><FONT  color=991122 face=HELVETICA>path</I></FONT> does not exist, or is <B><TT>NULL</TT></B> or an empty string.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is null or an empty string.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_TOO_LONG">B_NAME_TOO_LONG</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is too long.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to complete the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file system error prevented the operation from succeeding.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="next_dev()"></A>next_dev()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+dev_t <B><TT><FONT  color=000022 size=+1>next_dev(</TT></B></FONT>int32<I><FONT  color=991122 face=HELVETICA> </I></FONT>*<I><FONT  color=991122 face=HELVETICA>pos</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The <B><TT>next_dev()</TT></B> function allows you to iterate through all devices, receiving their device numbers as a result each time.  If the result is negative, it is an error code.  When the end of the device list is reached, the return value <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> is returned.
+<P>
+You should initially set <I><FONT  color=991122 face=HELVETICA>pos</I></FONT> to 0, then call <B><TT>next_dev()</TT></B> in a loop to obtain each device number until an error occurs.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void ScanDevices(void) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int pos;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pos = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while(next_dev(&amp;pos) >=0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do_something(pos);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI>B_BAD_VALUE. No matching device found.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_stat_dev()"></A>fs_stat_dev()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_stat_dev(</TT></B></FONT>dev_t <I><FONT  color=991122 face=HELVETICA>dev</I></FONT>, fs_info *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+struct {} <B><TT><FONT  color=000022 size=+1>fs_info
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>fs_stat_dev()</TT></B> returns information about the specified device.  This can be used in conjunction with <B><TT><A HREF="#next_dev()">next_dev()</A></TT></B> to scan all devices and record information your application requires.
+<P>
+This function returns 0 if the request was successful or -1 if an error occurred.  Use the <B><TT>errno()</TT></B> function to determine what error in particular occurred.
+<P>
+The <B><TT>fs_info</TT></B> structure is defined as:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct <B><TT>fs_info</TT></B> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dev_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>dev</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ino_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>root</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>flags</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>block_size</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>io_size</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>total_blocks</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>free_blocks</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>total_nodes</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;off_t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>free_nodes</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>device_name</TT></B>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>volume_name</TT></B>[<B><TT>B_FILE_NAME_LENGTH</TT></B>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT>fsh_name</TT></B>[<B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A></TT></B>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The structure's fields are:
+<P>
+<UL>
+<LI><B><TT>dev</TT></B>.  The device number of the device.
+<P>
+<LI>root.  The inode of the root of the device.
+<P>
+<LI><B><TT>flags</TT></B>.  Flags describing the device's capabilities.
+<P>
+<LI><B><TT>block_size</TT></B>.  The fundamental block size of the device.
+<P>
+<LI><B><TT>io_size</TT></B>.  Optimal I/O size of the device.
+<P>
+<LI><B><TT>total_blocks</TT></B>.  The total number of blocks on the device.
+<P>
+<LI><B><TT>free_blocks</TT></B>.  The number of free (unused) blocks on the device.
+<P>
+<LI><B><TT>total_nodes</TT></B>.  The total number of nodes on the device.
+<P>
+<LI><B><TT>free_nodes</TT></B>.  The number of free (unused) nodes on the device.
+<P>
+<LI><B><TT>device_name</TT></B>.  Name of the device holding the file system.
+<P>
+<LI><B><TT>volume_name</TT></B>.  Name of the volume contained by the device.
+<P>
+<LI><B><TT>fsh_name</TT></B>.  Name of the file system handler for the device.
+<P>
+</UL>
+<P>
+The <B><TT>flags</TT></B> can be any combination of the following values, which specify the attributes of the file system on the device:
+<P>
+<UL>
+<LI><B><TT>B_FS_IS_READONLY</TT></B>.  The file system on the device is read-only.
+<P>
+<LI><B><TT>B_FS_IS_REMOVABLE</TT></B>.  The device contains removable media.
+<P>
+<LI><B><TT>B_FS_IS_PERSISTENT</TT></B>.  Data written to the device remains even while the device is off.
+<P>
+<LI><B><TT>B_FS_IS_SHARED</TT></B>.  The file system is being shared on a network.
+<P>
+<LI><B><TT>B_FS_HAS_MIME</TT></B>.  The file system supports the MIME typing system used by the BeOS.
+<P>
+<LI><B><TT>B_FS_HAS_ATTR</TT></B>.  The file system supports node attributes.
+<P>
+<LI><B><TT>B_FS_HAS_QUERY</TT></B>.  THe file system supports the BeOS query mechanism.
+<P>
+</UL>
+<P>
+The information in the <B><TT>fs_info</TT></B> structure is guaranteed to be internally consistent, but the structure as a whole should be considered to be out-of-date as soon as you receive it.  It provides a picture of a device as it exists just before the info-retrieving function returns.  In particular, the number of free blocks and of free nodes can easily change immediately after you receive this information.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The device was found; <I><FONT  color=991122 face=HELVETICA>info</I></FONT> contains valid information.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>dev</I></FONT> doesn't identify an existing device.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,198 @@
+<HTML><HEAD><TITLE>Keyboard: Character Constants</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Keyboard Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Keyboard%20Master%20Index.html"><FONT face=HELVETICA>Keyboard Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Character%20Constants"></A>Character Constants
+</H1>
+<P>
+The Interface Kit defines constants for characters that aren't normally represented by a visible symbol.  This includes the usual space and backspace characters, but most invisible characters are produced by the function keys and the navigation keys located between the main keyboard and the numeric keypad.  The character values associated with these keys are more or less arbitrary, so you should always use the constant in your code rather than the actual character value.  Many of these characters are also produced by alphabetic keys when a Control key is held down.
+<P>
+The table below lists character constants defined in the kit and the keys they're associated with.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>
+</UL>
+<B>Key label</B></TH>
+<TH>Key code</TH>
+<TH>Character reported</TH>
+<TR>
+<TD><I>Backspace</I></TD>
+<TD>0x1e</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_BACKSPACE">B_BACKSPACE</A></TT></B> </TD>
+<TR>
+<TD><I>Tab</I></TD>
+<TD>0x26</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_TAB">B_TAB</A></TT></B> </TD>
+<TR>
+<TD><I>Enter</I></TD>
+<TD>0x47</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_ENTER">B_ENTER</A></TT></B> </TD>
+<TR>
+<TD><I>(space bar)</I></TD>
+<TD>0x5e</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_SPACE">B_SPACE</A></TT></B> </TD>
+<TR>
+<TD><I>Escape</I></TD>
+<TD>0x01</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_ESCAPE">B_ESCAPE</A></TT></B> </TD>
+<TR>
+<TD><I>F1 &ndash; F12</I></TD>
+<TD>0x02 through 0x0d</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> </TD>
+<TR>
+<TD><I>Print Screen</I></TD>
+<TD>0x0e</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> </TD>
+<TR>
+<TD><I>Scroll Lock</I></TD>
+<TD>0x0f</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> </TD>
+<TR>
+<TD><I>Pause</I></TD>
+<TD>0x10</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> </TD>
+<TR>
+<TD><I>System Request</I></TD>
+<TD>0x7e</TD>
+<TD>0xc8 </TD>
+<TR>
+<TD><I>Break</I></TD>
+<TD>0x7f</TD>
+<TD>0xca </TD>
+<TR>
+<TD><I>Insert</I></TD>
+<TD>0x1f</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_INSERT">B_INSERT</A></TT></B> </TD>
+<TR>
+<TD><I>Home</I></TD>
+<TD>0x20</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_HOME">B_HOME</A></TT></B> </TD>
+<TR>
+<TD><I>Page Up</I></TD>
+<TD>0x21</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_PAGE_UP">B_PAGE_UP</A></TT></B> </TD>
+<TR>
+<TD><I>Delete</I></TD>
+<TD>0x34</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_DELETE">B_DELETE</A></TT></B> </TD>
+<TR>
+<TD><I>End</I></TD>
+<TD>0x35</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_END">B_END</A></TT></B> </TD>
+<TR>
+<TD><I>Page Down</I></TD>
+<TD>0x36</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_PAGE_DOWN">B_PAGE_DOWN</A></TT></B> </TD>
+<TR>
+<TD><I>(up arrow)</I></TD>
+<TD>0x57</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_UP_ARROW">B_UP_ARROW</A></TT></B> </TD>
+<TR>
+<TD><I>(left arrow)</I></TD>
+<TD>0x61</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_LEFT_ARROW">B_LEFT_ARROW</A></TT></B> </TD>
+<TR>
+<TD><I>(down arrow)</I></TD>
+<TD>0x62</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_DOWN_ARROW">B_DOWN_ARROW</A></TT></B> </TD>
+<TR>
+<TD><I>(right arrow)</I></TD>
+<TD>0x63</TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_RIGHT_ARROW">B_RIGHT_ARROW</A></TT></B> </TD>
+</TABLE>
+<P>
+Several keys are mapped to the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> character.  An application can determine which function key was pressed to produce the character by testing the key code against these constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_F1_KEY</TT></B></TD>
+<TD><B><TT>B_F6_KEY</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_F11_KEY">B_F11_KEY</A></TT></B> </TD>
+<TR>
+<TD><B><TT>B_F2_KEY</TT></B></TD>
+<TD><B><TT>B_F7_KEY</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_F12_KEY">B_F12_KEY</A></TT></B> </TD>
+<TR>
+<TD><B><TT>B_F3_KEY</TT></B></TD>
+<TD><B><TT>B_F8_KEY</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_PRINT_KEY">B_PRINT_KEY</A></TT></B> (the "Print Screen" key)</TD>
+<TR>
+<TD><B><TT>B_F4_KEY</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_F9_KEY">B_F9_KEY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_SCROLL_KEY">B_SCROLL_KEY</A></TT></B> (the "Scroll Lock" key)</TD>
+<TR>
+<TD><B><TT>B_F5_KEY</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_F10_KEY">B_F10_KEY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_PAUSE_KEY">B_PAUSE_KEY</A></TD>
+</TABLE></TT></B>
+<P>
+Note that key 0x30 (<I>P</I>) is also mapped to <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> when the Control key is held down.
+<P>
+Each of the character constants listed above is a one-byte value falling in the range of values where ASCII and Unicode overlap.  For convenience, the Interface Kit also defines some constants for common characters that fall outside that range.  These characters have multibyte representations in UTF-8, so the constant is defined as a character string.  For example:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+#define <B><TT>B_UTF8_OPEN_QUOTE</TT></B> "xE2x80x9C"
+<br>
+#define <B><TT>B_UTF8_CLOSE_QUOTE</TT></B> "xE2x80x9D"
+<br>
+#define <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_UTF8_COPYRIGHT">B_UTF8_COPYRIGHT</A></TT></B> "xC2xA9"
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+See "Character Constants" in the "Global Variables, Constants, and Defined Types" section of <B>The Interface Kit</B> for a full list of these constants.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Keyboard Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Keyboard%20Master%20Index.html"><FONT face=HELVETICA>Keyboard Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

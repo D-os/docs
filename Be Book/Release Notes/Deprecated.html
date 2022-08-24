@@ -1,0 +1,110 @@
+<HTML><HEAD><TITLE>Release Notes: Deprecated API</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Deprecated%20API"></A>Deprecated API
+</H1>
+<P>
+The following API is still supported, but should be replaced as suggested.
+<P>
+<HR>
+<H3>
+<A NAME="Cursor"></A>Cursor
+, 
+<A NAME="Constants"></A>Constants
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/app/AppDefs.h">app/AppDefs.h</A>
+<P>
+The <B><TT><A HREF="../The%20Application%20Kit/misc.html#Cursor%20Constants">B_HAND_CURSOR</A></TT></B> and <B><TT><A HREF="../The%20Application%20Kit/misc.html#Cursor%20Constants">B_I_BEAM_CURSOR</A></TT></B> constants are deprecated in favor of the new <A HREF="AppKit.html#BCursor">BCursor</A> class.  
+<P>
+<HR>
+<H3>
+<A NAME="BDeskbar::AddItem()"></A>BDeskbar::AddItem()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be_apps/Deskbar/Deskbar.h">be_apps/Deskbar/Deskbar.h</A>
+<P>
+The BView-accepting version of <B><TT><A HREF="Deskbar.html#AddItem()">AddItem()</A></TT></B> has been deprecated:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>AddItem(<A HREF="InterfaceKit.html#BView">BView</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>view</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> <I><FONT  color=991122 face=HELVETICA>*id</I></FONT> = <B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT><I><FONT  color=008844 face=HELVETICA>deprecated
+<P>
+</I></FONT>
+</TABLE></TABLE>
+
+<P>
+See <a href="Deskbar.html#AddItem()">AddItem()</a> for more information.
+<P>
+<HR>
+<H3>
+<A NAME="BScreen::ProposeDisplayMode()"></A>BScreen::ProposeDisplayMode()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/Screen.h">interface/Screen.h</A>
+<P>
+This function is now called <B><TT><A HREF="InterfaceKit.html#ProposeMode()">ProposeMode()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Media"></A>Media
+, 
+<A NAME="Kit"></A>Kit
+</H3>
+<P>
+<B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_raw_audio_format">media_raw_audio_format</A></TT></B> is deprecated. Use <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_multi_audio_format">media_multi_audio_format</A></TT></B> instead. 
+<P>
+<B><TT>media_format.u.raw_audio</TT></B> and <B><TT>media_raw_audio_format::wildcard</TT></B> have been subsumed by the <B><TT><A HREF="../The%20Media%20Kit/misc_api.html#media_multi_audio_format">media_multi_audio_format</A></TT></B> struct, which is upwards compatible.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

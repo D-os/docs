@@ -1,0 +1,427 @@
+<HTML><HEAD><TITLE>The Translation Kit: Translator Add-ons</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Translator%20Add-ons"></A>Translator Add-ons
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/translation/TranslatorAddOn.h">be/translation/TranslatorAddOn.h</A>
+<P>
+Library:  libtranslation.so
+<P>
+This section describes the functions and data that a translator add-on must (or can) supply.   The translator add-ons that you create and install are loaded into a <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> object through its <B><TT><A HREF="TranslatorRoster.html#Default()">Default()</A></TT></B> or <B><TT><A HREF="TranslatorRoster.html#AddTranslators()">AddTranslators()</A></TT></B> function. 
+<P>
+You compile your add-on as a shared library, link against <B>libtranslation.so</B>, and install the add-on object file in the <B>Translators</B> subdirectory of <B><TT>B_USER_ADDONS_DIRECTORY</TT></B>.  
+<P>
+The table below briefly lists the translator add-on symbols: 
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Symbol</B></TH>
+<TH>Required?</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT><A HREF="#translatorInfo">translatorInfo</A></TT></B></TD>
+<TD>yes</TD>
+<TD>long description of translator</TD>
+<TR>
+<TD><B><TT><A HREF="#translatorName">translatorName</A></TT></B></TD>
+<TD>yes</TD>
+<TD>short name of translator</TD>
+<TR>
+<TD><B><TT><A HREF="#translatorVersion">translatorVersion</A></TT></B></TD>
+<TD>yes</TD>
+<TD>translator version number</TD>
+<TR>
+<TD><B><TT><A HREF="#Identify()">Identify()</A></TT></B></TD>
+<TD>yes</TD>
+<TD>identify data in a BPositionIO</TD>
+<TR>
+<TD><B><TT><A HREF="#Translate()">Translate()</A></TT></B></TD>
+<TD>yes</TD>
+<TD>translate data from one format to another</TD>
+<TR>
+<TD><B><TT><A HREF="#inputFormats">inputFormats</A></TT></B></TD>
+<TD>no</TD>
+<TD>list of supported input formats</TD>
+<TR>
+<TD><B><TT><A HREF="#outputFormats">outputFormats</A></TT></B></TD>
+<TD>no</TD>
+<TD>list of supported output formats</TD>
+<TR>
+<TD><B><TT><A HREF="#GetConfigMessage()">GetConfigMessage()</A></TT></B></TD>
+<TD>no</TD>
+<TD>save current configuration in a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A></TD>
+<TR>
+<TD><B><TT><A HREF="#MakeConfig()">MakeConfig()</A></TT></B></TD>
+<TD>no</TD>
+<TD>create a view for user-configuration of translator</TD>
+</TABLE>
+<P>
+<HR>
+<H2>
+<A NAME="Translator%20Add-on%20Functions"></A><FONT SIZE=6>T</FONT>ranslator <FONT SIZE=6>A</FONT>dd-on <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="GetConfigMessage()"></A>GetConfigMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetConfigMessage(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Optional
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+This function stores the current configuration in the <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> in such a manner that it may be flattened, unflattened, and then passed to <B><TT><A HREF="#Translate()">Translate()</A></TT></B> as an <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="Identify()"></A>Identify()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Identify(</TT></B></FONT>BPositionIO *<I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const translation_format *<I><FONT  color=991122 face=HELVETICA>inFormat</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;translator_info *<I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>outType</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Required
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+If the translator understands how to convert the data contained in <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> to media type <I><FONT  color=991122 face=HELVETICA>outType</I></FONT>, it fills <I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT> with details about the input format and return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. If it doesn't know how to translate the data, it returns <B><TT>B_NO_TRANSLATOR</TT></B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>quality</I></FONT> and <I><FONT  color=991122 face=HELVETICA>capability</I></FONT> fields in <I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT> are used by the Translation Kit in selecting the best suited translator for a given translation, so it is best to be conservative in choosing these values.
+<P>
+If the media format doesn't have a type code in <B>&lt;be/support/TypeConstants.h></B> (as will most likely be the case), choose a reasonable value.  For example, the Targa handler included with the BeOS distribution uses the type code 'TGA '.
+<P>
+The translator need not fill in the <I><FONT  color=991122 face=HELVETICA>translator</I></FONT> field in <I><FONT  color=991122 face=HELVETICA>outInfo</I></FONT>; <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> fills in this value for you.
+<P>
+Remember that <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> may be arriving from any source, including a live network feed.  It's therefore best to steer clear of calls such as <B><TT>BPositionIO::Size()</TT></B> which force all the data out of the stream.  Similarly, it is good practice to read only as much of the stream as you need.
+<P>
+<I><FONT  color=991122 face=HELVETICA>inFormat</I></FONT>, if it is not <B><TT>NULL</TT></B>, is provided as a hint to the format of the data in <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>.  Since it is only a hint, the data may very well be in some other format.
+<P>
+<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, if it is not <B><TT>NULL</TT></B>, contains additional information for the add-on.  It is described at length in the section in <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> titled "Configuration".
+<P>
+<I><FONT  color=991122 face=HELVETICA>outType</I></FONT> may be zero, in which case any output format is acceptable.
+<P>
+<HR>
+<H3>
+<A NAME="MakeConfig()"></A>MakeConfig()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>MakeConfig(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> **<I><FONT  color=991122 face=HELVETICA>outView</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>outExtent</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Optional
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+This function creates a new <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> through which the user configures the add-on.  For example, it could be used to control the degree of image compression used or the video frame rate.  The bounds of the view are returned in <I><FONT  color=991122 face=HELVETICA>outExtent</I></FONT>, although it can be resized at will by an external source.  Changes to the configuration take effect immediately, although  translations should be carried out with the same parameters throughout.
+<P>
+<HR>
+<H3>
+<A NAME="Translate()"></A>Translate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Translate(</TT></B></FONT>BPositionIO *<I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const translator_info *<I><FONT  color=991122 face=HELVETICA>inInfo</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>outType</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BPositionIO *<I><FONT  color=991122 face=HELVETICA>outDestination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Required
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The translator translates data from <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT> to format <I><FONT  color=991122 face=HELVETICA>outType</I></FONT>, writing the output to <I><FONT  color=991122 face=HELVETICA>outDestination</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>outType</I></FONT> may be zero, in which case it is assumed to be the default format type for the media group.  As in <B><TT><A HREF="#Identify()">Identify()</A></TT></B>, <I><FONT  color=991122 face=HELVETICA>inInfo</I></FONT> serves as a hint to the format of the data in <I><FONT  color=991122 face=HELVETICA>inSource</I></FONT>.  <I><FONT  color=991122 face=HELVETICA>ioExtension</I></FONT> fills its usual role as a container of configuration information.  The function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if it's able to convert the data successfully.  If it's unable to do so, it returns either <B><TT>B_NO_TRANSLATOR</TT></B> or an error value as appropriate.
+<P>
+<HR>
+<H2>
+<A NAME="Translator%20Add-on%20Data"></A><FONT SIZE=6>T</FONT>ranslator <FONT SIZE=6>A</FONT>dd-on <FONT SIZE=6>D</FONT>ata
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="inputFormats"></A>inputFormats
+, 
+<A NAME="outputFormats"></A>outputFormats
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+translation_format <B><TT><FONT  color=000022 size=+1>inputFormats</TT></B></FONT>[];
+<P>
+
+
+<TR><TD>
+translation_format <B><TT><FONT  color=000022 size=+1>outputFormats</TT></B></FONT>[];
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Optional
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+These arrays tell <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> which formats the add-on supports.  If they are not exported by the translator, the add-on's <B><TT><A HREF="#Identify()">Identify()</A></TT></B> will be called each time an application requests a translation.  Each array ends in an empty <B><TT><A HREF="TranslatorRoster.html#translation_format">translation_format</A></TT></B> structure, so a typical <I><FONT  color=991122 face=HELVETICA>inputFormats</I></FONT> would look like:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;translation_format inputFormats[] = {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 'TGA ', B_TRANSLATOR_BITMAP, 0.6, 0.5, "image/targa", 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  "Targa bitmap format" },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ B_TRANSLATOR_BITMAP, B_TRANSLATOR_BITMAP, 0.4, 0.6, "image/x-be-bitmap",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  "Be Bitmap format" },
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 0, 0, 0, 0, 0, 0 }
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+and similarly for <I><FONT  color=991122 face=HELVETICA>outputFormats</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="translatorInfo"></A>translatorInfo
+, 
+<A NAME="translatorName"></A>translatorName
+, 
+<A NAME="translatorVersion"></A>translatorVersion
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+char <B><TT><FONT  color=000022 size=+1>translatorInfo</TT></B></FONT>[];
+<P>
+
+
+<TR><TD>
+char <B><TT><FONT  color=000022 size=+1>translatorName</TT></B></FONT>[];
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>translatorVersion</TT></B></FONT>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Required
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#translatorInfo">translatorInfo</A></TT></B> returns a pointer to the translator's long name, e.g. "aiff translator by the Pie Man (pie@the.man)".  
+<P>
+<B><TT><A HREF="#translatorName">translatorName</A></TT></B> returns a pointer to the translator's short name, e.g. "aiff translator".  The short name should be appropriate for display in a menu.
+<P>
+<B><TT><A HREF="#translatorVersion">translatorVersion</A></TT></B> gives an "MM.mm" version number for the translator.  For example, a <B><TT><A HREF="Translator.html#TranslatorVersion()">TranslatorVersion()</A> </TT></B>of 314 is interpreted as version 3.14.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,687 @@
+<HTML><A NAME="26903:%20head1:%20BView%20Hook%20Functions"></A>
+<HEAD><TITLE>The Interface Kit: BView Hook Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BView%20Hook%20Functions"></A>BView Hook Functions
+</H1>
+<P>
+<H6><A HREF="View Hook Functions.summary.html"><i>Summary</i></A></H6>
+<P>
+The functions in this section are called in response to particular events, and are intended to be overridden in a <A HREF="View.html#BView">BView</A> subclass. (The default implementations of the <A HREF="View.html#BView">BView</A> hook functions do nothing.) They include functions to respond to input, draw when necessary, perform actions periodically, and various others.
+<P>
+<HR>
+<H3>AllAttached()   see <A HREF="#AttachedToWindow()">AttachedToWindow()</A></H3>
+<P>
+<HR>
+<H3>AllDetached()   see <A HREF="#DetachedFromWindow()">DetachedFromWindow()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+, 
+<A NAME="AllAttached()"></A>AllAttached()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AllAttached(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to complete the initialization of the <A HREF="View.html#BView">BView</A> when it's assigned to a window.  A <A HREF="View.html#BView">BView</A> is assigned to a window when it, or one of its ancestors in the view hierarchy, becomes a child of a view already attached to a window.
+<P>
+<B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> is called immediately after the <A HREF="View.html#BView">BView</A> is formally made a part of the window's view hierarchy and after it has become known to the Application Server and its graphics parameters are set.  The <B><TT><A HREF="ViewGeneral.html#Window()">Window()</A></TT></B> function can identify which <A HREF="Window.html#BWindow">BWindow</A> the <A HREF="View.html#BView">BView</A> belongs to.
+<P>
+All of the BView's children, if it has any, also become attached to the window and receive their own <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> notifications.  Parents receive the notification before their children, but only after all views have become attached to the window and recognized as part of the window's view hierarchy.  This function can therefore depend on all ancestor and descendant views being in place.
+<P>
+For example, <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> can be implemented to set a view's background color to the same color as its parent, something that can't be done before the view belongs to a window and knows who its parent is.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::AttachedToWindow()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( Parent() )
+&nbsp;&nbsp;&nbsp;        SetViewColor(Parent()->ViewColor());
+&nbsp;&nbsp;&nbsp;    <I>baseClass</I>::AttachedToWindow();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="#AllAttached()">AllAttached()</A></TT></B> notification follows on the heels of <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B>, but works its way up the view hierarchy rather than down.  When <B><TT><A HREF="#AllAttached()">AllAttached()</A></TT></B> is called for a <A HREF="View.html#BView">BView</A>, all its descendants have received both <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> and <B><TT><A HREF="#AllAttached()">AllAttached()</A></TT></B> notifications.  Therefore, parent views can depend on any calculations that their children make in either function.  For example, a parent can resize itself to fit the size of its children, where their sizes depend on calculations done in <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B>.
+<P>
+The default (BView) version of both these functions are empty.
+<P>
+<B>See also:  <TT><A HREF="Bitmap.html#AddChild()">AddChild()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#Window()">Window()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="DetachedFromWindow()"></A>DetachedFromWindow()
+, 
+<A NAME="AllDetached()"></A>AllDetached()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>DetachedFromWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AllDetached(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to make any adjustments necessary when the <A HREF="View.html#BView">BView</A> is about to be removed from a window's view hierarchy.  These two functions parallel the more commonly implemented <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> and <B><TT><A HREF="#AllAttached()">AllAttached()</A></TT></B> functions.
+<P>
+<B><TT><A HREF="#DetachedFromWindow()">DetachedFromWindow()</A></TT></B> notifications work their way down the hierarchy of views being detached, followed by <B><TT><A HREF="#AllDetached()">AllDetached()</A></TT></B> notifications, which work their way up the hierarchy.  The second function call permits an ancestor view to take actions that depend on calculations a descendant might have to make when it's first notified of being detached.
+<P>
+The <A HREF="View.html#BView">BView</A> is still attached to the window when both functions are called.
+<P>
+<B>See also:  <TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to draw the <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT> portion of the view.  The update rectangle is stated in the BView's coordinate system.
+<P>
+<B><TT><A HREF="#Draw()">Draw()</A></TT></B> is called as the result of update messages whenever the view needs to present itself on-screen.  This may happen when:
+<P>
+<LI>The window the view is in is first shown on-screen, or shown after being hidden (see the <A HREF="Window.html#BWindow">BWindow</A> version of the <B><TT><A HREF="Menu.html#Hide()">Hide()</A></TT></B> function).
+<P>
+<LI>The view is made visible after being hidden (see BView's <B><TT><A HREF="Menu.html#Hide()">Hide()</A></TT></B> function).
+<P>
+<LI>Obscured parts of the view are revealed, as when a window is moved from in front of the view or an image is dragged across it.
+<P>
+<LI>The view is resized.
+<P>
+<LI>The contents of the view are scrolled (see <B><TT>ScrollBy()</TT></B>).
+<P>
+<LI>A child view is added, removed, or resized.
+<P>
+<LI>A rectangle has been invalidated that includes at least some of the view (see <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B>).
+<P>
+<LI><B><TT><A HREF="ViewDrawing.html#CopyBits()">CopyBits()</A></TT></B> can't completely fill a destination rectangle within the view.
+<P>
+</UL>
+<P>
+<B><TT><A HREF="#Draw()">Draw()</A></TT></B> is also called from a <A HREF="PrintJob.html#BPrintJob">BPrintJob</A> object's <B><TT><A HREF="PrintJob.html#DrawView()">DrawView()</A></TT></B> function to draw the view on a printed page.  <B><TT><A HREF="ViewGeneral.html#IsPrinting()">IsPrinting()</A></TT></B> returns <B><TT>true</TT></B> when the <A HREF="View.html#BView">BView</A> is drawing for the printer and <B><TT>false</TT></B> when it's drawing to the screen.  When printing, you may want to recalculate layouts, substitute fonts, turn antialiasing off, scale the size of a coordinate unit, or make other adjustments to ensure the quality of the printed image.
+<P>
+When drawing to the screen, the <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT> is the smallest rectangle that encloses the current clipping region for the view.  Since the Application Server won't render anything on-screen that's outside the clipping region, an application will be more efficient if it avoids producing drawing instructions for images that don't intersect with the rectangle.  For still more efficiency and precision, you can ask for the clipping region itself (by calling <B><TT><A HREF="ViewGraphicsState.html#GetClippingRegion()">GetClippingRegion()</A></TT></B>) and confine drawing to images that intersect with it.
+<P>
+When printing, the <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT> matches the rectangle passed to <B><TT><A HREF="PrintJob.html#DrawView()">DrawView()</A></TT></B> and may lie outside the clipping region.  The clipping region is not enforced for printing, but the Print Server clips the BView's drawing to the specified rectangle. 
+<P>
+<B>See also:  <TT><A HREF="Window.html#UpdateIfNeeded()">BWindow::UpdateIfNeeded()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#GetClippingRegion()">GetClippingRegion()</A></TT></B>, <B><TT><A HREF="PrintJob.html#DrawView()">BPrintJob::DrawView()</A></TT></B>, <B><TT><A HREF="ViewGeneral.html#IsPrinting()">IsPrinting()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="DrawAfterChildren()"></A>DrawAfterChildren()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is similar (in fact, almost identical) to <B><TT><A HREF="#Draw()">Draw()</A></TT></B>. The only difference is that <B><TT><A HREF="#DrawAfterChildren()">DrawAfterChildren()</A></TT></B> is called <I>after</I> all children have drawn during a screen update. This is in contrast to <B><TT><A HREF="#Draw()">Draw()</A></TT></B>, which draws before any children have drawn. In general, <B><TT><A HREF="#Draw()">Draw()</A></TT></B> will be used for almost all of your drawing needs; <B><TT><A HREF="#DrawAfterChildren()">DrawAfterChildren()</A></TT></B> is intended for use in the rare circumstances where you wish a view to be able to draw on top of its child views.
+<P>
+Other details are as for <B><TT><A HREF="#Draw()">Draw()</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#Draw()">Draw()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="FrameMoved()"></A>FrameMoved()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>FrameMoved(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>parentPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to a notification that the view has moved within its parent's coordinate system.  <I><FONT  color=991122 face=HELVETICA>parentPoint</I></FONT> gives the new location of the left top corner of the BView's frame rectangle.
+<P>
+<B><TT><A HREF="#FrameMoved()">FrameMoved()</A></TT></B> is called only if the <B><TT><A HREF="ViewGeneral.html#B_FRAME_EVENTS">B_FRAME_EVENTS</A></TT></B> flag is set and the <A HREF="View.html#BView">BView</A> is attached to a window.
+<P>
+If the view is both moved and resized, <B><TT><A HREF="#FrameMoved()">FrameMoved()</A></TT></B> is called before <B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B>.  This might happen, for example, if the BView's automatic resizing mode is a combination of <B><TT>B_FOLLOW_TOP_BOTTOM</TT></B> and <B><TT><A HREF="ViewGeneral.html#B_FOLLOW_RIGHT">B_FOLLOW_RIGHT</A></TT></B> and its parent is resized both horizontally and vertically.
+<P>
+The default (BView) version of this function is empty.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <B><TT><A HREF="#FrameMoved()">FrameMoved()</A></TT></B> is also called when a hidden window is shown on-screen.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="Window.html#MoveBy()">MoveBy()</A></TT></B>, <B><TT><A HREF="Window.html#FrameMoved()">BWindow::FrameMoved()</A></TT></B>, <B><TT><A HREF="Font.html#SetFlags()">SetFlags()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="FrameResized()"></A>FrameResized()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>FrameResized(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to a notification that the view has been resized.  The arguments state the new <I><FONT  color=991122 face=HELVETICA>width</I></FONT> and <I><FONT  color=991122 face=HELVETICA>height</I></FONT> of the view.  The resizing could have been the result of a user action (resizing the window) or of a programmatic one (calling <B><TT><A HREF="ViewGeneral.html#ResizeTo()">ResizeTo()</A></TT></B> or <B><TT><A HREF="ViewGeneral.html#ResizeBy()">ResizeBy()</A></TT></B>).
+<P>
+<B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B> is called only if the <B><TT><A HREF="ViewGeneral.html#B_FRAME_EVENTS">B_FRAME_EVENTS</A></TT></B> flag is set and the <A HREF="View.html#BView">BView</A> is attached to a window.
+<P>
+BView's version of this function is empty.
+<P>
+<B>See also:  <TT><A HREF="ViewGeneral.html#ResizeBy()">ResizeBy()</A></TT></B>, <B><TT><A HREF="Window.html#FrameResized()">BWindow::FrameResized()</A></TT></B>, <B><TT><A HREF="Font.html#SetFlags()">SetFlags()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetPreferredSize()"></A>GetPreferredSize()
+, 
+<A NAME="ResizeToPreferred()"></A>ResizeToPreferred()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual  void <B><TT><FONT  color=000022 size=+1>GetPreferredSize(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float&nbsp;*<I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ResizeToPreferred(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#GetPreferredSize()">GetPreferredSize()</A></TT></B> is implemented by derived classes to write the preferred width and height of the view into the variables the <I><FONT  color=991122 face=HELVETICA>width</I></FONT> and <I><FONT  color=991122 face=HELVETICA>height</I></FONT> arguments refer to.  Derived classes generally make this calculation based on the view's contents.  For example, a <A HREF="Button.html#BButton">BButton</A> object reports the optimal size for displaying the button border and label given the current font.
+<P>
+<B><TT><A HREF="#ResizeToPreferred()">ResizeToPreferred()</A></TT></B> resizes the BView's frame rectangle to the preferred size, keeping its left and top sides constant.
+<P>
+<B>See also:  <TT><A HREF="ViewGeneral.html#ResizeTo()">ResizeTo()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="KeyDown()"></A>KeyDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> <B><TT><FONT  color=000022 size=+1>KeyDown(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>bytes</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to a <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message reporting keyboard input.  Whenever a <A HREF="View.html#BView">BView</A> is the focus view of the active window, it receives a <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> notification for each character the user types, except for those that:
+<P>
+<UL>
+<LI>Are produced while a Command key is held down.  Command key events are interpreted as keyboard shortcuts.
+<P>
+<LI>Are produced by the Tab key when an Option key is held down.  Option-Tab events are invariably interpreted as instructions to change the focus view (for keyboard navigation); they work even where Tab alone does not.
+<P>
+<LI>Can operate the default button in a window.  The <A HREF="Button.html#BButton">BButton</A> object's <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> function is called, rather than the focus view's.
+<P>
+</UL>
+<P>
+The first argument, <I><FONT  color=991122 face=HELVETICA>bytes</I></FONT>, is an array that encodes the character mapped to the key the user pressed.  The second argument, <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>, tells how many bytes are in the array; there will always be at least one.  The <I><FONT  color=991122 face=HELVETICA>bytes</I></FONT> value follows the character encoding of the BView's font.  Typically, the encoding is Unicode UTF-8 (<B><TT><A HREF="misc.html#B_UNICODE_UTF8">B_UNICODE_UTF8</A></TT></B>), so there may be more than one byte per character.  The <I><FONT  color=991122 face=HELVETICA>bytes</I></FONT> array is not null-terminated; '0' is a valid character value.
+<P>
+The character value takes into account any modifier keys that were held down or keyboard locks that were on at the time of the keystroke.  For example, Shift-<I>i</I> is reported as uppercase 'I' (0x49) and Control-<I>i</I> is reported as a <B><TT><A HREF="misc.html#B_TAB">B_TAB</A></TT></B> (0x09).
+<P>
+Single-byte characters can be tested against ASCII codes and these constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_BACKSPACE">B_BACKSPACE</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_LEFT_ARROW">B_LEFT_ARROW</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_INSERT">B_INSERT</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ENTER">B_ENTER</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_RIGHT_ARROW">B_RIGHT_ARROW</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_DELETE">B_DELETE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_RETURN">B_RETURN</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_UP_ARROW">B_UP_ARROW</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_HOME">B_HOME</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_SPACE">B_SPACE</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_DOWN_ARROW">B_DOWN_ARROW</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_END">B_END</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_TAB">B_TAB</A></TT></B></TD>
+<TD></TD>
+<TD><B><TT><A HREF="misc.html#B_PAGE_UP">B_PAGE_UP</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ESCAPE">B_ESCAPE</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_PAGE_DOWN">B_PAGE_DOWN</A></TT></B> </TD>
+</TABLE>
+<P>
+<B><TT>B_ENTER</TT></B> and <B><TT>B_RETURN</TT></B> are the same character, a newline ('n').
+<P>
+Only keys that generate characters produce key-down events; the modifier keys on their own do not.
+<P>
+You can determine which modifier keys were being held down at the time of the event by calling BLooper's <B><TT><A HREF="../The%20Application%20Kit/Looper.html#CurrentMessage()">CurrentMessage()</A></TT></B> function and looking up the "modifiers" entry in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> it returns.  If the <I><FONT  color=991122 face=HELVETICA>bytes</I></FONT> character is <B><TT><A HREF="misc.html#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> and you want to know which key produced the character, you can look up the "key" entry in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> and test it against these constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_F1_KEY</TT></B></TD>
+<TD><B><TT>B_F6_KEY</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_F11_KEY">B_F11_KEY</A></TT></B> </TD>
+<TR>
+<TD><B><TT>B_F2_KEY</TT></B></TD>
+<TD><B><TT>B_F7_KEY</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_F12_KEY">B_F12_KEY</A></TT></B> </TD>
+<TR>
+<TD><B><TT>B_F3_KEY</TT></B></TD>
+<TD><B><TT>B_F8_KEY</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_PRINT_KEY">B_PRINT_KEY</A></TT></B> (Print Screen)</TD>
+<TR>
+<TD><B><TT>B_F4_KEY</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_F9_KEY">B_F9_KEY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_SCROLL_KEY">B_SCROLL_KEY</A></TT></B> (Scroll Lock)</TD>
+<TR>
+<TD><B><TT>B_F5_KEY</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_F10_KEY">B_F10_KEY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_PAUSE_KEY">B_PAUSE_KEY</A></TT></B> </TD>
+</TABLE>
+<P>
+For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if ( bytes[0] == B_FUNCTION_KEY ) {
+&nbsp;&nbsp;&nbsp;    BMessage *msg = Window()->CurrentMessage();
+&nbsp;&nbsp;&nbsp;    if ( msg ) {
+&nbsp;&nbsp;&nbsp;        int32 key;
+&nbsp;&nbsp;&nbsp;        msg->FindInt32("key", &amp;key);
+&nbsp;&nbsp;&nbsp;        switch ( key ) {
+&nbsp;&nbsp;&nbsp;        case B_F1_KEY:
+&nbsp;&nbsp;&nbsp;            . . .
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;        case B_F2_KEY:
+&nbsp;&nbsp;&nbsp;            . . .
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;         . . .
+&nbsp;&nbsp;&nbsp;        }
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <A HREF="View.html#BView">BView</A> version of <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> handles keyboard navigation from view to view through <B><TT><A HREF="misc.html#B_TAB">B_TAB</A></TT></B> characters.  If the view you define is navigable, its <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> function should permit <B><TT><A HREF="misc.html#B_SPACE">B_SPACE</A></TT></B> characters to operate the object and perhaps allow the arrow keys to navigate inside the view.  It should also call the inherited version of <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> to enable between-view navigation.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::KeyDown(const char *bytes, int32 numBytes)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( numBytes == 1 ) {
+&nbsp;&nbsp;&nbsp;        switch ( bytes[0] ) {
+&nbsp;&nbsp;&nbsp;        case B_SPACE:
+&nbsp;&nbsp;&nbsp;            /* <I>mimic a click in the view</I> */
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;        case B_RIGHT_ARROW:
+&nbsp;&nbsp;&nbsp;            /* <I>move one position to the right in the view</I> */
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;        case B_LEFT_ARROW:
+&nbsp;&nbsp;&nbsp;            /* <I>move one position to the left in the view</I> */
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;        default:
+&nbsp;&nbsp;&nbsp;            <I>baseClass</I>::KeyDown(bytes, numBytes);
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;        }
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If your <A HREF="View.html#BView">BView</A> is navigable but needs to respond to <B><TT><A HREF="misc.html#B_TAB">B_TAB</A></TT></B> characters&mdash;for example, if it permits users to insert tabs in a text string&mdash;its <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> function should simply grab the characters and not pass them to the inherited function.  Users will have to rely on the Option-Tab combination to navigate from your view.
+<P>
+<B>See also:  </B>the <B>Keyboard Information</B> appendix, "B_KEY_DOWN" in the <B>Message Protocols</B> appendix, <B><TT><A HREF="Window.html#SetDefaultButton()">BWindow::SetDefaultButton()</A></TT></B>, <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#modifiers()">modifiers()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="KeyUp()"></A>KeyUp()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> <B><TT><FONT  color=000022 size=+1>KeyUp(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>bytes</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to a <B><TT><A HREF="misc.html#B_KEY_UP">B_KEY_UP</A></TT></B> message reporting that the user released a key on the keyboard.  The same set of keys that produce <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> messages when they're pressed produce <B><TT><A HREF="misc.html#B_KEY_UP">B_KEY_UP</A></TT></B> messages when they're released.  The <I><FONT  color=991122 face=HELVETICA>bytes</I></FONT> and <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> arguments encode the character mapped to the key the user released; they work exactly like the same arguments passed to <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B>.
+<P>
+Some <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> messages are swallowed by the system and are never dispatched by calling <B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B>; others are dispatched, but not to the focus view.  In contrast, all <B><TT><A HREF="misc.html#B_KEY_UP">B_KEY_UP</A></TT></B> messages are dispatched by calling <B><TT><A HREF="#KeyUp()">KeyUp()</A></TT></B> for the focus view of the active window.  Since the focus view and active window can change between the time a key is pressed and the time it's released, this may or may not be the same <A HREF="View.html#BView">BView</A> that was notified of the <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message.
+<P>
+<B>See also:  <TT><A HREF="#KeyDown()">KeyDown()</A></TT></B>, "B_KEY_DOWN" in the <B>Message Protocols</B> appendix
+<P>
+<HR>
+<H3>
+<A NAME="MouseDown()"></A>MouseDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> <B><TT><FONT  color=000022 size=+1>MouseDown(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#MouseDown()">MouseDown()</A></TT></B> is a hook function that's invoked when the user depresses a mouse button (or other pointing device button, not including joysticks).  The location of the cursor at the time of the event is given by <I><FONT  color=991122 face=HELVETICA>point</I></FONT> in the BView's coordinates.  See <B><TT><A HREF="misc.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B> for the message format.  Also see <B><TT>SetMouseEventMask() </TT></B>for information on extending the view's event mask while the mouse is being held down.
+<P>
+The <A HREF="View.html#BView">BView</A> version of <B><TT><A HREF="#MouseDown()">MouseDown()</A></TT></B> is empty.
+<P>
+<HR>
+<H3>
+<A NAME="MouseMoved()"></A>MouseMoved()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> <B><TT><FONT  color=000022 size=+1>MouseMoved(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>transit</I></FONT>, const&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to reports of mouse-moved events associated with the view.  As the user moves the cursor over a window, the Application Server generates a continuous stream of messages reporting where the cursor is located.
+<P>
+The first argument, <I><FONT  color=991122 face=HELVETICA>point</I></FONT>, gives the cursor's new location in the BView's coordinate system.  The second argument, <I><FONT  color=991122 face=HELVETICA>transit</I></FONT>, is one of four constants,
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_ENTERED_VIEW"></A>B_ENTERED_VIEW
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INSIDE_VIEW"></A>B_INSIDE_VIEW
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EXITED_VIEW"></A>B_EXITED_VIEW
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OUTSIDE_VIEW"></A>B_OUTSIDE_VIEW
+</TT></B> </TD>
+</TABLE>
+<P>
+which explains whether the cursor has just entered the visible region of the view, is now inside the visible region having previously entered, has just exited from the view, or is currently outside the visible region of the view.  When the cursor passes from one view to another, <B><TT><A HREF="#MouseMoved()">MouseMoved()</A></TT></B> is called on each of the BViews, once with a <I><FONT  color=991122 face=HELVETICA>transit</I></FONT> code of <B><TT><A HREF="#B_EXITED_VIEW">B_EXITED_VIEW</A></TT></B> and the other with a code of <B><TT><A HREF="#B_ENTERED_VIEW">B_ENTERED_VIEW</A></TT></B>.
+<P>
+If the user is dragging a bundle of information from one location to another, the final argument, <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, is a pointer to the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object that holds the information.  If a message isn't being dragged, <I><FONT  color=991122 face=HELVETICA>message</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+The default version of <B><TT><A HREF="#MouseMoved()">MouseMoved()</A></TT></B> is empty.
+<P>
+<HR>
+<H3>
+<A NAME="MouseUp()"></A>MouseUp()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> <B><TT><FONT  color=000022 size=+1>MouseUp(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to a message reporting a mouse-up event within the view.  The location of the cursor at the time of the event is given by <I><FONT  color=991122 face=HELVETICA>point</I></FONT> in the BView's coordinates.
+<P>
+<HR>
+<H3>
+<A NAME="Pulse()"></A>Pulse()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Pulse(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to do something at regular intervals.  Pulses are regularly timed events, like the tick of a clock or the beat of a steady pulse.  A <A HREF="View.html#BView">BView</A> receives <B><TT><A HREF="#Pulse()">Pulse()</A></TT></B> notifications when no other messages are pending, but only if it asks for them with the <B><TT><A HREF="ViewGeneral.html#B_PULSE_NEEDED">B_PULSE_NEEDED</A></TT></B> flag.
+<P>
+The interval between <B><TT><A HREF="#Pulse()">Pulse()</A></TT></B> calls can be set with BWindow's <B><TT><A HREF="Window.html#SetPulseRate()">SetPulseRate()</A></TT></B> function.  The default interval is around 500 milliseconds.  The pulse rate is the same for all views within a window, but can vary between windows.
+<P>
+Derived classes can implement a <B><TT><A HREF="#Pulse()">Pulse()</A></TT></B> function to do something that must be repeated continuously.  However, for time-critical actions, you should implement your own timing mechanism.
+<P>
+The <A HREF="View.html#BView">BView</A> version of this function is empty.
+<P>
+<B>See also:  <TT><A HREF="Font.html#SetFlags()">SetFlags()</A></TT></B>, the <A HREF="View.html#BView">BView</A> constructor, <B><TT><A HREF="Window.html#SetPulseRate()">BWindow::SetPulseRate()</A></TT></B> 
+<P>
+<HR>
+<H3>ResizeToPreferred()   see <A HREF="#GetPreferredSize()">GetPreferredSize()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="TargetedByScrollView()"></A>TargetedByScrollView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>TargetedByScrollView(</TT></B></FONT><A HREF="ScrollView.html#BScrollView">BScrollView</A> *<I><FONT  color=991122 face=HELVETICA>scroller</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to a notification that the <A HREF="View.html#BView">BView</A> has become the target of the <I><FONT  color=991122 face=HELVETICA>scroller</I></FONT> <A HREF="ScrollView.html#BScrollView">BScrollView</A> object.  This function is called when the <A HREF="ScrollView.html#BScrollView">BScrollView</A> sets its target, which it does on construction.  The target is the object whose contents will be scrolled.
+<P>
+BView's implementation of this function is empty.
+<P>
+<B>See also:  </B>the <A HREF="ScrollView.html#BScrollView">BScrollView</A> class, and the various scrolling-related functions in <a href="ViewInput.html#Input-Related%20Functions">Input-Related Functions</a>.
+<P>
+<HR>
+<H3>
+<A NAME="WindowActivated()"></A>WindowActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WindowActivated(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to take whatever steps are necessary when the BView's window becomes the active window, or when the window gives up that status.  If <I><FONT  color=991122 face=HELVETICA>active</I></FONT> is <B><TT>true</TT></B>, the window has become active.  If <I><FONT  color=991122 face=HELVETICA>active</I></FONT> is <B><TT>false</TT></B>, it no longer is the active window.
+<P>
+All objects in the view hierarchy receive <B><TT><A HREF="#WindowActivated()">WindowActivated()</A></TT></B> notifications when the status of the window changes.
+<P>
+BView's version of this function is empty.
+<P>
+<B>See also:  <TT><A HREF="Window.html#WindowActivated()">BWindow::WindowActivated()</A></TT></B> 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

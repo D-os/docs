@@ -1,0 +1,745 @@
+<HTML><HEAD><TITLE>The Media Kit: BTimedEventQueue</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BTimedEventQueue"></A>BTimedEventQueue
+</H1>
+<P>
+Derived from:  (none)
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/TimedEventQueue.h">be/media/TimedEventQueue.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="TimedEventQueue.summary.html"><i>Summary</i></A></H6>
+<P>
+The BTimedEventQueue class provides an easy way to queue a sequence of events within your node.  You can use it to queue up start, stop, and seek requests, and to queue up incoming data buffers in preparation for handling them.  Each queue element is tagged with the time at which the event should be processed, and functions are provided for locating the next event that should be handled.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Although you shouldn't need to subclass <A HREF="#BTimedEventQueue">BTimedEventQueue</A>, there's no reason you can't do it.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Cleaning%20Up%20After%20Nodes"></A><FONT SIZE=6>C</FONT>leaning <FONT SIZE=6>U</FONT>p <FONT SIZE=6>A</FONT>fter <FONT SIZE=6>N</FONT>odes
+</H2>
+<P>
+Each event has a cleanup flag associated with it that indicates what sort of special action needs to be performed when the event is removed from the queue.  If this value is <B><TT>B_NO_CLEANUP</TT></B>, nothing is done.  If it's <B><TT>B_RECYCLE</TT></B>, and the event is a <B><TT>B_HANDLE_BUFFER</TT></B> event, BTimedEventQueue will automatically recycle the buffer associated with the event.
+<P>
+If the cleanup flag is <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_DELETE">B_DELETE</A></TT></B> or is <B><TT>B_USER_CLEANUP</TT></B> or greater, the cleanup hook function will be called.  You can implement and establish a cleanup hook function to handle deleting event data yourself.  The hook function is of type <B><TT><A HREF="#cleanup_hook">cleanup_hook</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef void (*cleanup_hook)(void *context, bigtime_t time, int32 what,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *pointer, uint32 pointerCleanup, int64 data);</PRE>
+<P>
+You specify the cleanup hook function by calling <B><TT><A HREF="#SetCleanupHook()">SetCleanupHook()</A></TT></B>, like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SetCleanupHook(MyCleanupFunction, contextPtr);</PRE>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>contextPtr</I></FONT> is a pointer that your cleanup hook function uses, and can contain whatever data you require.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BTimedEventQueue()"></A>BTimedEventQueue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1><A HREF="#BTimedEventQueue()">BTimedEventQueue()</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes a new, empty, timed event queue.
+<P>
+<HR>
+<H3>
+<A NAME="~BTimedEventQueue()"></A>~BTimedEventQueue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>virtual ~BTimedEventQueue()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Flushes the queue and deallocates memory allocated by the object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddEvent()"></A>AddEvent()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddEvent(</TT></B></FONT>const media_timed_event &amp;<I><FONT  color=991122 face=HELVETICA>event</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds the specified <I><FONT  color=991122 face=HELVETICA>event</I></FONT> to the queue.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The event was added.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Unknown or invalid event type (you can't use <B><TT>B_NO_EVENT</TT></B> or <B><TT>B_ANY_EVENT</TT></B>).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The queue hasn't been initialized.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="DoForEach()"></A>DoForEach()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>DoForEach(</TT></B></FONT>for_each_hook <I><FONT  color=991122 face=HELVETICA>hook</I></FONT>, void *context,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>time</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_direction <I><FONT  color=991122 face=HELVETICA>direction</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> = <FONT  face=HELVETICA>true</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>event</I></FONT> = <FONT  face=HELVETICA>B_ANY_EVENT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+For each event in the queue matching the specified parameters, the <I><FONT  color=991122 face=HELVETICA>hook</I></FONT> function is called.  The <I><FONT  color=991122 face=HELVETICA>context</I></FONT> pointer is passed through to the hook function, and may point to anything your hook function requires.
+<P>
+<UL>
+<LI>Setting <I><FONT  color=991122 face=HELVETICA>direction</I></FONT> to <B><TT>B_ALWAYS</TT></B> indicates that all events of the type indicated by <I><FONT  color=991122 face=HELVETICA>event</I></FONT> should be processed.  The <I><FONT  color=991122 face=HELVETICA>time</I></FONT> and includive arguments are ignored.
+<P>
+<LI>Setting direction to <B><TT>B_BEFORE_TIME</TT></B> indicates that all matching events occurring before the specified <I><FONT  color=991122 face=HELVETICA>time</I></FONT> should be processed.  If <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> is <B><TT>true</TT></B>, events occurring at <I><FONT  color=991122 face=HELVETICA>time</I></FONT> are also processed.
+<P>
+<LI>Setting direction to <B><TT>B_AT_TIME</TT></B> processes all matching events scheduled at the specified <I><FONT  color=991122 face=HELVETICA>time</I></FONT>.  The <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> argument is ignored.
+<P>
+<LI>If direction is <B><TT>B_AFTER_TIME</TT></B>, all matching events scheduled to occur after the specified <I><FONT  color=991122 face=HELVETICA>time</I></FONT> are processed.  If <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> is <B><TT>true</TT></B>, events scheduled to occur at <I><FONT  color=991122 face=HELVETICA>time</I></FONT> are also processed.
+<P>
+</UL>
+<P>
+This provides a means for you to scan through the queue and perform a particular act on every node (or all nodes of a certain type, or that occur at certain times).  If you want to process all events, you can specify a time of <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B> and a direction of <B><TT>B_BEFORE_TIME</TT></B>.
+<P>
+The hook function should return a queue_action value.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;queue_action MyHook(media_timed_event *event, void *context) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (event->data == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* countdown finished, do something */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return BTimedEventQueue::B_REMOVE_EVENT;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event->data--;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return BTimedEventQueue::B_NO_ACTION;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+In this example, the hook function processes the event (and indicates on return that it should be removed from the queue) if the <B><TT>data</TT></B> field of the event structure is zero; otherwise <B><TT>data</TT></B> is decremented and the event is left alone.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The events were processed.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  An undefined error occurred.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="EventCount()"></A>EventCount()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>EventCount(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the number of events in the queue.
+<P>
+<HR>
+<H3>
+<A NAME="FindFirstMatch()"></A>FindFirstMatch()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const media_timed_event *<B><TT><FONT  color=000022 size=+1>FindFirstMatch(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>eventTime</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time_direction <I><FONT  color=991122 face=HELVETICA>direction</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> = <FONT  face=HELVETICA>true</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>eventType</I></FONT> = <FONT  face=HELVETICA>B_ANY_EVENT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Searches the event queue for the first event matching the given specifications.  The search begins at the time specified by <I><FONT  color=991122 face=HELVETICA>eventTime</I></FONT>, and progresses in the specified <I><FONT  color=991122 face=HELVETICA>direction</I></FONT>.
+<P>
+<UL>
+<LI>Setting <I><FONT  color=991122 face=HELVETICA>direction</I></FONT> to <B><TT>B_ALWAYS</TT></B> indicates that all events of the type indicated by <I><FONT  color=991122 face=HELVETICA>event</I></FONT> should be scanned.  The <I><FONT  color=991122 face=HELVETICA>eventTime</I></FONT> and includive arguments are ignored.
+<P>
+<LI>Setting direction to <B><TT>B_BEFORE_TIME</TT></B> indicates that all matching events occurring before the specified <I><FONT  color=991122 face=HELVETICA>eventTime</I></FONT> should be scanned.  If <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> is <B><TT>true</TT></B>, events occurring at <I><FONT  color=991122 face=HELVETICA>eventTime</I></FONT> are also scanned.
+<P>
+<LI>Setting direction to <B><TT>B_AT_TIME</TT></B> scans all matching events scheduled at the specified <I><FONT  color=991122 face=HELVETICA>eventTime</I></FONT>.  The <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> argument is ignored.
+<P>
+<LI>If direction is <B><TT>B_AFTER_TIME</TT></B>, all matching events scheduled to occur after the specified <I><FONT  color=991122 face=HELVETICA>eventTime</I></FONT> are scanned.  If <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> is <B><TT>true</TT></B>, events scheduled to occur at <I><FONT  color=991122 face=HELVETICA>eventTime</I></FONT> are also scanned.
+<P>
+</UL>
+<P>
+If you want to scan all events, you can specify a time of <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B> and a direction of <B><TT>B_BEFORE_TIME</TT></B>.
+<P>
+If no matching event is found, <B><TT>NULL</TT></B> is returned.
+<P>
+<HR>
+<H3>
+<A NAME="FirstEvent()"></A>FirstEvent()
+, 
+<A NAME="FirstEventTime()"></A>FirstEventTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const media_timed_event *<B><TT><FONT  color=000022 size=+1>FirstEvent(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>FirstEventTime(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>FirstEvent()</TT></B> returns the first event in the queue, without removing it from the queue.
+<P>
+<B><TT>FirstEventTime()</TT></B> returns the first event's time, in microseconds.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error occurred.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The queue hasn't been initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B>.  The queue is empty (<B><TT>FirstEventTime()</TT></B> only).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="FlushEvents()"></A>FlushEvents()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FlushEvents(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>time</I></FONT>, time_direction <I><FONT  color=991122 face=HELVETICA>direction</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> = <FONT  face=HELVETICA>true</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>event</I></FONT> = <FONT  face=HELVETICA>B_ANY_EVENT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Flushes the specified events from the queue.  You specify which events to flush by indicating a <I><FONT  color=991122 face=HELVETICA>time</I></FONT> from which events should be flushed, a <I><FONT  color=991122 face=HELVETICA>direction</I></FONT> in which to search for events to flush, and the type of events to flush:
+<P>
+<UL>
+<LI>Setting <I><FONT  color=991122 face=HELVETICA>direction</I></FONT> to <B><TT>B_ALWAYS</TT></B> indicates that all events of the type indicated by <I><FONT  color=991122 face=HELVETICA>event</I></FONT> should be flushed.  The <I><FONT  color=991122 face=HELVETICA>time</I></FONT> and includive arguments are ignored.
+<P>
+<LI>Setting direction to <B><TT>B_BEFORE_TIME</TT></B> indicates that all matching events occurring before the specified <I><FONT  color=991122 face=HELVETICA>time</I></FONT> should be flushed.  If <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> is <B><TT>true</TT></B>, events occurring at <I><FONT  color=991122 face=HELVETICA>time</I></FONT> are also flushed.
+<P>
+<LI>Setting direction to <B><TT>B_AT_TIME</TT></B> flushes all matching events scheduled at the specified <I><FONT  color=991122 face=HELVETICA>time</I></FONT>.  The <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> argument is ignored.
+<P>
+<LI>If direction is <B><TT>B_AFTER_TIME</TT></B>, all matching events scheduled to occur after the specified <I><FONT  color=991122 face=HELVETICA>time</I></FONT> are flushed.  If <I><FONT  color=991122 face=HELVETICA>inclusive</I></FONT> is <B><TT>true</TT></B>, events scheduled to occur at <I><FONT  color=991122 face=HELVETICA>time</I></FONT> are also flushed.
+<P>
+</UL>
+<P>
+If you want to flush all events, you can specify a time of <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B> and a direction of <B><TT>B_BEFORE_TIME</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The events were flushed.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  An undefined error occurred.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="HasEvents()"></A>HasEvents()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasEvents(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if there are events in the queue, otherwise returns <B><TT>false</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="LastEvent()"></A>LastEvent()
+, 
+<A NAME="LastEventTime()"></A>LastEventTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const media_timed_event *<B><TT><FONT  color=000022 size=+1>LastEvent(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>LastEventTime(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>LastEvent()</TT></B> returns the last event in the queue, without removing it from the queue.
+<P>
+<B><TT>LastEventTime()</TT></B> returns the last event's time, in microseconds.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error occurred.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The queue hasn't been initialized.
+<P>
+<LI><B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B>.  The queue is empty (<B><TT>LastEventTime()</TT></B> only).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="RemoveEvent()"></A>RemoveEvent()
+, 
+<A NAME="RemoveFirstEvent()"></A>RemoveFirstEvent()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveEvent(</TT></B></FONT>const media_timed_event *<I><FONT  color=991122 face=HELVETICA>event</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveFirstEvent(</TT></B></FONT>const media_timed_event *<I><FONT  color=991122 face=HELVETICA>outEvent</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>RemoveEvent()</TT></B> removes the specified <I><FONT  color=991122 face=HELVETICA>event</I></FONT> from the queue.
+<P>
+<B><TT>RemoveFirstEvent()</TT></B> removes the first event from the queue.  If <I><FONT  color=991122 face=HELVETICA>outEvent</I></FONT> isn't <B><TT>NULL</TT></B>, the specified buffer is filled with a copy of the event that's been removed.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The event was removed.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The queue hasn't been initialized.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetCleanupHook()"></A>SetCleanupHook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetCleanupHook(</TT></B></FONT>cleanup_hook <I><FONT  color=991122 face=HELVETICA>hook</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>context</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets up the cleanup hook function specified by hook to be called for events as they're removed from the queue.  The hook will be called only for events with <B><TT><A HREF="#cleanup_flag">cleanup_flag</A></TT></B> values of <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_DELETE">B_DELETE</A></TT></B> or <B><TT>B_USER_CLEANUP</TT></B> or greater.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="cleanup_flag"></A>cleanup_flag
+</H3>
+<P>
+Declared in:  &lt;be/media/TimedEventQueue.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_NO_CLEANUP</TT></B></TD>
+<TD>Don't clean up when the event is removed from the queue.</TD>
+<TR>
+<TD><B><TT>B_RECYCLE_BUFFER</TT></B></TD>
+<TD>BTimedEventQueue should recycle the buffer when the buffer event is removed from the queue.</TD>
+<TR>
+<TD><B><TT>B_EXPIRE_TIMER</TT></B></TD>
+<TD>Call <B><TT><A HREF="MediaNode.html#TimerExpired()">TimerExpired()</A></TT></B> on the event's <B><TT>data</TT></B> field.</TD>
+<TR>
+<TD><B><TT>B_USER_CLEANUP</TT></B></TD>
+<TD>Base value for user-defined cleanup types.</TD>
+</TABLE>
+<P>
+These values define how BTimedEventQueue should handle removing events from the queue.  If the flag is <B><TT>B_USER_CLEANUP</TT></B> or greater, the cleanup hook function is called when the event is removed.
+<P>
+<HR>
+<H3>
+<A NAME="event_type"></A>event_type
+</H3>
+<P>
+Declared in:  &lt;be/media/TimedEventQueue.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_NO_EVENT</TT></B></TD>
+<TD>Don't push buffers of this type.  It's a return value only.</TD>
+<TR>
+<TD><B><TT>B_ANY_EVENT</TT></B></TD>
+<TD>Don't push buffers of this type; it's used in searches only.</TD>
+<TR>
+<TD><B><TT>B_START</TT></B></TD>
+<TD>A start event.</TD>
+<TR>
+<TD><B><TT>B_STOP</TT></B></TD>
+<TD>A stop event.</TD>
+<TR>
+<TD><B><TT>B_SEEK</TT></B></TD>
+<TD>A seek event.</TD>
+<TR>
+<TD><B><TT>B_WARP</TT></B></TD>
+<TD>A warp event.</TD>
+<TR>
+<TD><B><TT>B_TIMER</TT></B></TD>
+<TD>A timer event.</TD>
+<TR>
+<TD><B><TT>B_HANDLE_BUFFER</TT></B></TD>
+<TD>Represents a buffer queued to be handled.  The event's <B><TT>pointer</TT></B> is a pointer to a <A HREF="Buffer.html#BBuffer">BBuffer</A> object.</TD>
+<TR>
+<TD><B><TT>B_DATA_STATUS</TT></B></TD>
+<TD>Represents a data status event.</TD>
+<TR>
+<TD><B><TT>B_HARDWARE</TT></B></TD>
+<TD>A hardware event.</TD>
+<TR>
+<TD><B><TT>B_PARAMETER</TT></B></TD>
+<TD>The buffer contains changes to parameter values; pass it to <B><TT><A HREF="Controllable.html#ApplyParameterData()">BControllable::ApplyParameterData()</A></TT></B>.</TD>
+<TR>
+<TD><B><TT>B_USER_EVENT</TT></B></TD>
+<TD>Base value for user-defined events.</TD>
+</TABLE>
+<P>
+These values describe type types of events that a BTimedEventQueue can handle.
+<P>
+<HR>
+<H3>
+<A NAME="queue_action"></A>queue_action
+</H3>
+<P>
+Declared in:  &lt;be/media/TimedEventQueue.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_DONE</TT></B></TD>
+<TD>End the <B><TT><A HREF="#DoForEach()">DoForEach()</A></TT></B> pass.</TD>
+<TR>
+<TD><B><TT>B_NO_ACTION</TT></B></TD>
+<TD>Do nothing for this event.</TD>
+<TR>
+<TD><B><TT>B_REMOVE_EVENT</TT></B></TD>
+<TD>Remove the event.</TD>
+<TR>
+<TD><B><TT>B_RESORT_QUEUE</TT></B></TD>
+<TD>Sort the queue again to ensure that events are still in the right order.</TD>
+</TABLE>
+<P>
+These queue action values are returned by the hook function used by <B><TT><A HREF="#DoForEach()">DoForEach()</A></TT></B>; these values indicate what <B><TT><A HREF="#DoForEach()">DoForEach()</A></TT></B> should do to the event after the hook has processed it.
+<P>
+<HR>
+<H3>
+<A NAME="time_direction"></A>time_direction
+</H3>
+<P>
+Declared in:  &lt;be/media/TimedEventQueue.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_ALWAYS</TT></B></TD>
+<TD>Matches events occurring at any time.</TD>
+<TR>
+<TD><B><TT>B_BEFORE_TIME</TT></B></TD>
+<TD>Matches events occurring before a specified time.</TD>
+<TR>
+<TD><B><TT>B_AT_TIME</TT></B></TD>
+<TD>Matches events occurring at a specified time.</TD>
+<TR>
+<TD><B><TT>B_AFTER_TIME</TT></B></TD>
+<TD>Matches events occurring after a specified time.</TD>
+</TABLE>
+<P>
+These values are used to indicate a search direction through the time continuum.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="cleanup_hook"></A>cleanup_hook
+</H3>
+<P>
+Declared in:  &lt;be/media/TimedEventQueue.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef queue_action (*cleanup_hook)(media_timed_event *event, void *context);</PRE>
+<P>
+The cleanup_hook type is used to define a hook function called while removing an event from the queue; it's set by calling <B><TT><A HREF="#SetCleanupHook()">SetCleanupHook()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="for_each_hook"></A>for_each_hook
+</H3>
+<P>
+Declared in:  &lt;be/media/TimedEventQueue.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef queue_action (*for_each_hook)(media_timed_event *event, void *context);</PRE>
+<P>
+The for_each_hook type is used to define a hook function called by <B><TT><A HREF="#DoForEach()">DoForEach()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="media_timed_event"></A>media_timed_event
+</H3>
+<P>
+Declared in:  &lt;be/media/TimedEventQueue.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct media_timed_event {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_timed_event();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_timed_event(bigtime_t inTime, int32 inType);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_timed_event(bigtime_t inTime, int32 inType, void *inPointer,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 inCleanup);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_timed_event(bigtime_t inTime, int32 inType,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *inPointer, uint32 inCleanup,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 inData, int64 inBigdata,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *inUserData, size_t dataSize = 0);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_timed_event(const media_timed_event &amp;clone);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void operator=(const media_timed_event &amp;clone);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~media_timed_event();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t event_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *pointer;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 cleanup;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 data;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64 bigdata;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char user_data[64];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 _reserved_media_timed_event_[8];
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+Describes a media event:
+<P>
+<UL>
+<LI><B><TT>event_time</TT></B> indicates the time at which the event is scheduled to occur.
+<P>
+<LI><B><TT>type</TT></B> indicates the type of event, as an event_type.
+<P>
+<LI><B><TT>pointer</TT></B> is a pointer to event-specific data owned by the event.
+<P>
+<LI><B><TT>cleanup</TT></B> is the cleanup_flag value for the event.
+<P>
+<LI><B><TT>data</TT></B> is an event-specific 32-bit value.
+<P>
+<LI><B><TT>bigdata</TT></B> is an event-specific 64-bit value.
+<P>
+<LI><B><TT>user_data</TT></B> is user-defined data.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,915 @@
+<HTML><HEAD><TITLE>The Media Kit: BMediaFormats</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMediaFormats"></A>BMediaFormats
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaFormats.h">be/media/MediaFormats.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="MediaFormats.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMediaFormat class provides a means for translating between BeOS media format identifiers and those used by the codecs themselves.  This is primarily useful if you're writing a codec add-on or a file format parser.
+<P>
+<HR>
+<H2>
+<A NAME="Supported%20Families"></A><FONT SIZE=6>S</FONT>upported <FONT SIZE=6>F</FONT>amilies
+</H2>
+<P>
+The BMediaFormats class currently knows how to translate among the following formats' codec identification methods:
+<P>
+<LI>BeOS
+<br>
+BeOS uses a constant within the media_format structure to indicate the kind of media being handled.
+<P>
+<LI>QuickTime
+<br>
+QuickTime uses a two-word vendor/codec pair to indicate the type of media.
+<P>
+<LI>AVI
+<br>
+The media format is indicated by a one-word constant.
+<P>
+<LI>AVR
+<br>
+The media format is indicated by a one-word constant.
+<P>
+<LI>ASF
+<br>
+The media format is indicated by a 128-bit UUID value.
+<P>
+<LI>MPEG
+<br>
+The media format is specified by a word that indicates the MPEG version and layer.
+<P>
+<LI>AIFF
+<br>
+The media format is specified by a codec ID word.
+<P>
+<LI>WAV
+<br>
+The media format is specified by a codec ID word.
+<P>
+<LI>Miscellaneous
+<br>
+The media format is indicated by a one-word file format value and a one-word codec ID.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMediaFormats()"></A>BMediaFormats()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaFormats(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Constructor.  Call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to ensure that the object was initialized properly after you instantiate it.
+<P>
+<HR>
+<H3>
+<A NAME="~BMediaFormats()"></A>~BMediaFormats()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BMediaFormats(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Destructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="GetBeOSFormatFor()"></A>GetBeOSFormatFor()
+, 
+<A NAME="GetAVIFormatFor()"></A>GetAVIFormatFor()
+, 
+<A NAME="GetQuicktimeFormatFor()"></A>GetQuicktimeFormatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetBeOSFormatFor(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>format</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT> = <FONT  face=HELVETICA>B_MEDIA_UNKNOWN_TYPE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAVIFormatFor(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>format</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT> = <FONT  face=HELVETICA>B_MEDIA_UNKNOWN_TYPE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetQuicktimeFormatFor(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>vendor</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>codec</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT> = <FONT  face=HELVETICA>B_MEDIA_UNKNOWN_TYPE</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetBeOSFormatFor()</TT></B> returns in <I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT> a media_format structure that describes the media format corresponding to the given BeOS <I><FONT  color=991122 face=HELVETICA>format</I></FONT> ID and media_type.
+<P>
+<B><TT>GetAVIFormatFor()</TT></B> returns in <I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT> a media_format structure that describes the media format corresponding to the given AVI <I><FONT  color=991122 face=HELVETICA>format</I></FONT> ID and media_type.
+<P>
+<B><TT>GetQuicktimeormatFor()</TT></B> returns in <I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT> a media_format structure that describes the media format corresponding to the given QuickTime <I><FONT  color=991122 face=HELVETICA>vendor</I></FONT> ID, <I><FONT  color=991122 face=HELVETICA>codec</I></FONT> ID, and media_type.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B>.  The specified media_type isn't supported.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_FORMAT">B_MEDIA_BAD_FORMAT</A></TT></B>.  The specified combination of parameters isn't supported.
+<P>
+<LI>Other errors.  The format couldn't be determined.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetCodeFor()"></A>GetCodeFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetCodeFor(</TT></B></FONT>const media_format &amp;<I><FONT  color=991122 face=HELVETICA>format</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format_family <I><FONT  color=991122 face=HELVETICA>family</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format_description *<I><FONT  color=991122 face=HELVETICA>outDescription</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given the specified media <I><FONT  color=991122 face=HELVETICA>format</I></FONT>, returns in <I><FONT  color=991122 face=HELVETICA>outDescription</I></FONT> the media format description for the specified format <I><FONT  color=991122 face=HELVETICA>family</I></FONT>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_FORMAT">B_MEDIA_BAD_FORMAT</A></TT></B>.  The specified format isn't recognized.
+<P>
+<LI>Other errors.  The code couldn't be determined.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetFormatFor()"></A>GetFormatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFormatFor(</TT></B></FONT>const media_format_description &amp;<I><FONT  color=991122 face=HELVETICA>description
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT>media_format *<I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns in <I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT> a media_format structure that describes the media format specified by <I><FONT  color=991122 face=HELVETICA>description</I></FONT>.  This lets you easily obtain a media_format structure from file-native description information.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_FORMAT">B_MEDIA_BAD_FORMAT</A></TT></B>.  The specified description isn't recognized.
+<P>
+<LI>Other errors.  The format couldn't be determined.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetNextFormat()"></A>GetNextFormat()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetNextFormat(</TT></B></FONT>media_format *<I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format_description *<I><FONT  color=991122 face=HELVETICA>outDescription</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Fills <I><FONT  color=991122 face=HELVETICA>outFormat</I></FONT> and <I><FONT  color=991122 face=HELVETICA>outDescription</I></FONT> with the media_format and media_format_description of the next supported media format.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.  No more formats to return.
+<P>
+<LI>Other errors.  The format couldn't be determined.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the status code from the constructor; you should call this to be sure the object was properly initialized before issuing any other calls.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The object is ready to use.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_HANDLER">B_BAD_HANDLER</A></TT></B>.  The object isn't ready.
+<P>
+<LI>Other errors.  The Media Server couldn't be contacted.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Lock()"></A>Lock()
+, 
+<A NAME="Unlock()"></A>Unlock()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Lock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Unlock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Lock()</TT></B> locks the BMediaFormats object so you can use it with the assurance that it won't change while you're working.  You should call this before using any of the other BMediaFormats functions.  Returns <B><TT>true</TT></B> if it's safe to use the BMediaFormats object; otherwise returns <B><TT>false</TT></B>.
+<P>
+<B><TT>Unlock()</TT></B> releases the BMediaFormats object when you're done with it; be sure to call it when you've finished your work.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You only need to <B><TT>Lock()</TT></B> and <B><TT>Unlock()</TT></B> the BMediaFormats object when you're using <B><TT><A HREF="#RewindFormats()">RewindFormats()</A></TT></B> and <B><TT><A HREF="#GetNextFormat()">GetNextFormat()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="MakeFormatFor()"></A>MakeFormatFor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>MakeFormatFor(</TT></B></FONT>const media_format_description *<I><FONT  color=991122 face=HELVETICA>descriptions</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>descCount</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0, void *<I><FONT  color=991122 face=HELVETICA>_reserved</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given the media format descriptions in the <I><FONT  color=991122 face=HELVETICA>descriptions</I></FONT> array, the number of descriptions in the list, <I><FONT  color=991122 face=HELVETICA>descCount</I></FONT>, and the media_format <I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT>, registers your format description and supported media_format with the Media Kit, and returns a media_format you can use from then on.
+<P>
+This function is called to let the Media Server assign you an encoding value for your media_format_description.  If you're implementing a codec add-on or a file parser, you should call this function to let the Media Kit know what you handle.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>descriptions</I></FONT> pointer is <B><TT>NULL</TT></B>, the <I><FONT  color=991122 face=HELVETICA>descCount</I></FONT> is less than 1, or <I><FONT  color=991122 face=HELVETICA>ioFormat</I></FONT> is <B><TT>NULL</TT></B>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Some other unfortunate incident occurred.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="RewindFormats()"></A>RewindFormats()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RewindFormats(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Resets format scanning to the first supported format; this causes <B><TT><A HREF="#GetNextFormat()">GetNextFormat()</A></TT></B> to start at the beginning of the list.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The object is ready to use.
+<P>
+<UL>
+<LI>Other errors.  Unable to communicate with the Media Server.
+<P>
+</UL>
+<I><P>
+</I><HR>
+<H3>Unlock() see <A HREF="#Lock()">Lock()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="make_format_flags"></A>make_format_flags
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><TT>
+<A NAME="make_format_flags"></A>B_EXCLUSIVE
+</TT></TD>
+<TD>
+<A NAME="make_format_flags"></A>Fail if this format has already 
+<A NAME="make_format_flags"></A>been registered.
+</TD>
+<TR>
+<TD><TT>
+<A NAME="make_format_flags"></A>B_NO_MERGE
+</TT></TD>
+<TD>
+<A NAME="make_format_flags"></A>Don't renumber any formats if 
+<A NAME="make_format_flags"></A>there are multiple clashing 
+<A NAME="make_format_flags"></A>previous registrations, but fail 
+<A NAME="make_format_flags"></A>instead.
+</TD>
+<TR>
+<TD><TT>
+<A NAME="make_format_flags"></A>B_SET_DEFAULT
+</TT></TD>
+<TD>
+<A NAME="make_format_flags"></A>Set the first format to be the 
+<A NAME="make_format_flags"></A>default for the format family 
+<A NAME="make_format_flags"></A>when registering more than 
+<A NAME="make_format_flags"></A>one in the same family.  Use 
+<A NAME="make_format_flags"></A>only in encoder add-ons.
+</TD>
+</TABLE>
+<P>
+These constants provide options for how to go about adding new formats.
+<P>
+<HR>
+<H3>
+<A NAME="Media"></A>Media
+, 
+<A NAME="Format"></A>Format
+, 
+<A NAME="Families"></A>Families
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaDefs.h>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_ANY_FORMAT_FAMILY</TT></B></TD>
+<TD>Any family.</TD>
+<TR>
+<TD><B><TT>B_BEOS_FORMAT_FAMILY</TT></B></TD>
+<TD>BeOS format.</TD>
+<TR>
+<TD><B><TT>B_QUICKTIME_FORMAT_FAMILY</TT></B></TD>
+<TD>QuickTime format.</TD>
+<TR>
+<TD><B><TT>B_AVI_FORMAT_FAMILY</TT></B></TD>
+<TD>AVI format.</TD>
+<TR>
+<TD><B><TT>B_ASF_FORMAT_FAMILY</TT></B></TD>
+<TD>ASF format.</TD>
+<TR>
+<TD><B><TT>B_MISC_FORMAT_FAMILY</TT></B></TD>
+<TD>Miscellaneous (includes MPEG)</TD>
+</TABLE>
+<P>
+These constants indicate the media format families the BMediaFormats class can map among.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="media_aiff_description"></A>media_aiff_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 codec;
+&nbsp;&nbsp;&nbsp;} media_aiff_description;</PRE>
+<P>
+Describes the format of media data as an AIFF codec ID.
+<P>
+<HR>
+<H3>
+<A NAME="media_asf_description"></A>media_asf_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GUID guid;
+&nbsp;&nbsp;&nbsp;} media_asf_description;</PRE>
+<P>
+Describes the format of media data as a 128-bit ASF GUID.
+<P>
+<HR>
+<H3>
+<A NAME="media_avi_description"></A>media_avi_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 codec;
+&nbsp;&nbsp;&nbsp;} media_avi_description;</PRE>
+<P>
+Describes the format of media data as an AVI codec ID.
+<P>
+<HR>
+<H3>
+<A NAME="media_avr_description"></A>media_avr_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 id;
+&nbsp;&nbsp;&nbsp;} media_avr_description;</PRE>
+<P>
+Describes the format of media data as an AVR codec ID.
+<P>
+<HR>
+<H3>
+<A NAME="media_beos_description"></A>media_beos_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 format;
+&nbsp;&nbsp;&nbsp;} media_beos_description;</PRE>
+<P>
+Describes the format of media data in a way the BeOS Media Kit understands and appreciates.  The <I><FONT  color=991122 face=HELVETICA>format</I></FONT> field has no predetermined meaning; it's a magic number that only the Media Kit understands.
+<P>
+<HR>
+<H3>
+<A NAME="media_codec_info"></A>media_codec_info
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct encoder_info {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char pretty_name[96];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char short_name[32];
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 id;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 sub_id;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 pad[63];
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+Provides information about an encoder.  The <B><TT>pretty_name</TT></B> is a complete human-readable name (such as "SuperSqueeze by Applied Interdynamic Systems, Inc."), and the <B><TT>short_name</TT></B> is a short-form version of the encoder's name (such as "SuperSqueeze").
+<P>
+The <B><TT>id</TT></B> is an opaque ID number that gets passed to <B><TT>BMediaFile::AddTrack()</TT></B> so the track can identify the encoder.
+<P>
+The padding is reserved space for future expansion of the structure.
+<P>
+<HR>
+<H3>
+<A NAME="media_file_format_info"></A>media_file_format_info
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct media_file_format_info {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char mimetype[64];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char pretty_name[64];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char short_name[32];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char file_extension[8];
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format_family family;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64 capabilities;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 id;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 pad[64];
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+Describes a media file format.  This is used when using <A HREF="MediaFile.html#BMediaFile">BMediaFile</A> objects to determine the type of media file being used.
+<P>
+<UL>
+<LI><B><TT>mimetype</TT></B> is the file format's MIME type string.
+<P>
+<LI><B><TT>pretty_name</TT></B> is a human-readable file format name, such as "QuickTime file".
+<P>
+<LI><B><TT>short_name</TT></B> is a human-readable short name, such as "QuickTime".
+<P>
+<LI><B><TT>file_extension</TT></B> indicates the dot-extension that untyped files of this format might have, such as ".mov".
+<P>
+<LI><B><TT>family</TT></B> indicates the BeOS file format family of the format, such as <B><TT>B_MEDIA_QUICKTIME_FAMILY</TT></B>.
+<P>
+<LI><B><TT>capabilities</TT></B> contains flags indicating what features the format supports.
+<P>
+<LI><B><TT>id</TT></B> is a unique ID number for the format.
+<P>
+<LI><B><TT>pad</TT></B> pads out the structure, and is reserved.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_format_description"></A>media_format_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct _media_format_description {
+&nbsp;&nbsp;&nbsp;#if defined(__cplusplus)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_media_format_description();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~_media_format_description();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_media_format_description(const _media_format_description &amp;other);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_media_format_description &amp; operator=(const _media_format_description
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;other);
+&nbsp;&nbsp;&nbsp;#endif
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format_family family;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 _reserved_[3];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;union {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_beos_description beos;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_quicktime_description quicktime;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_avi_description avi;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_asf_description asf;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_mpeg_description mpeg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_wav_description wav;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_aiff_description aiff;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_misc_description misc;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_avr_description avr;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 _reserved_[12];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} u;
+&nbsp;&nbsp;&nbsp;} media_format_description;</PRE>
+<P>
+Describes a media format.  The <I><FONT  color=991122 face=HELVETICA>family</I></FONT> indicates which media family in the union the description uses to identify the format.
+<P>
+<HR>
+<H3>
+<A NAME="media_misc_description"></A>media_misc_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 file_format;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 codec;
+&nbsp;&nbsp;&nbsp;} media_misc_description;</PRE>
+<P>
+Describes the format of a miscellaneous media file.
+<P>
+<HR>
+<H3>
+<A NAME="media_mpeg_description"></A>media_mpeg_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 id;
+&nbsp;&nbsp;&nbsp;} media_mpeg_description;</PRE>
+<P>
+Describes the format of media data as an MPEG format ID; this can be any of the following values:
+<P>
+<UL>
+<LI><B><TT>B_MPEG_ANY
+<br>
+</TT></B>An MPEG format not listed among these choices.
+<P>
+<LI><B><TT>B_MPEG_1_AUDIO_LAYER_1
+<br>
+</TT></B>MPEG 1 Layer 1 audio format.
+<P>
+<LI><B><TT>B_MPEG_1_AUDIO_LAYER_2
+<br>
+</TT></B>MPEG 1 Layer 2 audio format.
+<P>
+<LI><B><TT>B_MPEG_1_AUDIO_LAYER_3
+<br>
+</TT></B>MPEG 1 Layer 3 audio format (commonly known as "MP3").
+<P>
+<LI><B><TT>B_MPEG_1_VIDEO
+<br>
+</TT></B>An MPEG 1 viedo stream.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="media_quicktime_description"></A>media_quicktime_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 file_format;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 codec;
+&nbsp;&nbsp;&nbsp;} media_misc_description;</PRE>
+<P>
+Describes the format of media data as a file format/codec pair.
+<P>
+<HR>
+<H3>
+<A NAME="media_wav_description"></A>media_wav_description
+</H3>
+<P>
+Declared in:  &lt;be/media/MediaFormats.h><PRE>&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;typedef struct {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 codec;
+&nbsp;&nbsp;&nbsp;} media_wav_description;</PRE>
+<P>
+Describes the format of media data as a WAV codec ID.
+<P>
+<HR>
+<H2>
+<A NAME="Global%20C%20Functions"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="does_file_accept_format()"></A>does_file_accept_format()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>does_file_accept_format(</TT></B></FONT>const media_file_format *<I><FONT  color=991122 face=HELVETICA>mfi</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_format *<I><FONT  color=991122 face=HELVETICA>format</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the given media_file_format can contain data in the specified media_format.  Otherwise, <B><TT>false</TT></B> is returned.
+<P>
+<HR>
+<H3>
+<A NAME="get_next_encoder()"></A>get_next_encoder()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_next_encoder(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_file_format *<I><FONT  color=991122 face=HELVETICA>mfi</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>outputFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_codec_info *<I><FONT  color=991122 face=HELVETICA>codecInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_next_encoder(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_file_format *<I><FONT  color=991122 face=HELVETICA>mfi</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>inputFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>outputFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_codec_info *<I><FONT  color=991122 face=HELVETICA>codecInfo</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>acceptedInputFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format *<I><FONT  color=991122 face=HELVETICA>acceptedOutputFormat</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_next_encoder(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_codec_info *<I><FONT  color=991122 face=HELVETICA>codecInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Given a media_file_format, <I><FONT  color=991122 face=HELVETICA>mfi</I></FONT>, describing the format of a media file, a media_format, <I><FONT  color=991122 face=HELVETICA>outputFormat</I></FONT>, describing the desired output format, and optionally a media_format <I><FONT  color=991122 face=HELVETICA>inputFormat</I></FONT> describing the desired input format, returns in <I><FONT  color=991122 face=HELVETICA>codecInfo</I></FONT> information about the next encoder capable of handling the format.
+<P>
+You should set the int32 pointed to by <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> to 0 initially, and pass the same pointer each time you call <B><TT>get_next_encoder()</TT></B>, to scan through all possible encoders.  When there are no more encoders left to check, <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B> is returned.
+<P>
+If you use the second form of this function, on return the <I><FONT  color=991122 face=HELVETICA>acceptedInputFormat</I></FONT> and <I><FONT  color=991122 face=HELVETICA>acceptedOutputFormat</I></FONT> media_format structures will be filled out to indicate the formats that the codec will accept.  This form of the function supports wildcards, while the first does not.
+<P>
+The third form of the function is less specific, and can be used to get a complete list of codecs.  This can be handy if you're constructing a user interface to allow the user to select the codec they'd like to use, to get a full list of all the possible formats they can create.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. An encoder was found and returned.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>. The cookie was invalid, or no more encoders found.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="functions.html#get_next_file_format()">get_next_file_format()</A></TT></B> in the global C functions section.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

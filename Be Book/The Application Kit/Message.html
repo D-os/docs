@@ -1,0 +1,1722 @@
+<HTML><HEAD><TITLE>The Application Kit: BMessage</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMessage"></A>BMessage
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Message.h">be/app/Message.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  new, static, or automatic
+<P>
+<H6><A HREF="Message.summary.html"><i>Summary</i></A></H6>
+<P>
+A BMessage is a bundle of structured information.  Every BMessage contains a <I>command constant</I> and some number of <I>data fields</I>. 
+<P>
+<UL>
+<LI>The command constant is an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> value that describes, roughly, the purpose of the BMessage.  It's stored as the public <B><TT>what</TT></B> data member.  You always set and examine the <B><TT>what</TT></B> value directly&mdash;you don't need to call a function.  (As a convenience, you can set the command constant when you create your BMessage object.)
+<P>
+<LI>The data fields are name-type-value triplets.  A field is be primarily identified by name, but you can look for fields by name, type, or a combination of the two.  The type is encoded as a constant (<B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>, etc), and is meant to describe the type of value that the field holds.  A single field can have only one name and one type, but can contain an array of values.  Individual values in a field are accessible by index. 
+<P>
+</UL>
+<P>
+Neither the command constant nor the data fields are mandatory.  You can create a BMessage that has data but no command, or that <I>only</I> has a command.  However, creating a BMessage that has neither is pointless.
+<P>
+<HR>
+<H3>
+<A NAME="Preparatory%20Reading"></A>Preparatory Reading
+</H3>
+<P>
+BMessages are used throughout the kits to send data (or notifications) to another thread&mdash;possibly in another application.  To understand how BMessages fit into the messaging system, see <a href="topic_Messaging.html#Messaging">"Messaging"</a>.
+<P>
+The BMessage class also contributes a number of functions that help define the scripting system.  See <a href="topic_Scripting.html#Scripting">"Scripting"</a> for an introduction to this system.
+<P>
+BMessages are also used by a number of classes (BClipboard, <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>, and others) for their ability to store data.
+<P>
+<HR>
+<H3>
+<A NAME="Types%20of%20Functions"></A>Types of Functions
+</H3>
+<P>
+The BMessage class defines five types of functions:
+<P>
+<UL>
+<LI><I>Data field functions</I>.  These functions either set or retrieve the value of a data field.  See <B><TT>AddData(), FindData())</TT></B>, <B><TT><A HREF="#ReplaceData()">ReplaceData()</A></TT></B>, and  <B><TT><A HREF="#RemoveName()">RemoveName()</A></TT></B>. .
+<P>
+<LI><I>Info functions</I>. These functions retrieve information about the state and contents of the BMessage.  See <B><TT><A HREF="#IsSystem()">IsSystem()</A></TT></B> and <B><TT><A HREF="#GetInfo()">GetInfo()</A></TT></B>.
+<P>
+<LI><I>Messaging functions.</I>  These functions are part of the messaging system.  .A smaller set of functions reports on the status of a received message.  For example, <B><TT><A HREF="#IsSourceWaiting()">IsSourceWaiting()</A></TT></B> tells whether the message sender is waiting for a reply, <B><TT><A HREF="#WasDropped()">WasDropped()</A></TT></B> says whether it was dragged and dropped, and <B><TT><A HREF="#DropPoint()">DropPoint()</A></TT></B> says where it was dropped.  <B><TT><A HREF="#SendReply()">SendReply()</A>
+<P>
+</TT></B><LI><I>Scripting functions</I>, such as <B><TT><A HREF="#AddSpecifier()">AddSpecifier()</A></TT></B> and <B><TT><A HREF="#PopSpecifier()">PopSpecifier()</A></TT></B>.
+<P>
+<LI><I>Flattening function</I>s.  The data in a BMessage can be flattened.  See <B><TT><A HREF="#Flatten()">Flatten()</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="BMessage%20Ownership"></A>BMessage Ownership
+</H3>
+<P>
+The documentation for the functions that accept or pass back a BMessage object should tell you who's responsible for deleting the object. Most functions that accept a BMessage argument copy the object, leaving the caller with the responsibility for deleting the argument.  The exceptions&mdash;i.e. BMessage-accepting functions that take over ownership of the object&mdash;are listed below:
+<P>
+Functions that return a BMessage to you usually don't give up ownership; in general, you don't delete the BMessages that are passed to you.  The exceptions&mdash;functions that expect the caller to take over ownership of a passed-back BMessage&mdash;are listed below:
+<P>
+<HR>
+<H2>
+<A NAME="Data%20Members"></A><FONT SIZE=6>D</FONT>ata <FONT SIZE=6>M</FONT>embers
+</H2>
+<P>
+uint32 <B><TT>what</TT></B>&nbsp;&nbsp;&nbsp;
+<br>
+A coded constant that captures what the message is about.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMessage()"></A>BMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessage(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>command</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessage(</TT></B></FONT>const BMessage &amp;<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates a new BMessage object that has the given <I><FONT  color=991122 face=HELVETICA>command</I></FONT> constant, or that's a copy of another BMessage.  If it's a copy, the new object contains the same command constant and data fields as <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="Looper.html#DetachCurrentMessage()">BLooper::DetachCurrentMessage()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BMessage()"></A>~BMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BMessage()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees all memory allocated to hold message data.  If the message sender is expecting a reply but hasn't received one, a default reply (with <B><TT><A HREF="misc.html#B_NO_REPLY">B_NO_REPLY</A></TT></B> as the <B><TT>what</TT></B> data member) is sent before the message is destroyed. 
+<P>
+The system retains ownership of the messages it delivers to you.  Each message loop routinely deletes delivered BMessages after the application is finished responding to them.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddData()"></A>AddData()
+, 
+<A NAME="AddBool()"></A>AddBool()
+, 
+<A NAME="AddInt8()"></A>AddInt8()
+, 
+<A NAME="AddInt16()"></A>AddInt16()
+, 
+<A NAME="AddInt32()"></A>AddInt32()
+, 
+<A NAME="AddInt64()"></A>AddInt64()
+, 
+<A NAME="AddFloat()"></A>AddFloat()
+, 
+<A NAME="AddDouble()"></A>AddDouble()
+, 
+<A NAME="AddString()"></A>AddString()
+, 
+<A NAME="AddPoint()"></A>AddPoint()
+, 
+<A NAME="AddRect()"></A>AddRect()
+, 
+<A NAME="AddRef()"></A>AddRef()
+, 
+<A NAME="AddMessage()"></A>AddMessage()
+, 
+<A NAME="AddMessenger()"></A>AddMessenger()
+, 
+<A NAME="AddPointer()"></A>AddPointer()
+, 
+<A NAME="AddFlat()"></A>AddFlat()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddData(</TT></B></FONT>const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, type_code&nbsp;<I><FONT  color=991122 face=HELVETICA>type</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;void&nbsp;*<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ssize_t&nbsp;<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>fixedSize</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numItems</I></FONT>&nbsp;=&nbsp;1<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddBool(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>aBool</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddInt8(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int8 <I><FONT  color=991122 face=HELVETICA>anInt8</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddInt16(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int16 <I><FONT  color=991122 face=HELVETICA>anInt16</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddInt32(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>anInt32</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddInt64(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int64 <I><FONT  color=991122 face=HELVETICA>anInt64</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddFloat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>aFloat</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddDouble(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, double <I><FONT  color=991122 face=HELVETICA>aDouble</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddPoint(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddRect(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddRef(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddMessage(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const BMessage *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddMessenger(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddPointer(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>pointer</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddFlat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A> *<I><FONT  color=991122 face=HELVETICA>object</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>numItems</I></FONT>&nbsp;=&nbsp;1<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions add data to the field named <I><FONT  color=991122 face=HELVETICA>name</I></FONT> and assign a data type to the field.  Field names can be no longer than 255 characters.  If more than one item of data is added under the same name, the BMessage creates an array of data for that name.  Each time you add another value (to the same name), the value is added to the end of the array&mdash;you can't add a value at a specific index.  A given field can only store one type of data.
+<P>
+<B><TT><A HREF="#AddData()">AddData()</A></TT></B> copies <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> of <I><FONT  color=991122 face=HELVETICA>data</I></FONT> into the field, and assigns the data a <I><FONT  color=991122 face=HELVETICA>type</I></FONT> code.  It copies whatever the <I><FONT  color=991122 face=HELVETICA>data</I></FONT> pointer points to.  For example, if you want to add a string of characters to the message, <I><FONT  color=991122 face=HELVETICA>data</I></FONT> should be the string pointer (<B><TT>char *</TT></B>).  If you want to add only the string pointer, not the characters themselves, <I><FONT  color=991122 face=HELVETICA>data</I></FONT> should be a pointer to the pointer (<B><TT>char **</TT></B>).  The assigned <I><FONT  color=991122 face=HELVETICA>type</I></FONT> must be a specific data type; it should not be <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_ANY_TYPE">B_ANY_TYPE</A></TT></B>..  
+<P>
+When you call <B><TT><A HREF="#AddData()">AddData()</A></TT></B> to place the first item in an array under a new name, you can provide it with two arguments, <I><FONT  color=991122 face=HELVETICA>fixedSize</I></FONT> and <I><FONT  color=991122 face=HELVETICA>numItems</I></FONT>, that will improve the object's efficiency.  If the <I><FONT  color=991122 face=HELVETICA>fixedSize</I></FONT> flag is <B><TT>true</TT></B>, each item in the array must have the same number of bytes; if the flag is <B><TT>false</TT></B>, items can vary in size.  <I><FONT  color=991122 face=HELVETICA>numItems</I></FONT> tells the object to pre-allocate storage for some number of items.  This isn't a limit&mdash;you can add more than <I><FONT  color=991122 face=HELVETICA>numItems</I></FONT> to the field.
+<P>
+Most of the other functions are variants of <B><TT><A HREF="#AddData()">AddData()</A></TT></B> that hard-code the field's type.  For example, <B><TT><A HREF="#AddFloat()">AddFloat()</A></TT></B> assigns the type <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B>; <B><TT><A HREF="#AddBool()">AddBool()</A></TT></B> assigns <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B>, and so on. 
+<P>
+<B><TT><A HREF="#AddString()">AddString()</A></TT></B>, like <B><TT><A HREF="#AddData()">AddData()</A></TT></B>, takes a pointer to the data it adds, or you can use a <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> object.  The <I><FONT  color=991122 face=HELVETICA>string</I></FONT> must be null-terminated; the null character is counted and copied into the message.  Similarly, <B><TT><A HREF="#AddRef()">AddRef()</A></TT></B> adds the pointed to <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> structure to the message (and the variable-length name that's one of the elements of the structure); <B><TT><A HREF="#AddMessage()">AddMessage()</A></TT></B> adds one BMessage to another.  
+<P>
+The other functions are simply passed the data directly.  For example, <B><TT><A HREF="#AddInt32()">AddInt32()</A></TT></B> takes an <B><TT>int32</TT></B> or <B><TT>uint32</TT></B> and <B><TT><A HREF="#AddMessenger()">AddMessenger()</A></TT></B> takes a <A HREF="Messenger.html#BMessenger">BMessenger</A> object, whereas <B><TT><A HREF="#AddData()">AddData()</A></TT></B> would be passed a pointer to an <B><TT>int32</TT></B> and a pointer to a BMessenger.  <B><TT><A HREF="#AddPointer()">AddPointer()</A></TT></B> adds only the pointer it's passed, not the data it points to.  To accomplish the same thing, <B><TT><A HREF="#AddData()">AddData()</A></TT></B> would take a pointer to the pointer.  (The pointer will be valid only locally; it won't be useful to a remote destination.)
+<P>
+<B><TT><A HREF="#AddFlat()">AddFlat()</A></TT></B> flattens an <I><FONT  color=991122 face=HELVETICA>object</I></FONT> (by calling its <B><TT><A HREF="#Flatten()">Flatten()</A></TT></B> function) and adds the flat data to the message.  It calls the object's <B><TT><A HREF="PropertyInfo.html#TypeCode()">TypeCode()</A></TT></B> function to learn the type code it should associate with the data.  Objects that are added through AddFlat() must inherit from <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A> (defined in the Support Kit).
+<P>
+You can also provide a <I><FONT  color=991122 face=HELVETICA>numItems</I></FONT> hint to <B><TT><A HREF="#AddFlat()">AddFlat()</A></TT></B> when you call it to set up a new array.  <B><TT><A HREF="#AddFlat()">AddFlat()</A></TT></B> calls the object's <B><TT><A HREF="PropertyInfo.html#IsFixedSize()">IsFixedSize()</A></TT></B> function to discover whether all items in the array will be the same size.
+<P>
+These functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if the data is too massive to be added to the message, <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B> if the data can't be added to an existing array because it's the wrong type, <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B> if the BMessage can't get enough memory to hold the data, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> if the proposed <I><FONT  color=991122 face=HELVETICA>name</I></FONT> for the data is longer than 255 bytes.  If all goes well, they return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+There's no limit on the number of named fields a message can contain or on the size of a field's data.  However, since the search is linear, combing through a very long list of names to find a particular piece of data may be inefficient.  Also, because of the amount of data that must be moved, an extremely large message can slow the delivery mechanism.  It's sometimes better to put some of the information in a common location (a file, a private clipboard, a shared area of memory) and just refer to it in the message.
+<P>
+<B>See also:  <TT><A HREF="#FindData()">FindData()</A></TT></B>, <B><TT><A HREF="#GetInfo()">GetInfo()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="AddSpecifier()"></A>AddSpecifier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddSpecifier(</TT></B></FONT>const BMessage *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddSpecifier(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>property</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddSpecifier(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>property</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddSpecifier(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>property</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>range</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddSpecifier(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>property</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds a specifier to the specifier stack.  There are several variations of this method.  The first adds the specifier <I><FONT  color=991122 face=HELVETICA>message</I></FONT> to the specifier stack.  The other methods add a specifier targeting the property <I><FONT  color=991122 face=HELVETICA>property</I></FONT>, with specifier constants <B><TT><A HREF="misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B>, <B><TT><A HREF="misc.html#B_INDEX_SPECIFIER">B_INDEX_SPECIFIER</A></TT></B>, <B><TT><A HREF="misc.html#B_RANGE_SPECIFIER">B_RANGE_SPECIFIER</A></TT></B>, and <B><TT><A HREF="misc.html#B_NAME_SPECIFIER">B_NAME_SPECIFIER</A></TT></B>, respectively.  For all other specifiers, you must construct the specifier separately and then call <B><TT>AddSpecifier()</TT></B> on the message.  For more information about specifiers, see the "Scripting" section near the beginning of this chapter.
+<P>
+Specifiers are stored in a data array named "specifiers."  However, since <B><TT>AddSpecifier()</TT></B> also sets the notion of the current specifier, specifiers should always be added to a scripting message with this method rather than with <B><TT><A HREF="#AddMessage()">AddMessage()</A></TT></B>.
+<P>
+<B><TT><A HREF="#AddSpecifier()">AddSpecifier()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if it's able to add the specifier to the BMessage and an error code, generally only <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B> to indicate that it has run out of memory, if not.
+<P>
+<B>See also:  <TT><A HREF="#GetCurrentSpecifier()">GetCurrentSpecifier()</A></TT></B>, <B><TT><A HREF="#HasSpecifiers()">HasSpecifiers()</A></TT></B>, <B><TT><A HREF="#PopSpecifier()">PopSpecifier()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="CountNames()"></A>CountNames()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountNames(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of named data fields in the BMessage that store data of the specified <I><FONT  color=991122 face=HELVETICA>type</I></FONT>.  An array of information held under a single name counts as one field; each name is counted only once, no matter how many data items are stored under that name.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>type</I></FONT> is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_ANY_TYPE">B_ANY_TYPE</A></TT></B>, this function counts all named fields.  If <I><FONT  color=991122 face=HELVETICA>type</I></FONT> is a specific type, it counts only fields that store data registered as that type.
+<P>
+<B>See also:  <TT><A HREF="#GetInfo()">GetInfo()</A></TT></B> 
+<P>
+<HR>
+<H3>DropPoint()   see <A HREF="#WasDropped()">WasDropped()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="FindData()"></A>FindData()
+, 
+<A NAME="FindBool()"></A>FindBool()
+, 
+<A NAME="FintInt8()"></A>FintInt8()
+, 
+<A NAME="FindInt16()"></A>FindInt16()
+, 
+<A NAME="FindInt32()"></A>FindInt32()
+, 
+<A NAME="FindInt64()"></A>FindInt64()
+, 
+<A NAME="FindFloat()"></A>FindFloat()
+, 
+<A NAME="FindDouble()"></A>FindDouble()
+, 
+<A NAME="FindString()"></A>FindString()
+, 
+<A NAME="FindPoint()"></A>FindPoint()
+, 
+<A NAME="FindRect()"></A>FindRect()
+, 
+<A NAME="FindRef()"></A>FindRef()
+, 
+<A NAME="FindMessage()"></A>FindMessage()
+, 
+<A NAME="FindMessenger()"></A>FindMessenger()
+, 
+<A NAME="FindPointer()"></A>FindPointer()
+, 
+<A NAME="FindFlat()"></A>FindFlat()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindData(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;void&nbsp;**<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ssize_t&nbsp;*<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindData(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;void&nbsp;**<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ssize_t&nbsp;*<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindBool(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;*<I><FONT  color=991122 face=HELVETICA>aBool</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindBool(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, bool&nbsp;*<I><FONT  color=991122 face=HELVETICA>aBool</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindInt8(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int8&nbsp;*<I><FONT  color=991122 face=HELVETICA>anInt8</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindInt8(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int8&nbsp;*<I><FONT  color=991122 face=HELVETICA>anInt8</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindInt16(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16&nbsp;*<I><FONT  color=991122 face=HELVETICA>anInt16</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindInt16(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int16&nbsp;*<I><FONT  color=991122 face=HELVETICA>anInt16</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindInt32(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>anInt32</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindInt32(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>anInt32</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindInt64(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64&nbsp;*<I><FONT  color=991122 face=HELVETICA>anInt64</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindInt64(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int64&nbsp;*<I><FONT  color=991122 face=HELVETICA>anInt64</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindFloat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float&nbsp;*<I><FONT  color=991122 face=HELVETICA>aFloat</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindFloat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, float&nbsp;*<I><FONT  color=991122 face=HELVETICA>aFloat</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindDouble(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double&nbsp;*<I><FONT  color=991122 face=HELVETICA>aDouble</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindDouble(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, double&nbsp;*<I><FONT  color=991122 face=HELVETICA>aDouble</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;**<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const&nbsp;char&nbsp;**<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindPoint(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindPoint(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindRect(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindRect(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindRef(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindRef(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindMessage(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindMessage(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, BMessage *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindMessenger(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Messenger.html#BMessenger">BMessenger</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindMessenger(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="Messenger.html#BMessenger">BMessenger</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindPointer(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;**<I><FONT  color=991122 face=HELVETICA>pointer</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindPointer(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, void&nbsp;**<I><FONT  color=991122 face=HELVETICA>pointer</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindFlat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A> *<I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindFlat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A> *<I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions retrieve data from the BMessage.  Each looks for data stored under the specified <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  If more than one data item has the same name, an <I><FONT  color=991122 face=HELVETICA>index</I></FONT> can be provided to tell the function which item in the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> array it should find.  Indices begin at 0.  If an index isn't provided, the function will find the first, or only, item in the array.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/importantBullet.gif">
+					<TD><FONT FACE="helvetica">
+In all cases except <B><TT><A HREF="#FindData()">FindData()</A></TT></B> and <B><TT><A HREF="#FindString()">FindString()</A></TT></B>, the data that's retrieved from the BMessage is copied into the reference argument; the caller is responsible for freeing the copied data).  For<B><TT> <A HREF="#FindData()">FindData()</A></TT></B> and the non-BString version of <B><TT><A HREF="#FindString()">FindString()</A></TT></B>, a pointer to the data is returned; the BMessage retains ownership of the actual data and will delete the data when the object itself is deleted. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#FindData()">FindData()</A></TT></B> places, in *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, a pointer to the requested data item.  The size of the item in bytes is written to <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>.   If <I><FONT  color=991122 face=HELVETICA>type</I></FONT> is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_ANY_TYPE">B_ANY_TYPE</A></TT></B>, it provides a pointer to the data no matter what type it actually is.  But if <I><FONT  color=991122 face=HELVETICA>type</I></FONT> is a specific data type, it provides the pointer only if the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> field holds data of that particular type.
+<P>
+The other functions are specialized versions of <B><TT><A HREF="#FindData()">FindData()</A></TT></B>.  They match the corresponding <B><TT>Add</TT></B>...<B><TT>()</TT></B> functions and search for named data of a particular type, as described below:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Function</B></TH>
+<TH><B>Finds data</B></TH>
+<TH><B>Registered as type</TH>
+<TR>
+<TD><TT><A HREF="#FindBool()">FindBool()</A></TT></B></TD>
+<TD>a <B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="../Release%20Notes/AppKit.html#FindInt8()">FindInt8()</A></TT></B></TD>
+<TD>an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int8</A></TT></B> or <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint8</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT8_TYPE">B_INT8_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindInt16()">FindInt16()</A></TT></B></TD>
+<TD>an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int16</A></TT></B> or <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint16</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT16_TYPE">B_INT16_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindInt32()">FindInt32()</A></TT></B></TD>
+<TD>an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> or <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindInt64()">FindInt64()</A></TT></B></TD>
+<TD>an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int64</A></TT></B> or <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint64</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindFloat()">FindFloat()</A></TT></B></TD>
+<TD>a <B><TT>float</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT>FindDouble)</TT></B></TD>
+<TD>a <B><TT>double</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_DOUBLE_TYPE">B_DOUBLE_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindString()">FindString()</A></TT></B></TD>
+<TD>a character string</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindPoint()">FindPoint()</A></TT></B></TD>
+<TD>a <A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> object</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindRect()">FindRect()</A></TT></B></TD>
+<TD>a <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> object</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RECT_TYPE">B_RECT_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindRef()">FindRef()</A></TT></B></TD>
+<TD>an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindMessage()">FindMessage()</A></TT></B></TD>
+<TD>a BMessage object</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindMessenger()">FindMessenger()</A></TT></B></TD>
+<TD>a <A HREF="Messenger.html#BMessenger">BMessenger</A> object</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSENGER_TYPE">B_MESSENGER_TYPE</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#FindPointer()">FindPointer()</A></TT></B></TD>
+<TD>a pointer to anything</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINTER_TYPE">B_POINTER_TYPE</A></TT></B> </TD>
+</TABLE>
+<P>
+The other type-specific functions retrieve the requested data item from the message by copying it to the variable referred to by the last argument; you get the data, not just a pointer to it.  For example, <B><TT><A HREF="#FindMessenger()">FindMessenger()</A></TT></B> assigns the <A HREF="Messenger.html#BMessenger">BMessenger</A> it finds in the message to the <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT> object, whereas <B><TT><A HREF="#FindData()">FindData()</A></TT></B> would provide only a pointer to a BMessenger.  <B><TT><A HREF="#FindPointer()">FindPointer()</A></TT></B> puts the found pointer in the <B><TT>void*</TT></B> variable that <I><FONT  color=991122 face=HELVETICA>pointer</I></FONT> refers to; <B><TT><A HREF="#FindData()">FindData()</A></TT></B>, as illustrated above, would provide a pointer to the pointer.  (If the message was delivered from a remote source, pointers retrieved from the message won't be valid.)
+<P>
+<B><TT><A HREF="#FindRef()">FindRef()</A></TT></B> retrieves an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> structure; the data that's used to reconstitute the structure may have been added as an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> (through <B><TT><A HREF="#AddRef()">AddRef()</A></TT></B>), or as a flattened <A HREF="../Release%20Notes/StorageKit.html#BPath">BPath</A> object (<B><TT><A HREF="#AddFlat()">AddFlat()</A></TT></B>).
+<P>
+<B><TT><A HREF="#FindFlat()">FindFlat()</A></TT></B> assigns the object stored in the BMessage to the <I><FONT  color=991122 face=HELVETICA>object</I></FONT> passed as an argument&mdash;it calls the <I><FONT  color=991122 face=HELVETICA>object</I></FONT>'s <B><TT><A HREF="#Unflatten()">Unflatten()</A></TT></B> function and passes it the flat data from the message&mdash;provided that the two objects have compatible types.  The argument <I><FONT  color=991122 face=HELVETICA>object</I></FONT>'s <B><TT><A HREF="PropertyInfo.html#AllowsTypeCode()">AllowsTypeCode()</A></TT></B> function must return <B><TT>true</TT></B> when tested with the type code stored in the message; if not, <B><TT><A HREF="#FindFlat()">FindFlat()</A></TT></B> fails and returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.
+<P>
+If these functions can't find any data associated with <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, they return a <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B> error.  If they can't find <I><FONT  color=991122 face=HELVETICA>name</I></FONT> data of the requested <I><FONT  color=991122 face=HELVETICA>type</I></FONT> (or the type the function returns), they return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B>.  If the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is out of range, they return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.  You can rely on the values they retrieve only if they return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> and the data was correctly recorded when it was added to the message.
+<P>
+When they fail, <B><TT><A HREF="#FindData()">FindData()</A></TT></B> and <B><TT><A HREF="#FindString()">FindString()</A></TT></B> provide <B><TT>NULL</TT></B> pointers.  <B><TT><A HREF="#FindRect()">FindRect()</A></TT></B> hands you an invalid rectangle and <B><TT><A HREF="#FindMessenger()">FindMessenger()</A></TT></B> an invalid BMessenger.  Most of the other functions set the data values to 0, which may be indistinguishable from valid values.
+<P>
+Finding a data item doesn't remove it from the BMessage.
+<P>
+(Several functions, such as <B><TT><A HREF="#FindRect()">FindRect()</A></TT></B> and <B><TT><A HREF="#FindInt32()">FindInt32()</A></TT></B>, have versions that return the found value directly.  These versions don't report errors and may not be supported in the future.)
+<P>
+<B>See also:  <TT><A HREF="#GetInfo()">GetInfo()</A></TT></B>, <B><TT><A HREF="#AddData()">AddData()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Flatten()"></A>Flatten()
+, 
+<A NAME="Unflatten()"></A>Unflatten()
+, 
+<A NAME="FlattenedSize()"></A>FlattenedSize()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Flatten(</TT></B></FONT>BDataIO *<I><FONT  color=991122 face=HELVETICA>object</I></FONT>, ssize_t *<I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Flatten(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>address</I></FONT>, ssize_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Unflatten(</TT></B></FONT>BDataIO *<I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Unflatten(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>address</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>FlattenedSize(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions write the BMessage and the data it contains to a "flat" (untyped) buffer of bytes, and reconstruct a BMessage object from such a buffer.
+<P>
+If passed a BDataIO <I><FONT  color=991122 face=HELVETICA>object</I></FONT> (including a BFile), <B><TT><A HREF="#Flatten()">Flatten()</A></TT></B> calls the object's <B><TT><A HREF="../The%20Device%20Kit/SerialPort.html#Write()">Write()</A></TT></B> function to write the message data.  If passed the <I><FONT  color=991122 face=HELVETICA>address</I></FONT> of a buffer, it begins writing at the start of the buffer.  <B><TT><A HREF="#FlattenedSize()">FlattenedSize()</A></TT></B> returns the number of bytes you must provide in the buffer to hold the flattened object.  <B><TT><A HREF="#Flatten()">Flatten()</A></TT></B> places the number of bytes actually written in the variable that its <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> argument refers to.
+<P>
+<B><TT><A HREF="#Unflatten()">Unflatten()</A></TT></B> empties the BMessage of any information it may happen to contain, then initializes the object from data read from the buffer.   If passed a BDataIO <I><FONT  color=991122 face=HELVETICA>object</I></FONT>, it calls the object's <B><TT><A HREF="../The%20Device%20Kit/SerialPort.html#Read()">Read()</A></TT></B> function to read the message data.  If passed a buffer <I><FONT  color=991122 face=HELVETICA>address</I></FONT>, it begins reading at the start of the buffer.  It's up to the caller to make sure that <B><TT><A HREF="#Unflatten()">Unflatten()</A></TT></B> reads data that <B><TT><A HREF="#Flatten()">Flatten()</A></TT></B> wrote and that pointers are positioned correctly.
+<P>
+<B><TT><A HREF="#Flatten()">Flatten()</A></TT></B> returns any errors encountered when writing the data, or <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if there is no error.
+<P>
+If it doesn't recognize the data in the buffer as being a flattened object or there's a failure in reading the data, <B><TT><A HREF="#Unflatten()">Unflatten()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  If it doesn't have adequate memory to recreate the whole message, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Otherwise, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<B>See also:  </B>the BDataIO class in the Support Kit
+<P>
+<HR>
+<H3>
+<A NAME="GetCurrentSpecifier()"></A>GetCurrentSpecifier()
+, 
+<A NAME="PopSpecifier()"></A>PopSpecifier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetCurrentSpecifier(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage&nbsp;*<I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>what</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;**<I><FONT  color=991122 face=HELVETICA>property</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>PopSpecifier(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#GetCurrentSpecifier()">GetCurrentSpecifier()</A></TT></B> unpacks the current specifier in the <A HREF="#BMessage">BMessage</A>, the one at the top of the specifier stack; <B><TT><A HREF="#PopSpecifier()">PopSpecifier()</A></TT></B> changes the notion of which specifier is current, by popping the current one from the stack.
+<P>
+These functions aid in implementing a class-specific version of BHandler's <B><TT><A HREF="Application.html#ResolveSpecifier()">ResolveSpecifier()</A></TT></B> function&mdash;the first gets the specifier that needs to be resolved, and the second pops it from the stack after it is resolved.  You can also call them to examine relevant specifiers when handling a message that targets an object property (such as <B><TT><A HREF="misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B>).
+<P>
+A scripting BMessage keeps specifiers in a data array named "specifiers"; each specifier is itself a <A HREF="#BMessage">BMessage</A>, but one with a special structure and purpose in the scripting system.  See the "Scripting" section near the beginning of this chapter for an overview of the system and the place of specifiers in it.
+<P>
+The specifiers in a message are ordered and, until <B><TT><A HREF="#PopSpecifier()">PopSpecifier()</A></TT></B> is called, the one that was added last&mdash;the one with the greatest index&mdash;is the current specifier.  <B><TT><A HREF="#PopSpecifier()">PopSpecifier()</A></TT></B> merely decrements the index that picks the current specifier; it doesn't delete anything from the BMessage.
+<P>
+<B><TT><A HREF="#GetCurrentSpecifier()">GetCurrentSpecifier()</A></TT></B> puts the index of the current specifier in the variable that its first argument, <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, refers to.  If other arguments are provided, it makes the <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> BMessage a copy of the current specifier.  It also extracts two pieces of information from the <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>:  It places the <B><TT>what</TT></B> data member of the specifier in the <I><FONT  color=991122 face=HELVETICA>what</I></FONT> variable and a pointer to the property name in the <I><FONT  color=991122 face=HELVETICA>property</I></FONT> variable.  These last two output arguments won't be valid if the <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> argument is <B><TT>NULL</TT></B>.
+<P>
+Both functions fail if the BMessage doesn't contain specifiers.  In addition, <B><TT><A HREF="#GetCurrentSpecifier()">GetCurrentSpecifier()</A></TT></B> fails if it can't find data in the BMessage for its <I><FONT  color=991122 face=HELVETICA>specifier</I></FONT> and <I><FONT  color=991122 face=HELVETICA>property</I></FONT> arguments, and <B><TT><A HREF="#PopSpecifier()">PopSpecifier()</A></TT></B> fails if the BMessage isn't one that has been delivered to you after being processed through a message loop.   When it fails, <B><TT><A HREF="#GetCurrentSpecifier()">GetCurrentSpecifier()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_SCRIPT_SYNTAX">B_BAD_SCRIPT_SYNTAX</A></TT></B>, but <B><TT><A HREF="#PopSpecifier()">PopSpecifier()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  On success, both functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#AddSpecifier()">AddSpecifier()</A></TT></B>, <B><TT><A HREF="#HasSpecifiers()">HasSpecifiers()</A></TT></B>, <B><TT><A HREF="Handler.html#ResolveSpecifier()">BHandler::ResolveSpecifier()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetInfo()"></A>GetInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetInfo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code&nbsp;*<I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>countFound</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetInfo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code&nbsp;*<I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;*<I><FONT  color=991122 face=HELVETICA>fixedSize</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetInfo(</TT></B></FONT>type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char **<I><FONT  color=991122 face=HELVETICA>nameFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code&nbsp;*<I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32&nbsp;*<I><FONT  color=991122 face=HELVETICA>countFound</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Provides information about the data fields stored in the BMessage.
+<P>
+When passed a <I><FONT  color=991122 face=HELVETICA>name</I></FONT> that matches a name within the <A HREF="#BMessage">BMessage</A>,  <B><TT><A HREF="#GetInfo()">GetInfo()</A></TT></B> places the type code for data stored under that name in the variable referred to by <I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT> and writes the number of data items with that name into the variable referred to by <I><FONT  color=991122 face=HELVETICA>countFound</I></FONT>.  It then returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If it can't find a <I><FONT  color=991122 face=HELVETICA>name</I></FONT> field within the <A HREF="#BMessage">BMessage</A>, it sets the <I><FONT  color=991122 face=HELVETICA>countFound</I></FONT> variable to 0, and returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B> (without modifying the <I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT> variable).
+<P>
+When the <I><FONT  color=991122 face=HELVETICA>fixedSize</I></FONT> argument is specified, the bool referenced by <I><FONT  color=991122 face=HELVETICA>fixedSize</I></FONT> is set to <B><TT>true</TT></B> if all items in the array specified by name must be the same size, and <B><TT>false</TT></B> if the items can be of different sizes (see <B><TT><A HREF="#AddData()">AddData()</A></TT></B>).
+<P>
+When passed a <I><FONT  color=991122 face=HELVETICA>type</I></FONT> and an <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <B><TT><A HREF="#GetInfo()">GetInfo()</A></TT></B> looks only at fields that store data of the requested type and provides information about the field at the requested index.  Indices begin at 0 and are type specific.  For example, if the requested <I><FONT  color=991122 face=HELVETICA>type</I></FONT> is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_DOUBLE_TYPE">B_DOUBLE_TYPE</A></TT></B> and the BMessage contains a total of three named fields that store <B><TT>double</TT></B> data, the first field would be at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> 0, the second at 1, and the third at 2&mdash;no matter what other types of data actually separate them in the <A HREF="#BMessage">BMessage</A>, and no matter how many data items each field contains.  (Note that the index in this case ranges over fields, each with a different name, not over the data items within a particular named field.)  If the requested type is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_ANY_TYPE">B_ANY_TYPE</A></TT></B>, this function looks at all fields and gets information about the one at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> whatever its type.
+<P>
+If successful in finding data of the <I><FONT  color=991122 face=HELVETICA>type</I></FONT> requested at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <B><TT><A HREF="#GetInfo()">GetInfo()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> and provides information about the data through the last three arguments:
+<P>
+<UL>
+<LI>It places a pointer to the name of the data field in the variable referred to by <I><FONT  color=991122 face=HELVETICA>nameFound</I></FONT>.
+<P>
+<LI>It puts the code for the type of data the field contains in the variable referred to by <I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT>.  This will be the same as the <I><FONT  color=991122 face=HELVETICA>type</I></FONT> requested, unless the requested type is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_ANY_TYPE">B_ANY_TYPE</A></TT></B>, in which case <I><FONT  color=991122 face=HELVETICA>typeFound</I></FONT> will be the actual type stored under the name.
+<P>
+<LI>It records the number of data items stored within the field in the variable referred to by <I><FONT  color=991122 face=HELVETICA>countFound</I></FONT>.
+<P>
+</UL>
+<P>
+If <B><TT><A HREF="#GetInfo()">GetInfo()</A></TT></B> can't find data of the requested <I><FONT  color=991122 face=HELVETICA>type</I></FONT> at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, it sets the <I><FONT  color=991122 face=HELVETICA>countFound</I></FONT> variable to 0, and returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B>.  If the index is out of range, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.
+<P>
+This version of <B><TT><A HREF="#GetInfo()">GetInfo()</A></TT></B> can be used to iterate through all the BMessage's data.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;char  *name;
+&nbsp;&nbsp;&nbsp;uint32  type;
+&nbsp;&nbsp;&nbsp;int32   count;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;for ( int32 i = 0; 
+&nbsp;&nbsp;&nbsp;      msg->GetInfo(B_ANY_TYPE, i, &amp;name, &amp;type, &amp;count) == B_OK;
+&nbsp;&nbsp;&nbsp;      i++ ) {
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If the index is incremented from 0 in this way, all data of the requested type will have been read when <B><TT><A HREF="#GetInfo()">GetInfo()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  If the requested type is <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_ANY_TYPE">B_ANY_TYPE</A></TT></B>, as shown above, it will reveal the name and type of every field in the BMessage.
+<P>
+<B>See also:  <TT><A HREF="../The%20Media%20Kit/SoundPlayer.html#HasData()">HasData()</A></TT></B>, <B><TT><A HREF="#AddData()">AddData()</A></TT></B>, <B><TT><A HREF="#FindData()">FindData()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="HasSpecifiers()"></A>HasSpecifiers()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasSpecifiers(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the BMessage has specifiers added by an <B><TT><A HREF="#AddSpecifier()">AddSpecifier()</A></TT></B> function, and <B><TT>false</TT></B> if not.
+<P>
+<B>See also:  <TT><A HREF="#AddSpecifier()">AddSpecifier()</A></TT></B>, <B><TT><A HREF="#GetCurrentSpecifier()">GetCurrentSpecifier()</A></TT></B> 
+<P>
+<HR>
+<H3>IsEmpty()   see <A HREF="#MakeEmpty()">MakeEmpty()</A></H3>
+<P>
+<HR>
+<H3>IsReply()   see <A HREF="#WasDelivered()">WasDelivered()</A></H3>
+<P>
+<HR>
+<H3>IsSourceRemote()   see <A HREF="#WasDelivered()">WasDelivered()</A></H3>
+<P>
+<HR>
+<H3>IsSourceWaiting()   see <A HREF="#WasDelivered()">WasDelivered()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsSystem()"></A>IsSystem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsSystem(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the <B><TT>what</TT></B> data member of the BMessage object identifies it as a system-defined message, and <B><TT>false</TT></B> if not.
+<P>
+<HR>
+<H3>
+<A NAME="MakeEmpty()"></A>MakeEmpty()
+, 
+<A NAME="IsEmpty()"></A>IsEmpty()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>MakeEmpty(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsEmpty(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#MakeEmpty()">MakeEmpty()</A></TT></B> removes and frees all data that has been added to the <A HREF="#BMessage">BMessage</A>, without altering the <B><TT>what</TT></B> constant.  It returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>, unless the message can't be altered (as it can't if it's being dragged), in which case it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<B><TT><A HREF="#IsEmpty()">IsEmpty()</A></TT></B> returns <B><TT>true</TT></B> if the BMessage has no data (whether or not it was emptied by <B><TT><A HREF="#MakeEmpty()">MakeEmpty()</A></TT></B>), and <B><TT>false</TT></B> if it has some.
+<P>
+<B>See also:  <TT><A HREF="#RemoveName()">RemoveName()</A></TT></B> 
+<P>
+<HR>
+<H3>Previous()   see <A HREF="#WasDelivered()">WasDelivered()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="PrintToStream()"></A>PrintToStream()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>PrintToStream(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Prints information about the BMessage to the standard output stream (<B><TT>stdout</TT></B>).  Each field of named data is reported in the following format,
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#entry <I>name</I>, type = <I>type</I>, count = <I>count</PRE>
+<P>
+</I>where <I>name</I> is the name that the data is registered under, <I>type</I> is the constant that indicates what type of data it is, and <I>count</I> is the number of data items in the named array.
+<P>
+<HR>
+<H3>
+<A NAME="RemoveName()"></A>RemoveName()
+, 
+<A NAME="RemoveData()"></A>RemoveData()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveName(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveData(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>&nbsp;=&nbsp;0<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#RemoveName()">RemoveName()</A></TT></B> removes all data entered in the BMessage under <I><FONT  color=991122 face=HELVETICA>name</I></FONT> and the name itself.  <B><TT><A HREF="#RemoveData()">RemoveData()</A></TT></B> removes the single item of data at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> in the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> array.  If the array has just one data item, it removes the array and name just as <B><TT><A HREF="#RemoveName()">RemoveName()</A></TT></B> would.
+<P>
+Both functions free the memory that was allocated to hold the data, and return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> when successful.  However, if there's no data in the BMessage under <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, they return a <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B> error.  If message data can be read but can't be changed (as it can't for a message that's being dragged), they both return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  If the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is out of range, <B><TT><A HREF="#RemoveData()">RemoveData()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B> (the index is too high) or <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> (the value passed is a negative number).
+<P>
+<B>See also:  <TT><A HREF="#MakeEmpty()">MakeEmpty()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ReplaceData()"></A>ReplaceData()
+, 
+<A NAME="ReplaceBool()"></A>ReplaceBool()
+, 
+<A NAME="ReplaceInt8()"></A>ReplaceInt8()
+, 
+<A NAME="ReplaceInt16()"></A>ReplaceInt16()
+, 
+<A NAME="ReplaceInt32()"></A>ReplaceInt32()
+, 
+<A NAME="ReplaceInt64()"></A>ReplaceInt64()
+, 
+<A NAME="ReplaceFloat()"></A>ReplaceFloat()
+, 
+<A NAME="ReplaceDouble()"></A>ReplaceDouble()
+, 
+<A NAME="ReplaceString()"></A>ReplaceString()
+, 
+<A NAME="ReplacePoint()"></A>ReplacePoint()
+, 
+<A NAME="ReplaceRect()"></A>ReplaceRect()
+, 
+<A NAME="ReplaceRef()"></A>ReplaceRef()
+, 
+<A NAME="ReplaceMessage()"></A>ReplaceMessage()
+, 
+<A NAME="ReplaceMessenger()"></A>ReplaceMessenger()
+, 
+<A NAME="ReplacePointer()"></A>ReplacePointer()
+, 
+<A NAME="ReplaceFlat()"></A>ReplaceFlat()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceData(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ssize_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceData(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;type_code <I><FONT  color=991122 face=HELVETICA>type</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ssize_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceBool(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>aBool</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceBool(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>aBool</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceInt8(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int8 <I><FONT  color=991122 face=HELVETICA>anInt8</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceInt8(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int8 <I><FONT  color=991122 face=HELVETICA>anInt8</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceInt16(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int16 <I><FONT  color=991122 face=HELVETICA>anInt16</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceInt16(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 <I><FONT  color=991122 face=HELVETICA>anInt16</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceInt32(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, long <I><FONT  color=991122 face=HELVETICA>anInt32</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceInt32(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>anInt32</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceInt64(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int64 <I><FONT  color=991122 face=HELVETICA>anInt64</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceInt64(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64 <I><FONT  color=991122 face=HELVETICA>anInt64</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceFloat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>aFloat</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceFloat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <I><FONT  color=991122 face=HELVETICA>aFloat</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceDouble(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, double <I><FONT  color=991122 face=HELVETICA>aDouble</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceDouble(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;double <I><FONT  color=991122 face=HELVETICA>aDouble</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>FindString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="../The%20Support%20Kit/String.html#BString">BString</A> &amp;<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplacePoint(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplacePoint(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceRect(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceRect(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceRef(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceRef(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceMessage(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, BMessage&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceMessage(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceMessenger(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceMessenger(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Messenger.html#BMessenger">BMessenger</A>&nbsp;<I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplacePointer(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const&nbsp;void&nbsp;*<I><FONT  color=991122 face=HELVETICA>pointer</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplacePointer(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;void&nbsp;*<I><FONT  color=991122 face=HELVETICA>pointer</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceFlat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReplaceFlat(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Support%20Kit/Flattenable.html#BFlattenable">BFlattenable</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions replace a data item in the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> field with another item passed as an argument.  If an <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is provided, they replace the item in the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> array at that index; if an <I><FONT  color=991122 face=HELVETICA>index</I></FONT> isn't mentioned, they replace the first (or only) item stored under <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  If an <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is provided but it's out of range, the replacement fails.
+<P>
+<B><TT><A HREF="#ReplaceData()">ReplaceData()</A></TT></B> replaces an item in the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> field with <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> of <I><FONT  color=991122 face=HELVETICA>data</I></FONT>, but only if the <I><FONT  color=991122 face=HELVETICA>type</I></FONT> code that's specified for the data matches the type of data that's already stored in the field.  The <I><FONT  color=991122 face=HELVETICA>type</I></FONT> must be specific; it can't be <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_ANY_TYPE">B_ANY_TYPE</A></TT></B>.
+<P>
+<B><TT><A HREF="#FindFlat()">FindFlat()</A></TT></B> replaces a flattened object with another <I><FONT  color=991122 face=HELVETICA>object</I></FONT>, provided that the type reported by the argument <I><FONT  color=991122 face=HELVETICA>object</I></FONT> (by its <B><TT><A HREF="PropertyInfo.html#TypeCode()">TypeCode()</A></TT></B> function) matches the type recorded for the item in the message.  If not, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.
+<P>
+The other functions are simplified versions of <B><TT><A HREF="#ReplaceData()">ReplaceData()</A></TT></B>.  They each handle the specific type of data declared for their last arguments.  They succeed if this type matches the type of data already in the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> field, and fail if it does not.  The new data is added precisely as the counterpart <B><TT>Add</TT></B>...<B><TT>()</TT></B> function would add it.
+<P>
+If successful, all these functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If unsuccessful, they return an error code&mdash;<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if the message is read-only (as it is while the message is being dragged), <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B> if the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is out of range, <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B> if the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> field doesn't exist, or <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B> if the field doesn't contain data of the specified type.
+<P>
+<B>See also:  <TT><A HREF="#AddData()">AddData()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ReturnAddress()"></A>ReturnAddress()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Messenger.html#BMessenger">BMessenger</A> <B><TT><FONT  color=000022 size=+1>ReturnAddress(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a <A HREF="Messenger.html#BMessenger">BMessenger</A> object that can be used to reply to the BMessage.  Calling the BMessenger's <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> function is equivalent to calling <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B>, except that the return message won't be marked as a reply.  If a reply isn't allowed (if the BMessage wasn't delivered), the returned <A HREF="Messenger.html#BMessenger">BMessenger</A> will be invalid.
+<P>
+If you want to use the <B><TT><A HREF="#ReturnAddress()">ReturnAddress()</A></TT></B> <A HREF="Messenger.html#BMessenger">BMessenger</A> to send a synchronous reply, you must do so before the BMessage is deleted and a default reply is sent.
+<P>
+<B>See also:  <TT><A HREF="#SendReply()">SendReply()</A></TT></B>, <B><TT><A HREF="#WasDelivered()">WasDelivered()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SendReply()"></A>SendReply()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendReply(</TT></B></FONT>BMessage&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage&nbsp;*<I><FONT  color=991122 face=HELVETICA>reply</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;<I><FONT  color=991122 face=HELVETICA>sendTimeout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;<I><FONT  color=991122 face=HELVETICA>replyTimeout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendReply(</TT></B></FONT>BMessage&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Handler.html#BHandler">BHandler</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;<I><FONT  color=991122 face=HELVETICA>sendTimeout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_INFINITE_TIMEOUT</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendReply(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>command</I></FONT>, BMessage *<I><FONT  color=991122 face=HELVETICA>reply</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendReply(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>command</I></FONT>, <A HREF="Handler.html#BHandler">BHandler</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends a reply <I><FONT  color=991122 face=HELVETICA>message</I></FONT> back to the sender of the BMessage (in the case of a synchronous reply) or to a target <A HREF="Handler.html#BHandler">BHandler</A> (in the case of an asynchronous reply).  Whether the reply is synchronous or asynchronous depends on how the BMessage that's sending the reply was itself sent:
+<P>
+<UL>
+<LI>The reply is delivered synchronously if the message sender is waiting for one to arrive.  The function that sent the BMessage doesn't return until it receives the reply (or a timeout expires).  If an expected reply has not been sent by the time the BMessage object is deleted, a default <B><TT><A HREF="misc.html#B_NO_REPLY">B_NO_REPLY</A></TT></B> message is returned to the sender.  If a reply is sent after the sender gave up waiting for it to arrive, the reply <I><FONT  color=991122 face=HELVETICA>message</I></FONT> disappears into the bowels of the system.
+<P>
+<LI>The reply is delivered asynchronously if the message sender isn't waiting for a reply.  In this case, the sending function designates a target <A HREF="Handler.html#BHandler">BHandler</A> and <A HREF="Looper.html#BLooper">BLooper</A> for any replies that might be sent, then returns immediately after putting the BMessage in the pipeline.  Posted messages and messages that are dragged and dropped are also eligible for asynchronous replies.
+<P>
+</UL>
+<P>
+<B><TT><A HREF="#SendReply()">SendReply()</A></TT></B> works only for BMessage objects that have been processed through a message loop and delivered to you.  The caller retains ownership of the reply <I><FONT  color=991122 face=HELVETICA>message</I></FONT> passed to <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B>; it can be deleted (or left to die on the stack) after the function returns.
+<P>
+<B><TT><A HREF="#SendReply()">SendReply()</A></TT></B> sends a message&mdash;a reply message, to be sure, but a message nonetheless.  It behaves exactly like the other message-sending function, BMessenger's <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B>:
+<P>
+<UL>
+<LI>By passing it a <I><FONT  color=991122 face=HELVETICA>reply</I></FONT> argument, you can ask for a synchronous reply to the reply message it sends.  It won't return until it receives the reply.
+<P>
+<LI>By supplying a <I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT> argument, you can arrange for an expected asynchronous reply.  If a specific target isn't specified, the <A HREF="Application.html#BApplication">BApplication</A> object will handle the reply if one is sent.
+<P>
+</UL>
+<P>
+By default, <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B> doesn't return until the reply message is delivered (placed in the BLooper's port queue).  It's possible, in some circumstances, for the receiving port queue to be full, in which case <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B> will block until a slot becomes free.  However, you can limit how long <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B> will wait to deliver the message before it gives up and returns.  The <I><FONT  color=991122 face=HELVETICA>sendTimeout</I></FONT> argument is the number of microseconds you give the function to do its work.  If the time limit is exceeded, the function fails and returns an error (<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B>).
+<P>
+When asking for a synchronous reply, separate <I><FONT  color=991122 face=HELVETICA>sendTimeout</I></FONT> and <I><FONT  color=991122 face=HELVETICA>replyTimeout</I></FONT> limits can be set for sending the message and receiving the reply.  There is no time limit if a timeout value is set to <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B>&mdash;as it is by default.  The function won't block at all if the timeout is set to 0.
+<P>
+If a <I><FONT  color=991122 face=HELVETICA>command</I></FONT> is passed rather than a <I><FONT  color=991122 face=HELVETICA>message</I></FONT>, <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B> constructs the reply <A HREF="#BMessage">BMessage</A>, initializes its <B><TT>what</TT></B> data member with the <I><FONT  color=991122 face=HELVETICA>command</I></FONT> constant, and sends it just like any other reply.  The <I><FONT  color=991122 face=HELVETICA>command</I></FONT> versions of this function have infinite timeouts; they block until the message is delivered and, if requested, a synchronous reply is received.
+<P>
+This function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the reply is successfully sent.  If there's a problem in sending the message, it returns the same sort of error code as BMessenger's <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B>.  It may also report a reply-specific problem.  The more informative return values are as follows:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Error code</TH>
+<TH>Is returned when</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_REPLY">B_BAD_REPLY</A></TT></B></TD>
+<TD>Attempting to reply to a message that hasn't been delivered yet. </TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_DUPLICATE_REPLY">B_DUPLICATE_REPLY</A></TT></B></TD>
+<TD>Sending a reply after one has already been sent and delivered.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B></TD>
+<TD>Sending a reply to a destination thread that no longer exists.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_PORT_ID">B_BAD_PORT_ID</A></TT></B></TD>
+<TD>Sending a reply to a <A HREF="Looper.html#BLooper">BLooper</A> and port that no longer exist.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_TIMED_OUT">B_TIMED_OUT</A></TT></B></TD>
+<TD>Taking longer than the specified time limit to deliver a reply message or to receive a synchronous reply to the reply.</TD>
+</TABLE>
+<P>
+If you want to delay sending a reply and keep the BMessage object beyond the time it's scheduled to be deleted, you may be able to detach it from the message loop.  See <B><TT><A HREF="Looper.html#DetachCurrentMessage()">DetachCurrentMessage()</A></TT></B> in the <A HREF="Looper.html#BLooper">BLooper</A> class.
+<P>
+<B>See also:  <TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B>, <B><TT><A HREF="Looper.html#DetachCurrentMessage()">BLooper::DetachCurrentMessage()</A></TT></B>, <B><TT>Error</TT></B>, <B><TT><A HREF="#ReturnAddress()">ReturnAddress()</A></TT></B> 
+<P>
+<HR>
+<H3>Unflatten()   see <A HREF="#Flatten()">Flatten()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="WasDelivered()"></A>WasDelivered()
+, 
+<A NAME="IsSourceRemote()"></A>IsSourceRemote()
+, 
+<A NAME="IsSourceWaiting()"></A>IsSourceWaiting()
+, 
+<A NAME="IsReply()"></A>IsReply()
+, 
+<A NAME="Previous()"></A>Previous()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>WasDelivered(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsSourceRemote(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsSourceWaiting(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsReply(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+const BMessage *<B><TT><FONT  color=000022 size=+1>Previous(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const<B><TT><FONT  color=000022 size=+1> 
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions can help if you're engaged in an exchange of messages or managing an ongoing communication.
+<P>
+<B><TT><A HREF="#WasDelivered()">WasDelivered()</A></TT></B> indicates whether it's possible to send a reply to a message.  It returns <B><TT>true</TT></B> for a BMessage that was posted, sent, or dropped&mdash;that is, one that has been processed through a message loop&mdash;and <B><TT>false</TT></B> for a message that has not yet been delivered by any means.
+<P>
+<B><TT><A HREF="#IsSourceRemote()">IsSourceRemote()</A></TT></B> returns <B><TT>true</TT></B> if the message had its source in another application, and <B><TT>false</TT></B> if the source is local or the message hasn't been delivered yet.
+<P>
+<B><TT><A HREF="#IsSourceWaiting()">IsSourceWaiting()</A></TT></B> returns <B><TT>true</TT></B> if the message source is waiting for a synchronous reply, and <B><TT>false</TT></B> if not.  The source thread can request and wait for a reply when calling either BMessenger's <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> or BMessage's <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B> function.
+<P>
+<B><TT><A HREF="#IsReply()">IsReply()</A></TT></B> returns <B><TT>true</TT></B> if the BMessage is a reply to a previous message (if it was sent by the <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B> function), and <B><TT>false</TT></B> if not.
+<P>
+<B><TT><A HREF="#Previous()">Previous()</A></TT></B> returns the previous message&mdash;the message to which the current BMessage is a reply.  It works only for a BMessage that's received as an asynchronous reply to a previous message.  A synchronous reply is received in the context of the previous message, so it's not necessary to call a function to get it.  But when an asynchronous reply is received, the context of the original message is lost; this function can provide it.  <B><TT><A HREF="#Previous()">Previous()</A></TT></B> returns <B><TT>NULL</TT></B> if the BMessage isn't an asynchronous reply to another message.
+<P>
+<B>See also:  <TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B>, <B><TT><A HREF="#SendReply()">SendReply()</A></TT></B>, <B><TT><A HREF="#ReturnAddress()">ReturnAddress()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="WasDropped()"></A>WasDropped()
+, 
+<A NAME="DropPoint()"></A>DropPoint()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>WasDropped(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+
+<TR><TD>
+<A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>DropPoint(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>offset</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#WasDropped()">WasDropped()</A></TT></B> returns <B><TT>true</TT></B> if the user delivered the BMessage by dragging and dropping it, and <B><TT>false</TT></B> if the message was posted or sent in application code or if it hasn't yet been delivered at all.
+<P>
+<B><TT><A HREF="#DropPoint()">DropPoint()</A></TT></B> reports the point where the cursor was located when the message was dropped (when the user released the mouse button).  It directly returns the point in the screen coordinate system and, if an <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> argument is provided, returns it by reference in coordinates based on the image or rectangle the user dragged.  The <I><FONT  color=991122 face=HELVETICA>offset</I></FONT> assumes a coordinate system with (0.0,&nbsp;0.0) at the left top corner of the dragged rectangle or image.
+<P>
+Since any value can be a valid coordinate, <B><TT><A HREF="#DropPoint()">DropPoint()</A></TT></B> produces reliable results only if <B><TT><A HREF="#WasDropped()">WasDropped()</A></TT></B> returns <B><TT>true</TT></B>.
+<P>
+<B>See also:  <TT>BView::DragMessage()</TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (assignment)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+BMessage &amp;<B><TT><FONT  color=000022 size=+1>operator =(</TT></B></FONT>const BMessage&amp;<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Assigns one BMessage object to another.  After the assignment, the two objects are duplicates of each other without shared data.
+<P>
+<HR>
+<H3>
+<A NAME="new"></A>new
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>operator new(</TT></B></FONT>size_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Allocates memory for a BMessage object, or takes the memory from a previously allocated cache.  The caching mechanism is an efficient way of managing memory for objects that are created frequently and used for short periods of time, as BMessages typically are.
+<P>
+<HR>
+<H3>
+<A NAME="delete"></A>delete
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>operator delete(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>memory</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees memory allocated by the BMessage version of <B><TT>new</TT></B>, which may mean restoring the memory to the cache.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

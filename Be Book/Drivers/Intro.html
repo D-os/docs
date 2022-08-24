@@ -1,0 +1,323 @@
+<HTML><HEAD><TITLE>Drivers: Device Drivers</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME=""></A>Device Drivers
+</H1>
+<P>
+Writing device drivers requires additional knowledge of the inner workings of the BeOS.  To write a driver you must follow the rules laid out in this chapter very carefully.  These rules are not the same as those for writing a normal application&mdash;if your driver tries to do things it's not allowed to do, it could bring down the system. 
+<P>
+This introduction covers how drivers interact with the kernel.
+<P>
+<HR>
+<H2>
+<A NAME="The%20Kernel%20and%20the%20Driver%20Author"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>K</FONT>ernel and the <FONT SIZE=6>D</FONT>river <FONT SIZE=6>A</FONT>uthor
+</H2>
+<P>
+The BeOS kernel comprises the basic functionality of the operating system:  It knows how to start the boot process and to manage memory and threads, and it contains the PCI bus manager, the ISA bus manager, the device file system (<B><TT><A HREF="#devfs">devfs</A></TT></B>, which manages <B>/dev</B>), the root file system (<B><TT>rootfs</TT></B>, which manages <B>/</B>), and a few other things.
+<P>
+But this isn't enough to satisfy the needs of most applications, so the kernel uses add-ons to provide additional functionality.  During the boot process, add-ons are loaded to handle "real" file systems, devices, busses, and the like.
+<P>
+Although Be's kernel add-ons provide support for a wide range of hardware&mdash;from disk devices to joysticks&mdash;this support isn't all-inclusive.  Hardware developers may need to create their own drivers for their products.
+<P>
+<HR>
+<H3>
+<A NAME="Types%20of%20Kernel%20Add-on"></A>Types of Kernel Add-on
+</H3>
+<P>
+There are three types of kernel add-on:
+<P>
+<LI><I>Device drivers</I> are add-ons that communicate directly with devices.
+<P>
+<LI><I>Modules</I> are kernel space add-ons that export an API for use by drivers (or by other modules).
+<P>
+<LI><I>File systems</I> are add-ons that support specific file systems, such as BFS, DOSFS, HFS, and so forth.
+<P>
+</UL>
+<P>
+Device drivers and file systems, while extending the functionality of the kernel, are still accessible from user space:  Applications can open and address them using file descriptors.  Modules, on the other hand, are kernel-only units.  Applications have no access to them; they're provided strictly for use by the kernel and other kernel add-ons.
+<P>
+<H4>
+<A NAME=""></A>Device Drivers
+</H4>
+<P>
+A device driver is an add-on that recognizes a specific device (or class of devices) and provides a means for the rest of the system to communicate with it.  Usually this communication involves some form of device-specific protocol.  For example, if the system wants to use an Ethernet card or graphics card, it needs to load a device driver add-on that knows how to communicate with that card.  Similarly, code that knows how to talk to a class of devices (SCSI disks, ATA devices, ATAPI disks, or USB input devices, etc.) must be implemented as a device driver add-on.
+<P>
+<H4>
+<A NAME="Modules"></A>Modules
+</H4>
+<P>
+Modules provide a uniform API for use by other modules and drivers.  A module is like a library in that it acts as a repository for common code that's shared among several drivers.
+<P>
+For example:  Let's say you have a device driver that talks to a SCSI device connected to a SCSI bus.  A computer can have multiple SCSI busses.  Because all SCSI devices use the same command set independent of the particular controller used to send the commands, the command set can be (and is) implemented as a module.  The SCSI module knows how to handle all SCSI cards the BeOS supports; the API that the SCSI module defines is adopted by and augmented by the modules for specific SCSI device types (hard disks, scanners, CD drives, etc).  The SCSI device modules are managed by a SCSI bus manager module, which knows how to cope with multiple busses and presents them in encapulated form to the drivers.  The drivers then only need to deal with the bus manager's API, which makes the life of a driver author much simpler.
+<P>
+Be provides bus managers for SCSI, USB, IDE, and PCMCIA.
+<P>
+<H4>
+<A NAME="File%20Systems"></A>File Systems
+</H4>
+<P>
+File system add-ons provide support for disk and network file systems, such as BFS, HFS, FAT, ISO 9660, CIFS, and so forth.  By creating new file system add-ons, developers can provide access to disks that are formatted using other file system.
+<P>
+<HR>
+<H3>
+<A NAME="Interactions%20with%20the%20Kernel"></A>Interactions with the Kernel
+</H3>
+<P>
+The kernel provides a number of services that drivers and modules can use.  These include:
+<P>
+<UL>
+<LI>Enabling and disabling interrupts.
+<P>
+<LI>Setting up memory for DMA transactions.
+<P>
+<LI>Access to other devices and modules.
+<P>
+</UL>
+<P>
+The kernel also provides, at the user level, a Posix-like API for accessing devices.  An application can open a device through <B><TT>open()</TT></B>, and use <B><TT>read()</TT></B>, <B><TT>write()</TT></B>, and <B><TT>ioctl() </TT></B>to access the device.
+<P>
+The Posix functions are converted into system calls into the kernel, which then passes them, via <B><TT><A HREF="#devfs">devfs</A></TT></B>, to the appropriate device driver.
+<P>
+<HR>
+<H2>
+<A NAME="devfs"></A>devfs
+</H2>
+<P>
+The kernel manages device drivers through <B><TT><A HREF="#devfs">devfs</A></TT></B>, the device file system that's mounted at <B>/dev</B> during the boot process.  In order to be accessed, a driver must "publish" itself by adding an entry in the <B>/dev</B> hierarchy.  The basic Posix I/O functions (<B><TT>open()</TT></B>, <B><TT>read()</TT></B>, <B><TT>write()</TT></B>, <B><TT>readv()</TT></B>, <B><TT>writev()</TT></B>, <B><TT>ioctl()</TT></B>, and <B><TT>close()</TT></B>) can then be used.
+<P>
+<B><TT>Devfs</TT></B> makes the drivers available as needed in <B>/dev</B>; this usually happens the first time a program iterates through the directory entries for a subdirectory in <B>/dev</B>.  The kernel knows where in the <B>/dev</B> hierarchy to publish drivers based on their location in <B>/boot/beos/system/add-ons/kernel/drivers/dev</B>.  For example, the ATAPI driver publishes drivers in <B>/dev/disk/ide/atapi</B>, the driver is located in <B>/boot/beos/system/add-ons/kernel/drivers/dev/disk/ide/atapi</B>.  Whew.
+<P>
+You can see this device hierarchy by using the "ls" command from a Terminal window.  "ls /dev" will show you the root of the device hierarchy, "ls /dev/disk" will show you disk device busses, "ls /dev/disk/ide" will show you the IDE devices, and so forth.
+<P>
+In reality, drivers tend to publish themselves in multiple locations in the <B>/dev</B> hierarchy, so instead of putting duplicate copies of the driver in the <B>.../drivers/dev</B> tree, the driver binaries are put at <B>/boot/beos/system/add-ons/kernel/drivers/bin</B>, and symlinks are created in the <B>.../drivers/dev</B> tree at the appropriate place.  (The same is also done for drivers in <B>/boot/home/config/add-ons/kernel/drivers/...</B>.)
+<P>
+<HR>
+<H2>
+<A NAME="Driver%20Implementation%20Principles"></A><FONT SIZE=6>D</FONT>river <FONT SIZE=6>I</FONT>mplementation <FONT SIZE=6>P</FONT>rinciples
+</H2>
+<P>
+Much of the stability of the BeOS is achieved by constructing a nearly impenetrable wall between the kernel and user applications.  Drivers are chinks in that wall.  If a driver misbehaves or fails, there's a strong possibility that it will cause unexpected behavior or kill the entire system.  It's absolutely critical that drivers not only be very carefully tested before being released to the public, but that they follow the rules to the letter.
+<P>
+<HR>
+<H3>
+<A NAME="Kernel%20Space%20vs.%20User%20Space"></A>Kernel Space vs. User Space
+</H3>
+<P>
+One way you can reduce the risk of your driver causing a general system failure is by putting as much code as possible in user space.  Create a driver that loads into kernel space just enough code to handle the low-level interactions that absolutely have to be done in kernel space, then load code into user space to handle the rest of the work.  If the add-on fails, the system will keep running&mdash;only your driver will fail.
+<P>
+Another plus to placing as much of your code as possible into user space is that it's much easier to debug code running in user space.  Conventional debugging techniques that don't work for kernel code can be applied, and there's much less chance of taking down the system in the process.
+<P>
+<HR>
+<H3>
+<A NAME="Code%20Synchronization"></A>Code Synchronization
+</H3>
+<P>
+Normally, spinlocks are a bad thing.  A spinlock is a tight loop that watches for a condition to occur, looping endlessly until that condition is met (this is called "busy waiting").  This wastes valuable processor time, and is normally discouraged. 
+<P>
+In general, you're encouraged to use semaphores instead of spinlocks; however, you can't acquire a semaphore while handling an interrupt.  So if you need to synchronize code while handling an interrupt, you must use a spinlock.  Put simply:
+<P>
+<UL>
+<LI>Use spinlocks to protect critical sections in interrupt-handling code.
+<P>
+<LI>Use semaphores in any other situation that calls for code synchronization.
+<P>
+</UL>
+<P>
+Anywhere you use a spinlock to protect a critical section, you should disable interrupts.  Of course, in an interrupt handler, you know that interrupts are already disabled, so you don't need to explicitly disable interrupts yourself.  Interrupt handlers include I/O interrupts installed using <B><TT>install_io_interrupt()</TT></B> and timer interrupts installed by calling <B><TT><A HREF="KernelFunctions.html#add_timer()">add_timer()</A></TT></B>.
+<P>
+<A NAME="19965:%20head3:%20Functions%20Available%20During%20Spinlocks"></A>
+<P>
+<H4>
+<A NAME="Functions%20Available%20During%20Spinlocks"></A>Functions Available During Spinlocks
+</H4>
+<P>
+While your spinlock is running, you can perform the following actions.  If it's not on this list, you can't do it.
+<P>
+<UL>
+<LI>You can examine and alter hardware registers by using the appropriate bus manager hooks.
+<P>
+<LI>You can examine and alter any locked-down memory.
+<P>
+<LI>You can call the following kernel functions: <B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#atomic_add()">atomic_add()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#atomic_or()">atomic_or()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#atomic_and()">atomic_and()</A></TT></B>.
+<P>
+<LI>You can call the following bus manager functions: <B><TT>read_io_*()</TT></B> and <B><TT>write_io*()</TT></B>.
+<P>
+</UL>
+<P>
+If you do anything else inside your spinlock, you're breaking the rules, so don't do it.
+<P>
+<H4>
+<A NAME="Using%20Spinlocks"></A>Using Spinlocks
+</H4>
+<P>
+You need to be sure that your calls to <B><TT><A HREF="KernelFunctions.html#acquire_spinlock()">acquire_spinlock()</A></TT></B> and <B><TT><A HREF="KernelFunctions.html#release_spinlock()">release_spinlock()</A></TT></B> are balanced.  In addition, if you nest spinlocks, they must be released in logical order&mdash;that is, in the opposite order in which they're acquired.
+<P>
+The kernel keeps track of which spinlocks are being held and which are being waited upon.  The kernel assumes that spinlocks are initialized to 0, and then acquired and released in logical order.
+<P>
+By keeping track of spinlocks, the kernel can detect and break deadlocks on multiprocessor systems.
+<P>
+<HR>
+<H3>
+<A NAME="Disabling%20Interrupts"></A>Disabling Interrupts
+</H3>
+<P>
+The only time you should ever disable interrupts in a device driver is just before entering a spinlock-protected critical section.  There is absolutely no other reason to do it, so don't.
+<P>
+After disabling interrupts, you should reenable them as quickly as possible.  You must <B>never</B>, under any circumstances, leave interrupts disabled for more than 50 microseconds.  This means that your interrupt handler code (which runs with interrupts implicitly disabled) must execute in 50 microseconds or less.
+<P>
+<H4>
+<A NAME="Functions%20Available%20While%20Interrupts%20Are%20Disabled"></A>Functions Available While Interrupts Are Disabled
+</H4>
+<P>
+If you have interrupts disabled and aren't in a spinlock, you can do the following things in addition to those listed above in <a href="#Functions%20Available%20During%20Spinlocks">"Functions Available During Spinlocks"</a>:
+<P>
+<UL>
+<LI>You can call <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#release_sem_etc()">release_sem_etc()</A></TT></B> with the <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#B_DO_NOT_RESCHEDULE">B_DO_NOT_RESCHEDULE</A></TT></B> flag set.
+<P>
+<LI>You can call <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#get_sem_count()">get_sem_count()</A></TT></B>, <B><TT><A HREF="KernelFunctions.html#add_timer()">add_timer()</A></TT></B>, <B><TT><A HREF="KernelFunctions.html#cancel_timer()">cancel_timer()</A></TT></B>, and <B><TT><A HREF="KernelFunctions.html#dprintf()">dprintf()</A></TT></B>.
+<P>
+</UL>
+<P>
+If you feel that you need to call a function not explicitly listed as permitted here, please contact Be Developer Support at devsupport@be.com and explain your needs; we'd be happy to discuss the situation with you.
+<P>
+<H4>
+<A NAME="Don't%20Block"></A>Don't Block
+</H4>
+<P>
+It's crucial that your interrupt handler never block, whether directly (by acquiring a semaphore, for example) or indirectly (by calling a function that might block).  
+<P>
+Blocking can happen in a surprisingly large number of BeOS functions.  It's obvious that <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#acquire_sem()">acquire_sem()</A></TT></B> can block, but you might not be aware that functions such as <B><TT><A HREF="area_malloc.html#malloc()">malloc()</A></TT></B> or <B><TT><A HREF="../The%20Kernel%20Kit/Ports.html#read_port()">read_port()</A></TT></B> can block.  Even touching unlocked memory areas can block because of virtual memory hits.
+<P>
+The point is this:  If the BeOS function you want to call isn't explicitly listed in this section as one you can use, <B>don't call it</B>.
+<P>
+<H4>
+<A NAME="Don't%20Preempt"></A>Don't Preempt
+</H4>
+<P>
+Your interrupt handler or spinlock section can't be preempted.  Preemption could occur if you call <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#release_sem()">release_sem()</A></TT></B> or <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#release_sem_etc()">release_sem_etc()</A></TT></B> without specifying the <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#B_DO_NOT_RESCHEDULE">B_DO_NOT_RESCHEDULE</A></TT></B> flag.  Normally, <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#release_sem()">release_sem()</A></TT></B> lets the scheduler preempt your thread to allow other threads to acquire the semaphore as fast as possible.  By specifying <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#B_DO_NOT_RESCHEDULE">B_DO_NOT_RESCHEDULE</A></TT></B>, you tell the scheduler to allow your thread to continue running after it releases the semaphore. 
+<P>
+If your interrupt handler wants to ensure that any preemption is handled immediately, it should specify <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#B_DO_NOT_RESCHEDULE">B_DO_NOT_RESCHEDULE</A></TT></B> when calling <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#release_sem()">release_sem()</A></TT></B>, then return <B><TT>B_INVOKE_SCHEDULER</TT></B>.  This causes the scheduler to immediately handle preemption after your interrupt handler returns, instead of resuming the interrupted task.  This is especially useful if your code called <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#release_sem_etc()">release_sem_etc()</A></TT></B> to release a semaphore that will allow other code to run elsewhere (such as in your driver's corresponding user-space code).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Again, when you call <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#release_sem_etc()">release_sem_etc()</A></TT></B>, be sure to specify the <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#B_DO_NOT_RESCHEDULE">B_DO_NOT_RESCHEDULE</A></TT></B> flag to avoid any chance of preemption.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+In summary, the order in which you should do things is this:
+<P>
+<UL>
+<LI>Disable interrupts.
+<P>
+<LI>Acquire the spinlock.
+<P>
+<LI>Perform your tasks.
+<P>
+<LI>Release the spinlock.
+<P>
+<LI>Restore the original interrupt state.
+<P>
+</UL>
+<P>
+<H4>
+<A NAME="File%20I/O"></A>File I/O
+</H4>
+<P>
+Sometimes a driver needs to be able to access disk files.  Perhaps the driver has a preference file it needs to read.  There are two ways to do this.  You can use Posix I/O calls, or you can use the driver settings API provided by BeOS.  The latter is preferred.
+<P>
+<H5>
+<A NAME="Using%20Posix%20Calls"></A>Using Posix Calls
+</H5>
+<P>
+Under BeOS, device drivers can access disk files using the standard low-level Posix I/O functions: <B><TT>open()</TT></B>, <B><TT>close()</TT></B>, <B><TT>read()</TT></B>, <B><TT>write()</TT></B>, and so forth.  There aren't any special chores to attend to beforehand.  Just <B><TT>open()</TT></B> the file and do your thing.
+<P>
+Two Posix extensions that might be helpful when you're writing code to perform file I/O from a device driver: <B><TT>readv()</TT></B> and <B><TT>writev()</TT></B>.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int readv(int fd, const struct iovec *vector, size_t count);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;int writev(int fd, const struct iovec *vector, size_t count);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;struct iovec {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__ptr_t iov_base;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t iov_len;
+&nbsp;&nbsp;&nbsp;};</PRE>
+<P>
+These functions provide a means to read and write contiguous portions of a file from multiple buffers.  <I><FONT  color=991122 face=HELVETICA>vector</I></FONT> is a pointer to an array containing <I><FONT  color=991122 face=HELVETICA>count</I></FONT> vector records, each of which contains a pointer to a buffer, and the size of the buffer.  <B><TT>readv()</TT></B> fills these buffers with data from the file, and <B><TT>writev()</TT></B> writes them to the file, in order.
+<P>
+When successful, <B><TT>readv()</TT></B> returns the number of bytes read.
+<P>
+For example, if your code needs to write two separate 1k buffers into a file, one after the other, you might do something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;struct iovec v[2];
+&nbsp;&nbsp;&nbsp;v[0].iov_base = &amp;buffer1;
+&nbsp;&nbsp;&nbsp;v[0].iov_len = 1024;
+&nbsp;&nbsp;&nbsp;v[1].iov_base = &amp;buffer2;
+&nbsp;&nbsp;&nbsp;v[1].iov_len = 1024;
+&nbsp;&nbsp;&nbsp;if (writev(fd, &amp;v, 2) != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* error */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Performing vectored I/O like this is often faster than doing multiple calls to <B><TT>read()</TT></B> and <B><TT>write()</TT></B>.
+<P>
+<H5>
+<A NAME="The%20Driver%20Settings%20API"></A>The Driver Settings API
+</H5>
+<P>
+If your driver is loaded before the file system for the disk on which your settings file resides, your driver might not be able to load its settings using Posix calls.  The driver settings API lets you work around this circumstance.  See the <a href="../../4.1BookDevice Driverssettings_api.html#Driver%20Settings%20API">"Driver Settings API"</a> section for details.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

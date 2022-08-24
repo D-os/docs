@@ -1,0 +1,1182 @@
+<HTML><HEAD><TITLE>The Midi Kit: BMidi</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMidi"></A>BMidi
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/midi/Midi.h">be/midi/Midi.h</A>
+<P>
+Library:  libmidi.so
+<P>
+<H6><A HREF="Midi.summary.html"><i>Summary</i></A></H6>
+<P>
+BMidi is an abstract class that defines protocols and default implementations for functions that most of the other Midi Kit classes inherit.  The functions that BMidi defines fall into four categories:
+<P>
+<UL>
+<LI><I>Connection functions</I>.  The connection functions let you connect the output of one BMidi object to the input of another BMidi object.  
+<P>
+<LI><I>Performance functions</I>.  BMidi objects that generate MIDI data (by reading from a port or file, as examples) implement the <B><TT><A HREF="#Run()">Run()</A></TT></B> hook function.  <B><TT><A HREF="#Run()">Run()</A></TT></B> is the brains of a MIDI performance; <B><TT><A HREF="#Start()">Start()</A></TT></B> and <B><TT><A HREF="#Stop()">Stop()</A></TT></B> control the performance. 
+<P>
+<LI><I>"Spray" functions</I>.  The "spray" functions send MIDI messages to each of the objects that are connected to the output of the sprayer.  There's a spray function for each type of MIDI message; for example, <B><TT>SprayNoteOn() </TT></B>corresponds to MIDI's Note On message. 
+<P>
+<LI><I>"MIDI hook" functions</I>.  The "MIDI hook" functions define the object's response to a particular type of MIDI message.  There's a hook function for each MIDI message (<B><TT>NoteOn()</TT></B>, <B><TT>NoteOff()</TT></B>, etc.).  The hook functions are invoked automatically as "upstream" objects call the corresponding spray functions.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Forming%20Connections"></A>Forming Connections
+</H3>
+<P>
+MIDI data streams through your application, passing from one BMidi-derived object to another.  Each object does whatever it's designed to do:  Sends the data to a MIDI port, writes it to a file, modifies it and passes it on, and so on.  
+<P>
+You form a tree of BMidi objects through BMidi's<B><TT> <A HREF="#Connect()">Connect()</A></TT></B> function, which takes a single BMidi argument.   By calling <B><TT><A HREF="#Connect()">Connect()</A></TT></B>, you connect the output of the calling object to the input of the argument object. (i.e. the caller is the source; the argument is the destination.)
+<P>
+Let's say you want to connect a MIDI keyboard to your computer, play it, and have the performance recorded in a file.  You connect  a <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> object, which reads data from the MIDI port, to a <A HREF="MidiStore.html#BMidiStore">BMidiStore</A> object, which stores the data that's sent to it and can write it to a file:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Connect the output of a BMidiPort to the input of a BMidiStore. */
+&nbsp;&nbsp;&nbsp;BMidiPort m_port;
+&nbsp;&nbsp;&nbsp;BMidiStore m_store);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;m_port.Connect(&amp;m_store);</PRE>
+<P>
+You also have to tell the <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> to start listening to the MIDI port, by calling its <B><TT><A HREF="#Start()">Start()</A> </TT></B>function.  This is explained in a later section.
+<P>
+Once you've made the recording, you can play it back by re-connecting the objects in the opposite direction:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* We&gt;ll disconnect first, although this isn&gt;t strictly necessary. */
+&nbsp;&nbsp;&nbsp;m_port.Disconnect(&amp;m_store);
+&nbsp;&nbsp;&nbsp;m_store.Connect(&amp;m_port);</PRE>
+<P>
+In this configuration, a<B><TT> <A HREF="#Start()">Start()</A></TT></B> call to<B><TT> m_store</TT></B> would cause its MIDI data to flow into the <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> (and thence to a synthesizer, for example, for realization).
+<P>
+<H4>
+<A NAME="Sources%20and%20Destinations"></A>Sources and Destinations
+</H4>
+<P>
+A BMidi object can be the source for any number of other objects:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;a_midi.Connect(&amp;b_object);
+&nbsp;&nbsp;&nbsp;a_midi.Connect(&amp;c_object);
+&nbsp;&nbsp;&nbsp;a_midi.Connect(&amp;d_object);</PRE>
+<P>
+A source can get a list of its destinations through the <B><TT><A HREF="#Connections()">Connections()</A></TT></B> function.
+<P>
+A BMidi object can be the destination for any number of sources:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;b_midi.Connect(&amp;e_object);
+&nbsp;&nbsp;&nbsp;c_midi.Connect(&amp;e_object);
+&nbsp;&nbsp;&nbsp;d_midi.Connect(&amp;e_object);</PRE>
+<P>
+However, a destination <I>can't</I> get a list of its sources.
+<P>
+<A NAME="39752:%20head2:%20Message%20Generation%20and%20the%20Run()%20Function"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Generating%20MIDI%20Messages"></A>Generating MIDI Messages
+</H3>
+<P>
+If your class wants to generate new MIDI data (as opposed to filtering or realizing the data it receives), it must implement the <B><TT><A HREF="#Run()">Run()</A></TT></B> function.  An implementation of <B><TT><A HREF="#Run()">Run()</A></TT></B> should include a <B><TT>while()</TT></B> loop that broadcasts one or more MIDI message on each pass (typically it broadcasts only one), by invoking a spray function.  To predicate the loop you <I>must</I> test the value of the <B><TT><A HREF="#KeepRunning()">KeepRunning()</A></TT></B> boolean function.
+<P>
+The outline of a <B><TT><A HREF="#Run()">Run()</A></TT></B> implementation looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyMidi::Run()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (KeepRunning()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Generate a message and spray it. For example... */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SprayNoteOn(...);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* You MUST exit when KeepRunning() returns false. */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <B><TT><A HREF="#Run()">Run()</A></TT></B> function <I>must</I> exit when <B><TT><A HREF="#KeepRunning()">KeepRunning()</A></TT></B> returns <B><TT>false</TT></B>.  If it doesn't, you'll leak threads.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+To tell an object to perform its <B><TT><A HREF="#Run()">Run()</A> </TT></B>function, you call the object's <B><TT><A HREF="#Start()">Start()</A></TT></B> function&mdash;you never call <B><TT><A HREF="#Run()">Run()</A></TT></B> directly.  <B><TT><A HREF="#Start()">Start()</A></TT></B> causes the object to spawn a thread (its "run" thread) and execute <B><TT><A HREF="#Run()">Run()</A> </TT></B>within it.  When you're tired of the object's performance, you call its <B><TT><A HREF="#Stop()">Stop()</A></TT></B> function.
+<P>
+Keep in mind that the <B><TT><A HREF="#Run()">Run()</A></TT></B> function is only needed in classes that introduce <I>new</I> MIDI data into a performance.  As examples, BMidiStore's <B><TT><A HREF="#Run()">Run()</A></TT></B> sprays messages that correspond to the MIDI data that it stores, and <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> reads data from the MIDI port and sprays messages accordingly.   
+<P>
+Another point to keep in mind is that the <B><TT><A HREF="#Run()">Run()</A> </TT></B>function can run ahead of real time.  It doesn't have to generate and spray data precisely at the moment that the data needs to be realized.  This is further explained in the section &nbsp;<a href="#Time%20on%20page9">"Time" on page9</a>. 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A> class differs from the other classes in the way that it implements and uses its <B><TT><A HREF="#Run()">Run()</A></TT></B> function; in particular, it doesn't spawn a run thread.  See the <A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A> class for more information.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<A NAME="17525:%20head2:%20Spray%20Functions"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Spray%20Functions"></A>Spray Functions
+</H3>
+<P>
+The spray functions send data to the BMidi objects that are connected to the running object's output.  There's a separate spray function for each of the MIDI message types:  <B><TT>SprayNoteOn()</TT></B>, <B><TT>SprayNoteOff()</TT></B>, <B><TT>SprayPitchBend()</TT></B>, and so on.  Spray functions are always found within a BMidi's Run() loop, but they can be found in other places as well.  For example, if you're creating a MIDI filter, you would use spray functions in the implementations of the object's MIDI hook functions (as explained next).
+<P>
+<A NAME="13246:%20head2:%20MIDI%20Hook%20Functions"></A>
+<P>
+<HR>
+<H3>
+<A NAME="MIDI%20Hook%20Functions"></A>MIDI Hook Functions
+</H3>
+<P>
+The MIDI hook functions are hooks that are invoked upon an object's connections when the object sprays MIDI data.  The functions take the names of the MIDI messages to which they respond:  <B><TT>NoteOn() </TT></B>responds to a Note On message, <B><TT>NoteOff() </TT></B>responds to a Note Off, and so on.  For example, this...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;a_midi.Connect(&amp;b_midi);
+&nbsp;&nbsp;&nbsp;a_midi.SprayNoteOn(...);</PRE>
+<P>
+...causes <B><TT>b_midi</TT></B>'s <B><TT>NoteOn()</TT></B> function to be invoked.  The arguments that are passed to <B><TT>NoteOn()</TT></B> are taken directly from the <B><TT>SprayNoteOn()</TT></B> call.
+<P>
+BMidi doesn't provide default implementations for any of the MIDI hooks; it's up to each BMidi-derived class to decide how to respond to MIDI messages.  
+<P>
+Every BMidi object automatically spawns an "inflow" thread when it's constructed.  It's in this thread that the spray-invoked MIDI hooks are executed.  The inflow thread is always running&mdash;the <B><TT><A HREF="#Start()">Start()</A></TT></B> and <B><TT><A HREF="#Stop()">Stop()</A> </TT></B>functions don't affect it.  As soon as you construct an object, it's ready to receive data.
+<P>
+<H4>
+<A NAME="Calling%20MIDI%20Hooks%20Directly"></A>Calling MIDI Hooks Directly
+</H4>
+<P>
+You can also feed MIDI data to a BMidi object by invoking the MIDI hook functions directly.  For example, let's say you just want to play a note on the General MIDI synthesizer.  You don't have to create your own BMidi class simply to implement a <B><TT><A HREF="#Run()">Run()</A></TT></B> function that sprays the note; instead, all you have to do is this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMidiSynth midiSynth;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Initialize the BMidiSynth as described in that class. */
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;/* Play a note. */
+&nbsp;&nbsp;&nbsp;midiSynth.NoteOn(...);</PRE>
+<P>
+Keep in mind that when you invoke a hook function directly, it executes  synchronously in the calling thread.  Furthermore, the object may also be receiving MIDI messages in its inflow thread.  For the Midi Kit-defined classes, this isn't a problem.
+<P>
+<H4>
+<A NAME="Creating%20a%20MIDI%20Filter"></A>Creating a MIDI Filter
+</H4>
+<P>
+Some BMidi objects "act as filters:  They receive data, modify it, and then pass it on.  To do this, you call the appropriate spray functions from within the implementations of the MIDI hooks.  Below is the implementation of the <B><TT>NoteOn() </TT></B>function for a proposed class called Transposer.  It takes each Note On, transposes it up a half step, and then sprays it:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void Transposer::NoteOn(uchar channel, uchar keyNumber, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar velocity, uint32 time)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar new_key = max(keyNumber + 1, 127);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SprayNoteOn(channel, new_key, velocity, time);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+There's a subtle but important distinction between a filter class and a "performance" class (where the latter is a class that's designed to actually realize the MIDI data it receives).  The distinction has to do with time, and is explained in the next section.  An implication of the distinction that affects the current discussion is that it may not be a great idea to invest, in a single object, the ability to filter <I>and</I> perform MIDI data.  Both <A HREF="MidiStore.html#BMidiStore">BMidiStore</A> and <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> are performance classes&mdash;objects of these classes realize the data they receive, the former by caching it, the latter by sending it out the MIDI port.  In neither of these classes do the MIDI hooks spray data.
+<P>
+<A NAME="27287:%20head2:%20Time"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Time"></A>Time
+</H3>
+<P>
+Every spray and MIDI hook function takes a final <I><FONT  color=991122 face=HELVETICA>time</I></FONT> argument.  This argument declares when the message that the function represents should be performed.  The argument is given in <I><FONT  color=991122 face=HELVETICA>ticks</I></FONT> (milliseconds).  Tick 0 occurs when you boot your computer; the tick counter automatically starts running at that point.  To get the current tick measurement, you call the global, Kernel Kit-defined <B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B> function and divide by 1000 (<B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A> </TT></B>returns microseconds).
+<P>
+By convention, time arguments are applied at an object's input.  In other words, a MIDI hook should look at the time argument, wait until the designated time, and then do whatever it does that it does do.  However, this only applies to BMidi-derived classes that are designed to perform MIDI data.  Objects that simply filter data <I>shouldn't </I>apply the time argument.  
+<P>
+To apply the <I><FONT  color=991122 face=HELVETICA>time</I></FONT> argument, you call the <B><TT><A HREF="#SnoozeUntil()">SnoozeUntil()</A> </TT></B>function, passing the value of <I><FONT  color=991122 face=HELVETICA>time</I></FONT>.  For example, a "performance" <B><TT>NoteOn() </TT></B>function would look like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyPerformer::NoteOn(uchar channel, uchar keyNumber, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar velocity, uint32 time)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SnoozeUntil(time);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Perform the data here. */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If <I><FONT  color=991122 face=HELVETICA>time</I></FONT> designates a tick that has already tocked, <B><TT><A HREF="#SnoozeUntil()">SnoozeUntil()</A></TT></B> returns immediately; otherwise it tells the inflow thread to snooze until the designated tick is at hand. 
+<P>
+<HR>
+<H3>
+<A NAME="Spraying%20Time"></A>Spraying Time
+</H3>
+<P>
+If you're implementing the <B><TT><A HREF="#Run()">Run()</A> </TT></B>function, then you have to generate a time value yourself which you pass as the final argument to each spray function that you call.  The value you generate depends on whether your class runs in real time, or ahead of time.
+<P>
+<H4>
+<A NAME="Running%20in%20Real%20Time"></A>Running in Real Time
+</H4>
+<P>
+If your class conjures MIDI data that needs to be performed immediately, you should use the <B><TT>B_NOW</TT></B> macro as the value of the <I><FONT  color=991122 face=HELVETICA>time</I></FONT> arguments that you pass to your spray functions.  <B><TT>B_NOW </TT></B>is simply a cover for (<B><TT><A HREF="../The%20Kernel%20Kit/SysTime.html#system_time()">system_time()</A></TT></B>/1000<B><TT><A HREF="#)">)</A> </TT></B>(converted to  <B><TT>uint</TT></B>).  By using <B><TT>B_NOW</TT></B> as the <I><FONT  color=991122 face=HELVETICA>time</I></FONT> argument you're declaring that the data should be performed in the same tick in which it was generated.  This probably won't happen; by the time the MIDI hooks are called and the data realized, a couple of ticks may have elapsed.  In this case, the MIDI hooks' <B><TT><A HREF="#SnoozeUntil()">SnoozeUntil()</A></TT></B> calls will see that the time value has passed and will return immediately, allowing the data to be realized as quickly as possible.  
+<P>
+<H4>
+<A NAME="Running%20Ahead%20of%20Time"></A>Running Ahead of Time
+</H4>
+<P>
+If you're generating data ahead of its performance time, you need to compute the time value so that it pinpoints the correct time in the future.  For example, if you want to create a class that generates a note every 100 milliseconds, you need to do something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyTicker::Run()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 when = B_NOW;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar key_num;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (KeepRunning()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Make a new note. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SprayNoteOn(1, 60, 64, when);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Turn the note off 99 ticks later. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;when += 99;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SprayNoteOff(1, 60, 0, when);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Bump the when variable so the next Note On
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * will be 100 ticks after this one.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;when += 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+When a MyTicker object is told to start running, it generates a sequence of Note On/Note Off pairs, and sprays them to its connected objects.  Somewhere down the line, a performance object will apply the time value by calling <B><TT><A HREF="#SnoozeUntil()">SnoozeUntil()</A></TT></B>.  
+<P>
+But what keeps MyTicker from running wild and generating thousands or millions of notes&mdash;which aren't scheduled to be played for hours&mdash;as fast as possible?  It's because the spray functions pass data to the MIDI hooks through Kernel Kit ports that are 1 (one) message deep.  So, as long as one of the MIDI hooks calls <B><TT><A HREF="#SnoozeUntil()">SnoozeUntil()</A></TT></B>, the spraying object will never be more than one message ahead.
+<P>
+A useful feature of this mechanism is that if you connect a series of BMidi object that <I>don't </I>invoke <B><TT><A HREF="#SnoozeUntil()">SnoozeUntil()</A></TT></B>, you can process MIDI data faster than real-time.  For example, let's say you want to spray data from one <A HREF="MidiStore.html#BMidiStore">BMidiStore</A> object, pass the data through a filter, and then store it in another BMidiStore.  The <A HREF="MidiStore.html#BMidiStore">BMidiStore</A> MIDI hooks don't call <B><TT><A HREF="#SnoozeUntil()">SnoozeUntil()</A></TT></B>; thus, data will flow out of the first object, through the filter, and into its destination as quickly as possible, allowing you to process hours of real-time data in just a few seconds.  Of course, if you add a performance object into this mix (so you can hear the data while it's being processed), the data flow will be tethered, as described above.
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#Run()">Run()</A>
+<br>
+</TT></B>Contains the loop that generates and broadcasts MIDI messages. 
+<P>
+The MIDI hook functions (<B><TT>NoteOn()</TT></B>, <B><TT>NoteOff()</TT></B>, and so on) are listed in the section &nbsp;<a href="#MIDI%20Hook%20and%20Spray%20Functions%20on%20page15">"MIDI Hook and Spray Functions" on page15</a>.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMidi()"></A>BMidi()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMidi(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates and returns a new BMidi object.  The object's inflow thread is spawned and started in this function&mdash;in other words, BMidi objects are born with the ability to accept incoming messages.  The "run" thread, on the other hand, isn't spawned until <B><TT><A HREF="#Start()">Start()</A> </TT></B>is called.
+<P>
+<HR>
+<H3>
+<A NAME="~BMidi()"></A>~BMidi()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual<B><TT><FONT  color=000022 size=+1> ~BMidi()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Kills the inflow and run threads after they've gotten to suitable stopping points (as defined below), deletes the list that holds the connections (but doesn't delete the objects contained in the list), then destroys the BMidi object.  
+<P>
+The inflow thread is stopped after all currently-waiting MIDI hook messages have been read.  No more messages are accepted while the "inflow queue" is being drained.  The run thread is allowed to complete its current pass through the run loop and then told to stop (in the manner of the <B><TT><A HREF="#Stop()">Stop()</A></TT></B> function).  
+<P>
+While the destructor severs the connections that this BMidi object has formed, it doesn't sever the connections from other objects to this one.  For example, consider the following (improper) sequence of calls:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* DON&gt;T DO THIS... */
+&nbsp;&nbsp;&nbsp;a_midi->Connect(b_midi);
+&nbsp;&nbsp;&nbsp;b_midi->Connect(c_midi);
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;delete b_midi;</PRE>
+<P>
+The <B><TT>delete</TT></B> call severs the connection from <B><TT>b_midi</TT></B> to <B><TT>c_midi</TT></B>, but it doesn't disconnect <B><TT>a_midi</TT></B> and <B><TT>b_midi</TT></B>.  You have to disconnect the object's "back-connections" explicitly:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* ...DO THIS INSTEAD */
+&nbsp;&nbsp;&nbsp;a_midi->Connect(b_midi);
+&nbsp;&nbsp;&nbsp;b_midi->Connect(c_midi);
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;a_midi->Disconnect(b_midi);
+&nbsp;&nbsp;&nbsp;delete b_midi;</PRE>
+<P>
+<B>See also:  <TT><A HREF="#Stop()">Stop()</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AllNotesOff()"></A>AllNotesOff()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AllNotesOff(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>controlMsgOnly</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>time = B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends a B_ALL_NOTES_OFF Control Change message, passing along the timestamp, to all 16 MIDI channels.  If <I><FONT  color=991122 face=HELVETICA>channelMsgOnly</I></FONT> is <B><TT>false</TT></B>, the function also sends a Note Off message for all key numbers on all channels.
+<P>
+<HR>
+<H3>
+<A NAME="Connect()"></A>Connect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Connect(</TT></B></FONT>BMidi *<I><FONT  color=991122 face=HELVETICA>toObject</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Connects the BMidi object's output to <I><FONT  color=991122 face=HELVETICA>toObject</I></FONT>'s input.  The BMidi object can connect its output to any number of other objects.  Each of these connected objects receives a MIDI hook call as the BMidi sprays messages.  
+<P>
+Any object that's been the argument in a <B><TT><A HREF="#Connect()">Connect()</A></TT></B> call should eventually be disconnected through a call to <B><TT><A HREF="#Disconnect()">Disconnect()</A></TT></B>.  In particular, care should be taken to disconnect objects when deleting a BMidi object, as described in the destructor. 
+<P>
+<B>See also:  <TT><A HREF="#~BMidi()">~BMidi()</A></TT></B>,<B><TT> Connections(), IsConnected()
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="Connections()"></A>Connections()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *<B><TT><FONT  color=000022 size=+1>Connections(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) const
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> that contains the objects that are connected to this object's output.  
+<P>
+<HR>
+<H3>
+<A NAME="Disconnect()"></A>Disconnect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Disconnect(</TT></B></FONT>BMidi *<I><FONT  color=991122 face=HELVETICA>toObject</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Severs the BMidi's connection to the argument.  The connection must have previously been formed through a call to<B><TT> Connect() </TT></B>with a like disposition of receiver and argument.
+<P>
+<B>See also:  <TT><A HREF="#Connect()">Connect()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="IsConnected()"></A>IsConnected()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool<B><TT> IsConnected(</TT></B>BMidi *<I><FONT  color=991122 face=HELVETICA>toObject</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the argument is present in the receiver's list of connected objects.
+<P>
+<HR>
+<H3>
+<A NAME="IsRunning()"></A>IsRunning()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool<B><TT> IsRunning(</TT></B>void<B><TT>) const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the object's <B><TT><A HREF="#Run()">Run()</A></TT></B> loop is looping; in other words, if the object has received a <B><TT><A HREF="#Start()">Start()</A></TT></B> function call, but hasn't been told to<B><TT> <A HREF="#Stop()">Stop()</A></TT></B> (or otherwise hasn't fallen out of the loop). 
+<P>
+<HR>
+<H3>
+<A NAME="KeepRunning()"></A>KeepRunning()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool<B><TT> KeepRunning(</TT></B>void<B><TT><A HREF="#)">)</A>
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Used by the <B><TT><A HREF="#Run()">Run()</A></TT></B> function to predicate its <B><TT>while()</TT></B> loop, as explained in the class description.  This function should <I>only</I> be called from within <B><TT><A HREF="#Run()">Run()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Run()"></A>Run()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void<B><TT> Run(</TT></B>void<B><TT><A HREF="#)">)</A>
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+A BMidi-derived class places its data-generating machinery in the <B><TT><A HREF="#Run()">Run()</A> </TT></B>function, as described in the section &nbsp;<a href="#Generating%20MIDI%20Messages%20on%20page6">"Generating MIDI Messages" on page6</a>.  Of particular note:  Your implementation of <B><TT>Run()</TT></B> must exit when <B><TT><A HREF="#KeepRunning()">KeepRunning()</A></TT></B> returns <B><TT>false</TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyMidi::Run()
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (KeepRunning()) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Generate a message and spray it. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* You MUST exit when KeepRunning() returns false. */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="SnoozeUntil()"></A>SnoozeUntil()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT>SnoozeUntil(</TT></B>uint32 <I><FONT  color=991122 face=HELVETICA>tick</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Puts the calling thread to sleep until <I><FONT  color=991122 face=HELVETICA>tick</I></FONT> milliseconds have elapsed since the computer was booted.  This function is meant to be used in the implementation of the MIDI hook functions, as explained in the section &nbsp;<a href="#Time%20on%20page9">"Time" on page9</a>.
+<P>
+<HR>
+<H3>
+<A NAME="Start()"></A>Start()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Start(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Tells the object to spawn its run loop (wherein it executes the <B><TT><A HREF="#Run()">Run()</A></TT></B> function) and then immediately returns.  You can override this function in a BMidi-derived class to provide your own pre-running initialization.  Make sure you call the inherited version of this function within your implementation.  
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The run thread was successfully spawned and resumed.
+<P>
+<UL>
+<LI><I>Thread and port error codes</I>.   Something went wrong.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Stop()"></A>Stop()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT>Stop(</TT></B>void<B><TT><A HREF="#)">)</A>
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Tells the object to stop generating MIDI data.  Calling <B><TT>Stop()</TT></B> tells the <B><TT><A HREF="#KeepRunning()">KeepRunning()</A> </TT></B>function to return <B><TT>false</TT></B>, thus causing the run loop to terminate.  <B><TT>Stop()</TT></B> may return before the thread is dead.   <B><TT>This function</TT></B> doesn't affect the state of in-coming data:  The object will still be able to receive MIDI messages through its MIDI hook functions.
+<P>
+You can override this function in a BMidi-derived class to predicate the stop, or to perform post-performance clean-up (as two examples).  Make sure, however, that you invoke the inherited version of this function within your implementation.
+<P>
+<A NAME="42608:%20head1:%20Input%20and%20Spray%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="MIDI%20Hook%20and%20Spray%20Functions"></A><FONT SIZE=6>M</FONT><FONT SIZE=6>I</FONT><FONT SIZE=6>D</FONT><FONT SIZE=6>I</FONT> <FONT SIZE=6>H</FONT>ook and <FONT SIZE=6>S</FONT>pray <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+The protocols for the MIDI hook and spray functions are given below.  What a particular function <I>means</I> (and the values of its arguments) is defined by the MIDI spec and isn't explained here.  See <a href="#Spray%20Functions">"Spray Functions"</a> and <a href="#MIDI%20Hook%20Functions">"MIDI Hook Functions"</a>  for more information on how these functions are used.
+<P>
+<HR>
+<H3>
+<A NAME="ChannelPressure(),%20SprayChannelPressure()"></A>ChannelPressure(), SprayChannelPressure()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void<B><TT><FONT  color=000022 size=+1>
+<A NAME="ChannelPressure(),%20SprayChannelPressure()"></A> ChannelPressure(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> pressure</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="ChannelPressure(),%20SprayChannelPressure()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="ChannelPressure(),%20SprayChannelPressure()"></A>void
+<B><TT><FONT  color=000022 size=+1><A NAME="ChannelPressure(),%20SprayChannelPressure()"></A> SprayChannelPressure(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> pressure</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="ChannelPressure(),%20SprayChannelPressure()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="ControlChange(),%20SprayControlChange()"></A>ControlChange(), SprayControlChange()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="ControlChange(),%20SprayControlChange()"></A>virtual void
+<B><TT><FONT  color=000022 size=+1><A NAME="ControlChange(),%20SprayControlChange()"></A> ControlChange(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA>  controlNumber</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar<I><FONT  color=991122 face=HELVETICA>  controlValue</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="ControlChange(),%20SprayControlChange()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="ControlChange(),%20SprayControlChange()"></A>void
+<B><TT><FONT  color=000022 size=+1><A NAME="ControlChange(),%20SprayControlChange()"></A> SprayControlChange(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA>  controlNumber</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar<I><FONT  color=991122 face=HELVETICA>  controlValue</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="ControlChange(),%20SprayControlChange()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B>See also:  <TT>AllNotesOff(</TT></B>)
+<P>
+<HR>
+<H3>
+<A NAME="KeyPressure(),%20SprayKeyPressure()"></A>KeyPressure(), SprayKeyPressure()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>
+<A NAME="KeyPressure(),%20SprayKeyPressure()"></A>KeyPressure(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> note</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar<I><FONT  color=991122 face=HELVETICA> pressure</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="KeyPressure(),%20SprayKeyPressure()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="KeyPressure(),%20SprayKeyPressure()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="KeyPressure(),%20SprayKeyPressure()"></A>SprayKeyPressure(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> note</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> pressure</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="KeyPressure(),%20SprayKeyPressure()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="NoteOff(),%20SprayNoteOff()"></A>NoteOff(), SprayNoteOff()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="NoteOff(),%20SprayNoteOff()"></A>virtual void 
+<B><TT><FONT  color=000022 size=+1><A NAME="NoteOff(),%20SprayNoteOff()"></A>NoteOff(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> note</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar<I><FONT  color=991122 face=HELVETICA> velocity</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time = B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="NoteOff(),%20SprayNoteOff()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="NoteOff(),%20SprayNoteOff()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="NoteOff(),%20SprayNoteOff()"></A>SprayNoteOff(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> note</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> velocity</I></FONT>, uint32 time<B><TT><FONT  color=000022 size=+1>
+<A NAME="NoteOff(),%20SprayNoteOff()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="NoteOn(),%20SprayNoteOn()"></A>NoteOn(), SprayNoteOn()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="NoteOn(),%20SprayNoteOn()"></A>virtual void 
+<B><TT><FONT  color=000022 size=+1><A NAME="NoteOn(),%20SprayNoteOn()"></A>NoteOn(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> note</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> velocity</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="NoteOn(),%20SprayNoteOn()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="NoteOn(),%20SprayNoteOn()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="NoteOn(),%20SprayNoteOn()"></A>SprayNoteOn(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> note</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> velocity</I></FONT>, uint32 time<B><TT><FONT  color=000022 size=+1>
+<A NAME="NoteOn(),%20SprayNoteOn()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="PitchBend(),%20SprayPitchBend()"></A>PitchBend(), SprayPitchBend()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="PitchBend(),%20SprayPitchBend()"></A>virtual void 
+<B><TT><FONT  color=000022 size=+1><A NAME="PitchBend(),%20SprayPitchBend()"></A>PitchBend(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> lsb</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> msb</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="PitchBend(),%20SprayPitchBend()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="PitchBend(),%20SprayPitchBend()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="PitchBend(),%20SprayPitchBend()"></A>SprayPitchBend(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> lsb</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> msb</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="PitchBend(),%20SprayPitchBend()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="ProgramChange(),%20SprayProgramChange()"></A>ProgramChange(), SprayProgramChange()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="ProgramChange(),%20SprayProgramChange()"></A>virtual void 
+<B><TT><FONT  color=000022 size=+1><A NAME="ProgramChange(),%20SprayProgramChange()"></A>ProgramChange(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> progNum</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="ProgramChange(),%20SprayProgramChange()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="ProgramChange(),%20SprayProgramChange()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="ProgramChange(),%20SprayProgramChange()"></A>SprayProgramChange(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>channel</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> progNum</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="ProgramChange(),%20SprayProgramChange()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="SystemCommon(),%20SpraySystemCommon()"></A>SystemCommon(), SpraySystemCommon()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="SystemCommon(),%20SpraySystemCommon()"></A>virtual void 
+<B><TT><FONT  color=000022 size=+1><A NAME="SystemCommon(),%20SpraySystemCommon()"></A>SystemCommon(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>status</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> data1</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar<I><FONT  color=991122 face=HELVETICA> data2</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="SystemCommon(),%20SpraySystemCommon()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="SystemCommon(),%20SpraySystemCommon()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="SystemCommon(),%20SpraySystemCommon()"></A>SpraySystemCommon(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>status</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> data1</I></FONT>, uchar<I><FONT  color=991122 face=HELVETICA> data2</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="SystemCommon(),%20SpraySystemCommon()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="SystemExclusive(),%20SpraySystemExclusive()"></A>SystemExclusive(), SpraySystemExclusive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="SystemExclusive(),%20SpraySystemExclusive()"></A>virtual void 
+<B><TT><FONT  color=000022 size=+1><A NAME="SystemExclusive(),%20SpraySystemExclusive()"></A>SystemExclusive(
+</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t<I><FONT  color=991122 face=HELVETICA> dataLength</I></FONT>,uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="SystemExclusive(),%20SpraySystemExclusive()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="SystemExclusive(),%20SpraySystemExclusive()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="SystemExclusive(),%20SpraySystemExclusive()"></A>SpraySystemExclusive(
+</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t<I><FONT  color=991122 face=HELVETICA> dataLength</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="SystemExclusive(),%20SpraySystemExclusive()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="SystemRealTime(),%20SpraySystemRealTime()"></A>SystemRealTime(), SpraySystemRealTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="SystemRealTime(),%20SpraySystemRealTime()"></A>virtual void 
+<B><TT><FONT  color=000022 size=+1><A NAME="SystemRealTime(),%20SpraySystemRealTime()"></A>SystemRealTime(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>status</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="SystemRealTime(),%20SpraySystemRealTime()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="SystemRealTime(),%20SpraySystemRealTime()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="SystemRealTime(),%20SpraySystemRealTime()"></A>SpraySystemRealTime(
+</TT></B></FONT>uchar <I><FONT  color=991122 face=HELVETICA>status</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="SystemRealTime(),%20SpraySystemRealTime()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="TempoChange(),SprayTempoChange()"></A>TempoChange(),SprayTempoChange()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="TempoChange(),SprayTempoChange()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="TempoChange(),SprayTempoChange()"></A>SprayTempoChange(
+</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>beatsPerMinute</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA>&nbsp;time&nbsp;=&nbsp;B_NOW</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="TempoChange(),SprayTempoChange()"></A>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+protected:
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+
+<A NAME="TempoChange(),SprayTempoChange()"></A>void 
+<B><TT><FONT  color=000022 size=+1><A NAME="TempoChange(),SprayTempoChange()"></A>SprayTempoChange(
+</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>beatsPerMinute</I></FONT>, uint32<I><FONT  color=991122 face=HELVETICA> time</I></FONT><B><TT><FONT  color=000022 size=+1>
+<A NAME="TempoChange(),SprayTempoChange()"></A>)
+</TT></B></FONT><P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

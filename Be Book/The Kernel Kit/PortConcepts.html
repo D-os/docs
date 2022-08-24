@@ -1,0 +1,120 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Port Concepts</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Port%20Concepts"></A>Port Concepts
+</H1>
+<P>
+A port is a system-wide message repository into which any thread can copy a buffer of data, and from which any thread can then retrieve the buffer.  This repository is implemented as a first-in/first-out message queue:  A port stores its messages in the order in which they're received, and it relinquishes them in the order in which they're stored.  Each port has its own message queue.
+<P>
+<HR>
+<H3>
+<A NAME="Creating%20and%20Destroying%20a%20Port"></A>Creating and Destroying a Port
+</H3>
+<P>
+The <B><TT><A HREF="Ports.html#create_port()">create_port()</A></TT></B> function creates a new port and assigns it a unique, system-wide <B><TT>port_id</TT></B> number.  Although ports are accessible to all threads, the <B><TT>port_id</TT></B> numbers aren't disseminated by the operating system&mdash;there's no "find port" function.  If you create a port and want some other thread to be able to write to or read from it, you have to broadcast the <B><TT>port_id</TT></B> number to that thread. 
+<P>
+A port is owned by the team in which it was created.  When a team dies (when all its threads are killed), the ports that belong to the team are deleted.  A team can bestow ownership of its ports to some other team through the <B><TT><A HREF="Ports.html#set_port_owner()">set_port_owner()</A></TT></B> function.
+<P>
+If you want explicitly get rid of a port, you call <B><TT><A HREF="Ports.html#delete_port()">delete_port()</A></TT></B>.  You can delete any port, not just those that are owned by the team of the calling thread.  When you delete a port, all of its unread messages are thrown away.  If you want to read this messages, but you don't want any new messages to arrive in the meantime, you should call <B><TT><A HREF="Ports.html#close_port()">close_port()</A></TT></B> before deleting the port.  Note that you can't reopen a closed port; after you get done reading the port's messages, you're expected to delete the port. 
+<P>
+<HR>
+<H3>
+<A NAME="The%20Message%20Queue:%20%20Reading%20and%20Writing%20Port%20Messages"></A>The Message Queue:  Reading and Writing Port Messages
+</H3>
+<P>
+The length of a port's message queue&mdash;the number of messages that it can hold at a time&mdash;is set when the port is created.
+<P>
+The functions <B><TT><A HREF="Ports.html#write_port()">write_port()</A></TT></B> and <B><TT><A HREF="Ports.html#read_port()">read_port()</A></TT></B> manipulate a port's message queue:  <B><TT><A HREF="Ports.html#write_port()">write_port()</A></TT></B> places a message at the tail of the port's message queue; <B><TT><A HREF="Ports.html#read_port()">read_port()</A></TT></B> removes the message at the head of the queue and returns it the caller.<B><TT><A HREF="Ports.html#write_port()">write_port()</A> </TT></B> blocks if the queue is full; it returns when room is made in the queue by an invocation of <B><TT><A HREF="Ports.html#read_port()">read_port()</A></TT></B>.  Similarly, if the queue is empty, <B><TT><A HREF="Ports.html#read_port()">read_port()</A></TT></B> blocks until <B><TT><A HREF="Ports.html#write_port()">write_port()</A></TT></B> is called.
+<P>
+You can provide a timeout for your port-writing and port-reading operations by using the "full-blown" functions<B><TT> <A HREF="Ports.html#write_port_etc()">write_port_etc()</A></TT></B> and <B><TT><A HREF="Ports.html#read_port_etc()">read_port_etc()</A></TT></B>.  By supplying a timeout, you can ensure that your port operations won't block forever. 
+<P>
+Although each port has its own message queue, all ports share a global "queue slot" pool&mdash;there are only so many message queue slots that can be used by all ports taken cumulatively.  If too many port queues are allowed to fill up, the slot pool will drain, which will cause <B><TT><A HREF="Ports.html#write_port()">write_port()</A></TT></B> calls on less-than-full ports to block.  To avoid this situation, you should make sure that your <B><TT><A HREF="Ports.html#write_port()">write_port()</A></TT></B> and <B><TT><A HREF="Ports.html#read_port()">read_port()</A></TT></B> calls are reasonably balanced.  
+<P>
+The <B><TT><A HREF="Ports.html#write_port()">write_port()</A></TT></B> and<B><TT> <A HREF="Ports.html#read_port()">read_port()</A></TT></B> functions are the only way to traverse a port's message queue.  There's no notion of "peeking" at the queue's unread messages, or of erasing messages that are in the queue.
+<P>
+<HR>
+<H3>
+<A NAME="Port%20Messages"></A>Port Messages
+</H3>
+<P>
+A port message&mdash;the data that's sent through a port&mdash;consists of a "message code" and a "message buffer."  Either of these elements can be used however you like, but they're intended to fit these purposes:
+<P>
+<UL>
+<LI>The message code (a single four-byte value) should be a mask, flag, or other predictable value that gives a general representation of the flavor or import of the message.  For this to work, the sender and receiver of the message must agree on the meanings of the values that the code can take.
+<P>
+<LI>The data in the message buffer can elaborate upon the code, identify the sender of the message, or otherwise supply additional information.  The length of the buffer isn't restricted.  To get the length of the message buffer that's at the head of a port's queue, you call the <B><TT><A HREF="Ports.html#port_buffer_size()">port_buffer_size()</A></TT></B> function.
+<P>
+</UL>
+<P>
+The message that you pass to <B><TT><A HREF="Ports.html#write_port()">write_port()</A></TT></B> is copied into the port.  After <B><TT><A HREF="Ports.html#write_port()">write_port()</A> </TT></B>returns, you may free the message data without affecting the copy that the port holds.
+<P>
+When you read a port, you have to supply a buffer into which the port mechanism can copy the message.  If the buffer that you supply isn't large enough to accommodate the message, the unread portion will be lost&mdash;the next call to <B><TT><A HREF="Ports.html#read_port()">read_port()</A> </TT></B>won't finish reading the message.  
+<P>
+You typically allocate the buffer that you pass to<B><TT> <A HREF="Ports.html#read_port()">read_port()</A></TT></B> by first calling <B><TT><A HREF="Ports.html#port_buffer_size()">port_buffer_size()</A></TT></B>, as shown below:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;char *buf = NULL;
+&nbsp;&nbsp;&nbsp;ssize_t size;
+&nbsp;&nbsp;&nbsp;int32 code;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* We&gt;ll assume that my_port is valid. 
+&nbsp;&nbsp;&nbsp; * port_buffer_size() will block until a message shows up.
+&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;if ((size = port_buffer_size(my_port)) &lt; B_OK) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Handle the error */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (size > 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buf = (char *)malloc(size);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (buf) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Now we can read the buffer. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (read_port(my_port, &amp;code, (void *)buf, size) &lt; B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Handle the error */</PRE>
+<P>
+Obviously, there's a race condition (in the example) between <B><TT><A HREF="Ports.html#port_buffer_size()">port_buffer_size()</A></TT></B> and the subsequent <B><TT><A HREF="Ports.html#read_port()">read_port()</A></TT></B> call&mdash;some other thread could read the port in the interim.  If you're going to use<B><TT> <A HREF="Ports.html#port_buffer_size()">port_buffer_size()</A></TT></B> as shown in the example, you shouldn't have more than one thread reading the port at a time.  
+<P>
+As stated in the example, <B><TT><A HREF="Ports.html#port_buffer_size()">port_buffer_size()</A></TT></B> blocks until a message shows up.  If you don't want to (potentially) block forever, you should use the <B><TT><A HREF="Ports.html#port_buffer_size_etc()">port_buffer_size_etc()</A></TT></B> version of the function.  As with the other <B><TT>...etc()</TT></B> functions, <B><TT><A HREF="Ports.html#port_buffer_size_etc()">port_buffer_size_etc()</A></TT></B> provides a timeout option. 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

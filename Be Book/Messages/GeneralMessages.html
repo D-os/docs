@@ -1,0 +1,1610 @@
+<HTML><HEAD><TITLE>Messages: General Messages</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Messages Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Messages%20Master%20Index.html"><FONT face=HELVETICA>Messages Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="General%20Messages"></A>General Messages
+</H1>
+<P>
+<HR>
+<H3>
+<A NAME="B_ABOUT_REQUESTED"></A>B_ABOUT_REQUESTED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system or your app.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;App-defined; typically <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B>.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#AboutRequested()">BApplication::AboutRequested()</A></TT></B> if the target is <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B>.
+<P>
+The message should be assigned to an <B><U>About...</B></U> menu item, such that the message is sent when the user clicks the item.  Your application is expected to put up an "About This Application" panel when it receives this message.
+<P>
+<HR>
+<H3>
+<A NAME="B_ACQUIRE_OVERLAY_LOCK"></A>B_ACQUIRE_OVERLAY_LOCK
+, 
+<A NAME="B_RELEASE_OVERLAY_LOCK"></A>B_RELEASE_OVERLAY_LOCK
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;A graphics driver.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The team owning the overlay.
+<P>
+<B><TT><A HREF="#B_ACQUIRE_OVERLAY_LOCK">B_ACQUIRE_OVERLAY_LOCK</A></TT></B> is sent by a graphics driver when an overlay is acquired.  <B><TT><A HREF="#B_RELEASE_OVERLAY_LOCK">B_RELEASE_OVERLAY_LOCK</A></TT></B> is sent when the overlay is released.
+<P>
+<A NAME="27520:%20head3:%20B_APP_ACTIVATED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_APP_ACTIVATED"></A>B_APP_ACTIVATED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A>
+<P>
+</TT></B><FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#AppActivated()">BApplication::AppActivated()</A>
+<P>
+</TT></B>Sent when an application becomes active or inactive.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>
+</UL>
+<B>Field</B></TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"active"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if the app has become active; otherwise <B><TT>false</TT></B>.</TD>
+</TABLE>
+ 
+<P>
+<HR>
+<H3>
+<A NAME="B_ARCHIVED_OBJECT"></A>B_ARCHIVED_OBJECT
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable and format
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;A dragged replicant, or your app. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;A (remote) application.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Shelf.html#CanAcceptReplicantMessage()">BShelf::CanAcceptReplicantMessage()</A>
+<P>
+</TT><I>As a deliverable:</B></I>  The replicant system uses this message as a deliverable.  If you're using <A HREF="../The%20Interface%20Kit/Dragger.html#BDragger">BDragger</A> and <A HREF="../The%20Interface%20Kit/Shelf.html#BShelf">BShelf</A> objects, the message is created and delivered for you.  You can also simulate a dragged replicant by archiving a view, setting the archive message's command to <B><TT><A HREF="#B_ARCHIVED_OBJECT">B_ARCHIVED_OBJECT</A></TT></B>, and sending the message to a remote application.  If the remote application has a <A HREF="../The%20Interface%20Kit/Shelf.html#BShelf">BShelf</A> object, the <A HREF="../The%20Interface%20Kit/Shelf.html#BShelf">BShelf</A> will pick up the message (through a BMessageFilter) and pass it to the hook function. 
+<P>
+To create a simulated replicant message, you call <B><TT><A HREF="../The%20Application%20Kit/Application.html#Archive()">Archive()</A></TT></B> on the view that you want to replicate, and add (at least) the "add_on" field to the archive message.  
+<P>
+See <A HREF="../The%20Interface%20Kit/Shelf.html#BShelf">BShelf</A> and <A HREF="../The%20Interface%20Kit/Dragger.html#BDragger">BDragger</A> for more information about replicants.
+<P>
+<I><B>As a format:</B></I>  <B><TT><A HREF="#B_ARCHIVED_OBJECT">B_ARCHIVED_OBJECT</A></TT></B> should be used as the command constant for all archive messages.  When you archive an object, the "class" field is automatically added to the archive message.  All other fields must be added by your archiving code.  See the <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> class for more information about archiving.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"class" [ ]</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>An array of class names that gives the class hierarchy of the archived object.</TD>
+<TR>
+<TD>"add_on"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The signature of the library or application that knows how to create the archived object. </TD>
+<TR>
+<TD>"be:add_on_version"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The version of the add_on.</TD>
+<TR>
+<TD>"be:load_each_time"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B>:  The add_on is loaded each time the object is unarchived.
+<br>
+<B><TT>false</TT></B>:  The add_on is loaded only if it isn't already loaded.</TD>
+<TR>
+<TD>"be:unload_on_delete"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD>Is the add_on unloaded when the unarchived object is deleted?</TD>
+<TR>
+<TD>"shelf_type"
+<br>
+(replicants only; optional)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The "type" of shelf that you want to have display the replicant.  A shelf's type is its name, as assigned when it's created.</TD>
+</TABLE>
+<P>
+<A NAME="41050:%20head3:%20B_ARGV_RECEIVED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_ARGV_RECEIVED"></A>B_ARGV_RECEIVED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A>
+<P>
+</TT></B><FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#ArgvReceived()">BApplication::ArgvReceived()</A>
+<P>
+</TT></B>Forwards arguments that <B>(a)</B> the user passes while launching the app from the command line, or <B>(b)</B> are passed to <B><TT><A HREF="../The%20Application%20Kit/Roster.html#Launch()">BRoster::Launch()</A></TT></B>.  Most apps treat command line arguments as filenames that should be opened.  If the filename is relative (if it doesn't start with "/"), you should append it to the "cwd" field to reconstruct the full path. 
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"argc"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The number of arguments.</TD>
+<TR>
+<TD>"argv" [<I>argc</I>]</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The arguments.</TD>
+<TR>
+<TD>"cwd"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The path name of the current working directory. </TD>
+</TABLE>
+  
+<P>
+<HR>
+<H3>
+<A NAME="B_CANCEL"></A>B_CANCEL
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The Application Kit. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Application Server.
+<P>
+Used to cancel an ongoing operation.  The Application Kit sends this message to the Application Server to cancel a shutdown if a window refuses to quit.
+<P>
+<HR>
+<H3>
+<A NAME="B_CLIPBOARD_CHANGED"></A>B_CLIPBOARD_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The Application Server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Selected BMessenger.
+<P>
+If you've called BClipboard::<B><TT><A HREF="../The%20Application%20Kit/Handler.html#StartWatching()">StartWatching()</A></TT></B> to monitor a clipboard for changes, this message is sent to the specified <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> when the clipboard changes.
+<P>
+<HR>
+<H3>
+<A NAME="B_CONTROL_INVOKED"></A>B_CONTROL_INVOKED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;A BControl. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Selected BMessenger.
+<P>
+This message is sent to the targeted messenger when a BControl-derived object is invoked.
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_DEVICES_CHANGED"></A>B_INPUT_DEVICES_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The Input Server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Add-on specified target.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BInput::Control()
+<P>
+</TT></B>This message is sent by the Input Server to send you notification when a device starts or stops, or when the set of registered devices changes.  These messages are sent only if you've used the <B><TT><A HREF="../The%20Input%20Server/InputDevice.html#watch_input_devices()">watch_input_devices()</A></TT></B> function to request such notification.  The messages are sent to the target indicated in the function call.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"code"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Operation code for the keyboard device control request being issued.  One of:
+<br>
+<B><TT><A HREF="../The%20Input%20Server/InputServerMessages.html#B_INPUT_DEVICE_ADDED">B_INPUT_DEVICE_ADDED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_INPUT_DEVICE_STARTED">B_INPUT_DEVICE_STARTED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_INPUT_DEVICE_STOPPED">B_INPUT_DEVICE_STOPPED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_INPUT_DEVICE_REMOVED">B_INPUT_DEVICE_REMOVED</A></TD>
+<TR>
+<TD></TT></B>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The name of the device.  If this field doesn't exist, the device is identified by "type" instead.</TD>
+<TR>
+<TD>"type"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The device type.  If this field doesn't exist, the "device" field identifies the device.</TD>
+<TR>
+<TD>"message"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>The control message.  None of the BeOS standard messages use this field.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_INPUT_METHOD_EVENT"></A>B_INPUT_METHOD_EVENT
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The Input Server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Input method add-on's BLooper.
+<P>
+This message is sent by the Input Server to an input method add-on to let it know that a method event has occurred.  The message's "be:opcode" field indicates which event has occurred. 
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Input%20Server/InputServerMessages.html#B_INPUT_METHOD_STARTED">B_INPUT_METHOD_STARTED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="../The%20Input%20Server/InputServerMessages.html#B_INPUT_METHOD_STOPPED">B_INPUT_METHOD_STOPPED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="../The%20Input%20Server/InputServerMessages.html#B_INPUT_METHOD_CHANGED">B_INPUT_METHOD_CHANGED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="../The%20Input%20Server/InputServerMessages.html#B_INPUT_METHOD_LOCATION_REQUEST">B_INPUT_METHOD_LOCATION_REQUEST</A>
+<P>
+</TT></B></UL>
+<P>
+These are discussed in more detail in the Input Server chapter.
+<P>
+<HR>
+<H3>
+<A NAME="B_KEY_DOWN"></A>B_KEY_DOWN
+, 
+<A NAME="B_KEY_UP"></A>B_KEY_UP
+, 
+<A NAME="B_UNMAPPED_KEY_DOWN"></A>B_UNMAPPED_KEY_DOWN
+, 
+<A NAME="B_UNMAPPED_KEY_UP"></A>B_UNMAPPED_KEY_UP
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The focus view's BWindow.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BView::KeyDown()</TT></B> (<B><TT><A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></TT></B>)
+<br>
+<B><TT>BView::KeyUp()</TT></B> (<B><TT><A HREF="#B_KEY_UP">B_KEY_UP</A></TT></B>)
+<br>
+(The <B><TT>...UNMAPPED...</TT></B> messages don't map to hook functions.)
+<P>
+<B><TT><A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> is sent when the user presses (or holds down) a key that's mapped to a character; <B><TT><A HREF="#B_KEY_UP">B_KEY_UP</A></TT></B> is sent when the user releases the key.  <B><TT><A HREF="#B_UNMAPPED_KEY_DOWN">B_UNMAPPED_KEY_DOWN</A></TT></B> and <B><TT><A HREF="#B_UNMAPPED_KEY_UP">B_UNMAPPED_KEY_UP</A></TT></B> are sent if the key isn't mapped to a character.  This doesn't include modifier keys, which are reported in the <B><TT><A HREF="#B_MODIFIERS_CHANGED">B_MODIFIERS_CHANGED</A></TT></B> message.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"key"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The code for the physical key that was pressed.  See &lt;x> for the key map.</TD>
+<TR>
+<TD>"be:key_repeat"
+<br>
+(<B><TT><A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> only)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The "iteration number" of this key down.  When the user holds the key down, successive messages are sent with increasing key repeat values.  This field isn't present in the initial event; the first repeat message (i.e., the second key down message) has a key repeat value of 1.</TD>
+<TR>
+<TD>"modifiers"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The modifier keys that were in effect at the time of the event.  See &lt;x> for a list of values.</TD>
+<TR>
+<TD>"states"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_UINT8_TYPE">B_UINT8_TYPE</A></TT></B></TD>
+<TD>The state of all keys at the time of the event.  See &lt;x>.</TD>
+<TR>
+<TD>"byte" [3]
+<br>
+(<B><TT><A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> and <B><TT><A HREF="#B_KEY_UP">B_KEY_UP</A></TT></B> only)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT8_TYPE">B_INT8_TYPE</A></TT></B></TD>
+<TD>The UTF8 data that's generated </TD>
+<TR>
+<TD>"bytes" 
+<br>
+(<B><TT><A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> and <B><TT><A HREF="#B_KEY_UP">B_KEY_UP</A></TT></B> only)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The string that's generated. (The string usually contains a single character.)</TD>
+<TR>
+<TD>"raw_char"
+<br>
+(<B><TT><A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> and <B><TT><A HREF="#B_KEY_UP">B_KEY_UP</A></TT></B> only)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Modifier-independent ASCII code for the character.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>B_KEY_UP see <A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="B_KEYBOARD_DEVICE"></A>B_KEYBOARD_DEVICE
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The input server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;A keyboard device add-on.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BInput::Control()
+<P>
+</TT></B>This message is used by the input server to send a request to a keyboard device add-on.  
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"code"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Operation code for the keyboard device control request being issued.  One of:
+<br>
+<B><TT><A HREF="../The%20Input%20Server/InputServerMessages.html#B_KEY_MAP_CHANGED">B_KEY_MAP_CHANGED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_KEY_LOCKS_CHANGED">B_KEY_LOCKS_CHANGED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_KEY_REPEAT_DELAY_CHANGED">B_KEY_REPEAT_DELAY_CHANGED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_KEY_REPEAT_RATE_CHANGED">B_KEY_REPEAT_RATE_CHANGED</A></TD>
+<TR>
+<TD></TT></B>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The name of the device.  If this field doesn't exist, the device is identified by "type" instead.</TD>
+<TR>
+<TD>"type"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The device type.  If this field doesn't exist, the "device" field identifies the device.</TD>
+<TR>
+<TD>"message"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>The control message for the request.  None of the BeOS standard messages use this field.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>B_UNMAPPED_KEY_UP see <A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_BUFFER_CREATED"></A>B_MEDIA_BUFFER_CREATED
+, 
+<A NAME="B_MEDIA_BUFFER_DELETED"></A>B_MEDIA_BUFFER_DELETED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The media server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Target specified to <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B>.
+<P>
+Sent to indicate that a media buffer has been created or deleted.
+<P>
+<B><TT><A HREF="#B_MEDIA_BUFFER_CREATED">B_MEDIA_BUFFER_CREATED</A></TT></B>'s message has the following fields:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type Code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"clone_info"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>An area_info structure describing the buffer's location in memory.  This is an array, one entry per buffer created.</TD>
+</TABLE>
+<P>
+<B><TT><A HREF="#B_MEDIA_BUFFER_DELETED">B_MEDIA_BUFFER_DELETED</A></TT></B> looks like this:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type Code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"media_buffer_id"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The buffer ID number of the buffer being deleted.  This is an array, one entry per buffer deleted.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>B_MEDIA_BUFFER_DELETED see <A HREF="#B_MEDIA_BUFFER_CREATED">B_MEDIA_BUFFER_CREATED</A></H3>
+<P>
+<HR>
+<H3>B_MEDIA_CONNECTION_BROKEN see <A HREF="#B_MEDIA_CONNECTION_MADE">B_MEDIA_CONNECTION_MADE</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_CONNECTION_MADE"></A>B_MEDIA_CONNECTION_MADE
+, 
+<A NAME="B_MEDIA_CONNECTION_BROKEN"></A>B_MEDIA_CONNECTION_BROKEN
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The media server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Target specified to <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B>.
+<P>
+Sent to indicate that a connection between media nodes has been made or broken.
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_FLAVORS_CHANGED"></A>B_MEDIA_FLAVORS_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The media server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Target specified to <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B>.
+<P>
+Sent by the media server to indicate that the flavors supported by a particular add-on have changed.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type Code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"be:addon_id"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The add-on ID of the add-on whose flavors have changed</TD>
+<TR>
+<TD>"be:new_count"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>How many new flavors have been added.</TD>
+<TR>
+<TD>"be:gone_count"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>How many flavors have been removed.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_FORMAT_CHANGED"></A>B_MEDIA_FORMAT_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The media server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Target specified to <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B>.
+<P>
+Sent by the media server to indicate that the format used on a particular connection has changed.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type Code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"be:source"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>A media_source structure describing the source of the connection whose format changed.</TD>
+<TR>
+<TD>"be:destination"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>A media_source structure describing the source of the connection whose format changed.</TD>
+<TR>
+<TD>"be:format"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>A media_format structure describing the new format.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_NODE_CREATED"></A>B_MEDIA_NODE_CREATED
+, 
+<A NAME="B_MEDIA_NODE_DELETED"></A>B_MEDIA_NODE_DELETED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The media server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Target specified to <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B>.
+<P>
+Sent to indicate that a node has been created or deleted in the media system.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type Code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"media_node_id"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The ID of the media_node that was created or deleted.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>B_MEDIA_NODE_DELETED see <A HREF="#B_MEDIA_NODE_CREATED">B_MEDIA_NODE_CREATED</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_NODE_STOPPED"></A>B_MEDIA_NODE_STOPPED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The media server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Target specified to <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B>.
+<P>
+Indicates that a media node has stopped.
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_PARAMETER_CHANGED"></A>B_MEDIA_PARAMETER_CHANGED
+, 
+<A NAME="B_MEDIA_NEW_PARAMETER_VALUE"></A>B_MEDIA_NEW_PARAMETER_VALUE
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The media server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Target specified to <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B>.
+<P>
+Sent by the media server to indicate that the value of a parameter has changed.  <B><TT><A HREF="#B_MEDIA_PARAMETER_CHANGED">B_MEDIA_PARAMETER_CHANGED</A></TT></B> only tells you which parameter changed (media_node and parameter ID).  <B><TT><A HREF="../The%20Media%20Kit/messages.html#Notification%20Messages">B_MEDIA_NEW_PARAMTER_VALUE</A></TT></B> also tells you which parameter changed, and what the new value is.
+<P>
+The <B><TT><A HREF="#B_MEDIA_PARAMETER_CHANGED">B_MEDIA_PARAMETER_CHANGED</A></TT></B> message looks like this:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type Code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"be:node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>A media_node structure indicating which node's parameter web has changed.</TD>
+<TR>
+<TD>"be:parameter"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The ID number of the parameter whose value has changed.</TD>
+</TABLE>
+<P>
+The <B><TT><A HREF="#B_MEDIA_NEW_PARAMETER_VALUE">B_MEDIA_NEW_PARAMETER_VALUE</A></TT></B> message is:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type Code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>A media_node structure indicating which node is reporting a changed parameter value.</TD>
+<TR>
+<TD>"parameter"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The parameter ID of the changed parameter.</TD>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The performance time at which the change took effect.</TD>
+<TR>
+<TD>"value"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>The parameter's new value.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_WEB_CHANGED"></A>B_MEDIA_WEB_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The media server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Target specified to <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B>.
+<P>
+Sent by the media server to indicate that a particular node's <A HREF="../The%20Media%20Kit/ParameterWeb.html#BParameterWeb">BParameterWeb</A> has.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type Code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"node"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>A media_node structure indicating which node's parameter web has changed.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_MEDIA_WILDCARD"></A>B_MEDIA_WILDCARD
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Constant only.
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;Your application. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The media server.
+<P>
+When calling <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StartWatching()">BMediaRoster::StartWatching()</A></TT></B> or <B><TT><A HREF="../The%20Media%20Kit/MediaRoster.html#StopWatching()">BMediaRoster::StopWatching()</A></TT></B>, you can use this constant to match all media messages.  This message has no actual format.
+<P>
+<I>(No Be-defined fields)</I>
+<P>
+<A NAME="22989:%20head3:%20B_MINIMIZE"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_MINIMIZE"></A>B_MINIMIZE
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system or your app.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> that's hidden/unhidden.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Window.html#Minimize()">BWindow::Minimize()</A>
+<P>
+</TT></B>Sent when the user double-clicks a window's title bar (to hide the window), or selects a window from the <B>DeskBar</B>'s window list (to unhide the window).
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70.</TD>
+<TR>
+<TD>"minimize"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if the window is being hidden; <B><TT>false</TT></B> if it's being unhidden.</TD>
+</TABLE>
+<P>
+<A NAME="19648:%20head3:%20B_MOUSE_MOVED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_MODIFIERS_CHANGED"></A>B_MODIFIERS_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The focus view's window.
+<P>
+Sent when the user presses or releases a modifier key.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"modifiers"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The current modifier keys.  See &lt;x></TD>
+<TR>
+<TD>"be:old_modifiers"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The previous modifier keys.</TD>
+<TR>
+<TD>"states"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_UINT8_TYPE">B_UINT8_TYPE</A></TT></B></TD>
+<TD>The state of all keys at the time of the event.  See &lt;x>.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_MOUSE_DOWN"></A>B_MOUSE_DOWN
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> of the view the mouse is pointing to. 
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BView::MouseDown()
+<P>
+</TT></B>Sent when the user presses a mouse button.  This message is only sent if no other mouse button is already down.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"where"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>Mouse location in the view's coordinate system.</TD>
+<TR>
+<TD>"modifiers"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The 
+<P>
+<HR>
+<H1>
+<A NAME="modifier%20keys"></A>modifier keys
+</H1>
+<P>
+ that were in effect at the time of theevent. </TD>
+<TR>
+<TD>"buttons"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The mouse button that was pressed, one of:
+<br>
+<B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#B_PRIMARY_MOUSE_BUTTON">B_PRIMARY_MOUSE_BUTTON</A>
+<br>
+B_SECONDARY_MOUSE_BUTTON
+<br>
+B_TERTIARY_MOUSE_BUTTON</TD>
+<TR>
+<TD></TT></B>"clicks"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>1 for a single-click, 2 for double-click, 3 for triple-click, and so on.  The counter is reset if the time between clicks exceeds the "Double-click speed" set by the user in the <B>Mouse</B> preferences.  Note that the counter is <I>not</I> reset if the mouse moves between clicks.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_MOUSE_MOVED"></A>B_MOUSE_MOVED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> of the view the mouse is pointing to. 
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BView::MouseMoved()
+<P>
+</TT></B>Sent when the user moves the mouse.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"where"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>The mouse's new location in window coordinates.</TD>
+<TR>
+<TD>"buttons"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The mouse buttons that are down.  Zero or more of:
+<br>
+<B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#B_PRIMARY_MOUSE_BUTTON">B_PRIMARY_MOUSE_BUTTON</A>
+<br>
+B_SECONDARY_MOUSE_BUTTON
+<br>
+B_TERTIARY_MOUSE_BUTTON</TD>
+</TABLE></TT></B>
+<P>
+<HR>
+<H3>
+<A NAME="B_MOUSE_UP"></A>B_MOUSE_UP
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> of the view the mouse is pointing to. 
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BView::MouseUp()
+<P>
+</TT></B>Sent when the user releases a mouse button.  It's only sent if no other mouse button remains down.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"where"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>Mouse location in the view's coordinate system.</TD>
+<TR>
+<TD>"modifiers"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The modifier keys that were in effect at the time of the event.  See &lt;x> for a list of modifier values.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_MOUSE_WHEEL_CHANGED"></A>B_MOUSE_WHEEL_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> of the view the mouse is pointing to. 
+<P>
+Sent when the user moves the mouse wheel (on mice that have them).
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"be:wheel_delta_x"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>How much the Y value of the wheel has changed.</TD>
+<TR>
+<TD>"be:wheel_delta_y"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>How much the Y value of the wheel has changed.</TD>
+</TABLE>
+<P>
+The standard mouse driver that comes with BeOS only supports a Y-oriented wheel.
+<P>
+<HR>
+<H3>
+<A NAME="B_NODE_MONITOR"></A>B_NODE_MONITOR
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The Node Monitor.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;App-defined.
+<P>
+Sent when a monitored file changes.  All Node Monitor messages contain an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> "opcode" field that tells you what happened (a file was removed, an attribute changed, etc.).  The format of the rest of the message depends on the opcode.  The formats are given under individual entries in this appendix, listed by opcode value:
+<P>
+<UL>
+<LI><B><TT><A HREF="NodeMonitorMessages.html#B_ENTRY_CREATED">B_ENTRY_CREATED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="NodeMonitorMessages.html#B_ENTRY_REMOVED">B_ENTRY_REMOVED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="NodeMonitorMessages.html#B_ENTRY_MOVED">B_ENTRY_MOVED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="NodeMonitorMessages.html#B_STAT_CHANGED">B_STAT_CHANGED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="NodeMonitorMessages.html#B_ATTR_CHANGED">B_ATTR_CHANGED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="NodeMonitorMessages.html#B_DEVICE_MOUNTED">B_DEVICE_MOUNTED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="NodeMonitorMessages.html#B_DEVICE_UNMOUNTED">B_DEVICE_UNMOUNTED</A>
+<P>
+</TT></B></UL>
+<P>
+These are discussed in the section <a href="#Node%20Monitor%20Messages">"Node Monitor Messages"</a>.
+<P>
+<HR>
+<H3>
+<A NAME="B_OBSERVER_NOTICE_CHANGE"></A>B_OBSERVER_NOTICE_CHANGE
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Application-defined target.
+<P>
+Sent by BHandlers to all targets that have been registered with the BHandler's <B><TT><A HREF="../The%20Application%20Kit/Handler.html#StartWatching()">StartWatching()</A></TT></B> or <B><TT><A HREF="../Release%20Notes/AppKit.html#StartWatchingAll()">StartWatchingAll()</A></TT></B> function.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"be:observe_change_what"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The "what" code of the message being broadcast.</TD>
+<TR>
+<TD>"be:observe_orig_what"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The original "what" code of the message, before it was altered by the broadcasting mechanism.</TD>
+</TABLE>
+<P>
+The message may have other fields, depending on what the broadcast message is.  Messages are sent to targets in response to the <B><TT>BHandler::SendNotices()</TT></B> function.  The logic is:
+<P>
+<UL>
+<LI>Take the message to broadcast and place its what code into the "be:observe_change_orig_what" field.
+<P>
+<LI>Add the "be:observe_change_what" field, which is set to the what code specified by the call to <B><TT><A HREF="../Release%20Notes/AppKit.html#SendNotices()">SendNotices()</A></TT></B>.
+<P>
+<LI>Set the message's what code to <B><TT><A HREF="#B_OBSERVER_NOTICE_CHANGE">B_OBSERVER_NOTICE_CHANGE</A></TT></B>.
+<P>
+</UL>
+<P>
+The resulting message is then sent to all interested parties.
+<P>
+<B>See also:  <TT>BHandler::SendNotices()</TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Handler.html#StartWatching()">BHandler::StartWatching()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="B_OPEN_IN_WORKSPACE"></A>B_OPEN_IN_WORKSPACE
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;<A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A>.
+<P>
+Sent to an application when it's first launched to tell it to open in a specific workspace.  The message will be handled during the construction of the <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> object.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"be:workspace"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Workspace number into which the application should open.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_POINTING_DEVICE"></A>B_POINTING_DEVICE
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The input server. 
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;A pointing device add-on.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BInput::Control()
+<P>
+</TT></B>This message is used by the input server to send a request to a pointing device add-on.  
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"code"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Operation code for the pointing device control request being issued.  One of:
+<br>
+<B><TT><A HREF="../The%20Input%20Server/InputServerMessages.html#B_MOUSE_TYPE_CHANGED">B_MOUSE_TYPE_CHANGED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_MOUSE_MAP_CHANGED">B_MOUSE_MAP_CHANGED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_MOUSE_SPEED_CHANGED">B_MOUSE_SPEED_CHANGED</A>
+<br>
+<A HREF="../The%20Input%20Server/InputServerMessages.html#B_CLICK_SPEED_CHANGED">B_CLICK_SPEED_CHANGED</A>
+<br>
+B_MOUSE_ACCELERATION_CHANGED</TD>
+<TR>
+<TD></TT></B>"device"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The name of the device.  If this field doesn't exist, the device is identified by "type" instead.</TD>
+<TR>
+<TD>"type"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The device type.  If this field doesn't exist, the "device" field identifies the device.</TD>
+<TR>
+<TD>"message"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>The control message for the request.  None of the BeOS standard messages use this field.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_PRINTER_CHANGED"></A>B_PRINTER_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The Print Server.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Everyone.
+<P>
+Sent whenever the user changes printers.  Applications that support printing should watch for this message, and if they receive it, they should suggest that the user check their page setup the next time they choose to print.
+<P>
+<HR>
+<H3>
+<A NAME="B_PULSE"></A>B_PULSE
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> or <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> object.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#Pulse()">BApplication::Pulse()</A></TT></B> and <B><TT>BView::Pulse()
+<P>
+</TT></B>Sent at regular intervals, but with no particular intent.  You can implement <B><TT><A HREF="../The%20Application%20Kit/Application.html#Pulse()">Pulse()</A></TT></B> to do whatever you want.  The message is to the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> only if a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> within the window declares <B><TT><A HREF="../The%20Interface%20Kit/ViewGeneral.html#B_PULSE_NEEDED">B_PULSE_NEEDED</A></TT></B> in its constructor flags.
+<P>
+<HR>
+<H3>
+<A NAME="B_QUERY_UPDATE"></A>B_QUERY_UPDATE
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;App-defined.
+<P>
+Sent when the results of a live query change:  If a new file meets the query requirements, <B><TT><A HREF="NodeMonitorMessages.html#B_ENTRY_CREATED">B_ENTRY_CREATED</A></TT></B> is sent.  If a file that previously passed the query requirements no longer does, <B><TT><A HREF="NodeMonitorMessages.html#B_ENTRY_REMOVED">B_ENTRY_REMOVED</A></TT></B> is sent.
+<P>
+<HR>
+<H3>
+<A NAME="B_QUIT_REQUESTED"></A>B_QUIT_REQUESTED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system or your app.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B>, <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> closed by the user, or other<B><TT> </TT></B><A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> object.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Looper.html#QuitRequested()">BLooper::QuitRequested()</A></TT></B>.
+<P>
+Automatically sent <B>(a)</B> to <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> when the user types <B><U>Command</B></U>+<B><U>q</B></U>, and <B>(b)</B> to a <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> when the user clicks the window's close box.  Applications can also manufacture and send the message themselves.  A looper that receives this message is expected to quit, or at least consider quitting.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"shortcut"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD>true if the user typed <B><U>Command</B></U>+<B><U>q</B></U>.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_READY_TO_RUN"></A>B_READY_TO_RUN
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A>
+<P>
+</TT></B><FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#ReadyToRun()">BApplication::ReadyToRun()</A>
+<P>
+</TT></B>Sent when an application has finished configuring itself and is ready to start running. 
+<P>
+<I>(No Be-defined fields)
+<P>
+</I><A NAME="17656:%20head3:%20B_REFS_RECEIVED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_REFS_RECEIVED"></A>B_REFS_RECEIVED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system or your app.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B>, or other app-defined target.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#RefsReceived()">BApplication::RefsReceived()</A>
+<P>
+</TT></B>Automatically sent to <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> when <B>(a) </B>the user double-clicks a file that has a type that's supported by the app, and <B>(b)</B> when the user confirms some files (or directories) in an <B><U>Open File</B></U> panel (the target is <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> by default; it can be changed in <B><TT><A HREF="../The%20Storage%20Kit/FilePanel.html#SetTarget()">BFilePanel::SetTarget()</A></TT></B>).  You can also create, stuff, and send a <B><TT><A HREF="#B_REFS_RECEIVED">B_REFS_RECEIVED</A></TT></B> message yourself.  When it receives this message, an app is expected to open the files that the message refers to.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"refs" [<I>i</I>]</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> items, one for each file or directory.</TD>
+</TABLE>
+ 
+<P>
+<B><A NAME="26128:%20head2:%20Interface%20Messages"></A>
+</B><B><TT>
+<A NAME="39224:%20head3:%20B_KEY_DOWN"></A>
+<A NAME="37874:%20head3:%20B_SCREEN_CHANGED"></A>
+</TT></B><A NAME="A%20"></A>A 
+<A HREF="../The%20Interface%20Kit/StatusBar.html#BStatusBar">BStatusBar</A> object can be controlled synchronously by calling its <B><TT><A HREF="../The%20Interface%20Kit/StatusBar.html#Reset()">Reset()</A></TT></B> and <B><TT><A HREF="../The%20Device%20Kit/Joystick.html#Update()">Update()</A></TT></B> functions.  It can also be controlled asynchronously by sending it messages corresponding to the two functions; the object calls the function when it receives the message.  Each message contains fields for the arguments passed to the function.
+<P>
+<HR>
+<H3>B_RELEASE_OVERLAY_LOCK see <A HREF="#B_ACQUIRE_OVERLAY_LOCK">B_ACQUIRE_OVERLAY_LOCK</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="B_RESET_STATUS_BAR"></A>B_RESET_STATUS_BAR
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;Your app.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/StatusBar.html#Reset()">BStatusBar::Reset()</A>
+<P>
+</TT></B><FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/StatusBar.html#BStatusBar">BStatusBar</A> you're resetting.
+<P>
+You construct and send this message to a <A HREF="../The%20Interface%20Kit/StatusBar.html#BStatusBar">BStatusBar</A> object to tell it to (asynchronously) reset itself.  The message also lets you reset the object's labels.  To send the message, invoke BWindow's <B><TT><A HREF="../The%20Application%20Kit/Looper.html#PostMessage()">PostMessage()</A></TT></B> naming the target <A HREF="../The%20Interface%20Kit/StatusBar.html#BStatusBar">BStatusBar</A> as the handler:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;statusBar->Window()->PostMessage(theMessage, statusBar);</PRE>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"label"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The object's new label (<B><TT>NULL</TT></B>-terminated).</TD>
+<TR>
+<TD>"trailing_label"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The object's new trailing label (<B><TT>NULL</TT></B>-terminated)..</TD>
+</TABLE>
+  
+<P>
+<HR>
+<H3>
+<A NAME="B_SCREEN_CHANGED"></A>B_SCREEN_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Every <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> in the screen that changed (even hidden windows).
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Window.html#ScreenChanged()">BWindow::ScreenChanged()</A>
+<P>
+</TT></B>Sent when the screen's dimensions or color space changes&mdash;because the user played with the <B>Screen</B> preferences app, for example.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"frame"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RECT_TYPE">B_RECT_TYPE</A></TT></B></TD>
+<TD>The screen's dimensions.</TD>
+<TR>
+<TD>"mode"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The screen's color space: <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_CMAP8">B_CMAP8</A></TT></B>, <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_RGB15">B_RGB15</A></TT></B>, <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_RGB15">B_RGB15</A></TT></B>, or <B><TT>BRGB32</TT></B>.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_SILENT_RELAUNCH"></A>B_SILENT_RELAUNCH
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;<B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A>
+<P>
+</TT></B>Sent to a single-launch application when it's activated by being launched (for example, if the user double-clicks its icon in Tracker). 
+<P>
+<I>(No Be-defined fields)
+<P>
+</I><HR>
+<H3>
+<A NAME="B_SOME_APP_ACTIVATED"></A>B_SOME_APP_ACTIVATED
+, 
+<A NAME="B_SOME_APP_LAUNCHED"></A>B_SOME_APP_LAUNCHED
+, 
+<A NAME="B_SOME_APP_QUIT"></A>B_SOME_APP_QUIT
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The Roster Monitor.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;App-defined.
+<P>
+Sent as apps are launched, activated, or quit.  You get these messages by invoking <B><TT><A HREF="../The%20Application%20Kit/Roster.html#StartWatching()">BRoster::StartWatching()</A></TT></B> passing a one or more of <B><TT>B_REQUEST_ACTIVATED</TT></B>, <B><TT>B_REQUEST_LAUNCHED</TT></B>, and <B><TT>B_REQUEST_QUIT</TT></B>. 
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"mime_sig"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The ap signature.</TD>
+<TR>
+<TD>"team"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The app's team id.</TD>
+<TR>
+<TD>"thread"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The id of the app's main thread.</TD>
+<TR>
+<TD>"flags"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The app's app flags (<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SINGLE_LAUNCH">B_SINGLE_LAUNCH</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/misc.html#B_BACKGROUND_APP">B_BACKGROUND_APP</A></TT></B>, etc).</TD>
+<TR>
+<TD>"ref"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_REF_TYPE">B_REF_TYPE</A></TT></B></TD>
+<TD>The <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> of the app's executable.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_UPDATE_STATUS_BAR"></A>B_UPDATE_STATUS_BAR
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;Your app.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/StatusBar.html#Update()">BStatusBar::Update()</A>
+<P>
+</TT></B><FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/StatusBar.html#BStatusBar">BStatusBar</A> you're updating.
+<P>
+You construct and send this message to a <A HREF="../The%20Interface%20Kit/StatusBar.html#BStatusBar">BStatusBar</A> object to tell it to (asynchronously) update its progress.  To send the message, invoke BWindow's <B><TT><A HREF="../The%20Application%20Kit/Looper.html#PostMessage()">PostMessage()</A></TT></B> naming the target <A HREF="../The%20Interface%20Kit/StatusBar.html#BStatusBar">BStatusBar</A> as the handler:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;statusBar->Window()->PostMessage(theMessage, statusBar);</PRE>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"delta"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>An increment to the object's current value.</TD>
+<TR>
+<TD>"text"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The object's new text (<B><TT>NULL</TT></B>-terminated).</TD>
+<TR>
+<TD>"trailing_text"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The object's new trailing text (<B><TT>NULL</TT></B>-terminated)..</TD>
+</TABLE>
+  
+<P>
+<HR>
+<H3>
+<A NAME="B_VALUE_CHANGED"></A>B_VALUE_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The manipulated scrollbar's BWindow.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/ScrollBar.html#ValueChanged()">BScrollBar::ValueChanged()</A>
+<P>
+</TT></B>Sent when the user plays with a scrollbar. 
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"value"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The scrollbar's new value.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_VIEW_MOVED"></A>B_VIEW_MOVED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The moved view's BWindow.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BView::FrameMoved()
+<P>
+</TT></B>Sent when a view's origin (left top corner) changes relative to the origin of its parent.  The message isn't sent if the view doesn't have the <B><TT><A HREF="../The%20Interface%20Kit/ViewGeneral.html#B_FRAME_EVENTS">B_FRAME_EVENTS</A></TT></B> flag set.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"where"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>The view's new origin in the coordinate system of its parent.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_VIEW_RESIZED"></A>B_VIEW_RESIZED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The resized view's BWindow.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT>BView::FrameResized()
+<P>
+</TT></B>Sent when the size of the view's frame changes.  The message isn't sent if the view doesn't have the <B><TT><A HREF="../The%20Interface%20Kit/ViewGeneral.html#B_FRAME_EVENTS">B_FRAME_EVENTS</A></TT></B> flag set.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"width"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The view's new width.</TD>
+<TR>
+<TD>"height"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The view's new height.</TD>
+<TR>
+<TD>"where"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>The view's new origin expressed in the coordinate system of its parent.  This field is only included if the view actually moved while being resized, and can always be ignored:  If the view <I>did</I>  move, you'll hear about it in a separate <B><TT><A HREF="#B_VIEW_MOVED">B_VIEW_MOVED</A></TT></B> BMessage.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_WINDOW_ACTIVATED"></A>B_WINDOW_ACTIVATED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The activated/deactivated BWindow.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Window.html#WindowActivated()">BWindow::WindowActivated()</A></TT></B> and <B><TT>BView::WindowActivated()
+<P>
+</TT></B>Sent just after a window is activated or deactivated.  Note that the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> invokes <B><TT><A HREF="../The%20Game%20Kit/WindowScreen.html#WindowActivated()">WindowActivated()</A></TT></B> on each of its views.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"active"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if the window is now active; <B><TT>false</TT></B> if not.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_WINDOW_MOVE_BY"></A>B_WINDOW_MOVE_BY
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable.
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;Your application.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> to be moved.
+<P>
+You can send this message to a window to resize it by the specified deltas.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"data"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>The amount by which to move the window's X and Y coordinates.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_WINDOW_MOVE_TO"></A>B_WINDOW_MOVE_TO
+</H3>
+<P>
+<FONT face=helvetica><b>Purpose:</b></font>&nbsp;Deliverable.
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;Your application.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> to be moved.
+<P>
+You can send this message to a window to resize it to the specified size.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"data"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>The width and height (in X and Y) to resize the window to.</TD>
+</TABLE>
+<P>
+<A NAME="15054:%20head3:%20B_WINDOW_MOVED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_WINDOW_MOVED"></A>B_WINDOW_MOVED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> that moved.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Window.html#FrameMoved()">BWindow::FrameMoved()</A>
+<P>
+</TT></B>Sent when a window's origin (left top corner) changes within the screen coordinate system.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"where"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>The window's new origin in screen coordinates.</TD>
+</TABLE>
+<P>
+<A NAME="18353:%20head3:%20B_WINDOW_RESIZED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_WINDOW_RESIZED"></A>B_WINDOW_RESIZED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The resized BWindow.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Window.html#FrameResized()">BWindow::FrameResized()</A>
+<P>
+</TT></B>Sent when the size of the window's frame changes.  Note that the "width" and "height" fields measure the window's content area&mdash;they don't include the window border or window tab.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"width"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The width of the window's content area.</TD>
+<TR>
+<TD>"height"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The height of the window's content area.</TD>
+</TABLE>
+<P>
+<A NAME="37366:%20head3:%20B_WORKSPACE_ACTIVATED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_WORKSPACE_ACTIVATED"></A>B_WORKSPACE_ACTIVATED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Every <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> in the activated and deactivated workspaces.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Window.html#WorkspaceActivated()">BWindow::WorkspaceActivated()</A>
+<P>
+</TT></B>Sent when the active workspace changes.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"workspace"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The index of the window's workspace.</TD>
+<TR>
+<TD>"active"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if the workspace is now active; <B><TT>false</TT></B> if not.</TD>
+</TABLE>
+<P>
+<A NAME="37951:%20head3:%20B_WORKSPACES_CHANGED"></A>
+<P>
+<HR>
+<H3>
+<A NAME="B_WORKSPACES_CHANGED"></A>B_WORKSPACES_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> whose set of workspaces changed.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Window.html#WorkspacesChanged()">BWindow::WorkspacesChanged()</A>
+<P>
+</TT></B>Sent when there's a change to the set of workspaces in which a window can appear.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"old"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The window's old workspace set, given as a vector of workspace indices.</TD>
+<TR>
+<TD>"new"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The window's new workspace set, given as a vector of workspace indices.</TD>
+</TABLE>
+  
+<P>
+<HR>
+<H3>
+<A NAME="B_ZOOM"></A>B_ZOOM
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> that was zoomed.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;<B><TT><A HREF="../The%20Interface%20Kit/Window.html#Zoom()">BWindow::Zoom()</A>
+<P>
+</TT></B>Sent when the user clicks a window's zoom button.
+<P>
+The message has just one data field:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Messages Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Messages%20Master%20Index.html"><FONT face=HELVETICA>Messages Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

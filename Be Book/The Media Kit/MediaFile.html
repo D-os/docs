@@ -1,0 +1,733 @@
+<HTML><HEAD><TITLE>The Media Kit: BMediaFile</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMediaFile"></A>BMediaFile
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaFile.h">be/media/MediaFile.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="MediaFile.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMediaFile class represents a file containing media data.  When instantiated a BMediaFile with an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> to an existing media file, it sniffs the file and figures out the right codecs to use when accessing that file.
+<P>
+To read an existing media file, you can then call <B><TT>GetTrack()</TT></B> to instantiate <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> objects fot the file's tracks; these can in turn be used to decode media data from the file.
+<P>
+You can also write data to the file.  In this case, you construct the object by specifying an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> and a <B><TT><A HREF="misc_api.html#media_file_format">media_file_format</A></TT></B> specification describing the format of the media data you plan to write into the file.  You then call <B><TT><A HREF="#CreateTrack()">CreateTrack()</A></TT></B> to create each track you want to write into the file.  Once each track has been created (but is still empty), you call <B><TT><A HREF="#CommitHeader()">CommitHeader()</A></TT></B> to write the file's header to disk, and you can use <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> functions to write the actual media data into the tracks.
+<P>
+Call <B><TT><A HREF="#CloseFile()">CloseFile()</A></TT></B> when you're finished writing to it (you don't need to call this if you're reading the file).
+<P>
+For an example of how to use BMediaFile to read and write media files, see <a href="encode_sample.html#Reading%20and%20Writing%20Media%20Files">"Reading and Writing Media Files"</a>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+As a general rule, you can't use wildcards in any structures used by BMediaFile functions.  You tell BMediaFile what format you have, and BMediaFile will simply tell you whether or not that format is supported.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMediaFile()"></A>BMediaFile()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaFile(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaFile(</TT></B></FONT>BDataIO *<I><FONT  color=991122 face=HELVETICA>source</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaFile(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaFile(</TT></B></FONT>BDataIO *<I><FONT  color=991122 face=HELVETICA>source</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaFile(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_file_format *<I><FONT  color=991122 face=HELVETICA>fileFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMediaFile(</TT></B></FONT>BDataIO *<I><FONT  color=991122 face=HELVETICA>destination</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_file_format *<I><FONT  color=991122 face=HELVETICA>fileFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The first four forms of the constructor initializes the BMediaFile to read the file specified by <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> or by <I><FONT  color=991122 face=HELVETICA>source</I></FONT>.  Once this has been done, be sure to call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to ensure that the file was successfully sniffed.  If sniffing was successful, the BMediaFile object can then be used to instantiate the <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> objects necessary to read the file's data.
+<P>
+The second two forms prepare a BMediaFile object for writing to a media file, which is specified by either <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> or <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>.  The format of the file to be written is specified by <I><FONT  color=991122 face=HELVETICA>fileFormat</I></FONT>.
+<P>
+The flags can be a combination of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MEDIA_FILE_REPLACE_MODE</TT></B></TD>
+<TD>Replace any existing media file, if writing.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_FILE_NO_READ_AHEAD</TT></B></TD>
+<TD>Don't read ahead in the file.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_FILE_UNBUFFERED</TT></B></TD>
+<TD>Use smaller reads.  This can be handy if you're trying to stream low-bitrate files withou;waiting for the extractor to fill a large outgoing buffer.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_FILE_BIG_BUFFERS</TT></B></TD>
+<TD>Use large buffers.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="~BMediaFile()"></A>~BMediaFile()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BMediaFile(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Destructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddChunk()"></A>AddChunk()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddChunk(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>type</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Writes a user-defined chunk of data to the file (if doing so is supported by the encoder).  The <I><FONT  color=991122 face=HELVETICA>type</I></FONT> argument indicates the chunk type, <I><FONT  color=991122 face=HELVETICA>data</I></FONT> points to the data to be written, and <I><FONT  color=991122 face=HELVETICA>size</I></FONT> indicates the size of the data to write to the file.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The BMediaFile class doesn't automatically perform any locking to prevent multiple writes to the file from occurring at the same time.  If you have multiple threads writing into the same <A HREF="#BMediaFile">BMediaFile</A>, you must use a locking mechanism (such as a semaphore) to keep writes from overlapping.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B>.  The BMediaFile doesn't reference a valid file.
+<P>
+<LI>Other errors, depending on the codec.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="AddCopyright()"></A>AddCopyright()
+, 
+<A NAME="Copyright()"></A>Copyright()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t *<B><TT><FONT  color=000022 size=+1>AddCopyright(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>data</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Copyright(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#AddCopyright()">AddCopyright()</A></TT></B> sets the file's copyright notice to the string specified by <I><FONT  color=991122 face=HELVETICA>data</I></FONT>.  Any existing notice is replaced.  The string is copied, so the original belongs to you.
+<P>
+<B><TT><A HREF="#Copyright()">Copyright()</A></TT></B> returns the media file's copyright notice, or <B><TT>NULL</TT></B> if there isn't one.  This string belongs to the <A HREF="#BMediaFile">BMediaFile</A>, so don't delete or change it.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The BMediaFile class doesn't automatically perform any locking to prevent multiple writes to the file from occurring at the same time.  If you have multiple threads writing into the same <A HREF="#BMediaFile">BMediaFile</A>, you must use a locking mechanism (such as a semaphore) to keep writes from overlapping.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error. (<B><TT><A HREF="#AddCopyright()">AddCopyright()</A></TT></B> only)
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B>.  The BMediaFile doesn't reference a valid file. (<B><TT><A HREF="#AddCopyright()">AddCopyright()</A></TT></B> only)
+<P>
+<LI>Other errors, depending on the codec. (<B><TT><A HREF="#AddCopyright()">AddCopyright()</A></TT></B> only)
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="CloseFile()"></A>CloseFile()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>CloseFile(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Once all media data has been written to all tracks, you need to call <B><TT>CloseFile()</TT></B> so the BMediaFile object can tidy up the file and finish the writing tasks.  If you forget to call <B><TT>CloseFile()</TT></B>, the resulting file may not be complete.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B>.  The BMediaFile doesn't reference a valid file.
+<P>
+<LI>Other errors, depending on the codec.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="CommitHeader()"></A>CommitHeader()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>CommitHeader(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+</TABLE></TABLE>
+
+<P>
+After you've finished adding new tracks to a file, you need to call <B><TT>CommitHeader()</TT></B> to let the BMediaFile set up the file's header.  This helps optimize the file writing process.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_TYPE">B_BAD_TYPE</A></TT></B>.  The BMediaFile doesn't reference a valid file.
+<P>
+<LI>Other errors, depending on the codec.
+<P>
+</UL>
+<P>
+<HR>
+<H3>Copyright() see <A HREF="#AddCopyright()">AddCopyright()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="CountTracks()"></A>CountTracks()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountTracks(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the number of tracks in the media file.  The return value is undefined if the initialization failed.
+<P>
+<HR>
+<H3>
+<A NAME="CreateTrack()"></A>CreateTrack()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> *<B><TT><FONT  color=000022 size=+1>CreateTrack(</TT></B></FONT>media_format *<I><FONT  color=991122 face=HELVETICA>mediaFormat</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_codec_info *<I><FONT  color=991122 face=HELVETICA>codecInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> *<B><TT><FONT  color=000022 size=+1>CreateTrack(</TT></B></FONT>media_format *<I><FONT  color=991122 face=HELVETICA>mediaFormat</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new track in the file and returns a <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> object referencing it.  The track is configured to use the media format specified by <I><FONT  color=991122 face=HELVETICA>mediaFormat</I></FONT>, and will be written using the codec described by <I><FONT  color=991122 face=HELVETICA>codecInfo</I></FONT>.  You can only use <B><TT><A HREF="MediaTrack.html#WriteFrames()">BMediaTrack::WriteFrames()</A></TT></B> to write into the track.
+<P>
+If you use the second form of the constructor, without a <I><FONT  color=991122 face=HELVETICA>codecInfo</I></FONT> argument, the track will be written containing raw media data.  You can only use <B><TT><A HREF="MediaTrack.html#WriteChunk()">BMediaTrack::WriteChunk()</A></TT></B> to write into the track.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>mediaFormat</I></FONT> indicates the format of the buffers you'll be passing along to the write function, and <I><FONT  color=991122 face=HELVETICA>codecInfo</I></FONT> specifies the codec you want to use to encode the data into the track.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The <I><FONT  color=991122 face=HELVETICA>mediaFormat</I></FONT> can't contain any wildcards; you have to specify the exact format that you're going to be providing.  <I><FONT  color=991122 face=HELVETICA>mediaFormat</I></FONT> must also be the same structure you passed to <B><TT>get_net_encoder()</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+When writing new media files, you should create all your tracks at once before writing any media data.  Once all the tracks have been created, be sure to call <B><TT><A HREF="#CommitHeader()">CommitHeader()</A></TT></B> to write the header to disk.  This is necessary since the header size may vary depending on the number of tracks you put in the file, and once you start writing media data into the tracks, it would be difficult (and inefficient) to resize the header.
+<P>
+If an error occurs while creating the new track, <B><TT>NULL</TT></B> is returned.
+<P>
+<HR>
+<H3>
+<A NAME="GetFileFormatInfo()"></A>GetFileFormatInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFileFormatInfo(</TT></B></FONT>media_file_format *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Fills the specified <B><TT><A HREF="misc_api.html#media_file_format">media_file_format</A></TT></B> structure with information describing the  file format of the file referenced by the BMediaFile object.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMediaFile doesn't reference a valid file.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetParameterValue() see <A HREF="#SetParameterValue()">SetParameterValue()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetParameterView()"></A>GetParameterView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>GetParameterView(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> containing controls for adjusting the file format's parameters.  Returns <B><TT>NULL</TT></B> if there isn't a view available.
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the result code from the constructor.  You should always call this after instantiating a BMediaFile object, but before using it.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_NO_HANDLER">B_MEDIA_NO_HANDLER</A></TT></B>.  No codec available for the required or requested format.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to set up the codec (writing).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.  The required add-on wasn't found (writing).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MISSING_SYMBOL">B_MISSING_SYMBOL</A></TT></B>.  The add-on doesn't support writing.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="ReleaseTrack()"></A>ReleaseTrack()
+, 
+<A NAME="ReleaseAllTracks()"></A>ReleaseAllTracks()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReleaseTrack(</TT></B></FONT><A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> *<I><FONT  color=991122 face=HELVETICA>track</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>ReleaseAllTracks(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>ReleaseTrack()</TT></B> releases the resources used by the specified <I><FONT  color=991122 face=HELVETICA>track</I></FONT>.  Doing so reduces your application's memory usage.  If you want to release every track you're using, you can call <B><TT>ReleaseAllTracks()</TT></B>.
+<P>
+Once released, a track can't be used any longer until you use <B><TT><A HREF="#TrackAt()">TrackAt()</A></TT></B> again.
+<P>
+If the BMediaFile wasn't properly initialized, or the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is invalid, <B><TT>NULL</TT></B> is returned.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Couldn't release the track (it may be invalid, or not actually in use).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetParameterValue()"></A>SetParameterValue()
+, 
+<A NAME="GetParameterValue()"></A>GetParameterValue()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetParameterValue(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>value</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetParameterValue(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>value</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetParameterValue()</TT></B> sets the value of the parameter specified by <I><FONT  color=991122 face=HELVETICA>id</I></FONT> to the data pointed to by <I><FONT  color=991122 face=HELVETICA>value</I></FONT>; this data is <I><FONT  color=991122 face=HELVETICA>size</I></FONT> bytes long.
+<P>
+<B><TT>GetParameterValue()</TT></B> returns in <I><FONT  color=991122 face=HELVETICA>value</I></FONT> the value of the specified parameter, and the size of the value in bytes in the <I><FONT  color=991122 face=HELVETICA>size</I></FONT> argument.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMediaFile doesn't reference a valid file.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="TrackAt()"></A>TrackAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> *<B><TT><FONT  color=000022 size=+1>TrackAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> object referencing the track at the specified <I><FONT  color=991122 face=HELVETICA>index</I></FONT> into the file.  The index must be a value between 0 and <B><TT><A HREF="#CountTracks()">CountTracks()</A></TT></B> - 1.
+<P>
+If the BMediaFile wasn't properly initialized, or the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is invalid, <B><TT>NULL</TT></B> is returned.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You must call <B><TT><A HREF="#ReleaseTrack()">ReleaseTrack()</A></TT></B> when you're finished with the track.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Web()"></A>Web()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> *<B><TT><FONT  color=000022 size=+1>Web(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> that can be used for configuring the file format's parameters.  Returns <B><TT>NULL</TT></B> if the codec doesn't support user configuration.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Constructor%20Flags"></A>Constructor Flags
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/MediaFile.h">be/media/MediaFile.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_MEDIA_FILE_REPLACE_MODE</TT></B></TD>
+<TD>Replace any existing media file, if writing.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_FILE_NO_READ_AHEAD</TT></B></TD>
+<TD>Don't read ahead in the file.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_FILE_UNBUFFERED</TT></B></TD>
+<TD>Use smaller reads.  This can be handy if you're trying to stream low-bitrate files withou;waiting for the extractor to fill a large outgoing buffer.</TD>
+<TR>
+<TD><B><TT>B_MEDIA_FILE_BIG_BUFFERS</TT></B></TD>
+<TD>Use large buffers.</TD>
+</TABLE>
+<P>
+These flags control the behavior of the constructor.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

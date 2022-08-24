@@ -1,0 +1,452 @@
+<HTML><HEAD><TITLE>The Application Kit: Messaging</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Messaging"></A>Messaging
+</H1>
+<P>
+The Application Kit provides a message-passing system lets your application send messages to and receives messages from other applications (including the Be-defined servers and apps), and from other threads in your own application.   
+<P>
+The primary messaging classes are:
+<P>
+<UL>
+<LI><A HREF="Message.html#BMessage">BMessage</A> represents a message.
+<P>
+<LI><A HREF="Looper.html#BLooper">BLooper</A> runs a loop that receives in-coming messages and figures out which <A HREF="Handler.html#BHandler">BHandler</A> should handle them.
+<P>
+<LI><A HREF="Handler.html#BHandler">BHandler</A> defines hook functions that are called to handle in-coming messages.
+<P>
+<LI><A HREF="Messenger.html#BMessenger">BMessenger</A> represents a message's destination (a combination of <A HREF="Looper.html#BLooper">BLooper</A> and BHandler), whether it's local or remote.  The object is most useful for sending messages to other applications&mdash;you don't need it for local calls.
+<P>
+</UL>
+<P>
+The other messaging classes are:
+<P>
+<UL>
+<LI><A HREF="MessageQueue.html#BMessageQueue">BMessageQueue</A> is a fifo that holds a BLooper's in-coming messages.
+<P>
+<LI><A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> is a device that can examine and (potentially) reject or re-route in-coming messages.
+<P>
+<LI><A HREF="Invoker.html#BInvoker">BInvoker</A> is a convenience class that lets you treat a message and its target ( the <A HREF="Handler.html#BHandler">BHandler</A> that will handle the message) as a single object.
+<P>
+<LI><A HREF="MessageRunner.html#BMessageRunner">BMessageRunner</A> lets you send the same message over and over, at regular intervals.
+<P>
+</UL>
+<P>
+The rest of this chapter looks at...
+<P>
+<UL>
+<LI>The essential features of the four fundamental classes. (<a href="#Features%20of%20the%20Fundamental%20Classes">"Features of the Fundamental Classes"</a><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+<LI>How a <A HREF="Looper.html#BLooper">BLooper</A> decides which <A HREF="Handler.html#BHandler">BHandler</A> should handle an in-coming message.  (<a href="#From%20Looper%20to%20Handler">"From Looper to Handler"</a><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+<LI>The different methods for sending messages and receiving replies.  (<a href="#Sending%20a%20Message">"Sending a Message"</a>).
+<P>
+</UL>
+<P>
+ describes how the classes fit together in the messaging system with an emphasis on what you can do in your application to take part.
+<P>
+<A NAME="16643:%20head1:%20xa5%20%20Features%20of%20the%20Fundamental%20Classes"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Features%20of%20the%20Fundamental%20Classes"></A><FONT SIZE=6>F</FONT>eatures of the <FONT SIZE=6>F</FONT>undamental <FONT SIZE=6>C</FONT>lasses
+</H2>
+<P>
+Looked at collectively, the four fundamental messaging classes comprise a huge chunk of API.  Fortunately, the essential part of this API is pretty small; that's what we're going to look at here.
+<P>
+<HR>
+<H3>
+<A NAME="The%20BMessage%20Class"></A>The BMessage Class
+</H3>
+<P>
+In the <A HREF="Message.html#BMessage">BMessage</A> class, there's one essential data member, and two essential functions:
+<P>
+<UL>
+<LI>The <B><TT>what</TT></B> data member is an arbitrary <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> value that describes (symbolically) what the message is about.  You can set and examine <B><TT>what</TT></B> directly&mdash;you don't have to use functions to get to it.  The <B><TT>what</TT></B> value is called the object's <I>command constant</I>.  The BeOS defines some number of command constants (such as <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B>, and <B><TT><A HREF="../Messages/GeneralMessages.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B>), but you'll also be creating constants of your own.  Keep in mind that the constant's value is meaningless&mdash;it's just a code that identifies the "intent" of the message (and it's only meaningful if the receiver recognizes the constant).
+<P>
+<LI>The two essential functions are <B><TT><A HREF="Message.html#AddData()">AddData()</A></TT></B> and <B><TT><A HREF="Message.html#FindData()">FindData()</A></TT></B>.  These functions add data to a message you're about to send, and retrieve it from a message you just received.  A <A HREF="Message.html#BMessage">BMessage</A> can hold any amount of data; each data item (or "field") is identified by name, type, and index.  For example, you can ask a message for the third boolean value named "IsEnabled" that it contains.  In general, you use type-specific functions such as <B><TT>Add/FindString()</TT></B> and <B><TT>Add/FindInt32()</TT></B> rather than <B><TT>Add/FindData()</TT></B>.  The query we just posed would actually look like this:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;/* The args are:  name, index, value (returned by reference) */
+&nbsp;&nbsp;&nbsp;bool returnValue;
+&nbsp;&nbsp;&nbsp;aMessage.FindBool("IsEnabled", 2, &amp;returnValue);</PRE>
+<P>
+In summary, a <A HREF="Message.html#BMessage">BMessage</A> contains <B>(1)</B> a command constant and <B>(2)</B> a set of data fields.  Every <A HREF="Message.html#BMessage">BMessage</A> that's used in the messaging system must have a command constant, but not every object needs to have data fields.  (Other parts of the BeOS use BMessages for their data only.  The <A HREF="Clipboard.html#BClipboard">BClipboard</A> object, for example, ignores a BMessage's command constant.)  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+When discussing system-generated <A HREF="Message.html#BMessage">BMessage</A> objects, we refer to the object by its command constant.  For example, "a <B><TT><A HREF="../Messages/GeneralMessages.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B>" means "a <A HREF="Message.html#BMessage">BMessage</A> that has <B><TT><A HREF="../Messages/GeneralMessages.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B> as its command constant".
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Notice that a <A HREF="Message.html#BMessage">BMessage</A> doesn't know how to send itself.  However, as we'll see later, it does know how to reply to its sender once it's in the hands of the recipient.
+<P>
+<HR>
+<H3>
+<A NAME="The%20BLooper%20Class"></A>The BLooper Class
+</H3>
+<P>
+BLooper's role is to receive messages and figure out what to do with them.  There are four parts to this job, embodied in these functions:
+<P>
+<UL>
+<LI>Every <A HREF="Looper.html#BLooper">BLooper</A> spawns a thread in which it runs a message loop.  It's in this thread that the object receives messages.  But you have to kick the <A HREF="Looper.html#BLooper">BLooper</A> to get it to run; you do this by calling the <B><TT><A HREF="Application.html#Run()">Run()</A></TT></B> function.  When you're done with the obejct&mdash;when you no longer need it to receive messages&mdash;you call <B><TT><A HREF="Application.html#Quit()">Quit()</A></TT></B>.
+<P>
+<LI>Although you never invoke it directly, <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> is the guts of the message loop.  All messages that the looper receives show up in individual invocations of <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B>.  The function decides where the message should go next, which is mostly a matter of deciding whether <B>(1)</B> the message should be handled by a system-defined hook function, or <B>(2)</B> passed to BHandler's <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function (which we'll talk about in a moment).  Three other important aspects of <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> are...
+<P>
+<LI>It runs in the BLooper's message thread (or <I>message loop</I>); this is a separate thread that the object spawns specifically to receive in-coming messages.
+<P>
+<LI>Individual <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> invocations are synchronous with regard to the loop.  In other words, when a message shows up, <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> is called and runs to completion before the next message can be processed.  (Messages that show up while <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> is busy aren't lost&mdash;they're queued up in a <A HREF="MessageQueue.html#BMessageQueue">BMessageQueue</A> object.)  
+<P>
+<LI>It's fully implemented by <A HREF="Looper.html#BLooper">BLooper</A> (and kit classes derived from BLooper).  You should rarely need to override it in your application.
+<P>
+<LI>The <B><TT><A HREF="Looper.html#PostMessage()">PostMessage()</A></TT></B> function delivers a message to the BLooper.  In other words, it invokes <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> in the looper's message thread.  You call <B><TT><A HREF="Looper.html#PostMessage()">PostMessage()</A></TT></B> directly in your code.  For example, here we create a <A HREF="Message.html#BMessage">BMessage</A> and post it to our <A HREF="Application.html#BApplication">BApplication</A> object (BApplication inherits from BLooper):
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;/* This form of the BMessage constructor sets the command constant. */
+&nbsp;&nbsp;&nbsp;be_app->PostMessage(new BMessage(YOUR_CONSTANT_HERE))</PRE>
+<P>
+In the Be kits, the <A HREF="Application.html#BApplication">BApplication</A> and <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> classes inherit from BLooper.
+<P>
+<HR>
+<H3>
+<A NAME="The%20BHandler%20Class"></A>The BHandler Class
+</H3>
+<P>
+<A HREF="Handler.html#BHandler">BHandler</A> objects are called upon to handle the messages that a <A HREF="Looper.html#BLooper">BLooper</A> receives.  A <A HREF="Handler.html#BHandler">BHandler</A> depends on two essential function:
+<P>
+<UL>
+<LI><B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> is the function that a <A HREF="Looper.html#BLooper">BLooper</A> calls to dispatch an in-coming message to the <A HREF="Handler.html#BHandler">BHandler</A> (the <A HREF="Message.html#BMessage">BMessage</A> is passed as the function's only argument).  This is a hook function that a <A HREF="Handler.html#BHandler">BHandler</A> subclass implements to handle the different types of messages that it expects to receive.  Most implementations examine the message's command constant and go from there.  A typical outline looks like this:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp; void MyHandler::MessageReceived(BMessage *message)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Examine the command constant. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch ( message->what ) {
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case YOUR_CONSTANT_HERE:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Call a function that handles this sort of message. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HandlerFunctionA();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case ANOTHER_CONSTANT_HERE:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* ditto */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HandlerFunctionB();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Messages that your class doesn't recognize must be passed
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * on to the base class implementation. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>baseClass</I>::MessageReceived(message);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<UL>
+<LI>BHandler's other essential function is defined by BLooper:  <B><TT><A HREF="Looper.html#AddHandler()">BLooper::AddHandler()</A></TT></B>.  This function adds the (argument) <A HREF="Handler.html#BHandler">BHandler</A> object to the (invoked-upon) BLooper's list of candidate handlers (its<I> handler chain</I>).  If a <A HREF="Handler.html#BHandler">BHandler</A> wants to handle messages that are received by a <A HREF="Looper.html#BLooper">BLooper</A>, it must first be added to the BLooper's handler chain.
+<P>
+</UL>
+<P>
+<A HREF="Looper.html#BLooper">BLooper</A> inherits from <A HREF="Handler.html#BHandler">BHandler</A>, and automatically adds itself to its own handler chain.  This means that a <A HREF="Looper.html#BLooper">BLooper</A> can handle the messages that it receives&mdash;this is the default behaviour for most messages.  We'll examine this issue in depth later in this chapter.
+<P>
+The other classes that inherit from <A HREF="Handler.html#BHandler">BHandler</A> are <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> and <A HREF="../The%20Interface%20Kit/Shelf.html#BShelf">BShelf</A> (both in the Interface Kit).
+<P>
+<HR>
+<H3>
+<A NAME="The%20BMessenger%20Class"></A>The BMessenger Class
+</H3>
+<P>
+A BMessenger's most important feature is that it can send a message to a remote application.  To do this takes two steps, which point out the class' essential features:
+<P>
+<UL>
+<LI>You identify the application that you want to send a message to (the "target") in the <A HREF="Messenger.html#BMessenger">BMessenger</A> constructor.  An application is identified by its <I>app signature</I> (a MIME string).
+<P>
+<LI>The <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> function sends a message to the target.
+<P>
+</UL>
+<P>
+BMessengers can also be used to target local looper/handler pairs. 
+<P>
+<A NAME="19914:%20head1:%20xa5%20%20From%20Looper%20to%20Handler"></A>
+<P>
+<HR>
+<H2>
+<A NAME="From%20Looper%20to%20Handler"></A><FONT SIZE=6>F</FONT>rom <FONT SIZE=6>L</FONT>ooper to <FONT SIZE=6>H</FONT>andler
+</H2>
+<P>
+A <A HREF="Looper.html#BLooper">BLooper</A> pops a message from its message queue and, within its <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> function, dispatches the message by invoking a <A HREF="Handler.html#BHandler">BHandler</A> function.  But <B>(1)</B> which <A HREF="Handler.html#BHandler">BHandler</A> and <B>(2)</B> which function?  
+<P>
+<HR>
+<H3>
+<A NAME="Finding%20a%20Handler"></A>Finding a Handler
+</H3>
+<P>
+First, let's answer the "which BHandler" question.  To determine which <A HREF="Handler.html#BHandler">BHandler</A> should handle an in-coming message, a <A HREF="Looper.html#BLooper">BLooper</A> follows these steps:
+<P>
+<B>1. </B>&nbsp;&nbsp;&nbsp;<I>Does the <A HREF="Message.html#BMessage">BMessage</A> target a specific BHandler?</I>  Both the <B><TT><A HREF="Looper.html#PostMessage()">BLooper::PostMessage()</A></TT></B> and <B><TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B> functions provide additional arguments that let you specify a <I>target handler</I> that you want to have handle the message (you can also set the target in the <A HREF="Messenger.html#BMessenger">BMessenger</A> constructor).  If a <A HREF="Handler.html#BHandler">BHandler</A> is specified, the <A HREF="Message.html#BMessage">BMessage</A> will show up in that object's <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function (or it will invoke a message-mapped hook function, as explained below).
+<P>
+<B>2. </B>&nbsp;&nbsp;&nbsp;<I>Does the <A HREF="Looper.html#BLooper">BLooper</A> designate a preferred handler?  </I>Through its <B><TT><A HREF="Looper.html#SetPreferredHandler()">SetPreferredHandler()</A></TT></B> function, a <A HREF="Looper.html#BLooper">BLooper</A> can designate one of the objects in its handler chain as its <I>preferred handler</I>, and passes all messages to that object.
+<P>
+<B>3. </B>&nbsp;&nbsp;&nbsp;<I>The <A HREF="Looper.html#BLooper">BLooper</A> handles the <A HREF="Message.html#BMessage">BMessage</A> itself</I>.  If there's no target handler or preferred handler designation, the <A HREF="Looper.html#BLooper">BLooper</A> handles the message itself&mdash;in other words, the message is passed to the BLooper's own <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function (or message-mapped hook). 
+<P>
+We should mention here that both the <A HREF="Application.html#BApplication">BApplication</A> and the <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> class fine-tune this decision process a bit.  However, the meddling that they do only applies to system messages (described below).  The messages that you define yourself (i.e. the command constants that your application defines) will always follow the message dispatching path described here.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you look at the <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> protocol, you'll notice that it has a BMessage and a <A HREF="Handler.html#BHandler">BHandler</A> as arguments.  In other words, the "which handler" decision described here is actually made before <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> is called.  In general, this is an implementation detail that you shouldn't worry about.  If you want to think that <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> makes the decision&mdash;and we've done nothing to disabuse you of this notion&mdash;go ahead and think it.  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Finding%20a%20Function"></A>Finding a Function
+</H3>
+<P>
+As described above, a <A HREF="Looper.html#BLooper">BLooper</A> passes a <A HREF="Message.html#BMessage">BMessage</A> to a <A HREF="Handler.html#BHandler">BHandler</A> by invoking the latter's <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function.  This is true of all messages that you create yourself, but it isn't true of certain messages that the system defines and sends.  These system-generated messages (or <I>system messages</I>)&mdash;particularly those that report user events such as <B><TT><A HREF="../Messages/GeneralMessages.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B> or <B><TT><A HREF="misc.html#B_APP_ACTIVATED">B_APP_ACTIVATED</A></TT></B>&mdash;invoke specific hook functions.  
+<P>
+For example, when the user presses a key, a <B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message is sent to the active <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> object..  From within its <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> function, <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> invokes the <B><TT><A HREF="../The%20Interface%20Kit/MenuField.html#MouseDown()">MouseDown()</A></TT></B> function of the <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> that currently holds <I>keyboard focus</I>.  (When a <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> is made the focus of keyboard events, its window promotes it to preferred handler.) 
+<P>
+So the question of "which function" is fairly simple:  If the <A HREF="Message.html#BMessage">BMessage</A> is a system message that's mapped to a hook function, the hook function is invoked.  If it's not mapped to a hook function, the BHandler's <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function is invoked.
+<P>
+A full list of system messages and the hook functions that they're mapped to is given in the System Messages Appendix. Note that not all system messages are mapped to hook functions; some of them do show up in <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B>.
+<P>
+<H4>
+<A NAME="Inheritance%20and%20the%20Handler%20Chain"></A>Inheritance and the Handler Chain
+</H4>
+<P>
+Let's look at <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> again.  It was asserted, in a code snippet shown earlier, that a typical <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> implementation should include an invocation of the base class' version of the function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyHandler::MessageReceived(BMessage *message)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch ( message->what ) {
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Command constants that you handle go here. */&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Messages that your class doesn't recognize must be passed</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * on to the base class implementation. */</B>
+&nbsp;&nbsp;&nbsp;<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<I>baseClass</I>::MessageReceived(message);</B>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This isn't just a good idea&mdash;it's an essential part of the messaging system.  Forwarding the message to the base class does two things:  It lets messages <B>(1)</B> pass up the class hierarchy, and <B>(2)</B> pass along the handler chain (in that order).
+<P>
+Passing up the class hierarchy is mostly straight-forward&mdash;it's no different for the <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function than it is for any other function.  But what happens at the top of the hierarchy&mdash;at the <A HREF="Handler.html#BHandler">BHandler</A> class itself&mdash;adds a small wrinkle.  BHandler's implementation of <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> looks for the next handler in the BLooper's handler chain and invokes that object's <B><TT><A HREF="Handler.html#MessageReceived()">MessageReceived()</A></TT></B> function.  
+<P>
+<A NAME="32609:%20head1:%20xa5%20%20Sending%20a%20Message"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Sending%20a%20Message"></A><FONT SIZE=6>S</FONT>ending a <FONT SIZE=6>M</FONT>essage
+</H2>
+<P>
+There are two functions that send messages to distinct recipients:
+<P>
+<UL>
+<LI><B><TT><A HREF="Looper.html#PostMessage()">BLooper::PostMessage()</A></TT></B> can be used if the target (the <A HREF="Looper.html#BLooper">BLooper</A> that the <B><TT><A HREF="Looper.html#PostMessage()">PostMessage()</A></TT></B> function is invoked upon) lives in the same application as the message sender.  
+<P>
+<LI><B><TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B> lets you send messages to remote applications.  The <A HREF="Messenger.html#BMessenger">BMessenger</A> object acts as a proxy for the remote app.  (<B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> can also be used to send a message to a local <A HREF="Looper.html#BLooper">BLooper</A>, for reasons that we'll discuss later.)
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="The%20PostMessage()%20Function"></A>The PostMessage() Function
+</H3>
+<P>
+You can post a message if the recipient <A HREF="Looper.html#BLooper">BLooper</A> is in your application:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myLooper->PostMessage(new BMessage(DO_SOMETHING), targetHandler);</PRE>
+<P>
+As shown here, you can specify the handler that you want to have handle a posted message.   The only requirement is that the <A HREF="Handler.html#BHandler">BHandler</A> must belong to the BLooper.
+<P>
+If the handler argument is NULL, the message is handled by the looper's <I>preferred handler
+<P>
+</I><PRE>&nbsp;&nbsp;&nbsp;myLooper->PostMessage(new BMessage(DO_SOMETHING), NULL);</PRE>
+<P>
+By using the default handler, you let the looper decide who should handle the message.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The creator of the <A HREF="Message.html#BMessage">BMessage</A> retains ownership and is responsible for deleting it when it's no longer needed.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="The%20SendMessage()%20Function"></A>The SendMessage() Function
+</H3>
+<P>
+If you want to send a message to another application, you have to use BMessenger's <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> function.  First, you construct a <A HREF="Messenger.html#BMessenger">BMessenger</A> object that identifies the remote app by signature... 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessenger messenger("application/x-some-app");</PRE>
+<P>
+...and then you invoke <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;messenger.SendMessage(new BMessage(DO_SOMETHING));</PRE>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The creator of the <A HREF="Message.html#BMessage">BMessage</A> retains ownership and is responsible for deleting it when it's no longer needed.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Handling%20a%20Reply"></A>Handling a Reply
+</H3>
+<P>
+Every <A HREF="Message.html#BMessage">BMessage</A> that you send identifies the application from which it was sent.  The recipient of the message can reply to the message whether you (the sender) expect a reply or not.  By default, reply messages are handled by your <A HREF="Application.html#BApplication">BApplication</A> object.  If you want reply messages to be handled by some other <A HREF="Handler.html#BHandler">BHandler</A>, you specify the object as a final argument to the <B><TT>PostMesssage()</TT></B> or <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> call:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myLooper->PostMessage(new BMessage(DO_SOMETHING), targetHandler, replyHandler);
+&nbsp;&nbsp;&nbsp;/* and */
+&nbsp;&nbsp;&nbsp;myMessenger.SendMessage(&amp;message, replyHandler);</PRE>
+<P>
+The reply is sent asynchronously with regard to the PostMessage()/SendMessage() function. 
+<P>
+SendMessage() (only) lets you ask for a reply message that's handed back synchronously in the SendMessage() call itself:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage reply;
+&nbsp;&nbsp;&nbsp;myMessenger.SendMessage(&amp;message, &amp;reply);</PRE>
+<P>
+<B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B> doesn't return until a reply is received.  A default message is created and returned if the recipient doesn't respond quickly enough.
+<P>
+<H4>
+<A NAME="Receiving%20a%20Message"></A>Receiving a Message
+</H4>
+<P>
+BMessage's <B><TT><A HREF="Message.html#SendReply()">SendReply()</A></TT></B> function has the same syntax as <B><TT><A HREF="Messenger.html#SendMessage()">SendMessage()</A></TT></B>, so it's possible to ask for a synchronous reply to a message that is itself a reply,
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage message(READY);
+&nbsp;&nbsp;&nbsp;BMessage reply;
+&nbsp;&nbsp;&nbsp;theMessage->SendReply(&amp;message, &amp;reply);
+&nbsp;&nbsp;&nbsp;if ( reply->what != B_NO_REPLY ) {
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+or to designate a <A HREF="Handler.html#BHandler">BHandler</A> for an asynchronous reply to the reply:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;theMessage->SendReply(&amp;message, someHandler);</PRE>
+<P>
+In this way, two applications can maintain an ongoing exchange of messages.
+<P>
+<HR>
+<H3>
+<A NAME="Handler%20Associations"></A>Handler Associations
+</H3>
+<P>
+To be notified of an arriving message, a <A HREF="Handler.html#BHandler">BHandler</A> must "belong" to the BLooper; it must have been added to the BLooper's list of eligible handlers.  The list can contain any number of objects, but at any given time a <A HREF="Handler.html#BHandler">BHandler</A> can belong to only one BLooper.
+<P>
+Handlers that belong to the same <A HREF="Looper.html#BLooper">BLooper</A> can be chained in a linked list.  If an object can't respond to a message, the system passes the message to its next handler.
+<P>
+BLooper's <B><TT><A HREF="Looper.html#AddHandler()">AddHandler()</A></TT></B> function sets up the looper-handler association; BHandler's <B><TT><A HREF="Handler.html#SetNextHandler()">SetNextHandler()</A></TT></B> sets the handler-handler link.
+<P>
+<HR>
+<H2>
+<A NAME="Message%20Filters"></A><FONT SIZE=6>M</FONT>essage <FONT SIZE=6>F</FONT>ilters
+</H2>
+<P>
+The <A HREF="MessageFilter.html#BMessageFilter">BMessageFilter</A> class lets create filtering functions that examine and re-route (or reject) incoming messages before they're processed by a BLooper.  Message filters can also be applied to individual <A HREF="Handler.html#BHandler">BHandler</A> objects.
+<P>
+<HR>
+<H2>
+<A NAME="Message%20Protocols"></A><FONT SIZE=6>M</FONT>essage <FONT SIZE=6>P</FONT>rotocols
+</H2>
+<P>
+Both the source and the destination of a message must agree upon its format&mdash;the command constant and the names and types of data fields.  They must also agree on details of the exchange&mdash;when the message can be sent, whether it requires a response, what the format of the reply should be, what it means if an expected data item is omitted, and so on.
+<P>
+None of this is a problem for messages that are used only within an application; the application developer can keep track of the details.  However, protocols must be published for messages that communicate between applications.  You're urged to publish the specifications for all messages your application is willing to accept from outside sources and for all those that it can package for delivery to other applications.
+<A NAME="13998:%20head2:%20System%20Messages"></A>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

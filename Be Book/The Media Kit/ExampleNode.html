@@ -1,0 +1,855 @@
+<HTML><A NAME="A%20BMediaEventLooper%20Example"></A>
+<HEAD><TITLE>The Media Kit: A BMediaEventLooper Example</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="A%20BMediaEventLooper%20Example"></A>A BMediaEventLooper Example
+</H1>
+<P>
+Implementing a node using the <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> class to handle the scheduling issues makes your job much easier.  So much so, in fact, that Be recommends that you not try to bypass BMediaEventLooper.  This section provides an example of creating a node using <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> to handle the control port and event queueing.
+<P>
+When you implement a node using <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A>, you have to derive from multiple classes: <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A>, of course, and <A HREF="Controllable.html#BControllable">BControllable</A> if you want your node to be user-configurable.  Then you need to also derive from <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> and/or <A HREF="BufferProducer.html#BBufferProducer">BBufferProducer</A>, depending on whether you create or receive buffers.  And if your node can provide a time source, you would also need to derive from BTimeSource.
+<P>
+<A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> doesn't eliminate your obligation to implement the pure virtual functions in all the classes you derive from, and you may still have to implement some or all of the other virtual functions as well.  All BMediaEvent gives you is automatic queueing of received messages, and automatic management of your control port.  This still eliminates a lot of repetitive and uninteresting work, and makes your job a lot easier.
+<P>
+Let's look at an example node.  This node derives from <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A>, <A HREF="Controllable.html#BControllable">BControllable</A>, and <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A>, and logs media events to a disk file.  The node's latency, among other parameters, is user-configurable, so you can use this node to simulate different loads on the system.
+<P>
+This section only shows key portions of the sample node.  If you'd like to play with the full source code, you can download it from the Be web site at ftp://ftp.be.com/pub/samples/media_kit/LoggingConsumer.zip.
+<P>
+<HR>
+<H2>
+<A NAME="The%20Constructor%20and%20Destructor"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+Let's start at the very beginning (a very good place to start).  The constructor has to perform the initialization for all the superclasses:
+<P>
+<HR>
+<H3>
+<A NAME="Constructor"></A>Constructor
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;LoggingConsumer::LoggingConsumer(const entry_ref &amp;logFile)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;BMediaNode("LoggingConsumer"),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BBufferConsumer(B_MEDIA_UNKNOWN_TYPE),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BControllable(),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaEventLooper(),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogRef(logFile), mWeb(NULL),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLateBuffers(0),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLatency(50 * 1000),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// default to 50 milliseconds
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mSpinPercentage(0.10),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// default to spinning 10% of total latency
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mPriority(B_REAL_TIME_PRIORITY),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLastLatencyChange(0),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLastSpinChange(0),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLastPrioChange(0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger = new LogWriter(logFile);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The constructors for <A HREF="MediaNode.html#BMediaNode">BMediaNode</A>, <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A>, <A HREF="Controllable.html#BControllable">BControllable</A>, and <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> are all called through to here, to perform the standard initialization for each of these superclasses.  In addition, an assortment of local variables are initialized.
+<P>
+Finally, the thread that handles actually writing into the log file is started; this is done by the LogWriter class' constructor.  This class will be used to access the log file.  We won't get into any specifics of how the LogWriter class works.  Suffice it to say that the LogWriter has some public variables that affect the messages it logs to the file, and a <B><TT>Log()</TT></B> function that actually writes a new entry into the log file.
+<P>
+<HR>
+<H3>
+<A NAME="Destructor"></A>Destructor
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;LoggingConsumer::~LoggingConsumer() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaEventLooper::Quit();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetParameterWeb(NULL);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mWeb = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete mLogger;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The destructor, shown above, begins by stopping the BMediaEventLooper's control loop.  This is done by calling <B><TT><A HREF="MediaEventLooper.html#Quit()">BMediaEventLooper::Quit()</A></TT></B>.  Next we delete the parameter web by calling <B><TT><A HREF="Controllable.html#SetParameterWeb()">BControllable::SetParameterWeb()</A></TT></B>; we set the parameter web to <B><TT>NULL</TT></B> instead of deleting it ourselves because this lets the node handle cleanup&mdash;the node deletes the web for us in this case.  We then set our local pointer to the web to <B><TT>NULL</TT></B> so we know it's been deleted.
+<P>
+Once all that's been done, we delete the logging thread.  This is done last to avoid possible race conditions that could arise if an event arrives that would trigger a write to the log.  By waiting until the <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> has been quit, we can avoid this potential problem.
+<P>
+<HR>
+<H2>
+<A NAME="BMediaNode%20Functions"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>edia<FONT SIZE=6>N</FONT>ode <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+We also need to implement some functions from the <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> class.  Other than <B><TT><A HREF="MediaNode.html#AddOn()">BMediaNode::AddOn()</A></TT></B>, <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> provides default implementations for these functions.  In many cases, you can just use the default implementations.  We'll look at one custom implementation, so you can see how it's done.
+<P>
+<HR>
+<H3>
+<A NAME="AddOn()"></A>AddOn()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMediaAddOn* LoggingConsumer::AddOn(int32 *) const {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return NULL;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="MediaNode.html#AddOn()">BMediaNode::AddOn()</A></TT></B> function's job is to return a pointer to the <A HREF="MediaAddOn.html#BMediaAddOn">BMediaAddOn</A> object that instantiated the node.  In this case, we're contained within an application, so we return <B><TT>NULL</TT></B>.  But if the node were created from a media node add-on, we'd return a pointer to that object here.
+<P>
+<HR>
+<H3>
+<A NAME="Other%20BMediaNode%20Functions"></A>Other BMediaNode Functions
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void  LoggingConsumer::SetRunMode(run_mode mode) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.runmode.mode = mode;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_SET_RUN_MODE, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaEventLooper::SetRunMode(mode);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="MediaNode.html#SetRunMode()">BMediaNode::SetRunMode()</A></TT></B> function handles changing the run mode of the node.  The <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> class handles this automatically, but you can augment the implementation if you need to.
+<P>
+In this case, as we do in all the other <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> functions we implement, we simply log the call, then defer to BMediaEventLooper's implementation.
+<P>
+We call <B><TT>TimeSource()->Now()</TT></B> to get the current time, which is inserted into the log along with a description of the type of event that occurred.
+<P>
+The other <A HREF="MediaNode.html#BMediaNode">BMediaNode</A> functions we implement work similarly, logging the request, then deferring to the <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> implementation.
+<P>
+<HR>
+<H2>
+<A NAME="BControllable%20Functions"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>C</FONT>ontrollable <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+The <A HREF="Controllable.html#BControllable">BControllable</A> functions we implement allow our node to be user-configurable; these functions are called when someone needs to know the current value of one of the parameters, or when the value of a parameter needs to be changed.
+<P>
+<HR>
+<H3>
+<A NAME="GetParameterValue()"></A>GetParameterValue()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t LoggingConsumer::GetParameterValue(int32 id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t* last_change, void* value, size_t* ioSize) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.param.id = id;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_GET_PARAM_VALUE, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (*ioSize &lt; sizeof(float)) return B_ERROR;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (id) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case LATENCY_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*last_change = mLastLatencyChange;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*((float*) value) = mLatency/1000;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// the BParameter reads milliseconds, not microseconds
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*ioSize = sizeof(float);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case CPU_SPIN_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*last_change = mLastSpinChange;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*((float*) value) = mSpinPercentage;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*ioSize = sizeof(float);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case PRIORITY_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*last_change = mLastPrioChange;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*((int32*) value) = mPriority;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*ioSize = sizeof(int32);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="Controllable.html#GetParameterValue()">BControllable::GetParameterValue()</A></TT></B> function is called to obtain the current value for one of the node's configurable parameters.  The parameter is specified by an ID number in the <I><FONT  color=991122 face=HELVETICA>id</I></FONT> argument.  <I><FONT  color=991122 face=HELVETICA>value</I></FONT> points to a memory buffer in which the value should be stored, and <I><FONT  color=991122 face=HELVETICA>ioSize</I></FONT> indicates the size of the buffer.  Our job is to store the time at which the indicated parameter last changed into <I><FONT  color=991122 face=HELVETICA>last_change</I></FONT>, the new value into the buffer pointed at by <I><FONT  color=991122 face=HELVETICA>value</I></FONT>, and the actual size of the returned value into <I><FONT  color=991122 face=HELVETICA>ioSize</I></FONT>.
+<P>
+Our logging node begins by logging the request to the log file.
+<P>
+Then the real implementation begins by checking to be sure the space provided by the caller is big enough for the result.  In this node, all values are four bytes, so this is easy to check, but in your node, you might have to check on a parameter-by-parameter basis.
+<P>
+Then, based on the <I><FONT  color=991122 face=HELVETICA>id</I></FONT>, the result is filled out, based on values we've cached from the last change to the parameter values (these would be set when the web receives the appropriate messages indicating that the values have changed).  We'll look at the functioning of the <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> shortly.
+<P>
+<HR>
+<H3>
+<A NAME="SetParameterValue()"></A>SetParameterValue()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void  LoggingConsumer::SetParameterValue(int32 id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t performance_time, const void* value, size_t size) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.param.id = id;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_SET_PARAM_VALUE, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// if it&gt;s one of our parameters, enqueue a "set parameter" event for handling at the appropriate time
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (id) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case LATENCY_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case CPU_SPIN_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case PRIORITY_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_timed_event event(performance_time,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTimedEventQueue::B_PARAMETER, (void*) value,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTimedEventQueue::B_NO_CLEANUP, size, id, NULL);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EventQueue()->AddEvent(event);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// do nothing for other parameter IDs
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="Controllable.html#SetParameterValue()">BControllable::SetParameterValue()</A></TT></B> is called when a request is made to change the value of a parameter.  We begin, as usual, by logging the request.
+<P>
+The meat of this function is the switch statement, which enqueues a <B><TT><A HREF="TimedEventQueue.html#media_timed_event">media_timed_event</A></TT></B> representing the request.  We instantiate a new media_timed_event with the performance time at which the change is to take place, and all the other parameters needed when changing a parameter's value.
+<P>
+This is then inserted into the event queue by calling <B><TT><A HREF="TimedEventQueue.html#AddEvent()">BTimedEventQueue::AddEvent()</A></TT></B> on the BMediaEventLooper's queue, which is returned by <B><TT><A HREF="MediaEventLooper.html#EventQueue()">BMediaEventLooper::EventQueue()</A></TT></B>.  When the time specified by <I><FONT  color=991122 face=HELVETICA>performance_time</I></FONT> arrives, this will be dequeued and sent along to <B><TT><A HREF="MediaEventLooper.html#HandleEvent()">BMediaEventLooper::HandleEvent()</A></TT></B> automatically.
+<P>
+The event is given the type <B><TT>BTimedEventQueue::B_PARAMETER</TT></B>.  This type is used for parameter change events.
+<P>
+<HR>
+<H2>
+<A NAME="BBufferConsumer%20Functions"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>B</FONT>uffer<FONT SIZE=6>C</FONT>onsumer <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+Next we come to the <A HREF="BufferConsumer.html#BBufferConsumer">BBufferConsumer</A> functions that we have to implement.  These functions actually handle arriving buffers, and negotiations with producers.
+<P>
+<HR>
+<H3>
+<A NAME="HandleMessage()"></A>HandleMessage()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t LoggingConsumer::HandleMessage(int32 message, const void *data,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t size) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_HANDLE_MESSAGE, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_ERROR;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#HandleMessage()">HandleMessage()</A></TT></B> should never be called if you're using a <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> (if it's called, a message was received that can't be handled at this inheritance level), so we log it and return an error.
+<P>
+<HR>
+<H3>
+<A NAME="AcceptFormat()"></A>AcceptFormat()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t LoggingConsumer::AcceptFormat(const media_destination &amp;dest,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format* format) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_ACCEPT_FORMAT, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (dest != mInput.destination) return B_MEDIA_BAD_DESTINATION;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#AcceptFormat()">AcceptFormat()</A></TT></B> is called to confirm that a specified format is acceptable for a given destination.  Your implementation needs to look at the format and make this decision, reporting an error if the format is unacceptable.
+<P>
+The example implementation logs the call, then checks to be sure the destination  is in fact valid.  In this example node, there's only one input allowed, so this is checked easily.  If you have an array or linked list of inputs, you'll need to check them all.  If the destination isn't recognized, return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_DESTINATION">B_MEDIA_BAD_DESTINATION</A></TT></B>.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if the format is acceptable.  In this case, all formats are acceptable.
+<P>
+<HR>
+<H3>
+<A NAME="GetNextInput()"></A>GetNextInput()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t LoggingConsumer::GetNextInput(int32* cookie,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_input* out_input) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (0 == *cookie) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mInput.format.type = B_MEDIA_UNKNOWN_TYPE;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// accept any format
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*out_input = mInput;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*cookie = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else return B_BAD_INDEX;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <B><TT><A HREF="#GetNextInput()">GetNextInput()</A></TT></B> function is used to iterate through all the inputs your node provides.  You should fill <I><FONT  color=991122 face=HELVETICA>out_input</I></FONT> with the a copy of the requested input's <B><TT><A HREF="misc_api.html#media_input">media_input</A></TT></B> structure.  The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> is used to specify which input is to be returned; the caller specifies a pointer to 0 the first time <B><TT><A HREF="#GetNextInput()">GetNextInput()</A></TT></B> is called, and you can set this value appropriately to keep track of where you are scanning your list of inputs.
+<P>
+In this case, there's only one input available, so we return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B> if <B><TT>*</TT></B><I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> is nonzero (which indicates that the end of the list has been reached).  Otherwise the out_input is filled in, and the <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> is changed to 1 to indicate that the first input has been scanned.  <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> is returned to indicate success.
+<P>
+<HR>
+<H3>
+<A NAME="DisposeInputCookie()"></A>DisposeInputCookie()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void LoggingConsumer::DisposeInputCookie(int32 /*cookie*/ ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* handle disposing of your cookie here, if necessary */
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If your cookie isn't a simple integer value, but is actually a pointer, you should dispose of it in your <B><TT><A HREF="#DisposeInputCookie()">DisposeInputCookie()</A></TT></B> implementation.  In this case, we do nothing, since the cookie is an integer.
+<P>
+<HR>
+<H3>
+<A NAME="BufferReceived()"></A>BufferReceived()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void LoggingConsumer::BufferReceived(BBuffer* buffer) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t bufferStart = buffer->Header()->start_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t how_early=bufferStart-EventLatency()-SchedulingLatency()-now;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = now;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.buffer_data.start_time = bufferStart;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.buffer_data.offset = how_early;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_BUFFER_RECEIVED, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (B_MEDIA_PARAMETERS == buffer->Header()->type) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ApplyParameterData(buffer->Data(), buffer->SizeUsed());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer->Recycle();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_timed_event event(buffer->Header()->start_time,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTimedEventQueue::B_HANDLE_BUFFER,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer, BTimedEventQueue::B_RECYCLE_BUFFER);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = EventQueue()->AddEvent(event);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) buffer->Recycle();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#BufferReceived()">BufferReceived()</A></TT></B> is called when buffers arrive on an active connection.  Our primary task is to enqueue them for processing at the appropriate time.  We begin by logging the arrival of the buffer, including information about the time at which it arrived and how early it arrived.
+<P>
+<B><TT>B_MEDIA_PARAMETERS</TT></B> type buffers have to be handled specially (each parameter change in the buffer has its own performance time listed), so we check the buffer's header to see if it's a <B><TT>B_MEDIA_PARAMETERS</TT></B> buffer.  If it is, we call <B><TT><A HREF="Controllable.html#ApplyParameterData()">ApplyParameterData()</A></TT></B> to apply the parameter changes, and the buffer is immediately recycled so it can be reused.
+<P>
+If it's any other type of buffer, a new <B><TT><A HREF="TimedEventQueue.html#media_timed_event">media_timed_event</A></TT></B> is created to reference the new buffer.  The event is of type <B><TT>BTimedEventQueue::B_HANDLE_BUFFER</TT></B>, and the cleanup mode is <B><TT>BTimedEventQueue::B_RECYCLE_BUFFER</TT></B>, so that the buffer will automatically be recycled after the event is processed.  Then the new event is enqueued.
+<P>
+If an error occurred trying to enqueue the buffer, it's not in the queue, so we need to recycle it ourselves by calling <B><TT><A HREF="Buffer.html#Recycle()">BBuffer::Recycle()</A></TT></B>.  If we didn't do this, we'd leak buffers, which is an embarrassing problem for which there's no known cure.  So take proper precautions.
+<P>
+<HR>
+<H3>
+<A NAME="ProducerDataStatus()"></A>ProducerDataStatus()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void LoggingConsumer::ProducerDataStatus(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp; for_whom, int32 status,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t at_performance_time) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.data_status.status = status;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_PRODUCER_DATA_STATUS, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (for_whom == mInput.destination) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_timed_event event(at_performance_time,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTimedEventQueue::B_DATA_STATUS, &amp;mInput,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTimedEventQueue::B_NO_CLEANUP, status, 0, NULL);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EventQueue()->AddEvent(event);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#ProducerDataStatus()">ProducerDataStatus()</A></TT></B> is called when the upstream producer's status changes such that it will begin or stop sending buffers.  This lets your node optimize its performance based on whether or not buffers are expected.  After logging the call, the request is enqueued.  Note that it's only queued if the specified destination, <I><FONT  color=991122 face=HELVETICA>for_whom</I></FONT>, matches one of the node's actual inputs.  If it doesn't, the request should be ignored.
+<P>
+The event is given the type <B><TT>BTimedEventQueue:B_DATA_STATUS</TT></B>, and no cleanup is required.
+<P>
+<HR>
+<H3>
+<A NAME="GetLatencyFor()"></A>GetLatencyFor()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t LoggingConsumer::GetLatencyFor(const media_destination &amp;for_whom,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t* out_latency, media_node_id* out_timesource) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (for_whom != mInput.destination) return B_MEDIA_BAD_DESTINATION;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*out_latency = mLatency;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*out_timesource = TimeSource()->ID();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#GetLatencyFor()">GetLatencyFor()</A></TT></B>'s job is to report the latency for a particular destination.  Make sure the destination is a valid one by checking all your inputs to see if any of them have that destination; if none match, return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_DESTINATION">B_MEDIA_BAD_DESTINATION</A></TT></B>.
+<P>
+Otherwise, you should add up the internal and downstream latency (but not the scheduling latency) for the input, and store that value in <I><FONT  color=991122 face=HELVETICA>out_latency</I></FONT>, and the node's time source in <I><FONT  color=991122 face=HELVETICA>out_timesource</I></FONT>, before returning <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  In our example node, the latency is <B><TT>mLatency</TT></B>, which is a user-configurable parameter.
+<P>
+In this case, the node has no downstream latency (it's not a producer), so the only latency that counts is our internal latency, which is <B><TT>mLatency</TT></B>.  This is a user-configurable option in this node.
+<P>
+<HR>
+<H3>
+<A NAME="Connected()"></A>Connected()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t LoggingConsumer::Connected(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_source&amp; producer,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination&amp; where,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_format&amp; with_format,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_input* out_input) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_CONNECTED, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (where != mInput.destination) return B_MEDIA_BAD_DESTINATION;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// calculate my latency here, because it may depend on buffer sizes/durations, then
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// tell the BMediaEventLooper how early we need to get the buffers
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetEventLatency(mLatency);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// record useful information about the connection, and return success
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mInput.source = producer;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*out_input = mInput;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="BufferConsumer.html#Connected()">BBufferConsumer::Connected()</A></TT></B> is called when a connection between the specified <I><FONT  color=991122 face=HELVETICA>producer</I></FONT>, and your node's destination <I><FONT  color=991122 face=HELVETICA>where</I></FONT> is established.  The connection is logged to the log file.
+<P>
+If the destination isn't valid, <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MEDIA_BAD_DESTINATION">B_MEDIA_BAD_DESTINATION</A></TT></B> is returned.  Otherwise, the connection's latency is computed and <B><TT><A HREF="MediaEventLooper.html#SetEventLatency()">BMediaEventLooper::SetEventLatency()</A></TT></B> is called to tell the <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> what the latency is.  This is an important step, since the <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> class handles scheduling, it needs to know the latency!
+<P>
+In this case, we don't do much in the way of computing the latency; we have a known user-configurable value, <B><TT>mLatency</TT></B>, but in a real-world node, you need to compute this as accurately as you reasonably can.
+<P>
+Finally, important information about the connection is recorded into the input (the <B><TT><A HREF="misc_api.html#media_source">media_source</A></TT></B>, <I><FONT  color=991122 face=HELVETICA>producer</I></FONT>, for example), and we stuff a pointer to the input into <I><FONT  color=991122 face=HELVETICA>out_input</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="Disconnected()"></A>Disconnected()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void LoggingConsumer::Disconnected(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_source &amp;producer,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;where) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_DISCONNECTED, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::memset(&amp;mInput, 0, sizeof(mInput));
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="BufferConsumer.html#Disconnected()">BBufferConsumer::Disconnected()</A></TT></B> is called when a connection between the source <I><FONT  color=991122 face=HELVETICA>producer</I></FONT> and the destination <I><FONT  color=991122 face=HELVETICA>where</I></FONT> is terminated.  We log the call to the log file, then perform whatever tasks are necessary on disconnecting the nodes.
+<P>
+In this case, we zero out the <B><TT><A HREF="misc_api.html#media_input">media_input</A></TT></B> record used by the connection.  Your node may have other tasks to perform, depending on your implementation.
+<P>
+<HR>
+<H3>
+<A NAME="FormatChanged()"></A>FormatChanged()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t LoggingConsumer::FormatChanged(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_source &amp;producer,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination &amp;consumer,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 change_tag,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_format&amp; format) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_FORMAT_CHANGED, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="BufferConsumer.html#FormatChanged()">BBufferConsumer::FormatChanged()</A></TT></B> is called whenever the media_format used for buffers transmitted on the connection between the given producer and consumer changes.  This is called in response to your node calling <B><TT>BBufferConsumer::RequestFormatChange()</TT></B>; once the requested change has been made, this is called to let you know that it happened.  <I><FONT  color=991122 face=HELVETICA>change_tag</I></FONT> matches the change tag specified returned by <B><TT>RequestFormatChange()</TT></B>, and the <I><FONT  color=991122 face=HELVETICA>format</I></FONT> indicates the negotiated new <B><TT><A HREF="misc_api.html#media_format">media_format</A></TT></B> for the connection.
+<P>
+Once your <B><TT><A HREF="#FormatChanged()">FormatChanged()</A></TT></B> function returns, future buffers will be in the new format, so you should prepare for the change at this point.  In this case, we don't actually care about the contents of the received buffers, so we do nothing but log that the change occurred and return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="SeekTagRequested()"></A>SeekTagRequested()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t LoggingConsumer::SeekTagRequested(
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const media_destination&amp; destination,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t in_target_time,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 in_flags,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_seek_tag* out_seek_tag,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t* out_tagged_time,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32* out_flags) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_SEEK_TAG, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return B_OK;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="BufferConsumer.html#SeekTagRequested()">BBufferConsumer::SeekTagRequested()</A></TT></B> is called by the Media Server to obtain a seek tag corresponding to the specified <I><FONT  color=991122 face=HELVETICA>target_time</I></FONT>.  Your node needs to cache these tags which are embedded in buffers it receives so it can return them when this function is called.
+<P>
+In this example, we don't support seek tags, so the request is logged and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> is returned.  For more information, see <B><TT><A HREF="BufferConsumer.html#SeekTagRequested()">BBufferConsumer::SeekTagRequested()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="BMediaEventLooper%20Functions"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>edia<FONT SIZE=6>E</FONT>vent<FONT SIZE=6>L</FONT>ooper <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+The node's core is the implementation of the various <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> virtual functions.
+<P>
+<HR>
+<H3>
+<A NAME="NodeRegistered()"></A>NodeRegistered()
+</H3>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void LoggingConsumer::NodeRegistered() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_REGISTERED, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetPriority(mPriority);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Run();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mInput.destination.port = ControlPort();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mInput.destination.id = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mInput.node = Node();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::strcpy(mInput.name, "Logged input");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mWeb = build_parameter_web();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetParameterWeb(mWeb);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Called when <B><TT><A HREF="MediaRoster.html#RegisterNode()">BMediaRoster::RegisterNode()</A></TT></B> is called, <B><TT><A HREF="MediaEventLooper.html#NodeRegistered()">BMediaEventLooper::NodeRegistered()</A></TT></B>'s job is to set up the newly-registered node.
+<P>
+In this example, we begin by logging the call, then we set the thread's priority by calling <B><TT><A HREF="MediaEventLooper.html#SetPriority()">BMediaEventLooper::SetPriority()</A></TT></B>, then we run the control thread by calling <B><TT><A HREF="MediaEventLooper.html#Run()">BMediaEventLooper::Run()</A></TT></B>.  This thread will process events and pass them to our <B><TT><A HREF="MediaEventLooper.html#HandleEvent()">BMediaEventLooper::HandleEvent()</A></TT></B> function at the appropriate times.
+<P>
+Once that's done, we can initialize our inputs.  In this case, we only have one, but your node might have multiple inputs.  The input's <B><TT><A HREF="misc_api.html#media_destination">media_destination</A></TT></B>'s port is set to <B><TT>BMediaEventLooper::ControlPort()</TT></B>.  This tells the Media Kit which port to send messages to in order to communicate with the input.  The destination's ID is set to a node-defined value&mdash;0 in this case, but your node should use a different value for each input you support.  And the input's node is set to the result of <B><TT><A HREF="MediaNode.html#Node()">Node()</A></TT></B>.  We also set the input's name.  This name should be unique for every input.
+<P>
+Finally, the node's parameter web is constructed by calling <B><TT>build_parameter_web()</TT></B>, and we call <B><TT><A HREF="Controllable.html#SetParameterWeb()">BControllable::SetParameterWeb()</A></TT></B> to establish the web.
+<P>
+<HR>
+<H3>
+<A NAME="Start(),%20Stop(),%20Seek(),%20TimeWarp()"></A>Start(), Stop(), Seek(), TimeWarp()
+</H3>
+<P>
+These functions are called when the corresponding events occur.  Usually you don't have to implement these, as your <B><TT><A HREF="#HandleEvent()">HandleEvent()</A></TT></B> implementation will receive an appropriate message when the time comes to handle them.  In fact, the only reason to implement these at all is if you want to know when one of these events is inserted into the queue.
+<P>
+If you do choose to implement them, you should call through to the base function.  Let's look at the implementation of <B><TT><A HREF="MediaNode.html#Start()">Start()</A></TT></B> as an example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void LoggingConsumer::Start(bigtime_t performance_time) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_START, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaEventLooper::Start(performance_time);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+This code logs the request, then calls through to <B><TT>BMediaEventLooper::Start()</TT></B>.  This will enqueue the request.  We'll see how this is handled in <B><TT><A HREF="#HandleEvent()">HandleEvent()</A></TT></B> below.
+<P>
+<HR>
+<H3>
+<A NAME="HandleEvent()"></A>HandleEvent()
+</H3>
+<P>
+This is the real meat of the node.  <B><TT><A HREF="#HandleEvent()">HandleEvent()</A></TT></B> is called whenever the <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> detects that it's time for a queued event to be processed.  You should implement the function to handle these events as they're dequeued.  The specifics of your implementation will vary depending on what your node does.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void LoggingConsumer::HandleEvent(const media_timed_event *event,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t /* lateness */, bool /* realTimeEvent */) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;log_message logMsg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_HANDLE_EVENT, logMsg);</PRE>
+<P>
+First the call is logged, as is the routine for our example.  Next, as we see below, comes a long switch statement that checks for and handles the various event types our node supports.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (event->type) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case BTimedEventQueue::B_HANDLE_BUFFER:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BBuffer* buffer=const_cast&lt;BBuffer*>((BBuffer*) event->pointer);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (buffer) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_header* hdr = buffer->Header();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (hdr->destination == mInput.destination.id) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t now = TimeSource()->Now();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t perf_time = hdr->start_time;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t how_early = perf_time - mLatency - now;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.buffer_data.start_time = perf_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.buffer_data.offset = how_early;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.buffer_data.mode = RunMode();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_BUFFER_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((RunMode() != B_OFFLINE) &amp;&amp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// lateness doesn&gt;t matter in offline mode...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(RunMode() != B_RECORDING) &amp;&amp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// ...or in recording mode
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(how_early &lt; 0)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLateBuffers++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NotifyLateProducer(mInput.source, -how_early, perf_time);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// replace this with appropriate code for your node
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t spin_start = ::system_time();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t spin_now = spin_start;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t usecToSpin = bigtime_t(mSpinPercentage / 100.0 * mLatency);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (spin_now - spin_start &lt; usecToSpin) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (long k = 0; k &lt; 1000000; k++) { /* intentionally blank */ }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;spin_now = ::system_time();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((B_OFFLINE == RunMode()) &amp;&amp; (B_DATA_AVAILABLE == mProducerDataStatus)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err = RequestAdditionalBuffer(mInput.source, buffer);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.error.error = err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_ERROR, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* wrong destination! */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer->Recycle();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+The first case is the <B><TT>BTimedEventQueue::B_HANDLE_BUFFER</TT></B> event.  This event is received when it's time to handle an incoming buffer.
+<P>
+The buffer is obtained by casting the event's pointer field into a <A HREF="Buffer.html#BBuffer">BBuffer</A> pointer.  If it's <B><TT>NULL</TT></B>, nothing is done.  Otherwise, the buffer's header is grabbed and stashed into <B><TT>hdr</TT></B>.  If the destination is invalid, we do nothing (this should never happen, but better safe than sorry).
+<P>
+If the destination is good, it's time to begin processing the buffer.  We compute how early the buffer arrived by subtracting the latency and the current performance time from the buffer's performance time.
+<P>
+Then the buffer's performance is logged (this step is of course specific to this particular example node).
+<P>
+If the buffer is late (<B><TT>how_early</TT></B> is negative) and we're in neither <B><TT><A HREF="MediaNode.html#B_OFFLINE">B_OFFLINE</A></TT></B> nor <B><TT><A HREF="MediaNode.html#B_RECORDING">B_RECORDING</A></TT></B> mode, we ignore the buffer and notify the producer that the buffer was late by calling <B><TT><A HREF="BufferConsumer.html#NotifyLateProducer()">BBufferConsumer::NotifyLateProducer()</A></TT></B>.  This lets the producer adjust its performance to attempt to avoid future buffers from arriving late.  We allow tardiness in <B><TT><A HREF="MediaNode.html#B_OFFLINE">B_OFFLINE</A></TT></B> and <B><TT><A HREF="MediaNode.html#B_RECORDING">B_RECORDING</A></TT></B> modes because lateness doesn't matter in these cases.
+<P>
+If the buffer is on time, we process the buffer.  In this example, we just waste some processing time, rougly corresponding to our latency.  In a real node, you'd replace this code with code that handles the buffer, whether by displaying it to the screen or playing it through speakers, or whatever might be appropriate.
+<P>
+If the node is in <B><TT><A HREF="MediaNode.html#B_OFFLINE">B_OFFLINE</A></TT></B> mode, and the cached producer data status is <B><TT>B_DATA_AVAILABLE</TT></B> (meaning the producer has more buffers to send us), we must call <B><TT><A HREF="BufferConsumer.html#RequestAdditionalBuffer()">BBufferConsumer::RequestAdditionalBuffer()</A></TT></B> to tell the producer we're ready for another buffer.  If we fail to call this, performance will suffer greatly.  If <B><TT><A HREF="BufferConsumer.html#RequestAdditionalBuffer()">RequestAdditionalBuffer()</A></TT></B> fails, we log the error.
+<P>
+Once processing of the buffer is done, we call <B><TT><A HREF="Buffer.html#Recycle()">BBuffer::Recycle()</A></TT></B> to make it available for future use.
+<P>
+The next possible event is the <B><TT>BTimedEventQueue::B_PARAMETER</TT></B>, which indicates a change to the parameters' values.  
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case BTimedEventQueue::B_PARAMETER:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t dataSize = size_t(event->data);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 param = int32(event->bigdata);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.param.id = param;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (dataSize >= sizeof(float)) switch (param) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case LATENCY_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float value = *((float*) event->user_data);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLatency = bigtime_t(value* 1000);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLastLatencyChange = logMsg.now;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetEventLatency(mLatency);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SendLatencyChange(mInput.source, mInput.destination, EventLatency() + SchedulingLatency());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BroadcastNewParameterValue(logMsg.now, param, &amp;value, sizeof(value));
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.param.value = value;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_SET_PARAM_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+If the latency parameter is changed, we record the new latency in <B><TT>mLatency</TT></B>, and the time at which the change occurred in <B><TT>mLastLatencyChange</TT></B>, and we call <B><TT><A HREF="MediaEventLooper.html#SetEventLatency()">BMediaEventLooper::SetEventLatency()</A></TT></B> to let the control thread know about the latency change.
+<P>
+In addition, the new latency is sent to the producer by calling <B><TT><A HREF="BufferConsumer.html#SendLatencyChange()">BBufferConsumer::SendLatencyChange()</A></TT></B>.  This lets the producer alter its behavior as appropriate to avoid running amok (or falling behind, depending on the new latency).  And <B><TT><A HREF="Controllable.html#BroadcastNewParameterValue()">BControllable::BroadcastNewParameterValue()</A></TT></B> is called to share the change to the parameter's value with anyone that's watching for changes.
+<P>
+Finally, we log the change to disk.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case CPU_SPIN_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float value = *((float*) event->user_data);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mSpinPercentage = value;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLastSpinChange = logMsg.now;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BroadcastNewParameterValue(logMsg.now, param, &amp;value, sizeof(value));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.param.value = value;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_SET_PARAM_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+Similarly, if the CPU spin parameter is changed, we record the new value and the time at which the change occurred, then broadcast the change to the world and log the change.  Note that since this doesn't correspond to anything <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> cares about, we have no additional work to do.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case PRIORITY_PARAM:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mPriority = *((int32*) event->user_data);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetPriority(mPriority);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLastPrioChange = logMsg.now;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BroadcastNewParameterValue(logMsg.now, param, &amp;mPriority, sizeof(mPriority));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.param.value = (float) mPriority;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_SET_PARAM_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+When the priority parameter is changed, we call <B><TT><A HREF="MediaEventLooper.html#SetPriority()">BMediaEventLooper::SetPriority()</A></TT></B> to tell the control thread about its new priority.  You must never directly change the thread's priority, since the priority affects the functioning of the node, and there are other changes that have to be made based upon the change.
+<P>
+The new value is saved, along with the change time, and the value is broadcast and the log entry is recorded to disk.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_INVALID_PARAM_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+Here we deal with the case where a nonexistent parameter was changed.  This error condition is logged to disk.  You should deal gracefully with this possibility, although it should never happen.
+<P>
+The next event type that needs to be handled is <B><TT>BTimedEventQueue::B_START</TT></B>, which is received when it's time to start processing buffers:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case BTimedEventQueue::B_START:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_START_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+In this example node, we simply log the start request.  Your node should insert whatever code is necessary to prepare to process buffers.  If your node is a producer, you should start sending buffers at this point.  Be sure to call <B><TT><A HREF="BufferProducer.html#SendDataStatus()">BBufferProducer::SendDataStatus()</A></TT></B> to let the consumer know that you're sending buffers.
+<P>
+The next event type is <B><TT>BTimedEventQueue::B_STOP</TT></B>, which is received when it's time to stop processing buffers:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case BTimedEventQueue::B_STOP:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_STOP_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EventQueue()->FlushEvents(0, BTimedEventQueue::B_ALWAYS, true,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTimedEventQueue::B_HANDLE_BUFFER);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+Stopping your node implies that any buffers you've received to date that haven't been processed yet should be ignored, so the event queue is flushed of all <B><TT>BTimedEventQueue::B_HANDLE_BUFFER</TT></B> events.  If you have other tasks that need to be performend when your node is stopped, this is the place to handle them.
+<P>
+Note that if your node is a producer, you should call <B><TT><A HREF="BufferProducer.html#SendDataStatus()">BBufferProducer::SendDataStatus()</A></TT></B> here to let the consumer know that no more buffers will be arriving.
+<P>
+The <B><TT>BTimedEventQueue::B_SEEK</TT></B> request is received when it's time to perform a seek operation on the node's media.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case BTimedEventQueue::B_SEEK:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_SEEK_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+Handle the seek operation here.  In this node, we just log the seek request.
+<P>
+The <B><TT>BTimedEventQueue::B_WARP</TT></B> request is received when it's time to perform a time warp operation on the node'.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case BTimedEventQueue::B_WARP:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_WARP_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+In this example, we just log the request.
+<P>
+The <B><TT>BTimedEventQueue::B_DATA_STATUS</TT></B> event is received when the producer's <B><TT><A HREF="BufferProducer.html#SendDataStatus()">BBufferProducer::SendDataStatus()</A></TT></B> function is called.  Obviously you only need to handle this event if you're a consumer:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case BTimedEventQueue::B_DATA_STATUS:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mProducerDataStatus = event->data;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.data_status.status = event->data;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_DATA_STATUS_HANDLED, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</PRE>
+<P>
+In our node, we record the producer's current data status in the member variable <B><TT>mProducerDataStatus</TT></B>.  We use this information to determine whether or not we're expecting buffers.  Your node might wish to alter its priority or perform other optimizations if the producer stops sending buffers, or increase priority when buffers start arriving again.  We also log the change.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logMsg.unknown.what = event->type;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mLogger->Log(LOG_HANDLE_UNKNOWN, logMsg);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Finally, we log any messages received that we don't understand.  In general you can ignore messages your node isn't prepared to handle.
+<P>
+<HR>
+<H2>
+<A NAME="Creating%20a%20Parameter%20Web"></A><FONT SIZE=6>C</FONT>reating a <FONT SIZE=6>P</FONT>arameter <FONT SIZE=6>W</FONT>eb
+</H2>
+<P>
+A parameter web describes to the Media Kit the various user-configurable options that might interest them, and how they should appear in a user interface.  This information is used by the media theme to render the interface that the user sees when configuring the node via the preference panel instantiated by calling <B><TT><A HREF="MediaRoster.html#StartControlPanel()">BMediaRoster::StartControlPanel()</A></TT></B>.
+<P>
+Creating a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> is simple.  You begin by creating the BParameterGroups that logically group related parameters, then you insert parameters into each group by calling the appropriate <A HREF="ParameterGroup.html#BParameterGroup">BParameterGroup</A> functions for the various types of parameters that can be created.
+<P>
+<B><TT><A HREF="ParameterGroup.html#MakeNullParameter()">BParameterGroup::MakeNullParameter()</A></TT></B> can be used to create a label or other non-configurable control that might appear in the interface.
+<P>
+<B><TT><A HREF="ParameterGroup.html#MakeContinuousParameter()">BParameterGroup::MakeContinuousParameter()</A></TT></B> creates a parameter with a floating-point value, which is usually set using a slider control.
+<P>
+<B><TT><A HREF="ParameterGroup.html#MakeDiscreteParameter()">BParameterGroup::MakeDiscreteParameter()</A></TT></B> creates a parameter with a set of discrete possible values.  These are usually displayed as pop-up menus, although some themes might use radio buttons or lists.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;static BParameterWeb* build_parameter_web() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BParameterWeb* web = new BParameterWeb;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BParameterGroup* mainGroup = web->MakeGroup("LoggingConsumer Parameters");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BParameterGroup* group = mainGroup->MakeGroup("Latency Control");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BParameter* nullParam = group->MakeNullParameter(INPUT_NULL_PARAM, B_MEDIA_NO_TYPE, "Latency", B_GENERIC);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BParameter* latencyParam = group->MakeContinuousParameter(LATENCY_PARAM, B_MEDIA_NO_TYPE, "",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_GAIN, "msec", 5, 100, 5);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nullParam->AddOutput(latencyParam);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;latencyParam->AddInput(nullParam);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group = mainGroup->MakeGroup("CPU Percentage");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nullParam = group->MakeNullParameter(CPU_NULL_PARAM, B_MEDIA_NO_TYPE, "CPU Spin Percentage", B_GENERIC);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BContinuousParameter* cpuParam = group->MakeContinuousParameter(CPU_SPIN_PARAM, B_MEDIA_NO_TYPE, "",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_GAIN, "percent", 5, 80, 5);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nullParam->AddOutput(cpuParam);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cpuParam->AddInput(nullParam);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group = mainGroup->MakeGroup("Priority");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nullParam = group->MakeNullParameter(PRIO_NULL_PARAM, B_MEDIA_NO_TYPE, "Thread Priority", B_GENERIC);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BDiscreteParameter* prioParam = group->MakeDiscreteParameter(PRIORITY_PARAM, B_MEDIA_NO_TYPE, "", B_GENERIC);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prioParam->AddItem(5, "B_LOW_PRIORITY");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prioParam->AddItem(10, "B_NORMAL_PRIORITY");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prioParam->AddItem(15, "B_DISPLAY_PRIORITY");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prioParam->AddItem(20, "B_URGENT_DISPLAY_PRIORITY");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prioParam->AddItem(100, "B_REAL_TIME_DISPLAY_PRIORITY");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prioParam->AddItem(110, "B_URGENT_PRIORITY");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prioParam->AddItem(120, "B_REAL_TIME_PRIORITY");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return web;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Notice the use of the <B><TT><A HREF="DiscreteParameter.html#AddItem()">BDiscreteParameter::AddItem()</A></TT></B> function to add the discrete values to the priority parameter.  Each item has a value and a label that's displayed in the user interface.  In this example, these correspond to the various thread priorities and their names.
+<P>
+The user interface provided by this node lets the user configure the behavior of the node, including the thread priority, how busy the CPU should be while a buffer is "processed," and the latency of buffer processing.
+<P>
+Obviously your node will have different parameters (and may have none, in which case you wouldn't even derive from <A HREF="Controllable.html#BControllable">BControllable</A>, and wouldn't need a <A HREF="ParameterWeb.html#BParameterWeb">BParameterWeb</A> at all).
+<P>
+This function is called from the <B><TT><A HREF="MediaEventLooper.html#NodeRegistered()">BMediaEventLooper::NodeRegistered()</A></TT></B> implementation above.  <B><TT>NodeRegistered()</TT></B> then calls <B><TT><A HREF="Controllable.html#SetParameterWeb()">SetParameterWeb()</A></TT></B> to establish the web for use by <B><TT>StartControlPanel()</TT></B> and other functions that use the web.
+<P>
+This node's web, as interpreted by the default system theme in Release 4.5, looks like this:
+<P>
+<IMG SRC="art/examplenode.gif" ALIGN="bottom">
+<P>
+<HR>
+<H2>
+<A NAME="Producer-specific%20Issues"></A><FONT SIZE=6>P</FONT>roducer-specific <FONT SIZE=6>I</FONT>ssues
+</H2>
+<P>
+There are obviously some additional virtual functions you need to implement if your node derives from <A HREF="BufferProducer.html#BBufferProducer.">BBufferProducer.</A>
+<P>
+<H4>
+<A NAME="Connect()"></A>Connect()
+</H4>
+<P>
+Your <B><TT><A HREF="BufferProducer.html#Connect()">BBufferProducer::Connect()</A></TT></B> implementation should call <B><TT><A HREF="MediaEventLooper.html#SetEventLatency()">BMediaEventLooper::SetEventLatency()</A></TT></B> to establish your total latency.  This value, which is your internal latency plus the downstream latency, is used by <A HREF="MediaEventLooper.html#BMediaEventLooper">BMediaEventLooper</A> to determine when to pop events off the queue for you to process.  By keeping this value up-to-date, you can improve performance.  This code might resemble the following:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* calculate processing latency */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t latency = calculate_buffer_latency();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;latency += estimate_max_scheduling_latency();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* calculate downstream latency */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t downstream;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_node_id timesource;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FindLatencyFor(output.destination, &amp;downstream, &amp;timesource);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t totalLatency = latency + downstream;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SetEventLatency(totalLatency);</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="The%20Rest%20of%20the%20Story..."></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>R</FONT>est of the <FONT SIZE=6>S</FONT>tory...
+</H2>
+<P>
+The LogWriter class' implementation isn't critical to this example, and is cleverly ignored in the name of saving space.  If you're curious, you can reference the complete sample code for the LoggingApplication, at ftp://ftp.be.com/pub/samples/media_kit/LoggingConsumer.zip.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

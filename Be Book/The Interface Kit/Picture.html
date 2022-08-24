@@ -1,0 +1,380 @@
+<HTML><HEAD><TITLE>The Interface Kit: BPicture</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BPicture"></A>BPicture
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Picture.h">be/interface/Picture.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Picture.summary.html"><i>Summary</i></A></H6>
+<P>
+A BPicture object represents a set of drawing instructions that are executed when the object is passed to BView's <B><TT><A HREF="ViewDrawing.html#DrawPicture()">DrawPicture()</A></TT></B> function.  Because it contains drawing instructions rather than an actual image, a BPicture (unlike a BBitmap) is independent of the resolution of the display device.
+<P>
+<HR>
+<H2>
+<A NAME="Recording%20a%20Picture"></A><FONT SIZE=6>R</FONT>ecording a <FONT SIZE=6>P</FONT>icture
+</H2>
+<P>
+To start recording into a <A HREF="#BPicture">BPicture</A>, you pass a BPicture object to<B><TT> BView::BeginPicture()</TT></B>.  All drawing instructions that are executed by the <A HREF="View.html#BView">BView</A> are recorded into the BPicture object.  When you're done recording, you call <B><TT>BView::EndPicture()</TT></B>, which passes back a pointer to the recorded object.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BPicture *myPict;
+&nbsp;&nbsp;&nbsp;someView->BeginPicture(new BPicture);
+&nbsp;&nbsp;&nbsp;/* <I>drawing code goes here</I> */
+&nbsp;&nbsp;&nbsp;myPict = someView->EndPicture();</PRE>
+<P>
+Only drawing that the <A HREF="View.html#BView">BView</A> does is recorded; drawing done by children and other views attached to the window is ignored, as is everything except drawing code.
+<P>
+Drawing instructions that are captured between <B><TT><A HREF="ViewDrawing.html#BeginPicture()">BeginPicture()</A></TT></B> and <B><TT><A HREF="ViewDrawing.html#EndPicture()">EndPicture()</A></TT></B> are not renedered on-screen; ignored instructions may be rendered if they draw into the visible region of an on-screen window.
+<P>
+Any picture data in the BPicture passed to <B><TT><A HREF="ViewDrawing.html#BeginPicture()">BeginPicture()</A></TT></B> is cleared; if you'd instead like to append to the <A HREF="#BPicture">BPicture</A>, begin the picture recording with <B><TT>AppendPicture()</TT></B> instead.  As with <B><TT><A HREF="ViewDrawing.html#BeginPicture()">BeginPicture()</A></TT></B>, each <B><TT>AppendPicture()</TT></B> must have a corresponding <B><TT><A HREF="ViewDrawing.html#EndPicture()">EndPicture()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="The%20Picture%20Definition"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>P</FONT>icture <FONT SIZE=6>D</FONT>efinition
+</H2>
+<P>
+The picture captures everything that affects the image that's drawn.  It takes a snapshot of the BView's graphics state&mdash;the pen size, high and low colors, font size, and so on&mdash;when <B><TT><A HREF="ViewDrawing.html#BeginPicture()">BeginPicture()</A></TT></B> is called.  It then captures all subsequent modifications to those parameters, such as calls to <B><TT><A HREF="ViewGraphicsState.html#MovePenTo()">MovePenTo()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetLowColor()">SetLowColor()</A></TT></B>, and <B><TT><A HREF="ViewGraphicsState.html#SetFontSize()">SetFontSize()</A></TT></B>.  The recorded graphics state is used when the picture is drawn (through <B><TT>BView::DrawPicture()</TT></B>).
+<P>
+The picture records all primitive drawing instruction (<B><TT><A HREF="ViewDrawing.html#DrawBitmap()">DrawBitmap()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeEllipse()">StrokeEllipse()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillRect()">FillRect()</A></TT></B>, etc.) and will even record calls to <B><TT><A HREF="ViewDrawing.html#DrawPicture()">DrawPicture()</A></TT></B>.
+<P>
+The picture makes its own copy of any data that's passed during the recording session, including bitmaps passed to <B><TT><A HREF="ViewDrawing.html#DrawBitmap()">DrawBitmap()</A></TT></B> and picture data passed to <B><TT><A HREF="ViewDrawing.html#DrawPicture()">DrawPicture()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BPicture()"></A>BPicture()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPicture(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPicture(</TT></B></FONT>const BPicture &amp;<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPicture(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes the BPicture object by ensuring that it's empty, or by copying data from another <I><FONT  color=991122 face=HELVETICA>picture</I></FONT> or <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> of a BPicture object.
+<P>
+<HR>
+<H3>
+<A NAME="~BPicture()"></A>~BPicture()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BPicture()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Destroys the Application Server's record of the BPicture object and deletes all its picture data.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Play()"></A>Play()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t *<B><TT><FONT  color=000022 size=+1>Play(</TT></B></FONT>void **<I><FONT  color=991122 face=HELVETICA>callBackTable</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>tableEntries</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>user</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Plays back a picture using a user's rendering functions.  The functions are passed in <I><FONT  color=991122 face=HELVETICA>callBackTable</I></FONT>, an array of function pointers.  <I><FONT  color=991122 face=HELVETICA>tableEntries</I></FONT> contains the number of functions in the table.  The functions perform various tasks such as drawing lines and text.  <I><FONT  color=991122 face=HELVETICA>user</I></FONT> is passed to each function, providing a hook for passing additional data to the call back functions.  The functions, along with their positions in the call back table, are detailed below.<B>
+<P>
+</B><TABLE BORDER cellpadding=4>
+<TH>Index</TH>
+<TH>Function prototype</TH>
+<TR>
+<TD>0</TD>
+<TD>no operation</TD>
+<TR>
+<TD>1</TD>
+<TD>MovePenBy(void *user, <A HREF="Point.html#BPoint">BPoint</A> delta)</TD>
+<TR>
+<TD>2</TD>
+<TD>StrokeLine(void *user, <A HREF="Point.html#BPoint">BPoint</A> start, <A HREF="Point.html#BPoint">BPoint</A> end)</TD>
+<TR>
+<TD>3</TD>
+<TD>StrokeRect(void *user, <A HREF="Rect.html#BRect">BRect</A> rect)</TD>
+<TR>
+<TD>4</TD>
+<TD>FillRect(void *user, <A HREF="Rect.html#BRect">BRect</A> rect)</TD>
+<TR>
+<TD>5</TD>
+<TD>StrokeRoundRect(void *user, <A HREF="Rect.html#BRect">BRect</A> rect, <A HREF="Point.html#BPoint">BPoint</A> radii)</TD>
+<TR>
+<TD>6</TD>
+<TD>FillRoundRect(void *user, <A HREF="Rect.html#BRect">BRect</A> rect, <A HREF="Point.html#BPoint">BPoint</A> radii)</TD>
+<TR>
+<TD>7</TD>
+<TD>StrokeBezier(void *user, <A HREF="Point.html#BPoint">BPoint</A> *control)</TD>
+<TR>
+<TD>8</TD>
+<TD>FillBezier(void *user, <A HREF="Point.html#BPoint">BPoint</A> *control)</TD>
+<TR>
+<TD>9</TD>
+<TD>StrokeArc(void *user, <A HREF="Point.html#BPoint">BPoint</A> center, <A HREF="Point.html#BPoint">BPoint</A> radii, float startTheta, float arcTheta)</TD>
+<TR>
+<TD>10</TD>
+<TD>FillArc(void *user, <A HREF="Point.html#BPoint">BPoint</A> center, <A HREF="Point.html#BPoint">BPoint</A> radii, float startTheta, float arcTheta)</TD>
+<TR>
+<TD>11</TD>
+<TD>StrokeEllipse(void *user, <A HREF="Point.html#BPoint">BPoint</A> center, <A HREF="Point.html#BPoint">BPoint</A> radii)</TD>
+<TR>
+<TD>12</TD>
+<TD>FillEllipse(void *user, <A HREF="Point.html#BPoint">BPoint</A> center, <A HREF="Point.html#BPoint">BPoint</A> radii)</TD>
+<TR>
+<TD>13</TD>
+<TD>StrokePolygon(void *user, int32 numPoints, <A HREF="Point.html#BPoint">BPoint</A> *points, bool isClosed)</TD>
+<TR>
+<TD>14</TD>
+<TD>FillPolygon(void *user, int32 numPoints, <A HREF="Point.html#BPoint">BPoint</A> *points, bool isClosed)</TD>
+<TR>
+<TD>15</TD>
+<TD>Reserved</TD>
+<TR>
+<TD>16</TD>
+<TD>Reserved</TD>
+<TR>
+<TD>17</TD>
+<TD>DrawString(void *user, char *string, float deltax, float deltay)</TD>
+<TR>
+<TD>18</TD>
+<TD>DrawPixels(void *user, <A HREF="Rect.html#BRect">BRect</A> src, <A HREF="Rect.html#BRect">BRect</A> dest, int32 width, int32 height, 
+<br>
+int32 bytesPerRow, int32 pixelFormat, int32 flags, void *data)</TD>
+<TR>
+<TD>19</TD>
+<TD>Reserved</TD>
+<TR>
+<TD>20</TD>
+<TD>SetClippingRects(void *user, <A HREF="Rect.html#BRect">BRect</A> *rects, uint32 numRects)</TD>
+<TR>
+<TD>21</TD>
+<TD>Reserved</TD>
+<TR>
+<TD>22</TD>
+<TD>PushState(void *user)</TD>
+<TR>
+<TD>23</TD>
+<TD>PopState(void *user)</TD>
+<TR>
+<TD>24</TD>
+<TD>EnterStateChange(void *user)</TD>
+<TR>
+<TD>25</TD>
+<TD>ExitStateChange(void *user)</TD>
+<TR>
+<TD>26</TD>
+<TD>EnterFontState(void *user)</TD>
+<TR>
+<TD>27</TD>
+<TD>ExitFontState(void *user)</TD>
+<TR>
+<TD>28</TD>
+<TD>SetOrigin(void *user, <A HREF="Point.html#BPoint">BPoint</A> pt)</TD>
+<TR>
+<TD>29</TD>
+<TD>SetPenLocation(void *user, <A HREF="Point.html#BPoint">BPoint</A> pt)</TD>
+<TR>
+<TD>30</TD>
+<TD>SetDrawingMode(void *user, drawing_mode mode)</TD>
+<TR>
+<TD>31</TD>
+<TD>SetLineMode(void *user, cap_mode capMode, join_mode joinMode, 
+<br>
+float miterLimit)</TD>
+<TR>
+<TD>32</TD>
+<TD>SetPenSize(void *user, float size)</TD>
+<TR>
+<TD>33</TD>
+<TD>SetForeColor(void *user, rgb_color color)</TD>
+<TR>
+<TD>34</TD>
+<TD>SetBackColor(void *user, rgb_color color)</TD>
+<TR>
+<TD>35</TD>
+<TD>SetStipplePattern(void *user, pattern p)</TD>
+<TR>
+<TD>36</TD>
+<TD>SetScale(void *user, float scale)</TD>
+<TR>
+<TD>37</TD>
+<TD>SetFontFamily(void *user, char *family)</TD>
+<TR>
+<TD>38</TD>
+<TD>SetFontStyle(void *user, char *style)</TD>
+<TR>
+<TD>39</TD>
+<TD>SetFontSpacing(void *user, int32 spacing)</TD>
+<TR>
+<TD>40</TD>
+<TD>SetFontSize(void *user, float size)</TD>
+<TR>
+<TD>41</TD>
+<TD>SetFontRotate(void *user, float rotation)</TD>
+<TR>
+<TD>42</TD>
+<TD>SetFontEncoding(void *user, int32 encoding)</TD>
+<TR>
+<TD>43</TD>
+<TD>SetFontFlags(void *user, int32 flags)</TD>
+<TR>
+<TD>44</TD>
+<TD>SetFontShear(void *user, float shear)</TD>
+<TR>
+<TD>45</TD>
+<TD>Reserved</TD>
+<TR>
+<TD>46</TD>
+<TD>SetFontFace(void *user, int32 flags)</TD>
+</TABLE>
+<P>
+While many of these functions are similar to those found in <A HREF="View.html#BView">BView</A>, there are some important differences:
+<P>
+<UL>
+<LI>The return value of the functions is ignored.
+<P>
+<LI>The Fill... and Stroke... functions do not explicitly specify patterns.  Instead, they should be drawn in the current pattern, as set by the SetStipplePattern() (callback #35).  Note that there is no equivalent to SetStipplePattern() in BView.
+<P>
+<LI>The deltax and deltay arguments passed to DrawString() are escapement delta values; the string should be drawn at the current pen position.
+<P>
+<LI>MovePenBy() uses a <A HREF="Point.html#BPoint">BPoint</A> to specify the amount to move the pen.  The x component of the <A HREF="Point.html#BPoint">BPoint</A> gives the x offset and the y component the y offset.
+<P>
+<LI>Similarly, ...RoundRect() and ...Ellipse() use a <A HREF="Point.html#BPoint">BPoint</A> to specify the two separate radius components.  The x component gives the x radius and the y component the y radius.
+<P>
+<LI>DrawPixels() is a BPicture-specific primitive for rendering bitmaps.  It is a request to copy the <I><FONT  color=991122 face=HELVETICA>src</I></FONT> rectangle from the raw color information in <I><FONT  color=991122 face=HELVETICA>data</I></FONT> to the <I><FONT  color=991122 face=HELVETICA>dest</I></FONT> rectangle of the current rendering area.  <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, <I><FONT  color=991122 face=HELVETICA>height</I></FONT>, <I><FONT  color=991122 face=HELVETICA>bytesPerRow</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>pixelFormat</I></FONT> provide all the information necessary to interpret data.  <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> is currently always zero and should be ignored.  <I><FONT  color=991122 face=HELVETICA>src</I></FONT> and <I><FONT  color=991122 face=HELVETICA>dest</I></FONT> need not have the same dimensions; in these cases, the function should scale the bitmap appropriately.
+<P>
+<LI>SetClippingRects() is a BPicture-specific primitive approximating <B><TT><A HREF="ViewGraphicsState.html#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B>.  It instructs the renderer to replace the current clipping region with the union of the rectangles passed to SetClippingRects().
+<P>
+<LI>Changes in the graphics state are sandwiched between calls to EnterStateChange() and ExitStateChange().  State change functions will only be called between these functions.  No other call backs will be called between these functions.  State change functions are all Set... functions in addition to EnterFontState() and ExitFontState().
+<P>
+<LI>Similarly, changes to the font state are sandwiched between calls to EnterFontState() and ExitFontState().  Font state change functions will only be called between these functions.  No other call backs will be called between these functions.  Font state change functions are all SetFont... functions.  Many of the font state functions are found in <A HREF="Font.html#BFont">BFont</A> rather than BView.
+<P>
+<LI>SetFontRotate() sets the rotation of the font.  Unlike the <B><TT><A HREF="Font.html#SetRotation()">BFont::SetRotation()</A> </TT></B>function, the angle here is specified in radians, rather than in degrees.  You can convert the value into degrees by using the forumla:
+<P>
+</UL>
+<P>
+degrees = (rotation*180.0)/3.14159265369);
+<P>
+<A NAME="16822:%20head1:%20Archived%20Fields"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="MenuField.html#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:<B>
+<P>
+</B><TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_ver"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Always 1.</TD>
+<TR>
+<TD>"_endian"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT8_TYPE">B_INT8_TYPE</A></TT></B></TD>
+<TD>Endianness of the data.  Always <B><TT>B_HOST_IS_BENDIAN</TT></B>.</TD>
+<TR>
+<TD>"_data"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RAW_TYPE">B_RAW_TYPE</A></TT></B></TD>
+<TD>The BPicture data.</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

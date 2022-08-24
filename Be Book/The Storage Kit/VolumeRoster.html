@@ -1,0 +1,267 @@
+<HTML><HEAD><TITLE>The Storage Kit: BVolumeRoster</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BVolumeRoster"></A>BVolumeRoster
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/VolumeRoster.h">be/storage/VolumeRoster.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="VolumeRoster.summary.html"><i>Summary</i></A></H6>
+<P>
+The BVolumeRoster class keeps track of the volumes that are mounted in the file system hierarchy.  It lets you know about volumes in two ways:
+<P>
+<UL>
+<LI>It lists the volumes that are currently mounted.  You can step through the list through iterative calls to the <B><TT><A HREF="#GetNextVolume()">GetNextVolume()</A></TT></B> function.
+<P>
+<LI>It lets you know when new volumes are mounted, and when existing volumes are unmounted.  (See <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B>.)
+<P>
+</UL>
+<P>
+How you create your BVolumeRoster object depends on what you're going to do with it:
+<P>
+<UL>
+<LI>If you simply want to step through the volume list, then creating a BVolumeRoster on the stack is sufficient.
+<P>
+<LI>However, if you want to watch for volumes being mounted and unmounted, then you <I>must</I> keep your BVolumeRoster object around.  The watching stops when the object is deleted.
+<P>
+</UL>
+<P>
+A single BVolumeRoster object can perform both functions:  You can use it to step through the volume list at the same time that it's watching volumes.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BVolumeRoster()"></A>BVolumeRoster()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BVolumeRoster(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BVolumeRoster object.  You don't have to "initialize" the object before using it (as you do with most other Storage Kit classes).  You can call <B><TT><A HREF="#GetNextVolume()">GetNextVolume()</A></TT></B> (or whatever) immediately after constructing.
+<P>
+<HR>
+<H3>
+<A NAME="~BVolumeRoster()"></A>~BVolumeRoster()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual<B><TT><FONT  color=000022 size=+1> ~BVolumeRoster()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Destroys the object.  If this BVolumeRoster object was watching volumes, the watch is called off.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="GetBootVolume()"></A>GetBootVolume()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetBootVolume(</TT></B></FONT><A HREF="Volume.html#BVolume">BVolume</A> *<I><FONT  color=991122 face=HELVETICA>boot_vol</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Initializes <I><FONT  color=991122 face=HELVETICA>boot_vol</I></FONT> to refer to the "boot volume."  This is the volume that was used to boot the computer.  <I><FONT  color=991122 face=HELVETICA>boot_vol</I></FONT> must be allocated before you pass it in.  If the boot volume can't be found, the argument is uninitialized.
+<P>
+(Currently, this function looks for the volume that's mounted at <B>/boot</B>.  The only way to fool the system into thinking that there isn't a boot volume is to rename <B>/boot</B>&mdash;not a smart thing to do.)
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  The boot volume was successfully retrieved.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  The boot volume wasn't found.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetNextVolume()"></A>GetNextVolume()
+, 
+<A NAME="Rewind()"></A>Rewind()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetNextVolume(</TT></B></FONT><A HREF="Volume.html#BVolume">BVolume</A> *<I><FONT  color=991122 face=HELVETICA>volume</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Rewind(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetNextVolume()</TT></B> retrieves the "next" volume from the volume list and uses it to initialize the argument (which must be allocated).  When the function return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>, you've reached the end of the list.
+<P>
+<B><TT>Rewind()</TT></B> rewinds the volume list such that the next <B><TT>GetNextVolume()</TT></B> will return the first element in the list.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  The next volume was successfully retrieved.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  You've reached the end of the volume list.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="StartWatching()"></A>StartWatching()
+, 
+<A NAME="StopWatching()"></A>StopWatching()
+, 
+<A NAME="Messenger()"></A>Messenger()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT><A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT> <FONT  face=HELVETICA>= be_app_messenger</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <B><TT><FONT  color=000022 size=+1>Messenger(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions start and stop the BVolumeRoster's volume-watching facility.  (This is actually just a convenient cover for the Node Monitor.)
+<P>
+<UL>
+<LI><B><TT>StartWatching()</TT></B> registers a request for notifications of volume mounts and unmounts.  The notifications are sent (as BMessages) to the BHandler/BLooper pair specified by the argument.  There are separate messages for mounting and unmounting; their formats are described below.  The caller retains possession of the BHandler/BLooper that the <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> represents.  The volume watching continues until this BVolumeRoster object is destroyed, or until you call...
+<P>
+<LI><B><TT>StopWatching()</TT></B>.  This function tells the volume-watcher to stop watching.  In other words, notifications of volume mounts and unmounts are no longer sent to the BVolumeRoster's target.
+<P>
+<LI><B><TT>Messenger()</TT></B> returns a copy of the <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> object that was set in the previous <B><TT>StartWatching()</TT></B> call.
+<P>
+</UL>
+<P>
+There are separate notifications (BMessages) for volume-mounted and volume-unmounted events.  See the B_DEVICE_MOUNTED and B_DEVICE_UNMOUNTED descriptions in <a href="#The%20Node%20Monitor">"The Node Monitor"</a> section of this chapter.  
+<P>
+<b>RETURN CODES</b>
+<P>
+ 
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>.  The volume-watcher was successfully started or stopped.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Poorly formed BMessenger.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Couldn't allocate resources. 
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

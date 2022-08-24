@@ -1,0 +1,249 @@
+<HTML><HEAD><TITLE>The Storage Kit: Query C Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Query%20C%20Functions"></A>Query C Functions
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/fs_query.h">be/kernel/fs_query.h</A>
+<P>
+Library:  libroot.so
+<P>
+Normally, when you want to perform a file system query, you would use the <A HREF="Query.html#BQuery">BQuery</A> class, which is a nice, clean, object-oriented way to do it.  If you have an aversion to object-oriented programming, however, or you're writing a simple C program and would rather use C functions instead, then you've come to the right place.  
+<P>
+Be aware that, currently, you can't perform "live" queries at the C level.  If you want a live query, you have to use a <A HREF="Query.html#BQuery">BQuery</A> object.
+<P>
+<HR>
+<H3>
+<A NAME="Opening,%20Reading,%20and%20Closing%20a%20Query"></A>Opening, Reading, and Closing a Query
+</H3>
+<P>
+To begin a query, you call <B><TT><A HREF="#fs_open_query()">fs_open_query()</A></TT></B>.  <B><TT><A HREF="#fs_open_query()">fs_open_query()</A></TT></B> performs a "one-shot" query:  It lets you ask for all the files that fulfill certain criteria right now.  This criteria is expressed as a "predicate" string.  This is a formula that lists the attribute values that you're interested in.  A simple predicate takes the form
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+<I>attribute op value
+<P>
+</I>						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+For example, you can look for files that are larger than 5K by supplying a string that looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"size > 5000"</PRE>
+<P>
+Simple predicates can be grouped and combined to create more complex predicates.  Here we look for files named "fido" that are greater than 5K:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"(name = fido) &amp;&amp; (size > 5000)"</PRE>
+<P>
+For a full description of the predicate format, see <a href="#The%20Predicate,%20Attributes,%20and%20Indices">"The Predicate, Attributes, and Indices"</a> in the <A HREF="Query.html#BQuery">BQuery</A> class description, but be aware of this difference:
+<P>
+<UL>
+<LI>The <B><TT>fs_query</TT></B> functions don't let you "push" elements onto the predicate; all predicates must be expressed as strings.
+<P>
+</UL>
+<P>
+Once the query has been opened, you can step through the files that fulfill the predicate through iterated calls to <B><TT><A HREF="#fs_read_query()">fs_read_query()</A></TT></B>.  When all the winning files have been visited, <B><TT><A HREF="#fs_read_query()">fs_read_query()</A></TT></B> returns <B><TT>NULL</TT></B>. 
+<P>
+When you've finished using your query, you must close it by using the <B><TT><A HREF="#fs_close_query()">fs_close_query()</A></TT></B> function. 
+<P>
+<HR>
+<H3>
+<A NAME="An%20Example"></A>An Example
+</H3>
+<P>
+The following sample demonstrates very briefly how to perform a simple, non-live query.  In this example, we're searching for all C header files on the device specified by <I><FONT  color=991122 face=HELVETICA>devnum</I></FONT>.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void sample_query(dev_t devnum) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DIR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*q;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dirent_t&nbsp;&nbsp;&nbsp;*&nbsp;&nbsp;&nbsp;d;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q = fs_open_query(devnum, "name=*.h", 0);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (q) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (d = fs_read_query(q)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fs_close_query(q);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The code opens the query by calling <B><TT><A HREF="#fs_open_query()">fs_open_query()</A></TT></B>, then, calls <B><TT><A HREF="#fs_read_query()">fs_read_query()</A></TT></B> in a loop until <B><TT>NULL</TT></B> is returned.  Once that happens, <B><TT><A HREF="#fs_close_query()">fs_close_query()</A></TT></B> is used to close the query.
+<P>
+<HR>
+<H2>
+<A NAME="Query%20Functions"></A><FONT SIZE=6>Q</FONT>uery <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="fs_close_query()"></A>fs_close_query()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>fs_close_query(</TT></B></FONT>DIR<I><FONT  color=991122 face=HELVETICA> </I></FONT>*<I><FONT  color=991122 face=HELVETICA>dir</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Closes a query which was previously opened using the <B><TT><A HREF="#fs_open_query()">fs_open_query()</A></TT></B> function.  You pass in the DIR * returned by either of these functions.  The pointer <I><FONT  color=991122 face=HELVETICA>dir</I></FONT> is freed by this function.
+<P>
+If the query closes successfully, <B><TT>fs_close_query()</TT></B> returns 0; otherwise, it returns -1 and sets <B><TT>errno</TT></B> to an appropriate value.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file system error prevented the operation from succeeding.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_open_query()"></A>fs_open_query()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+DIR<B><TT><FONT  color=000022 size=+1> *fs_open_query(</TT></B></FONT>dev_t <I><FONT  color=991122 face=HELVETICA>device</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>query</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Opens a new query on the specified device.  The <I><FONT  color=991122 face=HELVETICA>query</I></FONT> string is the criteria or "predicate" that describes the files that you're looking for.  For information on how to construct the <I><FONT  color=991122 face=HELVETICA>query</I></FONT> string, see the <A HREF="Query.html#BQuery">BQuery</A> class.  Note that you can't use the "push" method:  fs_open_query() only understands predicate strings.
+<P>
+<I><FONT  color=991122 face=HELVETICA>flags</I></FONT> is currently unused; pass 0 as its value.
+<P>
+The pointer returned by this function is used to identify your query to the other query functions; you should not dispose of it yourself&mdash;this will be done for you when you call <B><TT><A HREF="#fs_close_query()">fs_close_query()</A></TT></B>.  If the query couldn't be opened, the function returns <B><TT>NULL</TT></B> and sets <B><TT>errno</TT></B> to an appropriate value.
+<P>
+<UL>
+<LI><B><TT>B_ENTRY_NOT_FOUND.,</TT></B><I><FONT  color=991122 face=HELVETICA>path</I></FONT> does not exist, or is <B><TT>NULL</TT></B> or an empty string.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>device</I></FONT> does not specify a valid device, <I><FONT  color=991122 face=HELVETICA>query</I></FONT> is <B><TT>NULL</TT></B> or an invalid expression, or a live query was requested without specifying a valid <I><FONT  color=991122 face=HELVETICA>port</I></FONT>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to complete the operation.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file system error prevented the operation from succeeding.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BUSY">B_BUSY</A></TT></B>.  A busy node could not be accessed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MORE_FDS">B_NO_MORE_FDS</A></TT></B>.  All file descriptors are in use (too many open files).
+<P>
+<LI><B><TT>E2BIG</TT></B>.  <I><FONT  color=991122 face=HELVETICA>query</I></FONT> expression is too big.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="fs_read_query()"></A>fs_read_query()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+dirent *<B><TT><FONT  color=000022 size=+1>fs_read_query(</TT></B></FONT>DIR<I><FONT  color=991122 face=HELVETICA> </I></FONT>*<I><FONT  color=991122 face=HELVETICA>d</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the next item that matches the specified query.  The <I><FONT  color=991122 face=HELVETICA>d</I></FONT> argument should have been gotten from a previous call to <B><TT><A HREF="#fs_open_query()">fs_open_query()</A></TT></B>; it identifies the particular query from which to read.
+<P>
+You mustn't free the pointer returned to you by this function.
+<P>
+If an error occurs while reading the query, this function returns <B><TT>NULL</TT></B> and sets <B><TT>errno</TT></B> to an appropriate value.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_FILE_ERROR">B_FILE_ERROR</A></TT></B>.  A file system error prevented the operation from succeeding.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  An error occurred processing the query predicate.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ENTRY_NOT_FOUND">B_ENTRY_NOT_FOUND</A></TT></B>.  No more matches.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_A_DIRECTORY">B_NOT_A_DIRECTORY</A></TT></B>.  A non-directory node was found where a directory was expected.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_INTERRUPTED">B_INTERRUPTED</A></TT></B>.  A signal interrupted the read.
+<P>
+<LI><B><TT>E2BIG</TT></B>.  Query predicate is too big.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

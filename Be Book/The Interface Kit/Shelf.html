@@ -1,0 +1,844 @@
+<HTML><HEAD><TITLE>The Interface Kit: BShelf</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BShelf"></A>BShelf
+</H1>
+<P>
+Derived from:  public <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Shelf.h">be/interface/Shelf.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="Shelf.summary.html"><i>Summary</i></A></H6>
+<P>
+A BShelf is an object that you "attach" to a view in order to make the view accept dropped <A HREF="Dragger.html#BDragger">BDragger</A> objects.  In user-talk, a shelf receives and displays replicants.   Attaching a BShelf to a view (called the "container" view) is remarkably simple:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BShelf *shelf = new BShelf(container_view);</PRE>
+<P>
+That's all there is to it:  With this single line of code, <B><TT>container_view</TT></B> is primed to accept and (automatically) display dropped replicants.  A dropped replicant becomes a child of the container view.  The container view itself can be <I>any</I> <A HREF="View.html#BView">BView</A> object&mdash;you don't alter the view in any way, or even tell it that it's going to be a container.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>Attaching a shelf to a view is performed by the BShelf constructor only</B>.  You can't create a BShelf and <I>then</I> decide which view you want it to serve.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Dropping%20into%20the%20View%20Hierarchy"></A>Dropping into the View Hierarchy
+</H3>
+<P>
+When the user drops a replicant on a container view, the view receives a <B><TT><A HREF="../Messages/GeneralMessages.html#B_ARCHIVED_OBJECT">B_ARCHIVED_OBJECT</A></TT></B> message that contains a <A HREF="Dragger.html#BDragger">BDragger</A> and the dragger's target (a BView).  These two views (the <A HREF="Dragger.html#BDragger">BDragger</A> and its target) are related as parent-child, child-parent, or as siblings (as explained in the <A HREF="Dragger.html#BDragger">BDragger</A> class).  The "more elderly" of the two objects is added as a child of the container view; if they're siblings, the two objects are both added as children.
+<P>
+You can also send or post <B><TT><A HREF="../Messages/GeneralMessages.html#B_ARCHIVED_OBJECT">B_ARCHIVED_OBJECT</A></TT></B> messages to a BShelf to simulate a drag and drop.
+<P>
+<HR>
+<H3>
+<A NAME="Other%20BShelf%20Features"></A>Other BShelf Features
+</H3>
+<P>
+<UL>
+<LI><B>Settings</B>.  A BShelf can configure itself from a "settings" file, and can write its contents to that file.  Your only chance to associate a BShelf with a settings file is during construction.  You can save the contents at any time through the <B><TT><A HREF="#Save()">Save()</A></TT></B> function.  
+<P>
+<LI><B>Replicant rejection</B>.  A BShelf can reject replicants, and can adjust the position of the replicants that it accepts.  These features are provided through the hook functions <B><TT><A HREF="#CanAcceptReplicantMessage()">CanAcceptReplicantMessage()</A>, <A HREF="#CanAcceptReplicantView()">CanAcceptReplicantView()</A>, </TT></B>and <B><TT><A HREF="#AdjustReplicantBy()">AdjustReplicantBy()</A></TT></B>.   A named shelf can also reject replicants, as explained next.
+<P>
+<LI><B>BShelf names</B>.  When a replicant message is dropped on the shelf, the shelf's name (set in the constructor) is compared to the dropped message's "shelf_type" field (if it has one).  If the two don't match, the replicant rejects the shelf.  In this way, individual replicants can be picky about the shelves that they want to be displayed on.  By default, a shelf accepts replicants that don't have a "shelf_type" field.  However, if a BShelf is set to "enforce type" (set through <B><TT><A HREF="#SetTypeEnforced()">SetTypeEnforced()</A></TT></B>), then it will only accept replicants that name the shelf  (in their "shelf_type" fields). 
+<P>
+<LI>A BShelf assigns each replicant a unique id that's valid for as long as the replicant is attached to the shelf.  Replicant ids don't change, even if the shelf is <B><TT><A HREF="#Save()">Save()</A></TT></B>'d and then later restored (through the constructor).
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#CanAcceptReplicantMessage()">CanAcceptReplicantMessage()</A>
+<br>
+</TT></B>Invoked when a replicant <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> is received by the BShelf.  A return value of <B><TT>false</TT></B> rejects the replicant.
+<P>
+<B><TT><A HREF="#CanAcceptReplicantView()">CanAcceptReplicantView()</A>
+<br>
+</TT></B>Invoked after the message has been accepted (by the above); this is the shelf's chance to reject on the basis of the view that the message contains.  A return value of <B><TT>false</TT></B> rejects the replicant.
+<P>
+<B><TT><A HREF="#AdjustReplicantBy()">AdjustReplicantBy()</A>
+<br>
+</TT></B>Invoked after the replicant has been accepted, but before it's displayed.  The function can return a <A HREF="Point.html#BPoint">BPoint</A> that offsets the replicant's frame.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BShelf()"></A>BShelf()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BShelf(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>allowsDragging</I></FONT> = <FONT  face=HELVETICA>true</FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BShelf(</TT></B></FONT>const&nbsp;entry_ref&nbsp;*<I><FONT  color=991122 face=HELVETICA>ref</I></FONT>, <A HREF="View.html#BView">BView</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>view</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>allowsDragging</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>name</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BShelf(</TT></B></FONT>BDataIO *<I><FONT  color=991122 face=HELVETICA>stream</I></FONT>, <A HREF="View.html#BView">BView</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>view</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>allowsDragging</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>name</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BShelf object so that it serves a container <I><FONT  color=991122 face=HELVETICA>view</I></FONT>.   The versions that accept an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> or BDataIO argument prime the shelf so that it (initially) contains the replicants that are archived in the referred to file or stream using <B><TT><A HREF="#Save()">Save()</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>ref</I></FONT>/<I><FONT  color=991122 face=HELVETICA>stream</I></FONT> argument is also used as the archival repository when you tell your BShelf to <B><TT><A HREF="#Save()">Save()</A></TT></B> itself. 
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>allowsDragging</I></FONT> flag is <B><TT>true</TT></B>, the user will be able to drag replicant view within the container's bounds.  If the flag is <B><TT>false</TT></B>, dropped views stay where they're first put.
+<P>
+<I><FONT  color=991122 face=HELVETICA>name</I></FONT> is the BShelf's handler name.  The name can be important:  It's compared to the replicant's "shelf_type" field, as explained in <B><TT><A HREF="#AddReplicant()">AddReplicant()</A></TT></B>.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+There's an archive-accepting version of the BShelf constructor declared in <B>Shelf.h</B>.  Don't use it.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="~BShelf()"></A>~BShelf()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BShelf()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The destructor calls <B><TT><A HREF="#Save()">Save()</A></TT></B>, and then frees the object.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> is currently a no-op that returns <B><TT>NULL</TT></B>.  You can't archive a BShelf.  If you want to archive something, archive the shelf's contents by calling <B><TT><A HREF="#Save()">Save()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddReplicant()"></A>AddReplicant()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddReplicant(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is invoked automatically when a replicant is dropped on the BShelf.  The <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message contains the <A HREF="Dragger.html#BDragger">BDragger</A> archive that's being dropped; <I><FONT  color=991122 face=HELVETICA>point</I></FONT> is where, within the container view's bounds, the message was dropped.  The function goes through these steps to reject and adjust the replicant:
+<P>
+<UL>
+<LI>First, it invokes the <B><TT><A HREF="#CanAcceptReplicantMessage()">CanAcceptReplicantMessage()</A></TT></B> hook function.  If the hook returns <B><TT>false</TT></B>, then <B><TT><A HREF="#AddReplicant()">AddReplicant()</A></TT></B> doesn't add the replicant.
+<P>
+<LI>Next, it looks for a "shelf_type" string field in the BMessage.  If it finds one and the value of the field doesn't match the BShelf's name, the replicant is rejected.
+<P>
+If type enforcement is <B><TT>true</TT></B> (see <B><TT><A HREF="#SetTypeEnforced()">SetTypeEnforced()</A></TT></B>) and the shelf has a name, then the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> must have a "shelf_type" string and this string must match the shelf name.  Otherwise, the replicant is rejected.
+<P>
+There's no specific API for adding the "shelf_type" field to a view.  If you want to configure your views to accept only certain BShelf objects, you have to add the field directly as part of the view's <B><TT><A HREF="#Archive()">Archive()</A></TT></B> implementation.
+<P>
+<LI>The archive message is then unarchived (the replicant is instantiated).  If the archive doesn't contain a <A HREF="View.html#BView">BView</A>, the message is passed on to another handler (<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DISPATCH_MESSAGE">B_DISPATCH_MESSAGE</A></TT></B> is returned). 
+<P>
+<LI><B><TT><A HREF="#CanAcceptReplicantView()">CanAcceptReplicantView()</A></TT></B> hook function is called next (with a return of <B><TT>false</TT></B> meaning rejection).
+<P>
+<LI>Finally, <B><TT><A HREF="#AdjustReplicantBy()">AdjustReplicantBy()</A></TT></B> is called, and the replicant is drawn in the container view.
+<P>
+</UL>
+<P>
+Except in the case of a no-view archive, <B><TT><A HREF="#AddReplicant()">AddReplicant()</A></TT></B> returns <B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SKIP_MESSAGE">B_SKIP_MESSAGE</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you want the ensure that the replicant is unique within the container view, add a "be:unique_replicant" entry of type <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B> to the archive with the value <B><TT>true</TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+It's possible to archive a <A HREF="Dragger.html#BDragger">BDragger</A> and call this function yourself, although that's not its expected use.
+<P>
+<HR>
+<H3>
+<A NAME="AdjustReplicantBy()"></A>AdjustReplicantBy()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>AdjustReplicantBy(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>destRect</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This hook function is invoked automatically when a replicant is dropped on the BShelf.  It gives the shelf a chance to fine-tune the placement of the <A HREF="Dragger.html#BDragger">BDragger</A> and its target view.  
+<P>
+<I><FONT  color=991122 face=HELVETICA>destRect</I></FONT> is the rectangle (in the container view's coordinates) in which the dropped replicant is about to be drawn.  Exactly what the rectangle means depends on the relationship between the dragger and its target:
+<P>
+<UL>
+<LI>If the dragger is the target's parent, then <I><FONT  color=991122 face=HELVETICA>destRect</I></FONT> encloses the BDragger's frame.
+<P>
+<LI>Otherwise (if the target is the parent, or if the two views are siblings), <I><FONT  color=991122 face=HELVETICA>destRect</I></FONT> encloses the target's frame.  Note that in the case of siblings, the BDragger's frame isn't included in the rectangle.
+<P>
+</UL>
+<P>
+<I><FONT  color=991122 face=HELVETICA>archive</I></FONT> is the archive message that was dropped on the shelf.
+<P>
+The <A HREF="Point.html#BPoint">BPoint</A> that this function returns offsets (is added into) the location of the replicant.  If you don't want to move the replicant, return BPoint(0, 0).  Note that the <A HREF="Dragger.html#BDragger">BDragger</A> and the view are <I>both</I> moved by this offset, even in the case where <I><FONT  color=991122 face=HELVETICA>destRect</I></FONT> doesn't include the dragger's frame. 
+<P>
+This function ignores the "allows dragging" flag given in the BShelf constructor.  In other words, you can adjust a replicant's placement through this function even if the BShelf doesn't otherwise allow dragging. 
+<P>
+<HR>
+<H3>AllowsDragging()   see <A HREF="#SetAllowsDragging()">SetAllowsDragging()</A></H3>
+<P>
+<HR>
+<H3>AllowsZombies()   see <A HREF="#SetAllowsZombies()">SetAllowsZombies()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#Archive()">Archive()</A></TT></B> is currently a no-op that returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  You can't archive a BShelf.  If you want to archive something, archive the shelf's contents by calling <B><TT><A HREF="#Save()">Save()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="CanAcceptReplicantMessage()"></A>CanAcceptReplicantMessage()
+, 
+<A NAME="CanAcceptReplicantView()"></A>CanAcceptReplicantView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>CanAcceptReplicantMessage(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>CanAcceptReplicantView(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>destRect</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="View.html#BView">BView</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>view</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These hook function are invoked from within <B><TT><A HREF="#AddReplicant()">AddReplicant()</A></TT></B> whenever a replicant is dropped on the BShelf.  You can implement these functions to reject unwanted replicants.
+<P>
+<B><TT><A HREF="#CanAcceptReplicantMessage()">CanAcceptReplicantMessage()</A></TT></B> is called first; the argument is the archive that (should) contain the replicated view.  If you don't like the look of the archive, return <B><TT>false</TT></B> and the message will be thrown away.  Note that you shouldn't return <B><TT>false</TT></B> if the archive doesn't seem to be in the correct form (specifically, if it doesn't contain any views).  Rejection of such messages is handled more elegantly (and after this function is invoked) by the <B><TT><A HREF="#AddReplicant()">AddReplicant()</A></TT></B> function.
+<P>
+<B><TT><A NAME="CanAcceptReplicantView()"></A>CanAcceptReplicantView()
+</TT></B> is invoked after the message has been unarchived.  <I><FONT  color=991122 face=HELVETICA>destRect</I></FONT> is the rectangle that the replicant will  occupy in the BShelf's container view's coordinates.  <I><FONT  color=991122 face=HELVETICA>view</I></FONT> is the replicated view itself.  <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> is theoriginal message.
+<P>
+If either function returns <B><TT>false</TT></B>, the replicant is rejected and the message is thrown away (it isn't passed on to another handler).  A return of <B><TT>true</TT></B> does the obvious thing.
+<P>
+<HR>
+<H3>
+<A NAME="CountReplicants()"></A>CountReplicants()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountReplicants(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of replicants attached to the shelf.
+<P>
+<HR>
+<H3>
+<A NAME="DeleteReplicant()"></A>DeleteReplicant()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>DeleteReplicant(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>replicant_view</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>DeleteReplicant(</TT></B></FONT>const <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>DeleteReplicant(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>uid</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Removes the specified replicant from the shelf.  It identifies replicants by either a view, a replicant message, or a unique id.
+<P>
+<HR>
+<H3>DisplaysZombies()   see <A HREF="#SetAllowsZombies()">SetAllowsZombies()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IndexOf()"></A>IndexOf()
+, 
+<A NAME="ReplicantAt()"></A>ReplicantAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IndexOf(</TT></B></FONT>const <A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>replicant_view</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IndexOf(</TT></B></FONT>const <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IndexOf(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>uid</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>ReplicantAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="View.html#BView">BView</A> **<I><FONT  color=991122 face=HELVETICA>view = NULL</I></FONT>, uint32 *<I><FONT  color=991122 face=HELVETICA>uid = NULL</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t *<I><FONT  color=991122 face=HELVETICA>err = NULL</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>IndexOf()</TT></B> returns the index of a specified replicant in the shelf, or -1 if no such replicant exists.  It accepts either a view, a replicant message, or a unique id as identifiers.
+<P>
+<B><TT>ReplicantAt()</TT></B> returns information about a replicant in a shelf given its index (as returned by <B><TT>IndexOf()</TT></B>).  It returns the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> archive of the replicant or <B><TT>NULL</TT></B> if the index is invalid.  It returns the <I><FONT  color=991122 face=HELVETICA>view</I></FONT> of the replicant as well as its <I><FONT  color=991122 face=HELVETICA>uid</I></FONT>, if these parameters are non-<B><TT>NULL</TT></B>.  It returns an error message in <I><FONT  color=991122 face=HELVETICA>err</I></FONT> if there was an error in initializing the given replicant.
+<P>
+<HR>
+<H3>IsDirty()   see <A HREF="#Save()">Save()</A></H3>
+<P>
+<HR>
+<H3>IsTypeEnforced()   see <A HREF="#SetTypeEnforced()">SetTypeEnforced()</A></H3>
+<P>
+<HR>
+<H3>ReplicantAt()   see <A HREF="#IndexOf()">IndexOf()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ReplicantDeleted()"></A>ReplicantDeleted()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ReplicantDeleted(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, const <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const <A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This hook function is invoked from within <B><TT><A HREF="#DeleteReplicant()">DeleteReplicant()</A></TT></B> to indicate a replicant has been deleted from the BShelf.  It is called after the view has been removed from the shelf with the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> of the replicant in the shelf, its <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message, and the detached <I><FONT  color=991122 face=HELVETICA>view</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="Save()"></A>Save()
+, 
+<A NAME="SaveLocation()"></A>SaveLocation()
+, 
+<A NAME="SetSaveLocation()"></A>SetSaveLocation()
+, 
+<A NAME="SetDirty()"></A>SetDirty()
+, 
+<A NAME="IsDirty()"></A>IsDirty()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Save(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+BDataIO *<B><TT><FONT  color=000022 size=+1>SaveLocation(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetSaveLocation(</TT></B></FONT>BDataIO *<I><FONT  color=991122 face=HELVETICA>data_io</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetSaveLocation(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetDirty(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>flag</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsDirty(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Writes the shelf's contents (the replicants that it contains) as an archive to the <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> or BDataIO object that was specified in the constructor.  You can also set the location where the shelf is saved with <B><TT><A HREF="#SetSaveLocation()">SetSaveLocation()</A></TT></B> and fetch it with <B><TT><A HREF="#SaveLocation()">SaveLocation()</A></TT></B>.  The entry_ref is stored in <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> (if <I><FONT  color=991122 face=HELVETICA>ref</I></FONT> is non-<B><TT>NULL</TT></B>) and the BDataIO the shelf will be written to is returned.  If the shelf will be written to an entry_ref that is not a BDataIO, <B><TT>SaveLocation()</TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+By default, the save is only performed if the object's "dirty" flag is set&mdash;in other words, if it has changed since it was last written.  You can force set the dirty flag by calling <B><TT><A HREF="#SetDirty()">SetDirty()</A></TT></B>. 
+<P>
+<B><TT><A HREF="#IsDirty()">IsDirty()</A></TT></B> returns the current state of the "dirty" flag. 
+<P>
+<HR>
+<H3>
+<A NAME="SetAllowsDragging()"></A>SetAllowsDragging()
+, 
+<A NAME="AllowsDragging()"></A>AllowsDragging()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetAllowsDragging(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>state</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>AllowsDragging(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetAllowsDragging()</TT></B> determines whether the BShelf accepts replicants dragged into the view by the user.  <B><TT>AllowsDragging()</TT></B> returns whether the BShelf accepts replicants dragged by the user into the container view's frame?
+<P>
+<HR>
+<H3>
+<A NAME="SetAllowsZombies()"></A>SetAllowsZombies()
+, 
+<A NAME="AllowsZombies()"></A>AllowsZombies()
+, 
+<A NAME="SetDisplayZombies()"></A>SetDisplayZombies()
+, 
+<A NAME="AllowsZombies()"></A>AllowsZombies()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetAllowsZombies(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>state</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>AllowsZombies(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetDisplaysZombies(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>state</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>DisplaysZombies(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetAllowsZombies()</TT></B> determines whether the BShelf accepts zombie views.  <B><TT>AllowsZombies()</TT></B> returns whether the BShelf accepts zombie views.  A zombie view is one whose associated executable cannot be located.
+<P>
+Similarly,<B><TT> SetDisplaysZombies()</TT></B> determines whether the BShelf displays zombie views and  <B><TT>DisplaysZombies()</TT></B> returns whether the BShelf displays zombie views.
+<P>
+<HR>
+<H3>SetDisplaysZombies()   see <A HREF="#SetAllowsZombies()">SetAllowsZombies()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetTypeEnforced()"></A>SetTypeEnforced()
+, 
+<A NAME="IsTypeEnforced()"></A>IsTypeEnforced()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetTypeEnforced(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>state</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsTypeEnforced(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These two methods set and return the type enforcement flag.  When it is <B><TT>true</TT></B>, the shelf compares its name to the "shelf_type" field of any dropped messages.  The replicant is accepted only if the two match.  If the dropped message does not have a "shelf_type" field, then it is rejected.  Type enforcement is <B><TT>false</TT></B> by default.
+<P>
+<HR>
+<H2>
+<A NAME="Scripting%20Support"></A><FONT SIZE=6>S</FONT>cripting <FONT SIZE=6>S</FONT>upport
+</H2>
+<P>
+The BShelf class implements the suite called "suite/vnd.Be-shelf" consisting of the following message: 
+<P>
+<HR>
+<H3>
+<A NAME="The%20Replicant%20Property"></A>The Replicant Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/topic_Scripting.html#B_COUNT_PROPERTIES">B_COUNT_PROPERTIES</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns number of replicants in the shelf.</TD>
+<TR>
+<TD><B><TT>B_CREATE_PROPERTIES</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Adds the archived replicant in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> "data" to the view at the <A HREF="Point.html#BPoint">BPoint</A> in "location."</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DELETE_PROPERTY">B_DELETE_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_INDEX_SPECIFIER">B_INDEX_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_REVERSE_INDEX_SPECIFIER">B_REVERSE_INDEX_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_NAME_SPECIFIER">B_NAME_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_ID_SPECIFIER">B_ID_SPECIFIER</A></TT></B></TD>
+<TD>Removes the specified replicant from the shelf.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD>B_INDEX_SPECIFIER,
+<br>
+B_REVERSE_INDEX_SPECIFIER,
+<br>
+B_NAME_SPECIFIER,
+<br>
+B_ID_SPECIFIER</TD>
+<TD>Archives the specified replicant into a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> in "result."</TD>
+<TR>
+<TD>anything else</TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_INDEX_SPECIFIER">B_INDEX_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_REVERSE_INDEX_SPECIFIER">B_REVERSE_INDEX_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_NAME_SPECIFIER">B_NAME_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_ID_SPECIFIER">B_ID_SPECIFIER</A></TT></B></TD>
+<TD>Directs the scripting message to the replicant interface "suite/vnd.Be-replicant" (described below), first popping the current specifier off the stack.</TD>
+</TABLE>
+<P>
+The "Replicant" property provides access to the replicants contained in a BShelf.  It also allows you to manipulate the replicants themselves by forwarding certain messages to a "suite/vnd.Be-replicant" interface.  This interface consists of the following messages:
+<P>
+<HR>
+<H3>
+<A NAME="The%20ID%20Property"></A>The ID Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the replicant ID.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Name%20Property"></A>The Name Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the name of the replicant view.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Signature%20Property"></A>The Signature Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the signature of the add-on containing the code for the replicant.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Suites%20Property"></A>The Suites Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns "suite/vnd.Be-replicant" in "suites" and a flattened <A HREF="../The%20Application%20Kit/PropertyInfo.html#BPropertyInfo">BPropertyInfo</A> describing the scripting suite in "messages."</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="The%20View%20Property"></A>The View Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD>any</TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Directs the scripting message to the replicant view, first popping the current specifier off the specifier stack.</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

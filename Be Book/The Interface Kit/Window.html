@@ -1,0 +1,2455 @@
+<HTML><B><HEAD><TITLE>The Interface Kit: BWindow</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BWindow"></A>BWindow
+</H1>
+<P>
+</B>Derived from:  <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> > <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> > <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Window.h">be/interface/Window.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="Window.summary.html"><i>Summary</i></A></H6>
+<P>
+A BWindow object represents a window that can be displayed on the screen, and that can be the target of user events.  You almost always create your own BWindow subclass(es) rather than use direct instances of BWindow.  
+<P>
+BWindow objects draw windows by talking to the App Server.  If you want to take over the entire screen or draw directly into the graphics card's frame buffer (by-passing the App Server), you should use a <A HREF="../The%20Game%20Kit/DirectWindow.html#BDirectWindow">BDirectWindow</A> or <A HREF="../The%20Game%20Kit/WindowScreen.html#BWindowScreen">BWindowScreen</A> object (both classes are defined in the Game Kit).
+<P>
+<HR>
+<H2>
+<A NAME="Creating%20and%20Using%20a%20BWindow"></A><FONT SIZE=6>C</FONT>reating and <FONT SIZE=6>U</FONT>sing a <FONT SIZE=6>B</FONT><FONT SIZE=6>W</FONT>indow
+</H2>
+<P>
+You must create your <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> object (<B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B>) before you create any windows.  <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> needn't be running to construct&mdash;or even show&mdash;a window, but it must be running for the window to receive notifications of user events (mouse clicks, key presses, etc.).
+<P>
+Typically, the first thing you do with your BWindow is add BViews to it, through the <B><TT><A HREF="#AddChild()">AddChild()</A></TT></B> function.  Again, <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> needn't be running at this point, nor must the window be showing.  
+<P>
+Even though it inherits from <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A>, you never invoke <B><TT><A HREF="../The%20Application%20Kit/Application.html#Run()">Run()</A></TT></B> on a BWindow.  Instead, you call <B><TT><A HREF="#Show()">Show()</A></TT></B>.  In addition to putting the window on-screen, the first (and <I>only</I> the first) <B><TT><A HREF="#Show()">Show()</A></TT></B> invocation starts the BWindow's message loop.  To remove a window from the screen without interrupting the object's message loop, use <B><TT><A HREF="#Hide()">Hide()</A></TT></B>.  Other message loop details (locking and quitting in particular) are handled as described in the <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> class. 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If you create a BWindow-derived class that uses multiple inheritance, make sure the first class your mixin class inherits from is BWindow; otherwise, you'll crash when you try to close the window.  This happens because of an interaction between the window thread how C++ deletes objects of a multiply-inherited class.  In other words:
+<P>
+<B><TT>class myClass : public <A HREF="#BWindow">BWindow</A>, public OtherClass</TT></B> 
+<P>
+is safe, while
+<P>
+<B><TT>class myClass : public OtherClass, public BWindow</TT></B> 
+<P>
+is not.
+<P>
+</TABLE>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+</TABLE><P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#FrameMoved()">FrameMoved()</A>
+<P>
+<A HREF="#FrameResized()">FrameResized()</A>
+<P>
+<A HREF="#MenusBeginning()">MenusBeginning()</A></TT></B> 
+<P>
+<B><TT><A HREF="#MenusEnded()">MenusEnded()</A></TT></B> 
+<P>
+<B><TT><A HREF="#Minimize()">Minimize()</A>
+<P>
+<A HREF="#ScreenChanged()">ScreenChanged()</A>
+<P>
+<A HREF="#WindowActivated()">WindowActivated()</A>
+<P>
+<A HREF="#WorkspaceActivated()">WorkspaceActivated()</A>
+<P>
+<A HREF="#WorkspacesChanged()">WorkspacesChanged()</A>
+<P>
+<A HREF="#Zoom()">Zoom()</A>
+<P>
+</TT></B><HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BWindow()"></A>BWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BWindow(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A>&nbsp;<I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>title</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#window_type">window_type</A></TT></B>&nbsp;<I><FONT  color=991122 face=HELVETICA>type</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>workspaces</I></FONT>&nbsp;=&nbsp;<B><TT><A HREF="#B_CURRENT_WORKSPACE">B_CURRENT_WORKSPACE</A></TT></B><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BWindow</TT></B></FONT>(BRect&nbsp;<I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>title</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#window_look">window_look</A></TT></B>&nbsp;<I><FONT  color=991122 face=HELVETICA>look</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#window_feel">window_feel</A></TT></B>&nbsp;<I><FONT  color=991122 face=HELVETICA>feel</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>workspace</I></FONT>&nbsp;=&nbsp;<B><TT><A HREF="#B_CURRENT_WORKSPACE">B_CURRENT_WORKSPACE</A></TT></B>) 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BWindow(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates a new window:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>frame</I></FONT> is the window's <I>content area</I> rectangle given in screen coordinates.  The window's border and title tab (if any) are wrapped <I>around</I> the content area.  The frame's coordinates are rounded to the nearest whole number.  You can further restrict the window's frame through <B><TT><A HREF="#SetWindowAlignment()">SetWindowAlignment()</A></TT></B> and <B><TT><A HREF="#SetSizeLimits()">SetSizeLimits()</A></TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>title</I></FONT> is the string that's displayed in the window's title tab (if it has one).  The  string is also used, with the prefix "w>", as the name of the window's looper thread: "w><I>title</I>".  You can reset the title through <B><TT><A HREF="#SetTitle()">SetTitle()</A></TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>look</I></FONT>/<I><FONT  color=991122 face=HELVETICA>feel</I></FONT> or <I><FONT  color=991122 face=HELVETICA>type</I></FONT>.  The appearance and behavior of the window is defined by a combination of the <I><FONT  color=991122 face=HELVETICA>look</I></FONT> and <I><FONT  color=991122 face=HELVETICA>feel </I></FONT>arguments, or by a single <I><FONT  color=991122 face=HELVETICA>type</I></FONT>.  See the <B><TT><A HREF="#window_look">window_look</A></TT></B>, <B><TT><A HREF="#window_feel">window_feel</A></TT></B>, and <B><TT><A HREF="#window_type">window_type</A></TT></B> descriptions for a list of values.  The look and feel can be reset through <B><TT><A HREF="#SetLook()">SetLook()</A></TT></B>, <B><TT><A HREF="#SetFeel()">SetFeel()</A></TT></B>, and <B><TT><A HREF="#SetType()">SetType()</A></TT></B>.
+<P>
+<LI>The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> argument is a mask that defines the window's "user attributes"&mdash;whether the user can resize or close the window, whether the window avoids front when the user closes other windows, and so on.  See <a href="#Window%20Flags">"Window Flags"</a> for a list of values.The flags can be reset through <B><TT><A HREF="#SetFlags()">SetFlags()</A></TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>workspaces</I></FONT> is a mask that tells the window which of the 32 potential workspace(s) it should be displayed in (it can be displayed in more than one workspace at the same time).  For example, a <I><FONT  color=991122 face=HELVETICA>workspaces</I></FONT> of (1&lt;&lt;2)+(1&lt;&lt;7) tells the window to display itself in workspaces 2 and 7.  Instead of passing a bitmask, you can also use the <B><TT><A HREF="#B_CURRENT_WORKSPACE">B_CURRENT_WORKSPACE</A></TT></B> or <B><TT><A HREF="#B_ALL_WORKSPACES">B_ALL_WORKSPACES</A></TT></B> constant. By default, the window appears in the current (active) workspace.  You can reset the workspaces through <B><TT><A HREF="#SetWorkspaces()">SetWorkspaces()</A></TT></B>. 
+<P>
+</UL>
+<P>
+A freshly-created window is hidden and locked.  After construction, you add BViews to the BWindow through <B><TT><A HREF="#AddChild()">AddChild()</A></TT></B>, and then show the window (and start its message loop) by calling <B><TT><A HREF="#Show()">Show()</A></TT></B>.   
+<P>
+<HR>
+<H3>
+<A NAME="~BWindow()"></A>~BWindow()
+</H3>
+<P>
+You never delete your BWindows; call <B><TT><A HREF="#Quit()">Quit()</A></TT></B> instead.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>Instantiate()  see <A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></H3>
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Activate()"></A>Activate()
+, 
+<A NAME="IsActive()"></A>IsActive()
+, 
+<A NAME="WindowActivated()"></A>WindowActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Activate(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> = <B><TT>true</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsActive(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WindowActivated(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Activate()">Activate()</A></TT></B> makes the BWindow the active window (if <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> is <B><TT>true</TT></B>), or causes it to relinquish that status (if <I><FONT  color=991122 face=HELVETICA>flag</I></FONT> is <B><TT>false</TT></B>).  The active window is made frontmost, its title tab is highlighted, and it becomes the target of keyboard events.  The <B><TT><A HREF="#Show()">Show()</A></TT></B> function automatically activates the window.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/importantBullet.gif">
+					<TD><FONT FACE="helvetica">
+You can't activate a hidden window.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You rarely call <B><TT><A HREF="#Activate()">Activate()</A></TT></B> yourself.  Deciding which window to make active is the user's choice. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#IsActive()">IsActive()</A></TT></B> returns <B><TT>true</TT></B> if the window is currently the active window, and <B><TT>false</TT></B> if it's not.
+<P>
+<B><TT><A HREF="#WindowActivated()">WindowActivated()</A></TT></B> is a hook function that's automatically invoked on the BWindow (and each of its <A HREF="View.html#BView">BView</A> children) when the window is activated or deactivated.  If <I><FONT  color=991122 face=HELVETICA>active</I></FONT> is <B><TT>true</TT></B>, the window has just become the active window; if it's <B><TT>false</TT></B>, it's about to give up that status.  You can implement <B><TT><A HREF="#WindowActivated()">WindowActivated()</A></TT></B> to do whatever you want; the default implementation does nothing.
+<P>
+<B>See also:  <TT>BView::WindowActivated()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="AddChild()"></A>AddChild()
+, 
+<A NAME="RemoveChild()"></A>RemoveChild()
+, 
+<A NAME="ChildAt()"></A>ChildAt()
+, 
+<A NAME="CountChildren()"></A>CountChildren()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>AddChild(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>aView</I></FONT>, <A HREF="View.html#BView">BView</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>sibling</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>RemoveChild(</TT></B></FONT><A HREF="View.html#BView">BView</A> *<I><FONT  color=991122 face=HELVETICA>aView</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>ChildAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountChildren(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#AddChild()">AddChild()</A></TT></B> places <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> (and its child views) in the window, adds it to the window's view list, and adds it to the window's list of handlers:
+<P>
+<UL>
+<LI>Graphically, the view is placed in the window's coordinate system at the location defined by its the view's frame rectangle.  
+<P>
+<LI>In the window's view list, <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> is inserted before <I><FONT  color=991122 face=HELVETICA>sibling</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>sibling</I></FONT> is <B><TT>NULL</TT></B>, <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> is added at the end of the list.  Note, however, that window list order is of little significance; for example, it doesn't affect the order in which sibling views are drawn.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>aView</I></FONT> and its children are added to the window's <I>handler list</I>; <I><FONT  color=991122 face=HELVETICA>aView</I></FONT>'s <I>next handler</I> is set to this BWindow.
+<P>
+</UL>
+<P>
+Each <A HREF="View.html#BView">BView</A> in <I><FONT  color=991122 face=HELVETICA>aView</I></FONT>'s hierarchy is sent an <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B> call.  When they've all had a chance to respond, they're each sent an  <B><TT><A HREF="MenuField.html#AllAttached()">AllAttached()</A></TT></B> call.
+<P>
+If <I>aView</I> has already been added to a view hierarchy, or if <I><FONT  color=991122 face=HELVETICA>sibling</I></FONT> isn't in the window's view list, <B><TT><A HREF="#AddChild()">AddChild()</A></TT></B> fails.
+<P>
+<B><TT><A HREF="#RemoveChild()">RemoveChild()</A></TT></B> removes <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> (and its children) from the window's display, view list, and handler list, and sets <I><FONT  color=991122 face=HELVETICA>aView</I></FONT>'s next handler to <B><TT>NULL</TT></B>.  <B><TT><A HREF="Dragger.html#DetachedFromWindow()">DetachedFromWindow()</A></TT></B> and <B><TT><A HREF="ViewHooks.html#AllDetached()">AllDetached()</A></TT></B> are invoked on <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> and each of its children.  If <I><FONT  color=991122 face=HELVETICA>aView</I></FONT> isn't in the window's view list, the function fails and returns <B><TT>false</TT></B>; it returns <B><TT>true</TT></B> upon success.
+<P>
+<B><TT><A HREF="#ChildAt()">ChildAt()</A></TT></B> returns the <I><FONT  color=991122 face=HELVETICA>index'</I></FONT>th view in the window's view list, or <B><TT>NULL</TT></B> if <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is out of bounds (you've reached the end of the list).  The view list doesn't recurse; to build a full map of a window's view hierarchy, you call <B><TT>BView::ChildAt()</TT></B> iteratively on each of the window's views (and each of their children, etc.).
+<P>
+<B>See also:  <TT>BView::Parent()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="AddShortcut()"></A>AddShortcut()
+, 
+<A NAME="RemoveShortcut()"></A>RemoveShortcut()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>AddShortcut(</TT></B></FONT>uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>key</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>AddShortcut(</TT></B></FONT>uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>key</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>handler</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>RemoveShortcut(</TT></B></FONT>uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>key</I></FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#AddShortcut()">AddShortcut()</A></TT></B> creates a <I>keyboard shortcut</I>:  When the user types <B><U>Command</B></U>+<I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT>+<I><FONT  color=991122 face=HELVETICA>key</I></FONT>, <I><FONT  color=991122 face=HELVETICA>message</I></FONT> is sent to <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>.  If a shortcut already exists for <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT>+<I><FONT  color=991122 face=HELVETICA>key</I></FONT>, it's removed before the new shortcut is added. 
+<P>
+<B><TT><A HREF="#RemoveShortcut()">RemoveShortcut()</A></TT></B> removes the shortcut for <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT>+<I><FONT  color=991122 face=HELVETICA>key</I></FONT>. 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Don't use these functions to create and remove menu shortcuts; use <A HREF="MenuItem.html#BMenuItem">BMenuItem</A> objects instead.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Notes on the arguments:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>key</I></FONT> is a case-insensitive character value.  If you want to map to an uppercase character, you have to include <B><TT><A HREF="misc.html#B_SHIFT_KEY">B_SHIFT_KEY</A></TT></B> in the <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT> mask.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT> is an OR'd list of modifier key numbers.  <B><TT><A HREF="misc.html#B_COMMAND_KEY">B_COMMAND_KEY</A></TT></B>,  which is always assumed, needn't be added to the mask.  See <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#modifiers()">modifiers()</A></TT></B> for a list of modifier keys.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>message</I></FONT> is a model of the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> you want sent when the user types the shortcut.  The BWindow takes ownership of the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> object and adds a "when" field to it:
+</UL>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field name</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The time of the key-down, in microseconds since 01/01/70.</TD>
+</TABLE>
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>handler</I></FONT> must be in the window's <I>handler list</I> (or the message won't be sent).  If you exclude the argument, this BWindow handles the message.  If <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> is (literally) <B><TT>NULL</TT></B>, the message is sent to the BWindow's <I>focus view</I> (or to the BWindow if no view is in focus).
+<P>
+</UL>
+<P>
+As with all <B><U>Command</B></U> events, a <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message isn't sent when the user invokes a keyboard shortcut, but the subsequent <B><TT><A HREF="misc.html#B_KEY_UP">B_KEY_UP</A></TT></B> is.
+<P>
+Every BWindow has five built-in shortcuts:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Shortcut</TH>
+<TH>Message</TH>
+<TH>Handler</TH>
+<TR>
+<TD><B><U>Command</B></U>+<B><U>x</B></U></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_CUT">B_CUT</A></TT></B></TD>
+<TD>the focus view</TD>
+<TR>
+<TD><B><U>Command</B></U>+<B><U>c</B></U></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_COPY">B_COPY</A></TT></B></TD>
+<TD>the focus view</TD>
+<TR>
+<TD><B><U>Command</B></U>+<B><U>v</B></U></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_PASTE">B_PASTE</A></TT></B></TD>
+<TD>the focus view</TD>
+<TR>
+<TD><B><U>Command</B></U>+<B><U>a</B></U></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SELECT_ALL">B_SELECT_ALL</A></TT></B></TD>
+<TD>the focus view</TD>
+<TR>
+<TD><B><U>Command</B></U>+<B><U>w
+<br>
+<I>(closable windows only)</B></I></U></TD>
+<TD><B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B></TD>
+<TD>the BWindow</TD>
+</TABLE>
+<P>
+In addition, BWindows respond to <B><U>Command</B></U>+<B><U>q</B></U> by posting <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> to <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="AddToSubset()"></A>AddToSubset()
+, 
+<A NAME="RemoveFromSubset()"></A>RemoveFromSubset()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>AddToSubset(</TT></B></FONT>BWindow *<I><FONT  color=991122 face=HELVETICA>window</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>RemoveFromSubset(</TT></B></FONT>BWindow *<I><FONT  color=991122 face=HELVETICA>window</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds windows to and removes them from this window's subset.  This affects modal and floating windows with a subset feel only (i.e. <B><TT><A HREF="#B_MODAL_SUBSET_WINDOW_FEEL">B_MODAL_SUBSET_WINDOW_FEEL</A></TT></B> or <B><TT>B_FLOATING_SUBSET_WINDOW_FEEL)</TT></B>.  A subset feel window blocks or floats above only those windows in its subset.  To set the window's feel, use <B><TT><A HREF="#SetFeel()">SetFeel()</A></TT></B>.  
+<P>
+For more information on this subject, see <a href="../User Interface GuidelinesWindowsWindowsCreation.html#Creating%20a%20Window">"Creating a Window"</a> in the BeUIG.
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>deep</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Archives the BWindow by recording its frame rectangle, title, type, and flags in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  If the <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> flag is <B><TT>true</TT></B>, this function also archives all the views in the window's view hierarchy.  If the flag is <B><TT>false</TT></B>, only the BWindow is archived.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="OutlineListView.html#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="Bounds()"></A>Bounds()
+, 
+<A NAME="Frame()"></A>Frame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>Bounds(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>Frame(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return the rectangle that encloses the window's content area.  The <I>bounds rectangle</I> (<B><TT><A HREF="#Bounds()">Bounds()</A></TT></B>) is expressed in the window's coordinate system; the <I>frame rectangle</I> (<B><TT><A HREF="#Frame()">Frame()</A></TT></B>) is expressed in the screen's coordinate system.  
+<P>
+The rectangles are cached by the BWindow itself&mdash;calling these functions doesn't incur a trip to the App Server.
+<P>
+<HR>
+<H3>ChildAt()  see <A HREF="#AddChild()">AddChild()</A></H3>
+<P>
+<HR>
+<H3>CountChildren()  see <A HREF="#AddChild()">AddChild()</A></H3>
+<P>
+<HR>
+<H3>CommitViewTransaction()  see <A HREF="#OpenViewTransaction()">OpenViewTransaction()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ConvertToScreen()"></A>ConvertToScreen()
+, 
+<A NAME="ConvertFromScreen()"></A>ConvertFromScreen()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>ConvertToScreen(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>windowPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertToScreen(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>windowPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>ConvertToScreen(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>windowRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertToScreen(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>windowRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>ConvertFromScreen(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>screenPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertFromScreen(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>screenPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>ConvertFromScreen(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>screenRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertFromScreen(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>screenRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Converts the argument from window coordinates to screen coordinates or vice versa.  The point or rect needn't fall within this BWindow's bounds.
+<P>
+If the argument is passed by value, the function returns the converted value; if it's by pointer, the conversion is done in-place.  
+<P>
+The BWindow must be locked.
+<P>
+<HR>
+<H3>
+<A NAME="CurrentFocus()"></A>CurrentFocus()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>CurrentFocus(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the current focus view for the <A HREF="#BWindow">BWindow</A>, or <B><TT>NULL</TT></B> if no view is currently in focus.  The focus view is the <A HREF="View.html#BView">BView</A> that's responsible for showing the current selection and is the target for keyboard messages directed at this BWindow.  The focus view is set through <B><TT>BView::MakeFocus()</TT></B>.
+<P>
+The BWindow sets its preferred handler to be the focus view, so the inherited <B><TT><A HREF="../The%20Application%20Kit/Looper.html#PreferredHandler()">PreferredHandler()</A></TT></B> function will return this same object (but as a BHandler).
+<P>
+<HR>
+<H3>DefaultButton()   see <A HREF="#SetDefaultButton()">SetDefaultButton()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="DisableUpdates()"></A>DisableUpdates()
+, 
+<A NAME="EnableUpdates()"></A>EnableUpdates()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DisableUpdates(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>EnableUpdates(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions disable automatic updating within the window, and re-enable it again.  Any drawing that's done while updates are disabled is suppressed until updates are re-enabled.  If you're doing a lot of drawing within the window, and you want the results of the drawing to appear all at once, you should disable updates, draw, and then re-enable updates.
+<P>
+<B>See also:  <TT>BView::Invalidate()</TT></B>, <B><TT><A HREF="#UpdateIfNeeded()">UpdateIfNeeded()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="DispatchMessage()"></A>DispatchMessage()
+</H3>
+<P>
+Implementation detail; see <B><TT><A HREF="../The%20Application%20Kit/Looper.html#DispatchMessage()">BLooper::DispatchMessage()</A></TT></B>.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+You shouldn't override this function in a BWindow subclass; if you want to augment the window's message-dispatching mechanism, override <B><TT><A HREF="#MessageReceived()">MessageReceived()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>EnableUpdates()   see <A HREF="#DisableUpdates()">DisableUpdates()</A></H3>
+<P>
+<HR>
+<H3>Feel()   see <A HREF="#SetFeel()">SetFeel()</A></H3>
+<P>
+<HR>
+<H3>Flags()   see <A HREF="#SetFlags()">SetFlags()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="FindView()"></A>FindView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>FindView(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>FindView(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the view located at <I><FONT  color=991122 face=HELVETICA>point</I></FONT> within the window, or the view tagged with <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.  The functions returns <B><TT>NULL</TT></B> if no view is found.
+<P>
+<HR>
+<H3>
+<A NAME="Flush()"></A>Flush()
+, 
+<A NAME="Sync()"></A>Sync()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Flush(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Sync(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Both of these functions cause this window's App Server-bound messages to be sent immediately.  <B><TT><A HREF="#Flush()">Flush()</A></TT></B> sends the messages and returns immediately; <B><TT><A HREF="#Sync()">Sync()</A></TT></B> send the messages and waits for the App Server to respond.  In other words, when <B><TT><A HREF="#Sync()">Sync()</A></TT></B> returns you're guaranteed that all of the flushed messages have been processed.
+<P>
+<B>See also:  <TT>BView::Flush()
+<P>
+</TT></B><HR>
+<H3>Frame()  see <A HREF="#Bounds()">Bounds()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="FrameMoved()"></A>FrameMoved()
+, 
+<A NAME="FrameResized()"></A>FrameResized()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>FrameMoved(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>origin</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>FrameResized(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These hook functions are invoked just after the window's frame is moved or resized, whether by the user or programatically.  The arguments give the window's new origin (in screen coordinates) or dimensions.  The default implementations do nothing.
+<P>
+<B>See also:  <TT><A HREF="misc.html#B_WINDOW_MOVED">B_WINDOW_MOVED</A></TT></B>, <B><TT><A HREF="misc.html#B_WINDOW_RESIZED">B_WINDOW_RESIZED</A></TT></B>.
+<P>
+<HR>
+<H3>GetSizeLimits()   see <A HREF="#SetSizeLimits()">SetSizeLimits()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetSupportedSuites()"></A>GetSupportedSuites()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>GetSupportedSuites(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Adds the name "suite/vnd.Be-window" to the <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Handler.html#GetSupportedSuites()">BHandler::GetSupportedSuites()</A></TT></B> 
+<P>
+<HR>
+<H3>GetWindowAlignment()   see <A HREF="#SetWindowAlignment()">SetWindowAlignment()</A></H3>
+<P>
+<HR>
+<H3>Hide() see <A HREF="#Show()">Show()</A></H3>
+<P>
+<HR>
+<H3>IsFloating()  see <A HREF="#IsFront()">IsFront()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsFront()"></A>IsFront()
+, 
+<A NAME="IsFloating()"></A>IsFloating()
+, 
+<A NAME="IsModal()"></A>IsModal()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsFront(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsFloating(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsModal(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return <B><TT>true</TT></B> if the window is frontmost on screen, if it has a floating window feel, and if it has a modal window feel, respectively.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+A floating window can never be the frontmost window.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>IsMinimized()  see <A HREF="#Show()">Show()</A></H3>
+<P>
+<HR>
+<H3>IsModal()  see <A HREF="#IsFront()">IsFront()</A></H3>
+<P>
+<HR>
+<H3>KeyMenuBar()   see <A HREF="#SetKeyMenuBar()">SetKeyMenuBar()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="LastMouseMovedView()"></A>LastMouseMovedView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="View.html#BView">BView</A> *<B><TT><FONT  color=000022 size=+1>LastMouseMovedView(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the view in this window that most recently received a  <B><TT><A HREF="misc.html#B_MOUSE_MOVED">B_MOUSE_MOVED</A></TT></B> message.
+<P>
+<HR>
+<H3>Look()   see <A HREF="#SetLook()">SetLook()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MenusBeginning()"></A>MenusBeginning()
+, 
+<A NAME="MenusEnded()"></A>MenusEnded()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MenusBeginning(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MenusEnded(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT><A HREF="#MenusBeginning()">MenusBeginning()</A></TT></B> hook function is called just before menus belonging to the window are about to be shown to the user.  <B><TT><A HREF="#MenusEnded()">MenusEnded()</A></TT></B> is called when the menus have been removed from the screen.  The default implementations do nothing.  You can implement these functions to make sure the menus' states accurately reflect the state of the window.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/importantBullet.gif">
+					<TD><FONT FACE="helvetica">
+These hook functions are not invoked because of messages&mdash;don't go looking for a "menus beginning" or "menus ended" message.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="MessageReceived()"></A>MessageReceived()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> <B><TT><FONT  color=000022 size=+1>MessageReceived(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implementation detail.  See <B><TT><A HREF="../The%20Application%20Kit/Handler.html#MessageReceived()">BHandler::MessageReceived()</A></TT></B>.
+<P>
+<HR>
+<H3>Minimize() see <A HREF="#Show()">Show()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MoveBy()"></A>MoveBy()
+, 
+<A NAME="MoveTo()"></A>MoveTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>MoveBy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>MoveTo(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>MoveTo(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions move the window without resizing it.  <B><TT><A HREF="#MoveBy()">MoveBy()</A></TT></B> adds <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT> coordinate units to the left and right components of the window's frame rectangle and <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT> units to the frame's top and bottom.  If <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT> and <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT> are negative, the window moves upward and to the left.  If they're positive, it moves downward and to the right.  <B><TT><A HREF="#MoveTo()">MoveTo()</A></TT></B> moves the left top corner of the window's content area to <I><FONT  color=991122 face=HELVETICA>point</I></FONT>&mdash;or (<I><FONT  color=991122 face=HELVETICA>x</I></FONT>,&nbsp;<I><FONT  color=991122 face=HELVETICA>y</I></FONT>)&mdash;in the screen coordinate system; it adjusts all coordinates in the frame rectangle accordingly.
+<P>
+None of the values passed to these functions should specify fractional coordinates; a window must be aligned on screen pixels.  Fractional values will be rounded to the closest whole number.
+<P>
+Neither function alters the BWindow's coordinate system or bounds rectangle.
+<P>
+When these functions move a window, a window-moved event is reported to the window.  This results in the BWindow's <B><TT><A HREF="#FrameMoved()">FrameMoved()</A></TT></B> function being called.
+<P>
+<B>See also:  <TT><A HREF="#FrameMoved()">FrameMoved()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="NeedsUpdate()"></A>NeedsUpdate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>NeedsUpdate(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if any of the views within the window need to be updated, and <B><TT>false</TT></B> if they're all up-to-date.
+<P>
+<HR>
+<H3>
+<A NAME="OpenViewTransaction()"></A>OpenViewTransaction()
+, 
+<A NAME="CommitViewTransaction()"></A>CommitViewTransaction()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>OpenViewTransaction(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>CommitViewTransaction(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These two functions bracket a series of "batched" drawing instructions.  After you call  <B><TT><A HREF="#OpenViewTransaction()">OpenViewTransaction()</A></TT></B>, everything you draw in the window is bundled up and then sent to the app server (and rendered) when you call <B><TT><A HREF="#CommitViewTransaction()">CommitViewTransaction()</A></TT></B>.  You can only perform one transaction (per window) at a time. The BWindow must be locked when you call <B><TT><A HREF="#OpenViewTransaction()">OpenViewTransaction()</A></TT></B>, and must remain locked until after you call <B><TT><A HREF="#CommitViewTransaction()">CommitViewTransaction()</A></TT></B>.  Invocations of <B><TT><A HREF="#Flush()">Flush()</A> </TT></B>are ignored while a transaction is open (and locked).
+<P>
+<HR>
+<H3>PreferredHandler()   see <A HREF="#CurrentFocus()">CurrentFocus()</A></H3>
+<P>
+<HR>
+<H3>PulseRate()   see <A HREF="#SetPulseRate()">SetPulseRate()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Quit()"></A>Quit()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Quit(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Quit()">Quit()</A></TT></B> removes the window from the screen, deletes all the BViews in its view hierarchy, destroys the window thread, removes the window's connection to the Application Server, and deletes the BWindow object.
+<P>
+Use this function, rather than the <B><TT>delete</TT></B> operator, to destroy a window.
+<P>
+BWindow's <B><TT><A HREF="#Quit()">Quit()</A></TT></B> works much like the <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> function it overrides.  When called from the BWindow's thread, it doesn't return.  When called from another thread, it returns after all previously posted messages have been processed and the BWindow and its thread have been destroyed.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The window must be locked when you call <B><TT><A HREF="#Quit()">Quit()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Looper.html#QuitRequested()">BLooper::QuitRequested()</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Looper.html#Quit()">BLooper::Quit()</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Application.html#QuitRequested()">BApplication::QuitRequested()</A></TT></B> 
+<P>
+<HR>
+<H3>RemoveChild()   see <A HREF="#AddChild()">AddChild()</A></H3>
+<P>
+<HR>
+<H3>RemoveShortcut()   see <A HREF="#AddShortcut()">AddShortcut()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ResizeBy()"></A>ResizeBy()
+, 
+<A NAME="ResizeTo()"></A>ResizeTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ResizeBy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ResizeTo(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions resize the window, while keeping its left top corner constant.  <B><TT><A HREF="#ResizeBy()">ResizeBy()</A></TT></B> adds <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT> pixels to the width of the window's frame and <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT> pixels to its height.  <B><TT><A HREF="#ResizeTo()">ResizeTo()</A></TT></B> sets the frame absolutely to [<I><FONT  color=991122 face=HELVETICA>width, height</I></FONT>] pixels.  Fractional components are rounded to the nearest whole number.
+<P>
+The <B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B> hook function is called after the frame has been resized.
+<P>
+<HR>
+<H3>
+<A NAME="ResolveSpecifier()"></A>ResolveSpecifier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>ResolveSpecifier(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>specifier</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>command</I></FONT>, const&nbsp;char&nbsp;*<I><FONT  color=991122 face=HELVETICA>property</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Resolves specifiers for the "Frame", "Title", and "View" properties.  See "Scripting Support" in the class overview for more information.
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Handler.html#ResolveSpecifier()">BHandler::ResolveSpecifier()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ScreenChanged()"></A>ScreenChanged()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ScreenChanged(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, color_space <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Hook function that's called when the screen (on which this window is located) changes size or location in the <I>screen coordinate system</I>, or changes color space (depth).  <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> is the screen's new frame rectangle, and <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> is its new color space.
+<P>
+<B>See also:  <TT><A HREF="Screen.html#Frame()">BScreen::Frame()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="SendBehind()"></A>SendBehind()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SendBehind(</TT></B></FONT>const BWindow *<I><FONT  color=991122 face=HELVETICA>window</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Relayers the windows on the screen so this window is behind <I><FONT  color=991122 face=HELVETICA>window</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="SetDefaultButton()"></A>SetDefaultButton()
+, 
+<A NAME="DefaultButton()"></A>DefaultButton()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetDefaultButton(</TT></B></FONT><A HREF="Button.html#BButton">BButton</A> *<I><FONT  color=991122 face=HELVETICA>button</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<A HREF="Button.html#BButton">BButton</A> *<B><TT><FONT  color=000022 size=+1>DefaultButton(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Set and return the window's <I>default button</I>.  This is the button that's mapped to the <B><U>Enter</B></U> key.  The user can activate the default button at any time&mdash;even if another <A HREF="View.html#BView">BView</A> is the focus view (the focus view will <I>not</I> receive a <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message).  To remove the current default (without promoting another button) call <B><TT>SetDefaultButton(NULL)</TT></B>.  There can only be one default button at a time; <B><TT><A HREF="#SetDefaultButton()">SetDefaultButton()</A></TT></B> demotes the previous default.
+<P>
+When you promote or demote a default button, it's automatically redisplayed and receives a <B><TT><A HREF="Button.html#MakeDefault()">BButton::MakeDefault()</A></TT></B> call. 
+<P>
+<HR>
+<H3>
+<A NAME="SetFeel()"></A>SetFeel()
+, 
+<A NAME="Feel()"></A>Feel()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetFeel</TT></B></FONT>(window_feel <I><FONT  color=991122 face=HELVETICA>feel</I></FONT>)
+<P>
+
+
+<TR><TD>
+window_feel <B><TT><FONT  color=000022 size=+1>Feel(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetFeel()</TT></B> changes the window's <I><FONT  color=991122 face=HELVETICA>feel</I></FONT> to the specified value.
+<P>
+<B><TT>Feel()</TT></B> returns the current feel of the window.
+<P>
+See the BWindow constructor for a list of <B><TT><A HREF="#window_feel">window_feel</A></TT></B> constants.
+<P>
+<HR>
+<H3>
+<A NAME="SetFlags()"></A>SetFlags()
+, 
+<A NAME="Flags()"></A>Flags()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetFlags</TT></B></FONT>(uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT>)
+<P>
+
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>Flags(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetFlags()">SetFlags()</A></TT></B> set the window's flags (or "user attributes") to the specified combination.  <B><TT><A HREF="Font.html#Flags()">Flags()</A></TT></B> returns the current flags.
+<P>
+See <a href="#Window%20Flags">"Window Flags"</a> for a list of the flag values.  Also see <a href="../User Interface GuidelinesWindowsWindowsCreation.html#User%20Attributes">"User Attributes"</a> in the BeUIG for a detailed description.
+<P>
+<HR>
+<H3>
+<A NAME="SetKeyMenuBar()"></A>SetKeyMenuBar()
+, 
+<A NAME="KeyMenuBar()"></A>KeyMenuBar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetKeyMenuBar(</TT></B></FONT><A HREF="MenuBar.html#BMenuBar">BMenuBar</A> *<I><FONT  color=991122 face=HELVETICA>menuBar</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="MenuBar.html#BMenuBar">BMenuBar</A> *<B><TT><FONT  color=000022 size=+1>KeyMenuBar(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetKeyMenuBar()">SetKeyMenuBar()</A></TT></B> makes the specified <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> object the "key" menu bar for the window&mdash;the object that's at the root of the menu hierarchy that users can navigate using the keyboard.  <B><TT><A HREF="#KeyMenuBar()">KeyMenuBar()</A></TT></B> returns the object with key status, or <B><TT>NULL</TT></B> if the window doesn't have a <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> object in its view hierarchy.
+<P>
+If a window contains only one <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> view, it's automatically designated the key menu bar.  If there's more than one <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> in the window, the last one added to the window's view hierarchy is considered to be the key one.
+<P>
+If there's a "true" menu bar displayed along the top of the window, its menu hierarchy is the one that users should be able to navigate with the keyboard.  <B><TT><A HREF="#SetKeyMenuBar()">SetKeyMenuBar()</A></TT></B> can be called to make sure that the <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> object at the root of that hierarchy is the "key" menu bar.
+<P>
+<HR>
+<H3>
+<A NAME="SetLook()"></A>SetLook()
+, 
+<A NAME="Look()"></A>Look()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetLook</TT></B></FONT>(window_look <I><FONT  color=991122 face=HELVETICA>look</I></FONT>)
+<P>
+
+
+<TR><TD>
+window_look <B><TT><FONT  color=000022 size=+1>Look(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetLook()</TT></B> changes the window's <I><FONT  color=991122 face=HELVETICA>look</I></FONT> to the specified value.
+<P>
+<B><TT>Look()</TT></B> returns the current look of the window.
+<P>
+See the BWindow constructor for a list of <B><TT><A HREF="#window_look">window_look</A></TT></B> constants.
+<P>
+<HR>
+<H3>
+<A NAME="SetPulseRate()"></A>SetPulseRate()
+, 
+<A NAME="PulseRate()"></A>PulseRate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetPulseRate(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>microseconds</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>PulseRate(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and return how often <B><TT><A HREF="TextView.html#Pulse()">Pulse()</A></TT></B> is called for the BWindow's views (how often <B><TT><A HREF="misc.html#B_PULSE">B_PULSE</A></TT></B> messages are posted to the window).  All BViews attached to the same window share the same pulse rate.
+<P>
+By turning on the <B><TT><A HREF="ViewGeneral.html#B_PULSE_NEEDED">B_PULSE_NEEDED</A></TT></B> flag, a <A HREF="View.html#BView">BView</A> can request periodic <B><TT><A HREF="TextView.html#Pulse()">Pulse()</A></TT></B> notifications.  By default, <B><TT><A HREF="misc.html#B_PULSE">B_PULSE</A></TT></B> messages are posted every 500,000 microseconds, as long as no other messages are pending.  Each message causes <B><TT><A HREF="TextView.html#Pulse()">Pulse()</A></TT></B> to be called once for every <A HREF="View.html#BView">BView</A> that requested the notification.  There are no pulses if no BViews request them.
+<P>
+<B><TT><A HREF="#SetPulseRate()">SetPulseRate()</A></TT></B> permits you to set a different interval.  The interval set should not be less than 100,000 microseconds; differences less than 50,000 microseconds may not be noticeable.  A finer granularity can't be guaranteed.
+<P>
+Setting the pulse rate to 0 disables pulsing for all views in the window.
+<P>
+<B>See also:  <TT>BView::Pulse()</TT></B>, the <A HREF="View.html#BView">BView</A> constructor 
+<P>
+<HR>
+<H3>
+<A NAME="SetSizeLimits()"></A>SetSizeLimits()
+, 
+<A NAME="GetSizeLimits()"></A>GetSizeLimits()
+, 
+<A NAME="SetZoomLimits()"></A>SetZoomLimits()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSizeLimits(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>minWidth</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <I><FONT  color=991122 face=HELVETICA>minHeight</I></FONT>, float&nbsp;<I><FONT  color=991122 face=HELVETICA>maxHeight</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>GetSizeLimits(</TT></B></FONT>float *<I><FONT  color=991122 face=HELVETICA>minWidth</I></FONT>, float *<I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float&nbsp;*<I><FONT  color=991122 face=HELVETICA>minHeight</I></FONT>, float&nbsp;*<I><FONT  color=991122 face=HELVETICA>maxHeight</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetZoomLimits(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT>, float&nbsp;<I><FONT  color=991122 face=HELVETICA>maxHeight</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and report limits on the size of the window.  The user won't be able to resize the window beyond the limits set by <B><TT><A HREF="#SetSizeLimits()">SetSizeLimits()</A></TT></B>&mdash;to make it have a width less than <I><FONT  color=991122 face=HELVETICA>minWidth</I></FONT> or greater than <I><FONT  color=991122 face=HELVETICA>maxWidth</I></FONT>, nor a height less than <I><FONT  color=991122 face=HELVETICA>minHeight</I></FONT> or greater than <I><FONT  color=991122 face=HELVETICA>maxHeight</I></FONT>.  By default, the minimums are sufficiently small and the maximums sufficiently large to accommodate any window within reason.
+<P>
+<B><TT><A HREF="#SetSizeLimits()">SetSizeLimits()</A></TT></B> constrains the user, not the programmer.  It's legal for an application to set a window size that falls outside the permitted range.  The limits are imposed only when the user attempts to resize the window; at that time, the window will jump to a size that's within range.
+<P>
+<B><TT><A HREF="#GetSizeLimits()">GetSizeLimits()</A></TT></B> writes the current limits to the variables provided.
+<P>
+<B><TT><A HREF="#SetZoomLimits()">SetZoomLimits()</A></TT></B> sets the maximum size that the window will zoom to (when the <B><TT><A HREF="#Zoom()">Zoom()</A></TT></B> function is called).  The maximums set by <B><TT><A HREF="#SetSizeLimits()">SetSizeLimits()</A></TT></B> also apply to zooming; the window will zoom to the screen size or to the smaller of the maximums set by these two functions.
+<P>
+Since the sides of a window must line up on screen pixels, the values passed to both <B><TT><A HREF="#SetSizeLimits()">SetSizeLimits()</A></TT></B> and <B><TT><A HREF="#SetZoomLimits()">SetZoomLimits()</A></TT></B> should be whole numbers.
+<P>
+<B>See also:  </B>the BWindow constructor, <B><TT><A HREF="#Zoom()">Zoom()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetTitle()"></A>SetTitle()
+, 
+<A NAME="Title()"></A>Title()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetTitle(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>newTitle</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Title(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the window's title.  <B><TT><A HREF="#SetTitle()">SetTitle()</A></TT></B> replaces the current title with <I><FONT  color=991122 face=HELVETICA>newTitle</I></FONT>.  It also renames the window thread in the following format:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;"w><I>newTitle</I>"</PRE>
+<P>
+where as many characters of the <I><FONT  color=991122 face=HELVETICA>newTitle</I></FONT> are included in the thread name as will fit.
+<P>
+<B><TT><A HREF="#Title()">Title()</A></TT></B> returns a pointer to the current title.  The returned string is null-terminated.  It belongs to the BWindow object, which may alter the string or free the memory where it resides without notice.  Applications should ask for the title each time it's needed and make a copy for their own purposes.
+<P>
+A window's title and thread name are originally set by an argument passed to the BWindow constructor.
+<P>
+<B>See also:  </B>the BWindow constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetType()"></A>SetType()
+, 
+<A NAME="Type()"></A>Type()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetType</TT></B></FONT>(window_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT>)
+<P>
+
+
+<TR><TD>
+window_type <B><TT><FONT  color=000022 size=+1>Type(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetType()</TT></B> changes the type of the window to the specified value.  <B><TT>Type()</TT></B> returns the type.  You normally set the window's type when it's constructed.  .
+<P>
+The type is set at construction (or by <B><TT>SetType()</TT></B>) as one of the following constants (full descriptions can be found in the discussion of the BWindow constructor):
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>B_UNTYPED_WINDOW</TD>
+<TR>
+<TD>B_MODAL_WINDOW</TD>
+<TR>
+<TD>B_BORDERED_WINDOW</TD>
+<TR>
+<TD>B_TITLED_WINDOW</TD>
+<TR>
+<TD>B_DOCUMENT_WINDOW</TD>
+<TR>
+<TD>B_FLOATING_WINDOW</TD>
+</TABLE>
+<P>
+<B>See also:  </B>the BWindow constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetWindowAlignment()"></A>SetWindowAlignment()
+, 
+<A NAME="GetWindowAlignment()"></A>GetWindowAlignment()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetWindowAlignment(</TT></B></FONT>window_alignment <I><FONT  color=991122 face=HELVETICA>mode</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>h</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>hOffset</I></FONT> = <FONT  face=HELVETICA>0</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>width</I></FONT> = <FONT  face=HELVETICA>0</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>widthOffset</I></FONT> = <FONT  face=HELVETICA>0</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>v</I></FONT> = <FONT  face=HELVETICA>0</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>vOffset</I></FONT> = <FONT  face=HELVETICA>0</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>height</I></FONT> = <FONT  face=HELVETICA>0</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <I><FONT  color=991122 face=HELVETICA>heightOffset</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetWindowAlignment(</TT></B></FONT>window_alignment *<I><FONT  color=991122 face=HELVETICA>mode</I></FONT> = <B><TT><FONT  color=000022 size=+1>NULL</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>h</I></FONT> = <B><TT><FONT  color=000022 size=+1>NULL</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>hOffset</I></FONT> = <B><TT><FONT  color=000022 size=+1>NULL</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>width</I></FONT> = <B><TT><FONT  color=000022 size=+1>NULL</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>widthOffset = NULL</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>v = NULL</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>vOffset = NULL</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>height = NULL</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 *<I><FONT  color=991122 face=HELVETICA>heightOffset</I></FONT> <FONT  face=HELVETICA>= NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetWindowAlignment()</TT></B> sets the current alignment of the window content on the screen.  <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> is either <B><TT>B_PIXEL_ALIGNMENT</TT></B> or <B><TT>B_BYTE_ALIGNMENT</TT></B>.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> is <B><TT>B_PIXEL_ALIGNMENT</TT></B>, <B><TT>SetWindowAlignment()</TT></B> aligns the window in pixel coordinates.  <I><FONT  color=991122 face=HELVETICA>h</I></FONT> and <I><FONT  color=991122 face=HELVETICA>hOffset</I></FONT> together determine the horizontal alignment: <I><FONT  color=991122 face=HELVETICA>h</I></FONT> gives the horizontal origin step while <I><FONT  color=991122 face=HELVETICA>hOffset</I></FONT> is the horizontal offset.  <I><FONT  color=991122 face=HELVETICA>hOffset</I></FONT> must be between 1 and <I><FONT  color=991122 face=HELVETICA>h </I></FONT>(as a convenience, 0 is taken to mean 1).  For example, if <I><FONT  color=991122 face=HELVETICA>h</I></FONT> is 4 and <I><FONT  color=991122 face=HELVETICA>hOffset</I></FONT> is 1, valid horizontal origins would be ..., -7, -3, 1, 5, 9, ...  Similarly, <I><FONT  color=991122 face=HELVETICA>width</I></FONT>/<I><FONT  color=991122 face=HELVETICA>widthOffset</I></FONT>, <I><FONT  color=991122 face=HELVETICA>v</I></FONT>/<I><FONT  color=991122 face=HELVETICA>vOffset</I></FONT>, <I><FONT  color=991122 face=HELVETICA>height</I></FONT>/<I><FONT  color=991122 face=HELVETICA>heightOffset</I></FONT> give you control over the other window parameters.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>mode</I></FONT> is <B><TT>B_BYTE_ALIGNMENT</TT></B>, then the alignment is given in terms of frame buffer offsets.  However, the setting only affects the horizontal origin and width.  You can't align the right and bottom edges in <B><TT>B_BYTE_ALIGNMENT</TT></B> mode.
+<P>
+<B><TT>GetWindowAlignment()</TT></B> returns the current window alignment.
+<P>
+Both methods return <B><TT>B_NO_ERROR</TT></B> on success and <B><TT>B_ERROR</TT></B> otherwise.
+<P>
+<HR>
+<H3>
+<A NAME="SetWorkspaces()"></A>SetWorkspaces()
+, 
+<A NAME="Workspaces()"></A>Workspaces()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetWorkspaces(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>workspaces</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>Workspaces(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the set of workspaces where the window can be displayed.  The <I><FONT  color=991122 face=HELVETICA>workspaces</I></FONT> argument passed to <B><TT><A HREF="#SetWorkspaces()">SetWorkspaces()</A></TT></B> and the value returned by <B><TT>Workspaces()</TT></B> is a bitfield with one bit set for each workspace in which the window can appear.  Usually a window appears in just one workspace.
+<P>
+<B><TT><A HREF="#SetWorkspaces()">SetWorkspaces()</A></TT></B> can associate a window with workspaces that don't exist yet.  The window will appear in those workspaces if and when the user creates them.
+<P>
+You can pass <B><TT><A HREF="#B_CURRENT_WORKSPACE">B_CURRENT_WORKSPACE</A></TT></B> as the <I><FONT  color=991122 face=HELVETICA>workspaces</I></FONT> argument to place the window in the workspace that's currently displayed (the active workspace) and remove it from all others, or <B><TT><A HREF="#B_ALL_WORKSPACES">B_ALL_WORKSPACES</A></TT></B> to make sure the window shows up in all workspaces, including any new ones that the user might create.  <B><TT>Workspaces()</TT></B> may return <B><TT><A HREF="#B_ALL_WORKSPACES">B_ALL_WORKSPACES</A></TT></B>, but will identify the current workspace rather than return <B><TT><A HREF="#B_CURRENT_WORKSPACE">B_CURRENT_WORKSPACE</A></TT></B>.
+<P>
+Changing a BWindow's set of workspaces causes it to be notified with a <B><TT><A HREF="#WorkspacesChanged()">WorkspacesChanged()</A></TT></B> function call.
+<P>
+<B>See also:  </B>the BWindow constructor, <B><TT><A HREF="#WorkspacesChanged()">WorkspacesChanged()</A></TT></B> 
+<P>
+<HR>
+<H3>SetZoomLimits()   see <A HREF="#SetSizeLimits()">SetSizeLimits()</A></H3>
+<P>
+<HR>
+<H3>Show()   see <A HREF="#Hide()">Hide()</A></H3>
+<P>
+<HR>
+<H3>Sync()   see <A HREF="#Flush()">Flush()</A></H3>
+<P>
+<HR>
+<H3>Title()   see <A HREF="#SetTitle()">SetTitle()</A></H3>
+<P>
+<HR>
+<H3>Type()   see <A HREF="#SetType()">SetType()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Show()"></A>Show()
+, 
+<A NAME="Hide()"></A>Hide()
+, 
+<A NAME="IsHidden()"></A>IsHidden()
+, 
+<A NAME="Minimize()"></A>Minimize()
+, 
+<A NAME="IsMinimized()"></A>IsMinimized()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> <B><TT><FONT  color=000022 size=+1>Show(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Hide(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsHidden(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Minimize(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>minimize</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsMinimized(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions hide and show the window.
+<P>
+<B><TT><A HREF="#Show()">Show()</A></TT></B> places the window frontmost on the screen (but behind any applicable floating or modal windows), places it on <B>Deskbar</B>'s window list, and makes it the active window.  If this is the BWindow's first <B><TT><A HREF="#Show()">Show()</A></TT></B>, the object's message loop is started, and the object is unlocked. 
+<P>
+<B><TT><A HREF="#Hide()">Hide()</A></TT></B> removes the window from the screen, removes it from <B>Deskbar</B>'s window list, and passes active status to some other window (if this is the active window).  If <B><TT><A HREF="#Hide()">Hide()</A></TT></B> is called more than once, you'll need to call <B><TT><A HREF="#Show()">Show()</A></TT></B> an equal number of times for the window to become visible again.
+<P>
+<B><TT><A HREF="#Minimize()">Minimize()</A></TT></B> hides and shows the window (and passes active status), as <I><FONT  color=991122 face=HELVETICA>minimize</I></FONT> is <B><TT>true</TT></B> or <B><TT>false</TT></B>.  The difference between this function and <B><TT><A HREF="#Hide()">Hide()</A></TT></B>/<B><TT><A HREF="#Show()">Show()</A></TT></B> is that<B><TT> Minimize()</TT></B> dims (and undims) the window's entry in <B>Deskbar</B>'s window list, but doesn't remove the entry altogether.  Also, a single <B><TT>Minimize(false)</TT></B> "undoes" any number of <B><TT>Minimize(true)</TT></B> calls.  
+<P>
+<B><TT><A HREF="#Minimize()">Minimize()</A></TT></B> also acts as a hook that's invoked when the user double-clicks the window's title tab or selects the window from <B>DeskBar</B>'s window list.  If <I><FONT  color=991122 face=HELVETICA>minimize</I></FONT> is <B><TT>true</TT></B>, the window is about to be hidden; if <B><TT>false</TT></B>, it's about to be shown.  The <B><TT><A HREF="#Minimize()">Minimize()</A></TT></B> function itself does the hiding and showing&mdash;if you override <B><TT><A HREF="#Minimize()">Minimize()</A></TT></B> and you want to inherit the BWindow behaviour, you must call <B><TT><A HREF="#BWindow::Minimize()">BWindow::Minimize()</A></TT></B> in your implementation. 
+<P>
+<B><TT><A HREF="#IsHidden()">IsHidden()</A></TT></B> returns <B><TT>true</TT></B> if the window is currently hidden (i.e. through <B><TT><A HREF="#Hide()">Hide()</A></TT></B>). <B><TT><A HREF="#IsMinimized()">IsMinimized()</A></TT></B> returns <B><TT>true</TT></B> if the window is minimized.  Hiding takes precendence over minimization.  For example, in both of these sequences...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;window->Hide();
+&nbsp;&nbsp;&nbsp;window->Minimize(true);
+&nbsp;&nbsp;&nbsp;/* or */
+&nbsp;&nbsp;&nbsp;window->Minimize(true);
+&nbsp;&nbsp;&nbsp;window->Hide();</PRE>
+<P>
+...the window is hidden but not minimized.
+<P>
+<B>See also:  <TT><A HREF="misc.html#B_MINIMIZE">B_MINIMIZE</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="UpdateIfNeeded()"></A>UpdateIfNeeded()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>UpdateIfNeeded(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Immediately and synchronously invokes <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> on each child view that needs updating.  This function is ignored if its called from any thread other than the BWindow's message loop.  You call it as part of the implementation of a user interface hook function (<B><TT><A HREF="TextView.html#MouseMoved()">MouseMoved()</A></TT></B>, <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B>, et. al.) to force invalid views to be immediately redrawn without having to wait for the hook function to finish.  See <a href="1_Drawing.html#Forcing%20an%20Update%20while%20Responding%20to%20an%20Event">"Forcing an Update while Responding to an Event"</a> for details and an example.
+<P>
+<HR>
+<H3>WindowActivated()  see <A HREF="#Activate()">Activate()</A></H3>
+<P>
+<HR>
+<H3>Workspaces()   see <A HREF="#SetWorkspaces()">SetWorkspaces()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="WorkspaceActivated()"></A>WorkspaceActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WorkspaceActivated(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>workspace</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to a notification that the workspace displayed on the screen has changed.  All windows in the newly activated workspace as well as those in the one that was just deactivated get this notification.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>workspace</I></FONT> argument is an index to the workspace in question and the <I><FONT  color=991122 face=HELVETICA>active</I></FONT> flag conveys its current status.  If <I><FONT  color=991122 face=HELVETICA>active</I></FONT> is <B><TT>true</TT></B>, the workspace has just become the active workspace.  If <I><FONT  color=991122 face=HELVETICA>active</I></FONT> is <B><TT>false</TT></B>, it has just stopped being the active workspace.
+<P>
+The default (BWindow) version of this function is empty.
+<P>
+<B>See also:  </B>"<B><TT><A HREF="../Messages/GeneralMessages.html#B_WORKSPACE_ACTIVATED">B_WORKSPACE_ACTIVATED</A></TT></B>" in the <B>Message Protocols</B> appendix, <B><TT><A HREF="functions.html#activate_workspace()">activate_workspace()</A></TT></B>  
+<P>
+<HR>
+<H3>
+<A NAME="WorkspacesChanged()"></A>WorkspacesChanged()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WorkspacesChanged(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>oldWorkspaces</I></FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>newWorkspaces</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to respond to a notification the the window has just changed the set of workspaces in which it can be displayed from <I><FONT  color=991122 face=HELVETICA>oldWorkspaces</I></FONT> to <I><FONT  color=991122 face=HELVETICA>newWorkspaces</I></FONT>.  This typically happens when the user moves a window from one workspace to another, but it may also happen when a programmatic change is made to the set of permitted workspaces.  Each workspace is represented by a corresponding bit in the <I><FONT  color=991122 face=HELVETICA>oldWorkspaces</I></FONT> and <I><FONT  color=991122 face=HELVETICA>newWorkspaces</I></FONT> masks.
+<P>
+The default (BWindow) version of this function is empty.
+<P>
+<B>See also:  </B>"<B><TT>B_WORKSPACES_CHANGED</TT></B>" in the <B>Message Protocols</B> appendix, <B><TT><A HREF="#SetWorkspaces()">SetWorkspaces()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Zoom()"></A>Zoom()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Zoom(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Zoom(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>origin</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The non-virtual <B><TT>Zoom()</TT></B> (which is called when the user clicks the <I>zoom button</I>, but can also be called programatically) figures out a new size and location for the window (as described below), and then passes these dimensions to the virtual <B><TT><A HREF="#Zoom()">Zoom()</A></TT></B> hook function.  It's hook <B><TT><A HREF="#Zoom()">Zoom()</A></TT></B>'s responsibility to actually resize and move the window; the default version applies the arguments explicitly by calling<B><TT> <A HREF="#MoveTo()">MoveTo()</A></TT></B> and<B><TT> ResizeTo()</TT></B>.  You can re-implement hook <B><TT>Zoom()</TT></B> to create a new zooming algorithm that incorporates or ignores the arguments as you see fit.
+<P>
+The dimensions that non-virtual <B><TT>Zoom()</TT></B> passes to hook <B><TT>Zoom()</TT></B> are deduced from the smallest of three rectangles:  1) the screen rectangle, 2) the rectangle defined by <B><TT><A HREF="#SetZoomLimits()">SetZoomLimits()</A></TT></B>, 3) the rectangle defined by <B><TT><A HREF="#SetSizeLimits()">SetSizeLimits()</A></TT></B>.  However, if the window's rectangle already matches these "zoom" dimensions (give or take a few pixels), <B><TT><A HREF="#Zoom()">Zoom()</A></TT></B> passes the window's previous ("non-zoomed") size and location.
+<P>
+You can effectively call <B><TT>Zoom()</TT></B> even if the window is <B><TT><A HREF="#B_NOT_ZOOMABLE">B_NOT_ZOOMABLE</A></TT></B>.
+<P>
+<B><TT><A HREF="#Zoom()">Zoom()</A></TT></B> may both move and resize the window, resulting in <B><TT><A HREF="#FrameMoved()">FrameMoved()</A></TT></B> and <B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B> notifications.
+<P>
+<HR>
+<H2>
+<A NAME="Constants%20and%20Defined%20Types"></A><FONT SIZE=6>C</FONT>onstants and <FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="window_look"></A>window_look
+</H3>
+<P>
+The <B><TT><A HREF="#window_look">window_look</A></TT></B> constants define the appearance of the window&mdash;the look of its title tab, border, and the type of "resize control" (in the bottom right corner of the window).  The look is set in the constructor or in the <B><TT><A HREF="#SetLook()">SetLook()</A></TT></B> function.  The table below lists and briefly describes the window_look values; for more information (and pictures) see <a href="../User Interface GuidelinesWindowsWindowsCreation.html#Window%20Looks">"Window Looks"</a> in the BeUIG.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Window Look</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_DOCUMENT_WINDOW_LOOK"></A>B_DOCUMENT_WINDOW_LOOK
+</TT></B></TD>
+<TD>Large title bar, thick border, draggable "resize box" .</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TITLED_WINDOW_LOOK"></A>B_TITLED_WINDOW_LOOK
+</TT></B></TD>
+<TD>Same as the document window, but with a less substantial "resize corner".</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FLOATING_WINDOW_LOOK"></A>B_FLOATING_WINDOW_LOOK
+</TT></B></TD>
+<TD>Small title bar, thin border, resize corner.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MODAL_WINDOW_LOOK"></A>B_MODAL_WINDOW_LOOK
+</TT></B></TD>
+<TD>No title bar, thick border, no resize control (by convention; see the <B><TT><A HREF="misc.html#B_NOT_RESIZABLE">B_NOT_RESIZABLE</A></TT></B> window flag).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BORDERED_WINDOW_LOOK"></A>B_BORDERED_WINDOW_LOOK
+</TT></B></TD>
+<TD>No title bar, line border, no resize control.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NO_BORDER_WINDOW_LOOK"></A>B_NO_BORDER_WINDOW_LOOK
+</TT></B></TD>
+<TD>A borderless white rectangle.  The user can't move or close this window.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="window_feel"></A>window_feel
+</H3>
+<P>
+The <B><TT><A HREF="#window_feel">window_feel</A></TT></B> constants govern a window's behavior in relation to other windows.  The feel is set in the BWindow constructor or in <B><TT><A HREF="#SetFeel()">SetFeel()</A></TT></B>.  The table below briefly describes the window feels.  For a more detailed explanation, see <a href="../User Interface GuidelinesWindowsWindowsCreation.html#Window%20Feels">"Window Feels"</a> in the BeUIG.  
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Window Feel</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_NORMAL_WINDOW_FEEL"></A>B_NORMAL_WINDOW_FEEL
+</TT></B></TD>
+<TD>Behaves like a normal window (non-modal, non-floating).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MODAL_SUBSET_WINDOW_FEEL"></A>B_MODAL_SUBSET_WINDOW_FEEL
+<br>
+B_MODAL_APP_WINDOW_FEEL
+<br>
+B_MODAL_ALL_WINDOW_FEEL</TT></B></TD>
+<TD>When displayed, blocks all windows in its subset<SUP>1</SUP>, app, or across the entire system.  A modal subset/app window is visible only if a window in its subset/app is visible.  Modal all windows are always visible in all workspaces</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FLOATING_SUBSET_WINDOW_FEEL"></A>B_FLOATING_SUBSET_WINDOW_FEEL
+<br>
+B_FLOATING_APP_WINDOW_FEEL
+<br>
+B_FLOATING_ALL_WINDOW_FEEL</TT></B></TD>
+<TD>Floats above all windows in its subset<SUP>1</SUP>, app, or across the entire system<SUP>2</SUP>.  A floating subset/app window is visible only if a window in its subset/app is frontmost.  Floating all windows are always visible in all workspaces.</TD>
+</TABLE>
+<P>
+<B><SUP>1 </B></SUP>&nbsp;&nbsp;&nbsp;To set a window's subset, use <B><TT><A HREF="#AddToSubset()">AddToSubset()</A></TT></B>.
+<P>
+<B><SUP>2 </B></SUP>&nbsp;&nbsp;&nbsp;Modal windows are drawn in front of floating windows.
+<P>
+<HR>
+<H3>
+<A NAME="window_type"></A>window_type
+</H3>
+<P>
+The <B><TT><A HREF="#window_type">window_type</A></TT></B> constants are pre-defined combinations of looks and feels.  You set the type through the BWindow constructor or <B><TT><A HREF="#SetType()">SetType()</A></TT></B>.  For more information on the window types, see <a href="../User Interface GuidelinesWindowsWindowsCreation.html#Window%20Types">"Window Types"</a> in the BeUIG. 
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Window Type</TH>
+<TH>Look and Feel</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_TITLED_WINDOW"></A>B_TITLED_WINDOW
+</TT></B></TD>
+<TD><B><TT><A HREF="#B_TITLED_WINDOW_LOOK">B_TITLED_WINDOW_LOOK</A></TT></B> and <B><TT><A HREF="#B_NORMAL_WINDOW_FEEL">B_NORMAL_WINDOW_FEEL</A></TT></B>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DOCUMENT_WINDOW"></A>B_DOCUMENT_WINDOW
+</TT></B></TD>
+<TD><B><TT><A HREF="#B_DOCUMENT_WINDOW_LOOK">B_DOCUMENT_WINDOW_LOOK</A></TT></B> and <B><TT><A HREF="#B_NORMAL_WINDOW_FEEL">B_NORMAL_WINDOW_FEEL</A></TT></B>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MODAL_WINDOW"></A>B_MODAL_WINDOW
+</TT></B></TD>
+<TD><B><TT><A HREF="#B_MODAL_WINDOW_LOOK">B_MODAL_WINDOW_LOOK</A></TT></B> and <B><TT>B_MODAL_APP_WINDOW_FEEL</TT></B>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FLOATING_WINDOW"></A>B_FLOATING_WINDOW
+</TT></B></TD>
+<TD><B><TT><A HREF="#B_FLOATING_WINDOW_LOOK">B_FLOATING_WINDOW_LOOK</A></TT></B> and <B><TT>B_FLOATING_APP_WINDOW_FEEL</TT></B>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BORDERED_WINDOW"></A>B_BORDERED_WINDOW
+</TT></B></TD>
+<TD><B><TT><A HREF="#B_BORDERED_WINDOW_LOOK">B_BORDERED_WINDOW_LOOK</A></TT></B> and <B><TT><A HREF="#B_NORMAL_WINDOW_FEEL">B_NORMAL_WINDOW_FEEL</A></TT></B>.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UNTYPED_WINDOW"></A>B_UNTYPED_WINDOW
+</TT></B></TD>
+<TD>A window of unknown or undefined type.</TD>
+</TABLE>
+<P>
+<A NAME="31792:%20funcName:%20Window%20Flags"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Window"></A>Window
+, 
+<A NAME="Flags"></A>Flags
+</H3>
+<P>
+The window flags (or "user attributes") define miscellaneous aspects of the window's interface, such as whether it can be moved or closed by the user.  You combine the flags that you want and pass them to the BWindow constructor or <B><TT><A HREF="#SetFlags()">SetFlags()</A></TT></B>.  For more information on the window flags, see <a href="../User Interface GuidelinesWindowsWindowsCreation.html#User%20Attributes">"User Attributes"</a>.
+<P>
+The default behavior is the inverse of all these flags&mdash;i.e. a window is normally  movable, closable, resizable, and so on.  However, some window looks and feels cause imply some of these flags.  For example, a modal feel window can't be minimized (hidden).  The <a href="../User Interface GuidelinesWindowsWindowsCreation.html#User%20Attributes">"User Attributes"</a> section lists these implications.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Window Flag</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_MOVABLE"></A>B_NOT_MOVABLE
+</TT></B></TD>
+<TD>Prevents the user from being able to move the window.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_CLOSABLE"></A>B_NOT_CLOSABLE
+</TT></B></TD>
+<TD>Prevents the user from closing the window.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_ZOOMABLE"></A>B_NOT_ZOOMABLE
+</TT></B></TD>
+<TD>Prevents the user from zooming the window. </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_MINIMIZABLE"></A>B_NOT_MINIMIZABLE
+</TT></B></TD>
+<TD>Prevents the user from hiding the window by double-clicking the title tab.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_H_RESIZABLE"></A>B_NOT_H_RESIZABLE
+<br>
+B_NOT_V_RESIZABLE
+<br>
+B_NOT_RESIZABLE</TT></B></TD>
+<TD>Prevents the user from resizing the window horizontally and/or vertically (<B><TT><A HREF="misc.html#B_NOT_RESIZABLE">B_NOT_RESIZABLE</A></TT></B> is the same as the sum of the other two constants).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OUTLINE_RESIZE"></A>B_OUTLINE_RESIZE
+</TT></B></TD>
+<TD>The window draws only the outline of its new dimensions as it's being resized, and doesn't refresh its contents.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WILL_ACCEPT_FIRST_CLICK"></A>B_WILL_ACCEPT_FIRST_CLICK
+</TT></B></TD>
+<TD>Tells a non-active window to process an activating mouse click (the "first" mouse click) as if it were already active.  The <A HREF="View.html#BView">BView</A> that responds to the mouse-down message must activate the window.  By default, the first mouse click in a non-active window activates the window, and then the mouse click event is thrown away.  </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_AVOID_FRONT"></A>B_AVOID_FRONT
+</TT></B></TD>
+<TD>Prevents the window from becoming the frontmost window.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_AVOID_FOCUS"></A>B_AVOID_FOCUS
+</TT></B></TD>
+<TD>Prevents the window from being the target of keyboard events.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NO_WORKSPACE_ACTIVATION"></A>B_NO_WORKSPACE_ACTIVATION
+</TT></B></TD>
+<TD>When a window is first shown, the workspace normally switches to the one in which the window is displayed.  Setting this flag keeps this from happening.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_ANCHORED_ON_ACTIVATE"></A>B_NOT_ANCHORED_ON_ACTIVATE
+</TT></B></TD>
+<TD>Tells the system to bring the window to the current workspace when the window is selected from <B>Deskbar</B>'s window list.  Normally, selecting a window from the list activates the workspace that the window is currently in. </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ASYNCHRONOUS_CONTROLS"></A>B_ASYNCHRONOUS_CONTROLS
+</TT></B></TD>
+<TD>Tells the window to allow controls to run asynchronously.  <I><B>All</I> windows that contain controls should include this flag</B> (it's off by default because of backwards compatibility).</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_QUIT_ON_WINDOW_CLOSE"></A>B_QUIT_ON_WINDOW_CLOSE
+</TT></B></TD>
+<TD>Currently has no effect.</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="Window"></A>Window
+, 
+<A NAME="Workspaces"></A>Workspaces
+</H3>
+<P>
+You tell a window which workspaces to appear through the constructor, or through the <B><TT><A HREF="#SetWorkspaces()">SetWorkspaces()</A></TT></B> function.  In practice, the only two realistic settings are represented by these constants.   
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Workspace Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_CURRENT_WORKSPACE"></A>B_CURRENT_WORKSPACE
+</TT></B></TD>
+<TD>Appear in the current workspace.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ALL_WORKSPACES"></A>B_ALL_WORKSPACES
+</TT></B></TD>
+<TD>Appear in all workspaces.</TD>
+</TABLE>
+ 
+<P>
+<A NAME="38062:%20head2:%20Scripting%20Support"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Scripting%20Support"></A><FONT SIZE=6>S</FONT>cripting <FONT SIZE=6>S</FONT>upport
+</H2>
+<P>
+The BWindow class implements the suite called "suite/vnd.Be-window" consisting of the following messages: 
+<P>
+<H4>
+<A NAME="Window%20Position"></A>Window Position
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../Messages/GeneralMessages.html#B_WINDOW_MOVE_BY">B_WINDOW_MOVE_BY</A></TT></B></TD>
+<TD>Moves the window by the distance specified by the <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B> field "data".</TD>
+<TR>
+<TD><B><TT><A HREF="../Messages/GeneralMessages.html#B_WINDOW_MOVE_TO">B_WINDOW_MOVE_TO</A></TT></B></TD>
+<TD>Moves the window to the position specified by the <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B> field "data".</TD>
+</TABLE>
+<P>
+These two messages can be sent to a BWindow to move the window.
+<P>
+<H4>
+<A NAME="The%20Feel%20Property"></A>The Feel Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the current feel of the window.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the feel of the window.</TD>
+</TABLE>
+<P>
+The "Feel" property represents the workspaces in which the window resides.  The messages are equivalent to manipulating the window with the <B><TT><A HREF="#Feel()">Feel()</A></TT></B> and <B><TT><A HREF="#SetFeel()">SetFeel()</A></TT></B> methods.
+<P>
+<H4>
+<A NAME="The%20Flags%20Property"></A>The Flags Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the current flags of the window.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the window flags.</TD>
+</TABLE>
+<P>
+The "Flags" property represents the window flags.  The messages are equivalent to manipulating the window with the <B><TT><A HREF="Font.html#Flags()">Flags()</A></TT></B> and <B><TT><A HREF="#SetFlags()">SetFlags()</A></TT></B> methods.
+<P>
+<H4>
+<A NAME="The%20Frame%20Property"></A>The Frame Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the window's frame rectangle.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the window's frame rectangle.</TD>
+</TABLE>
+<P>
+The "Frame" property represents the frame rectangle of the window.  The frame is passed as a <A HREF="Rect.html#BRect">BRect</A> (<B><TT>B_RECT_TYPE</TT></B>).
+<P>
+<H4>
+<A NAME="The%20Hidden%20Property"></A>The Hidden Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns <B><TT>true</TT></B> if the window is hidden; <B><TT>false</TT></B> otherwise.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Hides or shows the window.</TD>
+</TABLE>
+<P>
+The "Hidden" property determines the visibility of the window.  The messages are equivalent to manipulating the window with the <B><TT><A HREF="#IsHidden()">IsHidden()</A></TT></B>, <B><TT><A HREF="#Hide()">Hide()</A></TT></B>, and <B><TT><A HREF="#Show()">Show()</A></TT></B> methods with one caveat: nested <B><TT><A HREF="#Hide()">Hide()</A></TT></B> and <B><TT><A HREF="#Show()">Show()</A></TT></B> calls are disabled so that multiple scripting Hide commands may be undone with a single Show.
+<P>
+<H4>
+<A NAME="The%20Look%20Property"></A>The Look Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the current look of the window.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the look of the window.</TD>
+</TABLE>
+<P>
+The "Workspaces" property represents the workspaces in which the window resides.  The messages are equivalent to manipulating the window with the <B><TT><A HREF="#Look()">Look()</A></TT></B> and <B><TT><A HREF="#SetLook()">SetLook()</A></TT></B> methods.
+<P>
+<H4>
+<A NAME="The%20MenuBar%20Property"></A>The MenuBar Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD>any</TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Directs the scripting message to the key menu bar.</TD>
+</TABLE>
+<P>
+The "MenuBar" property pops the current specifier off the specifier stack and then passes the scripting message to the key menu bar.  If no such menu bar is present, then an error is returned.
+<P>
+<H4>
+<A NAME="The%20Minimize%20Property"></A>The Minimize Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Minimizes the window if "data" is <B><TT>true</TT></B>; restores otherwise.</TD>
+</TABLE>
+<P>
+The "Minimize" property controls the whether the window is minimized or not.  The message is equivalent to manipulating the window with the <B><TT><A HREF="#Minimize()">Minimize()</A></TT></B> method.
+<P>
+<H4>
+<A NAME="The%20Title%20Property"></A>The Title Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns a string containing the window title.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the window title.</TD>
+</TABLE>
+<P>
+The "Title" property represents the title of the window.  The messages are equivalent to manipulating the window with the <B><TT><A HREF="#Title()">Title()</A></TT></B> and <B><TT><A HREF="#SetTitle()">SetTitle()</A></TT></B> methods.
+<P>
+<H4>
+<A NAME="The%20View%20Property"></A>The View Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD>any</TD>
+<TD>any</TD>
+<TD>Directs the scripting message to the top view without popping the current specifier.</TD>
+</TABLE>
+<P>
+The "View" property simply redirects all requests to the window's top view without popping the specifier from the stack.
+<P>
+<H4>
+<A NAME="The%20Workspaces%20Property"></A>The Workspaces Property
+</H4>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns int32 bitfield of the workspaces in which the window appears.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Sets the workspaces in which the window appears.</TD>
+</TABLE>
+<P>
+The "Workspaces" property represents the workspaces in which the window resides.  The messages are equivalent to manipulating the window with the <B><TT>Workspaces()</TT></B> and <B><TT><A HREF="#SetWorkspaces()">SetWorkspaces()</A></TT></B> methods.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_frame"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_RECT_TYPE">B_RECT_TYPE</A></TT></B></TD>
+<TD>The frame rectangle.</TD>
+<TR>
+<TD>"_title"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The title of the BWindow.</TD>
+<TR>
+<TD>"_wlook"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The BWindow look.</TD>
+<TR>
+<TD>"_wfeel"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The BWindow feel.</TD>
+<TR>
+<TD>"_type"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The BWindow type (if one exists).</TD>
+<TR>
+<TD>"_flags"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The BWindow flags.</TD>
+<TR>
+<TD>"_wspace"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The workspaces in which the BWindow appears.</TD>
+<TR>
+<TD>"_zoom" 
+<br>
+(array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>The horizontal and vertical zoom limits, if any exist.</TD>
+<TR>
+<TD>"_sizel" 
+<br>
+(array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>The minimum horizontal and vertical and maximum horizontal and vertical size limits, if any exist.</TD>
+<TR>
+<TD>"_pulse"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>The pulse rate, if not the default.</TD>
+<TR>
+<TD>"_views"
+<br>
+(array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>Child BViews.  See 
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields%20[BView]"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields [<FONT SIZE=6>B</FONT><FONT SIZE=6>V</FONT>iew]
+</H2>
+<P>
+ <A HREF="../The%20Media%20Kit/BufferProducer.html#for">for</A>the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> format.  (Deep archive only.)</TD>
+</TABLE>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,411 @@
+<HTML><HEAD><TITLE>The Midi Kit: BSamples</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BSamples"></A>BSamples
+</H1>
+<P>
+Derived from:  (none)
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/midi/Samples.h">be/midi/Samples.h</A>
+<P>
+Library:  libmidi.so
+<P>
+<H6><A HREF="Samples.summary.html"><i>Summary</i></A></H6>
+<P>
+The BSamples class lets you add a stream of audio samples into the General MIDI mix.  The main functionality of the class (such as how you define the sound you want to play, whether it should repeat, what speed it should play at, and so on) is embedded in the <B><TT><A HREF="#Start()">Start()</A></TT></B> function; the class' other functions control and fine-tune the sound as it's playing.  To learn how to use a BSamples object, go to the <B><TT><A HREF="#Start()">Start()</A></TT></B> function.
+<P>
+Theoretically, you can create and play (at the same time) as many BSamples as you want.  In practice, you are limited to the sample voice limit set through BSynth's <B><TT><A HREF="Synth.html#SetVoiceLimits()">SetVoiceLimits()</A></TT></B> function; by default the limit is set to four.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BSamples()"></A>BSamples()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSamples(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new, empty BSamples object.  Also constructs a <A HREF="Synth.html#BSynth">BSynth</A> object and assigns the object to the app-wide <B><TT>be_synth</TT></B> variable (if the object doesn't already exist).  To initialize and use the BSamples object, invoke its <B><TT><A HREF="#Start()">Start()</A></TT></B> function.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, the "samples only" synth mode (B_SAMPLES_ONLY) is broken.  Unfortunately, this is the mode used by the BSamples constructor if it has to create a <B><TT>be_synth</TT></B> object.  The easiest way around this bug is to construct a <A HREF="MidiSynth.html#BMidiSynth">BMidiSynth</A> or <A HREF="MidiSynthFile.html#BMidiSynthFile">BMidiSynthFile</A> object.  If you don't need the object, you can immediately destroy it; the fix is effected by the object's construction. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="~BSamples()"></A>~BSamples()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual<B><TT><FONT  color=000022 size=+1> </TT></B></FONT><B><TT><FONT  color=000022 size=+1>~BSamples()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Stops the object's playback, calls the "exit hook" function (as set by <B><TT><A HREF="#Start()">Start()</A></TT></B>), and destroys the object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="EnableReverb()"></A>EnableReverb()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void<B><TT><FONT  color=000022 size=+1> EnableReverb(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>reverb</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If reverb is true, the object's sound data is sent through the synthesizer's reverberator.  To set the reverberation depth (for all reverberated sound), use <B><TT><A HREF="Synth.html#SetReverb()">BSynth::SetReverb()</A></TT></B>.
+<P>
+<HR>
+<H3>IsPlaying()  see <A HREF="#Stop()">Stop()</A></H3>
+<P>
+<HR>
+<H3>Pause()  see <A HREF="#Stop()">Stop()</A></H3>
+<P>
+<HR>
+<H3>Placement()  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+<HR>
+<H3>Resume()  see <A HREF="#Stop()">Stop()</A></H3>
+<P>
+<HR>
+<H3>SamplingRate()  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+<HR>
+<H3>SetPlacement()  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetSamplingRate()"></A>SetSamplingRate()
+, 
+<A NAME="SamplingRate()"></A>SamplingRate()
+, 
+<A NAME="SetPlacement()"></A>SetPlacement()
+, 
+<A NAME="Placement()"></A>Placement()
+, 
+<A NAME="SetVolume()"></A>SetVolume()
+, 
+<A NAME="Volume()"></A>Volume()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetSamplingRate(</TT></B></FONT>double <I><FONT  color=991122 face=HELVETICA>samplingRate</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+double <B><TT><FONT  color=000022 size=+1>SamplingRate(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetPlacement(</TT></B></FONT>double <I><FONT  color=991122 face=HELVETICA>stereoPan</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+double <B><TT><FONT  color=000022 size=+1>Placement(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetVolume(</TT></B></FONT>double <I><FONT  color=991122 face=HELVETICA>volume</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+double <B><TT><FONT  color=000022 size=+1>Volume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set parameters of the sound data.  They can be called while the sound is playing.  For details of what these parameters mean, and the values that they accept, see the descriptions of the <I><FONT  color=991122 face=HELVETICA>samplingRate</I></FONT>, <I><FONT  color=991122 face=HELVETICA>stereoPan</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>volume</I></FONT> arguments of the <B><TT><A HREF="#Start()">Start()</A></TT></B> function.
+<P>
+<HR>
+<H3>SetVolume()  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Start()"></A>Start()
+, 
+<A NAME="sample_loop_hook"></A>sample_loop_hook
+, 
+<A NAME="sample_exit_hook"></A>sample_exit_hook
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Start(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>samples</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>frameCount</I></FONT>, int16&nbsp;<I><FONT  color=991122 face=HELVETICA>sampleSize, </I></FONT>int16&nbsp;<I><FONT  color=991122 face=HELVETICA>channelCount, </I></FONT>double&nbsp;<I><FONT  color=991122 face=HELVETICA>samplingRate, </I></FONT>int32&nbsp;<I><FONT  color=991122 face=HELVETICA>loopStart, </I></FONT>int32&nbsp;<I><FONT  color=991122 face=HELVETICA>loopEnd, </I></FONT>double&nbsp;<I><FONT  color=991122 face=HELVETICA>volume, </I></FONT>double&nbsp;<I><FONT  color=991122 face=HELVETICA>stereoPan, </I></FONT>int32&nbsp;<I><FONT  color=991122 face=HELVETICA>hookArg, </I></FONT>sample_loop_hook&nbsp;<I><FONT  color=991122 face=HELVETICA>loopHook, </I></FONT>sample_exit_hook&nbsp;<I><FONT  color=991122 face=HELVETICA>exitHook</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+typedef bool (*<B><TT><FONT  color=000022 size=+1>sample_loop_hook</TT></B></FONT>)(int32 <I><FONT  color=991122 face=HELVETICA>arg</I></FONT>)
+<P>
+
+<TR><TD>
+typedef void (*<B><TT><FONT  color=000022 size=+1>sample_exit_hook</TT></B></FONT>)(int32 <I><FONT  color=991122 face=HELVETICA>arg</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>Start()</TT></B> passes in a buffer of audio samples that are immediately played.  The playback is performed by the synthesizer in its BSubscriber thread; the <B><TT>Start()</TT></B> function itself returns immediately.  
+<P>
+The audio data is assumed to be little-endian linear; other parameters of the data (sample size, channel count, etc.) are variable and are declared in the function's arguments.  The arguments are:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>samples</I></FONT> is a pointer to the data itself. 
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>frameCount</I></FONT> is the number of frames of audio data in the buffer.  
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>sampleSize</I></FONT> is the size of a single sample, in bytes.  Currently, the synthesizer only accepts 1- and 2-byte samples.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>channelCount</I></FONT> is the number of channels of data (1 or 2).
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>samplingRate</I></FONT> is the rate at which you want to the data played back, expressed as frames-per-second; for example, if your sound data was sampled at 44.1kHz and you want to play it back at its "native" pitch, you would set <I><FONT  color=991122 face=HELVETICA>samplingRate</I></FONT> to 44100.0.  The range of valid sampling rate values is [0, ~65 kHz].  The sampling rate is independent of the data's channel count and sample size, and is independent of <B><TT>be_synth</TT></B>'s sampling rate.  You can change the object's sampling rate on the fly through <B><TT><A HREF="#SetSamplingRate()">SetSamplingRate()</A></TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>loopStart</I></FONT> and <I><FONT  color=991122 face=HELVETICA>loopEnd</I></FONT> specify the first and last frames that are in the "loop section."  The loop section can be any valid section of frames within the sound data (i.e. [0, <I><FONT  color=991122 face=HELVETICA>frameCount </I></FONT>- 1] inclusive).  Everything up to the beginning of the loop section is the "attack section"; everything after the loop section is the "release section."  When the sound is played, the attack section is heard, then the loop section is repeated until the object is told to <B><TT><A HREF="#Stop()">Stop()</A></TT></B>, or until the "loop hook" function (defined below) returns <B><TT>false</TT></B>, at which point the release section is played.  If you don't want the sound to loop, set these<I><FONT  color=991122 face=HELVETICA> loop...</I></FONT> arguments to 0.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, the release section is automatically faded out over a brief period of time.  If your release section is designed to do a slow fade (for example) you probably won't hear it.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>volume</I></FONT> is an amplitude scalar for this sound.  The volume can also be set through <B><TT><A HREF="#SetVolume()">SetVolume()</A></TT></B>. 
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>stereoPan</I></FONT> locates the sound stereophonically, where -1.0 is hard left, 0.0 is center, and 1.0 is hard right.  Notice that if this is a stereo sound, a <I><FONT  color=991122 face=HELVETICA>stereoPan</I></FONT> value of (say) -1.0 completely attenuates the right channel&mdash;it doesn't "move" the right channel into the left channel. 
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>hookArg</I></FONT> is an arbitrary value that's passed to the <I><FONT  color=991122 face=HELVETICA>loopHook</I></FONT> and <I><FONT  color=991122 face=HELVETICA>exitHook </I></FONT>functions.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>loopHook</I></FONT> is a hook function that's called each time the loop section is about to repeat.  If the function returns <B><TT>true</TT></B>, the loop is, indeed, repeated.  If it returns <B><TT>false</TT></B>, the release section is played and the sound stops.  If you don't supply a <I><FONT  color=991122 face=HELVETICA>loopHook</I></FONT>, the loop is automatically repeated.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>exitHook</I></FONT> is called when the sound is all done playing, regardless of how it stopped (whether through <B><TT><A HREF="#Stop()">Stop()</A></TT></B>, a <I><FONT  color=991122 face=HELVETICA>hookFunc</I></FONT> return of <B><TT>false</TT></B>, or because the BSamples object was deleted).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Stop()"></A>Stop()
+, 
+<A NAME="Pause()"></A>Pause()
+, 
+<A NAME="Resume()"></A>Resume()
+, 
+<A NAME="IsPaused()"></A>IsPaused()
+, 
+<A NAME="IsPlaying()"></A>IsPlaying()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Stop(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Pause(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Resume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsPlaying(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsPaused(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>Stop()</TT></B> tells the object to stop playing its sound data, and invokes the exit function, as set through <B><TT><A HREF="#Start()">Start()</A></TT></B>.
+<P>
+<B><TT>Pause()</TT></B> suspends playback and <B><TT><A HREF="#Resume()">Resume()</A></TT></B> resumes it from where it was paused. 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#Pause()">Pause()</A></TT></B> and <B><TT><A HREF="#Resume()">Resume()</A></TT></B> are backwards.  To pause a sound, call <B><TT><A HREF="#Resume()">Resume()</A></TT></B>.  To resume it, call <B><TT><A HREF="#Pause()">Pause()</A></TT></B>.  Sorry about that.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#IsPlaying()">IsPlaying()</A></TT></B> returns <B><TT>true</TT></B> if the object is currently playing (paused or not).  
+<P>
+<B><TT><A HREF="#IsPaused()">IsPaused()</A> </TT></B>returns <B><TT>true</TT></B> if the sound is currently paused.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>IsPaused()</TT></B> returns <B><TT>true</TT></B> if you've called<B><TT> Pause()</TT></B>.  Thus, since <B><TT>Pause()</TT></B> and <B><TT>Resume()</TT></B> are backwards, the sense of <B><TT>IsPaused()</TT></B> is also backwards.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>Volume()  see <A HREF="#SetSamplingRate()">SetSamplingRate()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

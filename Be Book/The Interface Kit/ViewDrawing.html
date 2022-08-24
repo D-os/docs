@@ -1,0 +1,1124 @@
+<HTML><HEAD><TITLE>The Interface Kit: BView Drawing Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BView%20Drawing%20Functions"></A>BView Drawing Functions
+</H1>
+<P>
+<H6><A HREF="View Drawing Functions.summary.html"><i>Summary</i></A></H6>
+<P>
+The primitive drawing functions are listed in the first part of this section. Other drawing functions (which can be used to create a reusable sequence of primitive drawing functions, to install a default background bitmap into a view, to force drawing or redrawing, and for a few other purposes) are listed immediately following the primitive drawing functions, in <a href="#Other%20Drawing%20Functions">Other Drawing Functions</a>
+<P>
+<A NAME="35782:%20head1:%20Primitive%20Drawing%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Primitive%20Drawing%20Functions"></A><FONT SIZE=6>P</FONT>rimitive <FONT SIZE=6>D</FONT>rawing <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+Below are the primitive drawing functions (those which draw circles, lines, etc.) found in the <A HREF="View.html#BView">BView</A> class.
+<P>
+<HR>
+<H3>
+<A NAME="DrawBitmap()"></A>DrawBitmap()
+, 
+<A NAME="DrawBitmapAsync()"></A>DrawBitmapAsync()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawBitmap(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>image</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawBitmap(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>image</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawBitmap(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>image</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>destination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawBitmap(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>image</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>source</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>destination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawBitmapAsync(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>image</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawBitmapAsync(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>image</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawBitmapAsync(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>image</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>destination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawBitmapAsync(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>image</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>source</I></FONT>, <A HREF="Rect.html#BRect">BRect</A>&nbsp;<I><FONT  color=991122 face=HELVETICA>destination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions place a bitmap <I><FONT  color=991122 face=HELVETICA>image</I></FONT> in the view at the current pen position, at the <I><FONT  color=991122 face=HELVETICA>point</I></FONT> specified, or within the designated <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> rectangle.  The <I><FONT  color=991122 face=HELVETICA>point</I></FONT> and the <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> rectangle are stated in the BView's coordinate system.
+<P>
+If a <I><FONT  color=991122 face=HELVETICA>source</I></FONT> rectangle is given, only that part of the bitmap image is drawn.  Otherwise, the entire bitmap is placed in the view. The <I><FONT  color=991122 face=HELVETICA>source</I></FONT> rectangle is stated in the internal coordinates of the <A HREF="Bitmap.html#BBitmap">BBitmap</A> object.
+<P>
+If the source image is bigger than the destination rectangle, it's scaled to fit.
+<P>
+The two functions differ in only one respect:  <B><TT><A HREF="#DrawBitmap()">DrawBitmap()</A></TT></B> waits for the Application Server to finish rendering the image before it returns.  <B><TT><A HREF="#DrawBitmapAsync()">DrawBitmapAsync()</A></TT></B> doesn't wait; it passes the image to the server and returns immediately.  The latter function can be more efficient in some cases&mdash;for example, you might use an asynchronous function to draw several bitmaps and then call <B><TT><A HREF="#Sync()">Sync()</A></TT></B> to wait for them all to finish rather than wait for each one individually:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;DrawBitmapAsync(bitmapOne, firstPoint);
+&nbsp;&nbsp;&nbsp;DrawBitmapAsync(bitmapTwo, secondPoint);
+&nbsp;&nbsp;&nbsp;DrawBitmapAsync(bitmapThree, thirdPoint);
+&nbsp;&nbsp;&nbsp;Sync();</PRE>
+<P>
+Or, if you can cram some useful work between the time you send the bitmap to the Application Server and the time you need to be sure that it has appeared on-screen, <B><TT><A HREF="#DrawBitmapAsync()">DrawBitmapAsync()</A></TT></B> will free your thread to do that work immediately:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;DrawBitmapAsync(someBitmap, somePoint);
+&nbsp;&nbsp;&nbsp;/* do something else */ 
+&nbsp;&nbsp;&nbsp;Sync();</PRE>
+<P>
+<B>See also:  </B>the "Drawing" section near the beginning of this chapter, the <A HREF="Bitmap.html#BBitmap">BBitmap</A> class, <B><TT><A HREF="#Sync()">Sync()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="DrawChar()"></A>DrawChar()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawChar(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawChar(</TT></B></FONT>char <I><FONT  color=991122 face=HELVETICA>c</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the character <I><FONT  color=991122 face=HELVETICA>c</I></FONT> at the current pen position&mdash;or at the <I><FONT  color=991122 face=HELVETICA>point</I></FONT> specified&mdash;and moves the pen to a position immediately to the right of the character.  This function is equivalent to passing a string of one character to <B><TT><A HREF="#DrawString()">DrawString()</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>point</I></FONT> is specified in the BView's coordinate system.
+<P>
+<B>See also:  <TT><A HREF="#DrawString()">DrawString()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="DrawString()"></A>DrawString()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta&nbsp;*<I>delta</I>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta&nbsp;*<I>delta</I>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta&nbsp;*<I>delta</I>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawString(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;escapement_delta&nbsp;*<I>delta</I>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws the characters encoded in <I><FONT  color=991122 face=HELVETICA>length</I></FONT> bytes of <I><FONT  color=991122 face=HELVETICA>string</I></FONT>&mdash;or, if the number of bytes isn't specified, all the characters in the string, up to the null terminator ('0').  Characters are drawn in the BView's current font.  The font's direction determines whether the string is drawn left-to-right or right-to-left.  Its rotation determines the angle of the baseline (horizontal for an unrotated font).  The spacing mode of the font determines how characters are positioned within the string and the string width.
+<P>
+This function places the characters on a baseline that begins one pixel above the current pen position&mdash;or one pixel above the specified <I><FONT  color=991122 face=HELVETICA>point</I></FONT> in the BView's coordinate system.  It draws the characters to the right (assuming an unrotated font) and moves the pen to the baseline immediately past the characters drawn.  For a left-to-right font, the pen will be in position to draw the next character, as shown below: 
+<P>
+<IMG SRC="art/View1.GIF" ALIGN="bottom">
+<P>
+The characters are drawn in the opposite direction for a right-to-left font, but the pen still moves left-to-right: 
+<P>
+<IMG SRC="art/View2.GIF" ALIGN="bottom">
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The BeOS draws text one pixel above the logical baseline to maintain compatibility with an earlier version of one of our most commonly-used font rasterizers.  This affects both fonts and BShapes representing glyphs (see <B><TT>BFont::GetGlyphShapes()</TT></B>.  To draw text at the right place, add one to the Y coordinate when calling <B><TT><A HREF="ViewGraphicsState.html#MovePenTo()">MovePenTo()</A></TT></B> or specifying a <A HREF="Point.html#BPoint">BPoint</A> at which to begin drawing.
+<P>
+</UL>
+<P>
+For a font that's read from left-to-right, a series of simple <B><TT><A HREF="#DrawString()">DrawString()</A></TT></B> calls (with no <I><FONT  color=991122 face=HELVETICA>point</I></FONT> specified) will produce a continuous string.  For example, these two lines of code,
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;DrawString("tog");
+&nbsp;&nbsp;&nbsp;DrawString("ether");</PRE>
+<P>
+will produce the same result as this one,
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;DrawString("together");</PRE>
+<P>
+except if the spacing mode is <B><TT>B_STRING_SPACING</TT></B>.  Under <B><TT>B_STRING_SPACING</TT></B>, character placements are adjusted keeping the string width constant.  The adjustments are contextually dependent on the string and may therefore differ depending on whether there are two strings ("tog" and "ether") or just one ("together").
+<P>
+If a <I><FONT  color=991122 face=HELVETICA>delta</I></FONT> argument is provided, <B><TT><A HREF="#DrawString()">DrawString()</A></TT></B> adds the additional amounts specified in the <B><TT><A HREF="Font.html#escapement_delta">escapement_delta</A></TT></B> structure to the width of each character.  This structure has two fields:
+<P>
+float <B><TT>nonspace
+<br>
+</TT></B>The amount to add to the width of characters that have visible glyphs (that put ink on the printed page).
+<P>
+float <B><TT>space
+<br>
+</TT></B>The amount to add to the width of characters that have escapements, but don't have visible glyphs (characters that affect the position of surrounding characters but don't put ink on the page).
+<P>
+When drawing to the screen, <B><TT><A HREF="#DrawString()">DrawString()</A></TT></B> uses antialiasing&mdash;unless the BView's font disables it or the font size is large enough (over 1,000.0 points) so that its benefits aren't required.  Antialiasing produces colors at the margins of character outlines that are intermediate between the color of the text (the BView's high color) and the color of the background against which the text is drawn.  When drawing in <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B> mode, antialiasing requires the BView's low color to match the background color.
+<P>
+It's much faster to draw a string in <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B> mode than in any other mode.  If you draw the same string repeatedly in the same location in <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B> mode without erasing, antialiasing will produce different, and worse, results each time as the intermediate color it previously produced is treated as the new background each time.  Antialiasing doesn't produce pleasing results in <B><TT>B_OP_SELECT</TT></B> mode.
+<P>
+This is a graphical drawing function, so any character that doesn't have an escapement or a visible representation (including white space) is replaced by an undefined character that can be drawn (currently an empty box).  This includes all control characters (those with values less than <B><TT><A HREF="misc.html#B_SPACE">B_SPACE</A></TT></B>, 0x20).
+<P>
+<B><TT><A HREF="#DrawString()">DrawString()</A></TT></B> doesn't erase before drawing.
+<P>
+<B>See also:  <TT><A HREF="ViewGraphicsState.html#MovePenBy()">MovePenBy()</A></TT></B>, <B><TT>SetFontName()</TT></B>, the <A HREF="Font.html#BFont">BFont</A> class 
+<P>
+<HR>
+<H3>FillArc()   see <A HREF="#StrokeEllipse()">StrokeEllipse()</A></H3>
+<P>
+<HR>
+<H3>FillBezier()   see <A HREF="#StrokeBezier()">StrokeBezier()</A></H3>
+<P>
+<HR>
+<H3>FillEllipse()   see <A HREF="#StrokeEllipse()">StrokeEllipse()</A></H3>
+<P>
+<HR>
+<H3>FillPolygon()   see <A HREF="#StrokePolygon()">StrokePolygon()</A></H3>
+<P>
+<HR>
+<H3>FillRect()   see <A HREF="#StrokeRect()">StrokeRect()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="FillRegion()"></A>FillRegion()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillRegion(</TT></B></FONT><A HREF="Region.html#BRegion">BRegion</A> *<I><FONT  color=991122 face=HELVETICA>region</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Fills the <I><FONT  color=991122 face=HELVETICA>region</I></FONT> with the pattern specified by <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&mdash;or, if no pattern is specified, with the current high color.  Filling a region is equivalent to filling all the rectangles that define the region.
+<P>
+<B>See also:  </B>the <A HREF="Region.html#BRegion">BRegion</A> class
+<P>
+<HR>
+<H3>FillRoundRect()   see <A HREF="#StrokeRoundRect()">StrokeRoundRect()</A></H3>
+<P>
+<HR>
+<H3>FillTriangle()   see <A HREF="#StrokeTriangle()">StrokeTriangle()</A></H3>
+<P>
+<HR>
+<H3>StrokeEllipse</H3>
+<P>
+<HR>
+<H3>
+<A NAME="StrokeBezier()"></A>StrokeBezier()
+, 
+<A NAME="FillBezier()"></A>FillBezier()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeBezier(</TT></B></FONT>BPoint<A HREF="Point.html#BPoint">StrokeEllipse</A> *<I><FONT  color=991122 face=HELVETICA>controlPoints</I></FONT>, pattern <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT> = <FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillBezier(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>controlPoints</I></FONT>, pattern <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT> = <FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions draw a third degree Bezier curve.  <B><TT><A HREF="#StrokeBezier()">StrokeBezier()</A></TT></B> strokes a line along the path of the curve; the width of the line is determined by the current pen size.  <B><TT><A HREF="#FillBezier()">FillBezier()</A></TT></B> fills in the region defined by the path of the curve and the line joining the two endpoints.
+<P>
+<I><FONT  color=991122 face=HELVETICA>controlPoints</I></FONT> points to an array of the four points for the curve.  Both functions draw using the pattern specified by <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&mdash;or, if no pattern is specified, in the current high color.  Neither function alters the current pen position.
+<P>
+<B>See also:  <TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B>, <B><TT><A HREF="#StrokeRoundRect()">StrokeRoundRect()</A></TT></B> 
+<P>
+<B>See also:  <TT><A HREF="#StrokeEllipse()">StrokeEllipse()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="StrokeEllipse()"></A>StrokeEllipse()
+, 
+<A NAME="FillEllipse()"></A>FillEllipse()
+, 
+<A NAME="StrokeArc()"></A>StrokeArc()
+, 
+<A NAME="FillArc()"></A>FillArc()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeEllipse(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, pattern<I><FONT  color=991122 face=HELVETICA>&nbsp;aPattern</I></FONT> = <FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeEllipse(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>center</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>xRadius</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>yRadius</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillEllipse(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillEllipse(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>center</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>xRadius</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>yRadius</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeArc(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>angle</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>span</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeArc(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>center</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>xRadius</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>yRadius</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>angle</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>span</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillArc(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>angle</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>span</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillArc(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>center</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>xRadius</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>yRadius</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>angle</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>span</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions draw all or part of the ellipse that's inscribed in <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> or that has its  center at <I><FONT  color=991122 face=HELVETICA>center</I></FONT> and has horizontal and vertical radii <I><FONT  color=991122 face=HELVETICA>xRadius</I></FONT> and <I><FONT  color=991122 face=HELVETICA>yRadius</I></FONT>.  The ellipse is always aligned with the x and y axes.  A more flexible curve-drawing mechanism is given by <B><TT><A HREF="#StrokeBezier()">StrokeBezier()</A></TT></B> and <B><TT><A HREF="#FillBezier()">FillBezier()</A></TT></B>. 
+<P>
+<B><TT><A HREF="#StrokeEllipse()">StrokeEllipse()</A></TT></B> strokes a line around the entire perimeter of the ellipse and <B><TT><A HREF="#FillEllipse()">FillEllipse()</A></TT></B> fills the area the ellipse encloses.
+<P>
+<B><TT>StrokeArc()</TT></B> and <B><TT><A HREF="#FillArc()">FillArc()</A></TT></B>  stroke and fill a section of the ellipse, starting at <I><FONT  color=991122 face=HELVETICA>angle</I></FONT> (where 0 &deg; points right along the x-axis) and proceeding (counterclockwise) <I><FONT  color=991122 face=HELVETICA>span</I></FONT> degrees.  In the illustration below, the red arc is the result of <B><TT><A HREF="#StrokeArc()">StrokeArc()</A></TT></B> with an angle of 10 &deg; and span of 235 &deg;; the blue area is the same arc filled through <B><TT><A HREF="#FillArc()">FillArc()</A></TT></B>.  The center of the ellipse (the yellow dot) is drawn for reference.  
+<P>
+<IMG SRC="art/ViewDrawArc.GIF" ALIGN="bottom">
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <I><FONT  color=991122 face=HELVETICA>angle</I></FONT> and <I><FONT  color=991122 face=HELVETICA>span</I></FONT> measurements in fractions of a degree are not supported.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+For the stroking functions, the width of the stroked line is determined by the current pen size.  All functions draw using <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT> or, if no pattern is specified, the current high color.  The functions neither depend on nor alter the current pen position.
+<P>
+<HR>
+<H3>
+<A NAME="StrokeLine()"></A>StrokeLine()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeLine(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>start</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>end</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeLine(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>end</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Draws a straight line between the <I><FONT  color=991122 face=HELVETICA>start</I></FONT> and <I><FONT  color=991122 face=HELVETICA>end</I></FONT> points&mdash;or, if no starting point is given, between the current pen position and <I><FONT  color=991122 face=HELVETICA>end</I></FONT> point&mdash;and leaves the pen at the end point.
+<P>
+This function draws the line using the current pen size and the specified pattern.  If no pattern is specified, the line is drawn in the current high color.  The points are specified in the BView's coordinate system.
+<P>
+<B>See also:  <TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B>, <B><TT><A HREF="#BeginLineArray()">BeginLineArray()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="StrokePolygon()"></A>StrokePolygon()
+, 
+<A NAME="FillPolygon()"></A>FillPolygon()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokePolygon(</TT></B></FONT><A HREF="Polygon.html#BPolygon">BPolygon</A> *<I><FONT  color=991122 face=HELVETICA>polygon</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>isClosed</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokePolygon(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>pointList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>numPoints</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>isClosed</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokePolygon(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>pointList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>numPoints</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>isClosed</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillPolygon(</TT></B></FONT><A HREF="Polygon.html#BPolygon">BPolygon</A> *<I><FONT  color=991122 face=HELVETICA>aPolygon</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillPolygon(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>pointList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>numPoints</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillPolygon(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>pointList</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>numPoints</I></FONT>, <A HREF="Rect.html#BRect">BRect</A>&nbsp;<I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions draw a polygon with an arbitrary number of sides.  <B><TT><A HREF="#StrokePolygon()">StrokePolygon()</A></TT></B> strokes a line around the edge of the polygon using the current pen size.  If a <I><FONT  color=991122 face=HELVETICA>pointList</I></FONT> is specified rather than a <A HREF="Polygon.html#BPolygon">BPolygon</A> object, this function strokes a line from point to point, connecting the first and last points if they aren't identical.  However, if the <I><FONT  color=991122 face=HELVETICA>isClosed</I></FONT> flag is <B><TT>false</TT></B>, <B><TT><A HREF="#StrokePolygon()">StrokePolygon()</A></TT></B> won't stroke the line connecting the first and last points that define the <A HREF="Polygon.html#BPolygon">BPolygon</A> (or the first and last points in the <I><FONT  color=991122 face=HELVETICA>pointList</I></FONT>).  This leaves the polygon open&mdash;making it not appear to be a polygon at all, but rather a series of straight lines connected at their end points.  If <I><FONT  color=991122 face=HELVETICA>isClosed</I></FONT> is <B><TT>true</TT></B>, as it is by default, the polygon will appear to be a polygon, a closed figure.
+<P>
+<B><TT><A HREF="#FillPolygon()">FillPolygon()</A></TT></B> is a simpler function; it fills in the entire area enclosed by the polygon.
+<P>
+Both functions must calculate the frame rectangle of a polygon constructed from a point list&mdash;that is, the smallest rectangle that contains all the points in the polygon.  If you know what this rectangle is, you can make the function somewhat more efficient by passing it as the <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> parameter.
+<P>
+Both functions draw using the specified pattern&mdash;or, if no pattern is specified, in the current high color.  Neither function alters the current pen position.
+<P>
+<B>See also:  <TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B>, the <A HREF="Polygon.html#BPolygon">BPolygon</A> class
+<P>
+<HR>
+<H3>
+<A NAME="StrokeRect()"></A>StrokeRect()
+, 
+<A NAME="FillRect()"></A>FillRect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeRect(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillRect(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions draw a rectangle.  <B><TT><A HREF="#StrokeRect()">StrokeRect()</A></TT></B> strokes a line around the edge of the rectangle; the width of the line is determined by the current pen size.  <B><TT><A HREF="#FillRect()">FillRect()</A></TT></B> fills in the entire rectangle.
+<P>
+Both functions draw using the pattern specified by <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&mdash;or, if no pattern is specified, in the current high color.  Neither function alters the current pen position.
+<P>
+<B>See also:  <TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B>, <B><TT><A HREF="#StrokeRoundRect()">StrokeRoundRect()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="StrokeRoundRect()"></A>StrokeRoundRect()
+, 
+<A NAME="FillRoundRect()"></A>FillRoundRect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeRoundRect(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>xRadius</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>yRadius</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillRoundRect(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>xRadius</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>yRadius</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions draw a rectangle with rounded corners.  The corner arc is one-quarter of an ellipse, where the ellipse would have a horizontal radius equal to <I><FONT  color=991122 face=HELVETICA>xRadius</I></FONT> and a vertical radius equal to <I><FONT  color=991122 face=HELVETICA>yRadius</I></FONT>.
+<P>
+Except for the rounded corners of the rectangle, these functions work exactly like <B><TT><A HREF="#StrokeRect()">StrokeRect()</A></TT></B> and <B><TT><A HREF="#FillRect()">FillRect()</A></TT></B>.
+<P>
+Both functions draw using the pattern specified by <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&mdash;or, if no pattern is specified, in the current high color.  Neither function alters the current pen position.
+<P>
+<B>See also:  <TT><A HREF="#StrokeRect()">StrokeRect()</A></TT></B>, <B><TT><A HREF="#StrokeEllipse()">StrokeEllipse()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="StrokeShape()"></A>StrokeShape()
+, 
+<A NAME="FillShape()"></A>FillShape()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeShape(</TT></B></FONT><A HREF="Shape.html#BShape">BShape</A> *<I><FONT  color=991122 face=HELVETICA>shape</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillShape(</TT></B></FONT><A HREF="Shape.html#BShape">BShape</A> *<I><FONT  color=991122 face=HELVETICA>shape</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions draw a shape.  <B><TT><A HREF="#StrokeShape()">StrokeShape()</A></TT></B> strokes a line around the edge of the shape; the width of the line is determined by the current pen size.  <B><TT><A HREF="#FillShape()">FillShape()</A></TT></B> fills in the entire shape.
+<P>
+Both functions draw using the pattern specified by <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&mdash;or, if no pattern is specified, in the current high color.  Neither function alters the current pen position.
+<P>
+<B>See also:  <TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B>
+<P>
+<HR>
+<H3>
+<A NAME="StrokeTriangle()"></A>StrokeTriangle()
+, 
+<A NAME="FillTriangle()"></A>FillTriangle()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeTriangle(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>firstPoint</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>secondPoint</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>thirdPoint</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>StrokeTriangle(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>firstPoint</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>secondPoint</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>thirdPoint</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillTriangle(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>firstPoint</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>secondPoint</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>thirdPoint</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>FillTriangle(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>firstPoint</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>secondPoint</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>thirdPoint</I></FONT>, <A HREF="Rect.html#BRect">BRect</A>&nbsp;<I><FONT  color=991122 face=HELVETICA>rect</I></FONT>, pattern&nbsp;<I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SOLID_HIGH</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions draw a triangle, a three-sided polygon.  <B><TT><A HREF="#StrokeTriangle()">StrokeTriangle()</A></TT></B> strokes a line the width of the current pen size from the first point to the second, from the second point to the third, then back to the first point.  <B><TT><A HREF="#FillTriangle()">FillTriangle()</A></TT></B> fills in the area that the three points enclose.
+<P>
+Each function must calculate the smallest rectangle that contains the triangle.  If you know what this rectangle is, you can make the function marginally more efficient by passing it as the <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> parameter.
+<P>
+Both functions do their drawing using the pattern specified by <I><FONT  color=991122 face=HELVETICA>aPattern</I></FONT>&mdash;or, if no pattern is specified, in the current high color.  Neither function alters the current pen position.
+<P>
+<B>See also:  <TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B> 
+<P>
+<A NAME="38926:%20head1:%20Textual%20Drawing%20Functions"></A>
+<A NAME="32936:%20head1:%20Other%20Drawing%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Other%20Drawing%20Functions"></A><FONT SIZE=6>O</FONT>ther <FONT SIZE=6>D</FONT>rawing <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+The functions below are <A HREF="View.html#BView">BView</A> drawing-related functions which do not fall under the rubric of Primitive Drawing Functions. The functions in this section can be used to draw bitmaps, to define sequences of more primitive drawing commands, and for some other more specialized purposes.
+<P>
+<HR>
+<H3>AddLine()   see <A HREF="#BeginLineArray()">BeginLineArray()</A></H3>
+<P>
+<HR>
+<H3>AppendToPicture()   see <A HREF="#BeginPicture()">BeginPicture()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="BeginLineArray()"></A>BeginLineArray()
+, 
+<A NAME="AddLine()"></A>AddLine()
+, 
+<A NAME="EndLineArray()"></A>EndLineArray()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>BeginLineArray(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>AddLine(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>start</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>end</I></FONT>, rgb_color <I><FONT  color=991122 face=HELVETICA>color</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>EndLineArray(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions provide a more efficient way of drawing a large number of lines than repeated calls to <B><TT><A HREF="#StrokeLine()">StrokeLine()</A></TT></B>.  <B><TT><A HREF="#BeginLineArray()">BeginLineArray()</A></TT></B> signals the beginning of a series of up to <I><FONT  color=991122 face=HELVETICA>count</I></FONT> <B><TT><A HREF="#AddLine()">AddLine()</A></TT></B> calls; <B><TT><A HREF="#EndLineArray()">EndLineArray()</A></TT></B> signals the end of the series.  Each <B><TT><A HREF="#AddLine()">AddLine()</A></TT></B> call defines a line from the <I><FONT  color=991122 face=HELVETICA>start</I></FONT> point to the <I><FONT  color=991122 face=HELVETICA>end</I></FONT> point, associates it with a particular <I><FONT  color=991122 face=HELVETICA>color</I></FONT>, and adds it to the array.  The lines can each be a different color; they don't have to be contiguous.  When <B><TT><A HREF="#EndLineArray()">EndLineArray()</A></TT></B> is called, all the lines are drawn&mdash;using the then current pen size&mdash;in the order that they were added to the array.
+<P>
+These functions don't change any graphics parameters.  For example, they don't move the pen or change the current high and low colors.  Parameter values that are in effect when <B><TT><A HREF="#EndLineArray()">EndLineArray()</A></TT></B> is called are the ones used to draw the lines.  The high and low colors are ignored in favor of the <I><FONT  color=991122 face=HELVETICA>color</I></FONT> specified for each line.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>count</I></FONT> passed to <B><TT><A HREF="#BeginLineArray()">BeginLineArray()</A></TT></B> is an upper limit on the number of lines that can be drawn.  Keeping the count close to accurate and within reasonable bounds helps the efficiency of the line-array mechanism.  It's a good idea to keep it less than 256; above that number, memory requirements begin to impinge on performance.
+<P>
+<B>See also:  <TT><A HREF="#StrokeLine()">StrokeLine()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="BeginPicture()"></A>BeginPicture()
+, 
+<A NAME="AppendToPicture()"></A>AppendToPicture()
+, 
+<A NAME="EndPicture()"></A>EndPicture()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>BeginPicture(</TT></B></FONT><A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>AppendToPicture(</TT></B></FONT><A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Picture.html#BPicture">BPicture</A> *<B><TT><FONT  color=000022 size=+1>EndPicture(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#BeginPicture()">BeginPicture()</A></TT></B> starts a new "picture recording" session:  Subsequent drawing instructions invoked upon the view are recorded in the <A HREF="Picture.html#BPicture">BPicture</A> argument.  <B><TT>AppendToPicture()</TT></B> does the same, but doesn't clear the argument first&mdash;it tacks additional instructions on to the end of the BPicture.  <B><TT><A HREF="#EndPicture()">EndPicture()</A></TT></B> ends the recording session; it returns the object that was passed to <B><TT>BeginPicture() or AppendToPicture()</TT></B>. 
+<P>
+While it's recording a picture, the <A HREF="View.html#BView">BView</A> doesn't display anything to the screen.  To render the drawing, you use the <B><TT><A HREF="#DrawPicture()">DrawPicture()</A></TT></B> function.  
+<P>
+The picture captures only primitive graphics operations such as <B><TT><A HREF="#DrawString()">DrawString()</A></TT></B>, <B><TT><A HREF="#FillArc()">FillArc()</A></TT></B>, and <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B>.  Furthermore, only instructions performed by this view are recorded; the drawing done by the view's children is not recorded.
+<P>
+A <A HREF="Picture.html#BPicture">BPicture</A> can be recorded only if the <A HREF="View.html#BView">BView</A> is attached to a window.  The window can be off-screen and the view itself can be hidden or reside outside the current clipping region.
+<P>
+<B>See also:  </B>the <A HREF="Picture.html#BPicture">BPicture</A> class, <B><TT><A HREF="#DrawPicture()">DrawPicture()</A></TT></B> 
+<P>
+<HR>
+<H3>ClearViewBitmap() see <A HREF="#SetViewBitmap()">SetViewBitmap()</A></H3>
+<P>
+<HR>
+<H3>ClearViewOverlay() see <A HREF="#SetViewOverlay()">SetViewOverlay()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="CopyBits()"></A>CopyBits()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>CopyBits(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>source</I></FONT>, <A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>destination</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Copies the image displayed in the <I><FONT  color=991122 face=HELVETICA>source</I></FONT> rectangle to the <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> rectangle, where both rectangles lie within the view and are stated in the BView's coordinate system.
+<P>
+If the two rectangles aren't the same size, the source image is scaled to fit.
+<P>
+If not all of the destination rectangle lies within the BView's visible region, the source image is clipped rather than scaled.
+<P>
+If not all of the source rectangle lies within the BView's visible region, only the visible portion is copied.  It's mapped to the corresponding portion of the destination rectangle.  The <A HREF="View.html#BView">BView</A> is then invalidated so its <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function will be called to update the part of the destination rectangle that can't be filled with the source image.
+<P>
+The <A HREF="View.html#BView">BView</A> must be attached to a window.
+<P>
+<HR>
+<H3>
+<A NAME="DrawPicture()"></A>DrawPicture()
+, 
+<A NAME="DrawPictureAsync()"></A>DrawPictureAsync()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawPicture(</TT></B></FONT>const <A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawPicture(</TT></B></FONT>const <A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawPicture(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>filename</I></FONT>, off_t <I><FONT  color=991122 face=HELVETICA>offset</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawPictureAsync(</TT></B></FONT>const <A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawPictureAsync(</TT></B></FONT>const <A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DrawPictureAsync(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>filename</I></FONT>, long <I><FONT  color=991122 face=HELVETICA>offset</I></FONT>, <A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Draws the previously recorded <I><FONT  color=991122 face=HELVETICA>picture</I></FONT> at the current pen position&mdash;or at the specified <I><FONT  color=991122 face=HELVETICA>point</I></FONT> in the BView's coordinate system.  The point or pen position is taken as the coordinate origin for all the drawing instructions recorded in the BPicture.  The last form of the method plays a picture from an arbitrary offset of a file.
+<P>
+The two functions differ in only one respect:  <B><TT><A HREF="#DrawPicture()">DrawPicture()</A></TT></B> waits for the Application Server to finish rendering the image before it returns.  <B><TT><A HREF="#DrawPictureAsync()">DrawPictureAsync()</A></TT></B> doesn't wait; it passes the image to the server and returns immediately.  The latter function can be more efficient in some cases&mdash;for example, you might use an asynchronous function to draw several bitmaps and then call <B><TT><A HREF="#Sync()">Sync()</A></TT></B> to wait for them all to finish rather than wait for each one individually:
+<P>
+Nothing that's done in the <A HREF="Picture.html#BPicture">BPicture</A> can affect anything in the BView's graphics state&mdash;for example, the <A HREF="Picture.html#BPicture">BPicture</A> can't reset the current high color or the pen position.  Conversely, nothing in the BView's current graphics state affects the drawing instructions captured in the picture.  The graphics parameters that were in effect when the picture was recorded determine what the picture looks like.
+<P>
+<B>See also:  <TT><A HREF="#BeginPicture()">BeginPicture()</A></TT></B>, the <A HREF="Picture.html#BPicture">BPicture</A> class
+<P>
+<HR>
+<H3>EndLineArray()   see <A HREF="#BeginLineArray()">BeginLineArray()</A></H3>
+<P>
+<HR>
+<H3>EndPicture()   see <A HREF="#AppendToPicture()">AppendToPicture()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Flush()"></A>Flush()
+, 
+<A NAME="Sync()"></A>Sync()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Flush(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Sync(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions flush the window's connection to the Application Server.  If the <A HREF="View.html#BView">BView</A> isn't attached to a window, <B><TT>Flush()</TT></B> does nothing.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+If the <A HREF="View.html#BView">BView</A> isn't attached to a window, <B><TT>Sync()</TT></B> will crash the application.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+For reasons of efficiency, the window's connection to the Application Server is buffered.  Drawing instructions destined for the server are placed in the buffer and dispatched as a group when the buffer becomes full.  Flushing empties the buffer, sending whatever it contains to the server, even if it's not yet full.
+<P>
+The buffer is automatically flushed on every update.  However, if you do any drawing outside the update mechanism&mdash;in response to interface messages, for example&mdash;you need to explicitly flush the connection so that drawing instructions won't languish in the buffer while waiting for it to fill up or for the next update.  You should also flush it if you call any drawing functions from outside the window's thread.
+<P>
+<B><TT><A HREF="#Flush()">Flush()</A></TT></B> simply flushes the buffer and returns.  It does the same work as BWindow's function of the same name.
+<P>
+<B><TT><A HREF="#Sync()">Sync()</A></TT></B> flushes the connection, then waits until the server has executed the last instruction that was in the buffer before returning.  This alternative to <B><TT><A HREF="#Flush()">Flush()</A></TT></B> prevents the application from getting ahead of the server (ahead of what the user sees on-screen) and keeps both processes synchronized.
+<P>
+It's a good idea, for example, to call <B><TT><A HREF="#Sync()">Sync()</A></TT></B>, rather than <B><TT><A HREF="#Flush()">Flush()</A></TT></B>, after employing BViews to produce a bitmap image (a <A HREF="Bitmap.html#BBitmap">BBitmap</A> object).  <B><TT><A HREF="#Sync()">Sync()</A></TT></B> is the only way you can be sure the image has been completely rendered before you attempt to draw with it.
+<P>
+(Note that all BViews attached to a window share the same connection to the Application Server.  Calling <B><TT><A HREF="#Flush()">Flush()</A></TT></B> or <B><TT><A HREF="#Sync()">Sync()</A></TT></B> for any one of them flushes the buffer for all of them.)
+<P>
+<B>See also:  <TT><A HREF="Window.html#Flush()">BWindow::Flush()</A></TT></B>, the <B><TT><A HREF="Bitmap.html#BBitmap">BBitmap</A></TT></B> class
+<P>
+<HR>
+<H3>
+<A NAME="Invalidate()"></A>Invalidate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Invalidate(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Invalidate(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Invalidates the <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> portion of the view, causing update messages&mdash;and consequently <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> notifications&mdash;to be generated for the <A HREF="View.html#BView">BView</A> and all descendants that lie wholly or partially within the rectangle.  The rectangle is stated in the BView's coordinate system.
+<P>
+If no rectangle is specified, the BView's entire bounds rectangle is invalidated.
+<P>
+Since only BViews that are attached to a window can draw, only attached BViews can be invalidated.
+<P>
+<B>See also:  <TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#GetClippingRegion()">GetClippingRegion()</A></TT></B>, <B><TT><A HREF="Window.html#UpdateIfNeeded()">BWindow::UpdateIfNeeded()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="InvertRect()"></A>InvertRect()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>InvertRect(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Inverts all the colors displayed within the <I><FONT  color=991122 face=HELVETICA>rect</I></FONT> rectangle.  A subsequent <B><TT><A HREF="#InvertRect()">InvertRect()</A></TT></B> call on the same rectangle restores the original colors. This operation can be used to "highlight" a selection made as the user drags the mouse.
+<P>
+The rectangle is stated in the BView's coordinate system.
+<P>
+<B>See also:  <TT>BScreen::ColorMap</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetViewBitmap()"></A>SetViewBitmap()
+, 
+<A NAME="ClearViewBitmap()"></A>ClearViewBitmap()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetViewBitmap(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>bitmap</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>source</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>follow</I></FONT> = <FONT  face=HELVETICA>B_FOLLOW_TOP | B_FOLLOW_LEFT</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>options</I></FONT> = <FONT  face=HELVETICA>B_TILE_BITMAP</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetViewBitmap(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>bitmap</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>follow</I></FONT> = <FONT  face=HELVETICA>B_FOLLOW_TOP | B_FOLLOW_LEFT</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>options</I></FONT> = <FONT  face=HELVETICA>B_TILE_BITMAP</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ClearViewBitmap(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetViewBitmap()</TT></B> sets the background bitmap for the view.  The view bitmap is a background image for the view; all drawing in the view occurs over this bitmap.  The background color is used to fill in the visible regions not covered by the background bitmap.
+<P>
+The background bitmap is passed in <I><FONT  color=991122 face=HELVETICA>bitmap</I></FONT>.  The caller can delete <I><FONT  color=991122 face=HELVETICA>bitmap</I></FONT> after the function returns.
+<P>
+If a <I><FONT  color=991122 face=HELVETICA>source</I></FONT> rectangle is given, only that part of the bitmap is used.  Otherwise, the entire bitmap is used as the background bitmap.  The <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> bitmap, if given, specifies the placement of the bitmap in the view.  It need not be the same size as the <I><FONT  color=991122 face=HELVETICA>source</I></FONT> rectangle; scaling is performed automatically by the application server.  If no <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> is given, the image will be placed, unscaled, at the upper left corner of the view.
+<P>
+<I><FONT  color=991122 face=HELVETICA>follow</I></FONT> determines the behavior of <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> as the view is resized; see the <A HREF="View.html#BView">BView</A> constructor for specifics.  <I><FONT  color=991122 face=HELVETICA>options</I></FONT> specifies additional view options.  Currently, only one option, <B><TT>B_TILE_BITMAP</TT></B>, is defined.  If set, the view bitmap is tiled across the view.
+<P>
+<B><TT>ClearViewBitmap()</TT></B> clears the background bitmap for the view.
+<P>
+<B>See also:  </B>"The Background Bitmap" in the "Drawing" section of this chapter, <B><TT><A HREF="ViewGraphicsState.html#SetViewColor()">SetViewColor()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetViewOverlay()"></A>SetViewOverlay()
+, 
+<A NAME="ClearViewOverlay()"></A>ClearViewOverlay()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetViewOverlay(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>overlay</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>source</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>destination</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgb_color *<I><FONT  color=991122 face=HELVETICA>colorKey</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>follow</I></FONT> = <FONT  face=HELVETICA>B_FOLLOW_TOP | B_FOLLOW_LEFT</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>options</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetViewOverlay(</TT></B></FONT>const <A HREF="Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>bitmap</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgb_color *<I><FONT  color=991122 face=HELVETICA>colorKey</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>follow</I></FONT> = <FONT  face=HELVETICA>B_FOLLOW_TOP | B_FOLLOW_LEFT</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>options</I></FONT> = <FONT  face=HELVETICA>0</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ClearViewOverlay(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetViewOverlay()</TT></B> sets the overlay bitmap for the view.  The overlay bitmap is superimposed on top of the view's contents.  The colorKey is used to determine which color in the overlay should be treated as transparent, allowing the view's contents to be visible.
+<P>
+The overlay bitmap is passed in <I><FONT  color=991122 face=HELVETICA>bitmap</I></FONT>.  The caller can delete <I><FONT  color=991122 face=HELVETICA>bitmap</I></FONT> after the function returns.
+<P>
+If a <I><FONT  color=991122 face=HELVETICA>source</I></FONT> rectangle is given, only that part of the bitmap is used.  Otherwise, the entire bitmap is used as the background bitmap.  The <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> bitmap, if given, specifies the placement of the overlay bitmap in the view.  It need not be the same size as the <I><FONT  color=991122 face=HELVETICA>source</I></FONT> rectangle; scaling is performed automatically by the application server.  If no <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> is given, the image will be placed, unscaled, at the upper left corner of the view.
+<P>
+<I><FONT  color=991122 face=HELVETICA>follow</I></FONT> determines the behavior of <I><FONT  color=991122 face=HELVETICA>destination</I></FONT> as the view is resized; see the <A HREF="View.html#BView">BView</A> constructor for specifics.  <I><FONT  color=991122 face=HELVETICA>options</I></FONT> specifies additional view options.  The same options allowed by <B><TT>SetViewBitmap()</TT></B> are allowed here.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You can't use both a background bitmap and an overlay in the same view.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>ClearViewBitmap()</TT></B> clears the background bitmap for the view.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

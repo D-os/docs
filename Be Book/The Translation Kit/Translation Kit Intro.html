@@ -1,0 +1,99 @@
+<HTML><HEAD><TITLE>The Translation Kit: The Translation Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Translation%20Kit"></A>The Translation Kit
+</H1>
+<P>
+The Translation Kit provides a framework for converting data streams between different media formats.  A word processor, for example, could use the Translation Kit to import and export documents in a variety of formats, including HTML, PostScript, and plain ASCII, while working in its own native format.  
+<P>
+The translation itself is performed by translator add-ons (or, less globally, <A HREF="Translator.html#BTranslator">BTranslator</A> objects).  You can create your own translator add-ons and <A HREF="Translator.html#BTranslator">BTranslator</A> subclasses, or you can use the translators that are supplied by Be and third parties.
+<P>
+The Translation Kit operates on <B><TT>BPositionIO</TT></B> objects and their descendents.  Since <B><TT><A HREF="../The%20Storage%20Kit/File.html#BFile">BFile</A></TT></B> derives from BPositionIO, the Translation Kit is naturally suited for importing and exporting files.  However, it's far more general; the Translation Kit could be used, for example, to translate input directly to or from a network connection, provided a suitable BPositionIO subclass was available.  More importantly, <B><TT>BMemoryIO</TT></B> and <B><TT>BMallocIO</TT></B> can be used to load data directly into or out of memory.
+<P>
+Applications primarily interact with the Translation Kit through the <A HREF="TranslatorRoster.html#BTranslatorRoster">BTranslatorRoster</A> class.  This class encapsulates the functionality required to load and unload translators, discover their capabilities, configure the translators, and execute the translations.
+<P>
+Applications may also use the <A HREF="TranslationUtils.html#BTranslationUtils">BTranslationUtils</A> class, a collection of static utility functions designed to simplify access to the Translation Kit.  Currently the class only defines members for loading bitmap images from files, resources, and general BPositionIO data streams.
+<P>
+<HR>
+<H2>
+<A NAME="Media%20Formats"></A><FONT SIZE=6>M</FONT>edia <FONT SIZE=6>F</FONT>ormats
+</H2>
+<P>
+The Translation Kit identifies a particular media format by a <I>media group</I> and <I>format type</I>.  Media groups identify the class of media represented by a format.  Definitions for the common media groups can be found in <B>&lt;be/translation/TranslatorFormats.h></B>:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Media Group</TH>
+<TH>Constant</TH>
+<TR>
+<TD>Bitmap</TD>
+<TD><B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_BITMAP">B_TRANSLATOR_BITMAP</A></TD>
+<TR>
+<TD></TT></B><A HREF="../The%20Interface%20Kit/Picture.html#BPicture">BPicture</A> data</TD>
+<TD><B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_PICTURE">B_TRANSLATOR_PICTURE</A></TD>
+<TR>
+<TD></TT></B>Text</TD>
+<TD><B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_TEXT">B_TRANSLATOR_TEXT</A></TD>
+<TR>
+<TD></TT></B>Sound</TD>
+<TD><B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_SOUND">B_TRANSLATOR_SOUND</A></TD>
+<TR>
+<TD></TT></B>Standard MIDI</TD>
+<TD><B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_MIDI">B_TRANSLATOR_MIDI</A></TD>
+<TR>
+<TD></TT></B>Streaming media</TD>
+<TD><B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_MEDIA">B_TRANSLATOR_MEDIA</A></TD>
+<TR>
+<TD></TT></B>nothing</TD>
+<TD><B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_NONE">B_TRANSLATOR_NONE</A></TD>
+</TABLE></TT></B>
+<P>
+A format type is a type constant identifying the specific data format, i.e. tiff, aiff, mpeg.  The standard type constants can be found in <B>&lt;be/support/TypeConstants.h></B>.
+<P>
+It is often convenient to define a baseline format to which all translators of a given media group adhere.  An application that understands the baseline format could then use all the translators for that group.  This also simplifies the job of the translator, which minimally needs only to translate between the baseline and the new formats.  Well-behaved translators will always be able to translate to and from the default media format (if one exists for its media group).
+<P>
+The Translation Kit defines a default media format for each existing media group.  They are explained at length in the section <a href="Default Media Formats.html#Default%20Media%20Formats">"Default Media Formats"</a>.  The format type constant for each default format is the same as the media group constant; for example, the format type for the default bitmap format is <B><TT><A HREF="Default%20Media%20Formats.html#B_TRANSLATOR_BITMAP">B_TRANSLATOR_BITMAP</A></TT></B>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,502 @@
+<HTML><HEAD><TITLE>The Game Kit: Global Functions, Constants, and Defined Types</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Global%20Functions,%20Constants,%20and%20Defined%20Types"></A>Global Functions, Constants, and Defined Types
+</H1>
+<P>
+Library:  libgame.so
+<P>
+The Game Kit has just one global function, <B><TT><A HREF="#set_mouse_position()">set_mouse_position()</A></TT></B>.  It should be called only by an application that has control of the screen through a <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A> object.  Otherwise, the kit borrows constants and types defined for graphics card drivers and by other parts of the BeOS.  Those that are not documented for the Interface and Support Kits are listed here.
+<P>
+<HR>
+<H2>
+<A NAME="Global%20Functions"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="set_mouse_position()"></A>set_mouse_position()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;game/WindowScreen.h>">&lt;game/WindowScreen.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>set_mouse_position(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Moves the cursor hot spot to (<I><FONT  color=991122 face=HELVETICA>x</I></FONT>, <I><FONT  color=991122 face=HELVETICA>y</I></FONT>) in the screen coordinate system, where <I><FONT  color=991122 face=HELVETICA>x</I></FONT> is a left-to-right index to a pixel column and <I><FONT  color=991122 face=HELVETICA>y</I></FONT> is a top-to-bottom index to a pixel row.  The origin of the coordinate system is the left top pixel of the display area of the main screen.
+<P>
+This function should be called only while the application has a direct connection to the frame buffer through a <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A> object.
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Control%20Flags"></A>Control Flags
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;add-ons/graphics/GraphicsCard.h>">&lt;add-ons/graphics/GraphicsCard.h></A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_CRT_CONTROL"></A>B_CRT_CONTROL
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GAMMA_CONTROL"></A>B_GAMMA_CONTROL
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FRAME_BUFFER_CONTROL"></A>B_FRAME_BUFFER_CONTROL
+</TT></B> </TD>
+</TABLE>
+<P>
+These flags report the driver's ability to control the CRT display, make gamma corrections, and permit nonstandard configurations of the frame buffer.  Only the last has any meaning for the Game Kit.
+<P>
+<B>See also:  <TT><A HREF="WindowScreen.html#CardInfo()">CardInfo()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="gs_attributes"></A>gs_attributes
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;game/GameSoundDefs.h>">&lt;game/GameSoundDefs.h></A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>Constant</TD>
+<TD>Meaning</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_MAIN_GAIN"></A>B_GS_MAIN_GAIN
+</TT></B> </TD>
+<TD>Main gain control, in decibels.  The main gain doesn't support ramping.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_CD_THROUGH_GAIN"></A>B_GS_CD_THROUGH_GAIN
+</TT></B></TD>
+<TD>Gain on the CD through, in decibels.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_GAIN"></A>B_GS_GAIN
+</TT></B></TD>
+<TD>Gain on the sound, in decibels.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_PAN"></A>B_GS_PAN
+</TT></B> </TD>
+<TD>Pan position of the sound. -1.0 for far left, 0 for middle, 1.0 for far right.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_SAMPLING_RATE"></A>B_GS_SAMPLING_RATE
+</TT></B></TD>
+<TD>Sampling rate in hertz.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_LOOPING"></A>B_GS_LOOPING
+</TT></B></TD>
+<TD>If the attribute's value is nonzero, the sound automatically loops.  If it's 0, the sound plays through just once.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_FIRST_PRIVATE_ATTRIBU"></A>B_GS_FIRST_PRIVATE_ATTRIBU
+TE</TT></B></TD>
+<TD>Beginning of private attribute range</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_FIRST_USER_ATTRIBUTE"></A>B_GS_FIRST_USER_ATTRIBUTE
+</TT></B></TD>
+<TD>Beginning of user attribute range.</TD>
+</TABLE>
+<P>
+These are the various possible game sound attributes.  The range between <B><TT>B_GS_FIRST_PRIVATE_ATTRIBUTE</TT></B> and <B><TT><A HREF="#B_GS_FIRST_USER_ATTRIBUTE">B_GS_FIRST_USER_ATTRIBUTE</A></TT></B> are reserved; if you need custom attributes, use values <B><TT><A HREF="#B_GS_FIRST_USER_ATTRIBUTE">B_GS_FIRST_USER_ATTRIBUTE</A></TT></B> and higher.
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="frame_buffer_info"></A>frame_buffer_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;add-ons/graphics/GraphicsCard.h>">&lt;add-ons/graphics/GraphicsCard.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>bits_per_pixel
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>bytes_per_row
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>width
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>height
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>display_width
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>display_height
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>display_x
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>display_y
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>
+<A NAME="frame_buffer_info"></A>frame_buffer_info
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure is used to report the current configuration of the frame buffer.
+<P>
+<B>See also:  <TT><A HREF="WindowScreen.html#FrameBufferInfo()">FrameBufferInfo()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="graphics_card_hook"></A>graphics_card_hook
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;add-ons/graphics/GraphicsCard.h>">&lt;add-ons/graphics/GraphicsCard.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef void (*<B><TT><FONT  color=000022 size=+1>graphics_card_hook</TT></B></FONT>)(void) 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This is the general type declaration for a graphics card hook function.  Specific hook functions will in fact declare various sets of arguments and all return a <B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> error code rather than <B><TT>void</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="WindowScreen.html#CardHookAt()">CardHookAt()</A></TT></B>, &nbsp;<a href="WScreen.html#Graphics%20Card%20Hook%20Functions%20on%20page18">"Graphics Card Hook Functions" on page18</a> 
+<P>
+<HR>
+<H3>
+<A NAME="graphics_card_info"></A>graphics_card_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;add-ons/graphics/GraphicsCard.h>">&lt;add-ons/graphics/GraphicsCard.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>version</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>id</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<B><TT><FONT  color=000022 size=+1>frame_buffer</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char <B><TT><FONT  color=000022 size=+1>rgba_order</TT></B></FONT>[4];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>bits_per_pixel</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>bytes_per_row</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>width</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;short <B><TT><FONT  color=000022 size=+1>height</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>graphics_card_info</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Drivers use this structure to supply information about themselves and the current configuration of the frame buffer to the Application Server and the <A HREF="WindowScreen.html#BWindowScreen">BWindowScreen</A> class.
+<P>
+<B>See also:  <TT><A HREF="WindowScreen.html#CardInfo()">CardInfo()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="gs_attribute"></A>gs_attribute
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;game/GameSoundDefs.h>">&lt;game/GameSoundDefs.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>gs_attribute</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>attribute</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <B><TT><FONT  color=000022 size=+1>duration</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>value</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}; 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Defines an attribute.  An attribute consists of an <B><TT>attribute</TT></B> number from <B><TT><A HREF="#gs_attributes">gs_attributes</A></TT></B>, a <B><TT>duration</TT></B> indicating the period of time, in microseconds, over which the attribute's change takes effect, and a target <B><TT>value</TT></B>.  Additional <B><TT>flags</TT></B> can be specified for the attribute as well; these vary depending on the attribute.
+<P>
+Currently, there are no flags defined for any of the predefined attributes.
+<P>
+<HR>
+<H3>
+<A NAME="gs_attribute_info"></A>gs_attribute_info
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;game/GameSoundDefs.h>">&lt;game/GameSoundDefs.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>
+<A NAME="gs_attribute_info"></A>gs_attribute_info
+</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>
+<A NAME="gs_attribute_info"></A>attribute
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>
+<A NAME="gs_attribute_info"></A>granularity
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>
+<A NAME="gs_attribute_info"></A>minimum
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>
+<A NAME="gs_attribute_info"></A>maximum
+</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}; 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Describes the possible values the <B><TT>attribute</TT></B> can take.  The <B><TT>granularity</TT></B> field indicates how finely the value of the attribute can be controlled, and <B><TT>minimum</TT></B> and <B><TT>maximum</TT></B> specify the minimum and maximum values the attribute can take on.
+<P>
+<HR>
+<H3>
+<A NAME="gs_audio_format"></A>gs_audio_format
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;game/GameSoundDefs.h>">&lt;game/GameSoundDefs.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>gs_audio_format</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enum <B><TT><FONT  color=000022 size=+1>format</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#B_GS_U8">B_GS_U8</A></TT></B> = 0x11,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#B_GS_S16">B_GS_S16</A></TT></B> = 0x2,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#B_GS_F">B_GS_F</A></TT></B> = 0x24,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#B_GS_S32">B_GS_S32</A></TT></B> = 0x4
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;};
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>frame_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>channel_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>format</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>byte_order</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <B><TT><FONT  color=000022 size=+1>buffer_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}; 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure describes the format of a game sound.  The format enum lists the possible sound sample formats supported by the Game Kit:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>Constant</TD>
+<TD>Meaning</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_U8"></A>B_GS_U8
+</TT></B> </TD>
+<TD>Unsigned 8-bit integer.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_S16"></A>B_GS_S16
+</TT></B></TD>
+<TD>Signed 16-bit integer.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_F"></A>B_GS_F
+</TT></B></TD>
+<TD>Floating-point.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GS_S32"></A>B_GS_S32
+</TT></B></TD>
+<TD>Signed 32-bit integer.</TD>
+</TABLE>
+<P>
+<UL>
+<LI>The <B><TT>
+<A NAME="frame_rate"></A>frame_rate
+</TT></B> indicates how many frames per second of audio should be played.
+<P>
+<LI>The <B><TT>
+<A NAME="channel_count"></A>channel_count
+</TT></B> field indicates the number of audio channels the sound uses.
+<P>
+<LI>The <B><TT>
+<A NAME="format"></A>format
+</TT></B> field, which specifies the format of the audio data to be played must be one of the values declared in the <B><TT>
+<A NAME="format"></A>format
+</TT></B> enum.
+<P>
+<LI>The <B><TT>
+<A NAME="byte_order"></A>byte_order
+</TT></B> field specifies the byte order of the sound to be played.
+<P>
+<LI>The <B><TT>
+<A NAME="buffer_size"></A>buffer_size
+</TT></B> is used to specify how large the audio buffers used to play the sound should be.  You can specify zero if you want the Game Kit to determine an appropriate size for you.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="gs_id"></A>gs_id
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/&lt;game/GameSoundDefs.h>">&lt;game/GameSoundDefs.h></A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef int32 gs_id;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type is used for game sound ID numbers.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

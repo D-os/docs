@@ -1,0 +1,836 @@
+<HTML><HEAD><TITLE>The Interface Kit: BView General Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BView%20General%20Functions"></A>BView General Functions
+</H1>
+<P>
+<H6><A HREF="View General Functions.summary.html"><i>Summary</i></A></H6>
+<P>
+This section describes <A HREF="View.html#BView">BView</A> functionality which is of general use, or which does not fit neatly into any of the other <A HREF="View.html#BView">BView</A> document sections describing the <A HREF="View.html#BView">BView</A> functions.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BView()"></A>BView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BView(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BView(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets up a view with the <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> rectangle, which is specified in the coordinate system of its eventual parent, and assigns the <A HREF="View.html#BView">BView</A> an identifying <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, which can be <B><TT>NULL</TT></B>.
+<P>
+When it's created, a <A HREF="View.html#BView">BView</A> doesn't belong to a window and has no parent.  It's assigned a parent by having another <A HREF="View.html#BView">BView</A> adopt it with the <B><TT><A HREF="Bitmap.html#AddChild()">AddChild()</A></TT></B> function.  If the other view is in a window, the <A HREF="View.html#BView">BView</A> becomes part of that window's view hierarchy.  A <A HREF="View.html#BView">BView</A> can be made a child of the window's top view by calling BWindow's version of the <B><TT><A HREF="Bitmap.html#AddChild()">AddChild()</A></TT></B> function.
+<P>
+When the <A HREF="View.html#BView">BView</A> gains a parent, the values in <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> are interpreted in the parent's coordinate system.  The sides of the view must be aligned on screen pixels.  Therefore, the <I><FONT  color=991122 face=HELVETICA>frame</I></FONT> rectangle should not contain coordinates with fractional values.  Fractional coordinates will be rounded to the first lower whole number (for example 1.2 will be rounded down to 1.0).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT> mask determines the behavior of the view when its parent is resized.  It should combine one constant for horizontal resizing,
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>
+</UL>
+<B><TT><A NAME="B_FOLLOW_LEFT"></A>B_FOLLOW_LEFT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_RIGHT"></A>B_FOLLOW_RIGHT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_LEFT_RI"></A>B_FOLLOW_LEFT_RI
+GHT</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_H_CENT"></A>B_FOLLOW_H_CENT
+ER</TT></B> </TD>
+</TABLE>
+<P>
+with one for vertical resizing:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_FOLLOW_TOP"></A>B_FOLLOW_TOP
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_BOTTOM"></A>B_FOLLOW_BOTTOM
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_TOP_BOTT"></A>B_FOLLOW_TOP_BOTT
+OM</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_V_CENTER"></A>B_FOLLOW_V_CENTER
+</TT></B> </TD>
+</TABLE>
+<P>
+For example, if <B><TT><A HREF="#B_FOLLOW_LEFT">B_FOLLOW_LEFT</A></TT></B> is chosen, the margin between the left side of the view and the left side of its parent will remain constant&mdash;the view will "follow" the parent's left side.  Similarly, if <B><TT><A HREF="#B_FOLLOW_RIGHT">B_FOLLOW_RIGHT</A></TT></B> is chosen, the view will follow the parent's right side.  If <B><TT><A HREF="misc.html#B_FOLLOW_H_CENTER">B_FOLLOW_H_CENTER</A></TT></B> is chosen, the view will maintain a constant relationship to the horizontal center of the parent.
+<P>
+If the constants name opposite sides of the view rectangle&mdash;left and right, or top and bottom&mdash;the view will necessarily be resized in that dimension when the parent is.  For example, <B><TT><A HREF="misc.html#B_FOLLOW_LEFT_RIGHT">B_FOLLOW_LEFT_RIGHT</A></TT></B> means that the margin between the left side of the view and left side of the parent will remain constant, as will the margin between the right side of the view and the right side of the parent.  As the parent is resized horizontally, the child will be resized with it.  Note that <B><TT><A HREF="misc.html#B_FOLLOW_LEFT_RIGHT">B_FOLLOW_LEFT_RIGHT</A></TT></B> is not the same as combining <B><TT><A HREF="#B_FOLLOW_LEFT">B_FOLLOW_LEFT</A></TT></B> and <B><TT>
+<A NAME="B_FOLLOW_RIGHT"></A>B_FOLLOW_RIGHT
+</TT></B>, an illegal move.  The <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT> mask can contain only one horizontal constant and one vertical constant.
+<P>
+If a side is not mentioned in the mask, the distance between that side of the view and the corresponding side of the parent is free to fluctuate.  This may mean that the view will move within its parent's coordinate system when the parent is resized.  <B><TT><A HREF="#B_FOLLOW_RIGHT">B_FOLLOW_RIGHT</A></TT></B> plus <B><TT><A HREF="#B_FOLLOW_BOTTOM">B_FOLLOW_BOTTOM</A></TT></B>, for example, would keep a view from being resized, but the view will move to follow the right bottom corner of its parent whenever the parent is resized.  <B><TT><A HREF="#B_FOLLOW_LEFT">B_FOLLOW_LEFT</A></TT></B> plus <B><TT><A HREF="#B_FOLLOW_TOP">B_FOLLOW_TOP</A></TT></B> prevents a view from being resized <I>and</I> from being moved.
+<P>
+In addition to the constants listed above, there are two other possibilities:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_FOLLOW_ALL_SI"></A>B_FOLLOW_ALL_SI
+DES</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_NONE"></A>B_FOLLOW_NONE
+</TT></B> </TD>
+</TABLE>
+<P>
+<B><TT>B_FOLLOW_ALL_SIDES</TT></B> is a shorthand for <B><TT><A HREF="misc.html#B_FOLLOW_LEFT_RIGHT">B_FOLLOW_LEFT_RIGHT</A></TT></B> and <B><TT>B_FOLLOW_TOP_BOTTOM</TT></B>.  It means that the view will be resized in tandem with its parent, both horizontally and vertically.
+<P>
+<B><TT><A HREF="#B_FOLLOW_NONE">B_FOLLOW_NONE</A></TT></B> behaves just like <B><TT><A HREF="#B_FOLLOW_LEFT">B_FOLLOW_LEFT</A></TT></B>|<B><TT><A HREF="#B_FOLLOW_TOP">B_FOLLOW_TOP</A></TT></B>; the view maintains the same position in its parent's coordinate system, but not in the screen coordinate system.
+<P>
+Typically, a parent view is resized because the user resizes the window it's in.  When the window is resized, the top view is too.  Depending on how the <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT> flag is set for the top view's children and for the descendants of its children, automatic resizing can cascade down the view hierarchy.  A view can also be resized programmatically by the <B><TT><A HREF="#ResizeTo()">ResizeTo()</A></TT></B> and <B><TT><A HREF="#ResizeBy()">ResizeBy()</A></TT></B> functions.
+<P>
+The resizing mode can be changed after construction with the <B><TT><A HREF="#SetResizingMode()">SetResizingMode()</A></TT></B> function.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> mask determines what kinds of notifications the <A HREF="View.html#BView">BView</A> will receive.  It can be any combination of the following constants:
+<P>
+<B><TT><A NAME="B_WILL_DRAW"></A>B_WILL_DRAW
+<br>
+</TT></B>Indicates that the <A HREF="View.html#BView">BView</A> does some drawing of its own and therefore can't be ignored when the window is updated.  If this flag isn't set, the <A HREF="View.html#BView">BView</A> won't receive update notifications&mdash;its <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function won't be called&mdash;and it won't be erased to its background view color if the color is other than white.
+<P>
+<B><TT><A NAME="B_PULSE_NEEDED"></A>B_PULSE_NEEDED
+<br>
+</TT></B>Indicates that the <A HREF="View.html#BView">BView</A> should receive <B><TT><A HREF="TextView.html#Pulse()">Pulse()</A></TT></B> notifications.
+<P>
+<B><TT><A NAME="B_FRAME_EVENTS"></A>B_FRAME_EVENTS
+<br>
+</TT></B>Indicates that the <A HREF="View.html#BView">BView</A> should receive <B><TT><A HREF="Box.html#FrameResized()">FrameResized()</A></TT></B> and <B><TT><A HREF="Window.html#FrameMoved()">FrameMoved()</A></TT></B> notifications when its frame rectangle changes&mdash;typically as a result of the automatic resizing behavior described above.  <B><TT><A HREF="Box.html#FrameResized()">FrameResized()</A></TT></B> is called when the dimensions of the view change; <B><TT><A HREF="Window.html#FrameMoved()">FrameMoved()</A></TT></B> is called when the position of its left top corner in its parent's coordinate system changes.
+<P>
+<B><TT><A NAME="B_FULL_UPDATE_ON_RESIZE"></A>B_FULL_UPDATE_ON_RESIZE
+<br>
+</TT></B>Indicates that the entire view should be updated when it's resized.  If this flag isn't set, only the portions that resizing adds to the view will be included in the clipping region.  This doesn't affect the view's children; their own flags determine when updates will occur.
+<P>
+<B><TT><A NAME="B_NAVIGABLE"></A>B_NAVIGABLE
+<br>
+</TT></B>Indicates that the <A HREF="View.html#BView">BView</A> can become the focus view for keyboard actions.  This flag makes it possible for the user to navigate to the view and put it in focus by pressing the Tab key.  See "Keyboard Navigation" at the beginning of this chapter. 
+<P>
+<B><TT><A NAME="B_NAVIGABLE_JUMP"></A>B_NAVIGABLE_JUMP
+<br>
+</TT></B>Marks the position of a group of views for keyboard navigation.  By pressing Control-Tab, the user can jump from group to group.  The focus lands on the first <A HREF="View.html#BView">BView</A> in the group that has the <B><TT><A HREF="#B_NAVIGABLE">B_NAVIGABLE</A></TT></B> flag set.  This may be the same <A HREF="View.html#BView">BView</A> that has the <B><TT><A HREF="#B_NAVIGABLE_JUMP">B_NAVIGABLE_JUMP</A></TT></B> marker, or the <B><TT><A HREF="#B_NAVIGABLE_JUMP">B_NAVIGABLE_JUMP</A></TT></B> <A HREF="View.html#BView">BView</A> may be the parent of a group of <B><TT><A HREF="#B_NAVIGABLE">B_NAVIGABLE</A></TT></B> views.
+<P>
+<B><TT><A NAME="B_SUBPIXEL_PRECISE"></A>B_SUBPIXEL_PRECISE
+<br>
+</TT></B>Instructs the rendering methods to use subpixel precision when drawing. If you don't set this flag, coordinates are rounded to the nearest unit.
+<P>
+If none of these constants apply, <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> can be <B><TT>NULL</TT></B>.  The flags can be reset after construction with the <B><TT><A HREF="#SetFlags()">SetFlags()</A></TT></B> function.
+<P>
+<B>See also:  <TT><A HREF="#SetResizingMode()">SetResizingMode()</A></TT></B>, <B><TT><A HREF="#SetFlags()">SetFlags()</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Handler.html#SetName()">BHandler::SetName()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BView()"></A>~BView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BView()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees all memory the <A HREF="View.html#BView">BView</A> allocated, and ensures that each of the BView's descendants in the view hierarchy is also destroyed.
+<P>
+It's an error to delete a <A HREF="View.html#BView">BView</A> while it remains attached to a window.  Call <B><TT><A HREF="Bitmap.html#RemoveChild()">RemoveChild()</A></TT></B> or <B><TT>RemoveSelf()</TT></B> before using the <B><TT>delete</TT></B> operator.
+<P>
+<B>See also:  <TT><A HREF="Bitmap.html#RemoveChild()">RemoveChild()</A></TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new <A HREF="View.html#BView">BView</A> object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the message doesn't contain archived data for a <A HREF="View.html#BView">BView</A>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Bounds()"></A>Bounds()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>Bounds(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the BView's bounds rectangle.  
+<P>
+<HR>
+<H3>
+<A NAME="ConvertToParent()"></A>ConvertToParent()
+, 
+<A NAME="ConvertFromParent()"></A>ConvertFromParent()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>ConvertToParent(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>localPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertToParent(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>localPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>ConvertToParent(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>localRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertToParent(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>localRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>ConvertFromParent(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>parentPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertFromParent(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>parentPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>ConvertFromParent(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>parentRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertFromParent(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>parentRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions convert points and rectangles to and from the coordinate system of the BView's parent.  <B><TT><A HREF="#ConvertToParent()">ConvertToParent()</A></TT></B> converts <I><FONT  color=991122 face=HELVETICA>localPoint</I></FONT> or <I><FONT  color=991122 face=HELVETICA>localRect</I></FONT> from the BView's coordinate system to the coordinate system of its parent BView.  <B><TT><A HREF="#ConvertFromParent()">ConvertFromParent()</A></TT></B> does the opposite; it converts <I><FONT  color=991122 face=HELVETICA>parentPoint</I></FONT> or <I><FONT  color=991122 face=HELVETICA>parentRect</I></FONT> from the coordinate system of the BView's parent to the BView's own coordinate system.
+<P>
+If the point or rectangle is passed by value, the function returns the converted value.  If a pointer is passed, the conversion is done in place.
+<P>
+Both functions fail if the <A HREF="View.html#BView">BView</A> isn't attached to a window.
+<P>
+<B>See also:  <TT><A HREF="#ConvertToScreen()">ConvertToScreen()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ConvertToScreen()"></A>ConvertToScreen()
+, 
+<A NAME="ConvertFromScreen()"></A>ConvertFromScreen()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>ConvertToScreen(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>localPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertToScreen(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>localPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>ConvertToScreen(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>localRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertToScreen(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>localRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>ConvertFromScreen(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>screenPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertFromScreen(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>screenPoint</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>ConvertFromScreen(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>screenRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ConvertFromScreen(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> *<I><FONT  color=991122 face=HELVETICA>screenRect</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#ConvertToScreen()">ConvertToScreen()</A></TT></B> converts <I><FONT  color=991122 face=HELVETICA>localPoint</I></FONT> or <I><FONT  color=991122 face=HELVETICA>localRect</I></FONT> from the BView's coordinate system to the global screen coordinate system.  <B><TT><A HREF="#ConvertFromScreen()">ConvertFromScreen()</A></TT></B> makes the opposite conversion; it converts <I><FONT  color=991122 face=HELVETICA>screenPoint</I></FONT> or <I><FONT  color=991122 face=HELVETICA>screenRect</I></FONT> from the screen coordinate system to the BView's local coordinate system.
+<P>
+If the point or rectangle is passed by value, the function returns the converted value.  If a pointer is passed, the conversion is done in place.
+<P>
+The screen coordinate system has its origin, (0.0,&nbsp;0.0), at the left top corner of the main screen.
+<P>
+Neither function will work if the <A HREF="View.html#BView">BView</A> isn't attached to a window.
+<P>
+<B>See also:  <TT><A HREF="Window.html#ConvertToScreen()">BWindow::ConvertToScreen()</A></TT></B>, <B><TT><A HREF="#ConvertToParent()">ConvertToParent()</A></TT></B> 
+<P>
+<HR>
+<H3>Flags()   see <A HREF="#SetFlags()">SetFlags()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Frame()"></A>Frame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>Frame(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the BView's frame rectangle.  The frame rectangle is first set by the <A HREF="View.html#BView">BView</A> constructor and is altered only when the view is moved or resized.  It's stated in the coordinate system of the BView's parent.   
+<P>
+<HR>
+<H3>
+<A NAME="Hide()"></A>Hide()
+, 
+<A NAME="Show()"></A>Show()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Hide(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Show(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions hide a view and show it again.
+<P>
+<B><TT><A HREF="#Hide()">Hide()</A></TT></B> makes the view invisible without removing it from the view hierarchy.  The visible region of the view will be empty and the <A HREF="View.html#BView">BView</A> won't receive update messages.  If the <A HREF="View.html#BView">BView</A> has children, they also are hidden.
+<P>
+<B><TT><A HREF="#Show()">Show()</A></TT></B> unhides a view that had been hidden.  This function doesn't guarantee that the view will be visible to the user; it merely undoes the effects of <B><TT><A HREF="#Hide()">Hide()</A></TT></B>.  If the view didn't have any visible area before being hidden, it won't have any after being shown again (given the same conditions).
+<P>
+Calls to <B><TT><A HREF="#Hide()">Hide()</A></TT></B> and <B><TT><A HREF="#Show()">Show()</A></TT></B> can be nested.  For a hidden view to become visible again, the number of <B><TT><A HREF="#Hide()">Hide()</A></TT></B> calls must be matched by an equal number of <B><TT><A HREF="#Show()">Show()</A></TT></B> calls.
+<P>
+However, <B><TT><A HREF="#Show()">Show()</A></TT></B> can only undo a previous <B><TT><A HREF="#Hide()">Hide()</A></TT></B> call on the same view.  If the view became hidden when <B><TT><A HREF="#Hide()">Hide()</A></TT></B> was called to hide the window it's in or to hide one of its ancestors in the view hierarchy, calling <B><TT><A HREF="#Show()">Show()</A></TT></B> on the view will have no effect.  For a view to come out of hiding, its window and all its ancestor views must be unhidden.
+<P>
+<B><TT><A HREF="#Hide()">Hide()</A></TT></B> and <B><TT><A HREF="#Show()">Show()</A></TT></B> can affect a view before it's attached to a window.  The view will reflect its proper state (hidden or not) when it becomes attached.  Views are created in an unhidden state.
+<P>
+<B>See also:  <TT><A HREF="Window.html#Hide()">BWindow::Hide()</A></TT></B>, <B><TT><A HREF="#IsHidden()">IsHidden()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="IsFocus()"></A>IsFocus()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsFocus(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the <A HREF="View.html#BView">BView</A> is the current focus view for its window, and <B><TT>false</TT></B> if it's not.  The focus view changes as the user chooses one view to work in and then another&mdash;for example, as the user moves from one text field to another when filling out an on-screen form.  The change is made programmatically through the <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> function.
+<P>
+<B>See also:  <TT><A HREF="Window.html#CurrentFocus()">BWindow::CurrentFocus()</A></TT></B>, <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="IsHidden()"></A>IsHidden()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsHidden(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the view has been hidden by the <B><TT><A HREF="#Hide()">Hide()</A></TT></B> function, and <B><TT>false</TT></B> otherwise.
+<P>
+This function returns <B><TT>true</TT></B> whether <B><TT><A HREF="#Hide()">Hide()</A></TT></B> was called to hide the <A HREF="View.html#BView">BView</A> itself, to hide an ancestor view, or to hide the BView's window.  When a window is hidden, all its views are hidden with it.  When a <A HREF="View.html#BView">BView</A> is hidden, all its descendants are hidden with it.
+<P>
+If the view has no visible region&mdash;perhaps because it lies outside its parent's frame rectangle or is obscured by a window in front&mdash;this function may nevertheless return <B><TT>false</TT></B>.  It reports only whether the <B><TT><A HREF="#Hide()">Hide()</A></TT></B> function has been called to hide the view, hide one of the view's ancestors in the view hierarchy, or hide the window where the view is located.
+<P>
+If the <A HREF="View.html#BView">BView</A> isn't attached to a window, <B><TT><A HREF="#IsHidden()">IsHidden()</A></TT></B> returns the state that it will assume when it becomes attached.  By default, views are not hidden.
+<P>
+<B>See also:  <TT><A HREF="#Hide()">Hide()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="IsPrinting()"></A>IsPrinting()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsPrinting(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the <A HREF="View.html#BView">BView</A> is being asked to draw for the printer, and <B><TT>false</TT></B> if the drawing it produces will be rendered on-screen (or if the <A HREF="View.html#BView">BView</A> isn't being asked to draw at all).
+<P>
+This function's result is only reliable when called from within <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> or <B><TT>DrawChildren()</TT></B> to determine whether the drawing it does is destined for the printer or the screen.  When drawing to the printer, the <A HREF="View.html#BView">BView</A> may choose  different parameters&mdash;such as fonts, bitmap images, or colors&mdash;than when drawing to the screen.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+You should avoid calling this function from outside <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> and <B><TT>DrawChildren()</TT></B>; however, if you absolutely have to do it, lock the view first.  Failure to do so may bring up the debugger&mdash;if not in BeOS 5, it may in future versions of BeOS.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  </B>the <A HREF="PrintJob.html#BPrintJob">BPrintJob</A> class, <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> , <B><TT>DrawChildren()
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="LeftTop()"></A>LeftTop()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>LeftTop(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the coordinates of the left top corner of the view&mdash;the smallest <I>x</I> and <I>y</I> coordinate values within the bounds rectangle.
+<P>
+<B>See also:  <TT>BRect::LeftTop()</TT></B>, <B><TT><A HREF="#Bounds()">Bounds()</A></TT></B> 
+<P>
+<HR>
+<H3>Origin()   see <A HREF="#SetOrigin()">SetOrigin()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="ResizeBy()"></A>ResizeBy()
+, 
+<A NAME="ResizeTo()"></A>ResizeTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ResizeBy(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ResizeTo(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions resize the view, without moving its left and top sides.  <B><TT><A HREF="#ResizeBy()">ResizeBy()</A></TT></B> adds <I><FONT  color=991122 face=HELVETICA>horizontal</I></FONT> coordinate units to the width of the view and <I><FONT  color=991122 face=HELVETICA>vertical</I></FONT> units to the height.  <B><TT><A HREF="#ResizeTo()">ResizeTo()</A></TT></B> makes the view <I><FONT  color=991122 face=HELVETICA>width</I></FONT> units wide and <I><FONT  color=991122 face=HELVETICA>height</I></FONT> units high.  Both functions adjust the right and bottom components of the frame rectangle accordingly.
+<P>
+Since a BView's frame rectangle must be aligned on screen pixels, only integral values should be passed to these functions.  Values with fractional components will be rounded to the nearest whole integer.
+<P>
+If the <A HREF="View.html#BView">BView</A> is attached to a window, these functions cause its parent view to be updated, so the <A HREF="View.html#BView">BView</A> is immediately displayed in its new size.  If it doesn't have a parent or isn't attached to a window, these functions merely alter its frame and bounds rectangles.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+If the view isn't attached to a window, its frame and bounds rectangles are adjusted, but its children, if any, don't get corresponding adjustments.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B>See also:  <TT><A HREF="Box.html#FrameResized()">FrameResized()</A></TT></B>, <B><TT><A HREF="Window.html#MoveBy()">MoveBy()</A></TT></B>, <B><TT><A HREF="Rect.html#Width()">BRect::Width()</A></TT></B>, <B><TT><A HREF="#Frame()">Frame()</A></TT></B> 
+<P>
+<HR>
+<H3>ResizingMode()   see <A HREF="#SetResizingMode()">SetResizingMode()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetFlags()"></A>SetFlags()
+, 
+<A NAME="Flags()"></A>Flags()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetFlags(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>mask</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>Flags(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the flags that inform the Application Server about the kinds of notifications the <A HREF="View.html#BView">BView</A> should receive.  The <I><FONT  color=991122 face=HELVETICA>mask</I></FONT> set by <B><TT><A HREF="#SetFlags()">SetFlags()</A></TT></B> and the return value of <B><TT><A HREF="#Flags()">Flags()</A></TT></B> is formed from combinations of the following constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_WILL_DRAW </TD>
+<TR>
+<TD>B_FULL_UPDATE_ON_RESIZE </TD>
+<TR>
+<TD>B_FRAME_EVENTS </TD>
+<TR>
+<TD>B_PULSE_NEEDED </TD>
+<TR>
+<TD>B_NAVIGABLE</TD>
+<TR>
+<TD>B_NAVIGABLE_JUMP </TD>
+<TR>
+<TD>B_SUBPIXEL_PRECISE</TD>
+</TABLE></TT></B>
+<P>
+The flags are first set when the <A HREF="View.html#BView">BView</A> is constructed; they're explained in the description of the <A HREF="View.html#BView">BView</A> constructor.  The mask can be 0.
+<P>
+To set just one of the flags, combine it with the current setting:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myView->SetFlags(Flags() | B_FRAME_EVENTS);</PRE>
+<P>
+<B>See also:  </B>the <A HREF="View.html#BView">BView</A> constructor, <B><TT><A HREF="#SetResizingMode()">SetResizingMode()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetOrigin()"></A>SetOrigin()
+, 
+<A NAME="Origin()"></A>Origin()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetOrigin(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>pt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetOrigin(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>Origin(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets and retrieves the local origin of the BView's coordinate system.
+<P>
+The actual origin used by the Application Server is the sum of the local origin (as set by this method) and the origins stored on the state stack (properly scaled).
+<P>
+<HR>
+<H3>
+<A NAME="SetResizingMode()"></A>SetResizingMode()
+, 
+<A NAME="ResizingMode()"></A>ResizingMode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetResizingMode(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>ResizingMode(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the BView's automatic resizing mode.  The resizing mode is first set when the <A HREF="View.html#BView">BView</A> is constructed.  The various possible modes are explained where the constructor is described.
+<P>
+<B>See also:  </B>the <A HREF="View.html#BView">BView</A> constructor, <B><TT><A HREF="#SetFlags()">SetFlags()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SetViewCursor()"></A>SetViewCursor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetViewCursor(</TT></B></FONT>const <A HREF="../The%20Application%20Kit/Cursor.html#BCursor">BCursor</A> *<I><FONT  color=991122 face=HELVETICA>cursor</I></FONT>, bool sync=<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets the specified <I><FONT  color=991122 face=HELVETICA>cursor</I></FONT> as the view's cursor; while the mouse is inside the view, this cursor will be displayed (unless of course the cursor is hidden or obscured).
+<P>
+If <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> is <B><TT>true</TT></B>, the Application Server will be synchronized by this call, forcing the change to take place immediately.  If <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> is <B><TT>false</TT></B>, the change will take place when the Application Server naturally gets to the change in its queue of pending requests.
+<P>
+<HR>
+<H3>Show()   see <A HREF="#Hide()">Hide()</A></H3>
+<P>
+<HR>
+<H3>Sync()   see <A HREF="ViewDrawing.html#Flush()">Flush()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Window()"></A>Window()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Window.html#BWindow">BWindow</A> *<B><TT><FONT  color=000022 size=+1>Window(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="Window.html#BWindow">BWindow</A> to which the <A HREF="View.html#BView">BView</A> belongs, or <B><TT>NULL</TT></B> if the <A HREF="View.html#BView">BView</A> isn't attached to a window.  This function returns the same object that <B><TT><A HREF="../The%20Application%20Kit/Handler.html#Looper()">Looper()</A></TT></B> (inherited from the <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> class) does&mdash;except that <B><TT><A HREF="#Window()">Window()</A></TT></B> returns it more specifically as a pointer to a <A HREF="Window.html#BWindow">BWindow</A> and <B><TT><A HREF="../The%20Application%20Kit/Handler.html#Looper()">Looper()</A></TT></B> returns it more generally as a pointer to a BLooper. 
+<P>
+<B>See also:  <TT><A HREF="../The%20Application%20Kit/Handler.html#Looper()">BHandler::Looper()</A></TT></B> in the Application Kit, <B><TT><A HREF="Bitmap.html#AddChild()">AddChild()</A></TT></B>, <B><TT><A HREF="Window.html#AddChild()">BWindow::AddChild()</A></TT></B>, <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B> 
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

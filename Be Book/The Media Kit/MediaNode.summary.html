@@ -1,0 +1,268 @@
+<HTML><HEAD><TITLE>BMediaNode Summary</TITLE></HEAD><BODY BGCOLOR=#ffffff><A HREF="MediaNode.html">
+<P>
+<HR>
+<H1>BMediaNode Summary</H1>
+<P>
+</A>
+<P>
+<HR>
+<H2>
+<A NAME="Function%20Summary"></A><FONT SIZE=6>F</FONT>unction <FONT SIZE=6>S</FONT>ummary
+</H2>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Function</TH>
+<TH>Description</TH>
+<TR>
+<TD><A HREF="MediaNode.html#Acquire()">Acquire()</A></TD>
+<TD>Returns a reference to the node</TD>
+<TR>
+<TD><A HREF="MediaNode.html#AddNodeKind()">AddNodeKind()</A></TD>
+<TD>Adds a kind to the set of kinds supported by the node</TD>
+<TR>
+<TD><A HREF="MediaNode.html#AddOn()">AddOn()</A></TD>
+<TD>Returns the BMediaAddOn that instantiated the node</TD>
+<TR>
+<TD><A HREF="MediaNode.html#AddTimer()">AddTimer()</A></TD>
+<TD>Hook: implement to remember a time that should be reported</TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_BUFFER_CONSUMER">B_BUFFER_CONSUMER</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_BUFFER_PRODUCER">B_BUFFER_PRODUCER</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_CONTROLLABLE">B_CONTROLLABLE</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Constants">Constants</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Constructor and Destructor">Constructor and Destructor</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#ControlPort()">ControlPort()</A></TD>
+<TD>Hook: return the port_id of the node's control port</TD>
+<TR>
+<TD><A HREF="MediaNode.html#Creating Your Own Node">Creating Your Own Node</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_DECREASE_PRECISION">B_DECREASE_PRECISION</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_DECREASE_PRECISION">B_DECREASE_PRECISION</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#DeleteHook()">DeleteHook()</A></TD>
+<TD>Hook: called when the node is to be deleted</TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_DROP_DATA">B_DROP_DATA</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_DROP_DATA">B_DROP_DATA</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_ENTITY_INTERFACE">B_ENTITY_INTERFACE</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_FILE_INTERFACE">B_FILE_INTERFACE</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Function Summary">Function Summary</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#GetNodeAttributes()">GetNodeAttributes()</A></TD>
+<TD>Hook: implement to return the node's attributes</TD>
+<TR>
+<TD><A HREF="MediaNode.html#HandleBadMessage()">HandleBadMessage()</A></TD>
+<TD>Copes with messages the node doesn't understand</TD>
+<TR>
+<TD><A HREF="MediaNode.html#HandleMessage()">HandleMessage()</A></TD>
+<TD>Hook: dispatch a Media Kit message</TD>
+<TR>
+<TD><A HREF="MediaNode.html#Hook Functions">Hook Functions</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#ID()">ID()</A></TD>
+<TD>Returns the node's ID</TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_INCREASE_LATENCY">B_INCREASE_LATENCY</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_INCREASE_LATENCY">B_INCREASE_LATENCY</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Kinds()">Kinds()</A></TD>
+<TD>Returns a bit mask indicating what interfaces the node implements</TD>
+<TR>
+<TD><A HREF="MediaNode.html#BMediaNode">BMediaNode</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#BMediaNode()">BMediaNode()</A></TD>
+<TD>Constructor</TD>
+<TR>
+<TD><A HREF="MediaNode.html#~BMediaNode">~BMediaNode</A></TD>
+<TD>Destructor</TD>
+<TR>
+<TD><A HREF="MediaNode.html#Member Functions">Member Functions</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Name()">Name()</A></TD>
+<TD>Returns the node's name</TD>
+<TR>
+<TD><A HREF="MediaNode.html#Negotiating a Connection">Negotiating a Connection</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#NewChangeTag()">NewChangeTag()</A></TD>
+<TD>Returns a new change tag</TD>
+<TR>
+<TD><A HREF="MediaNode.html#Node()">Node()</A></TD>
+<TD>Returns a reference to the node for use when calling BMediaRoster</TD>
+<TR>
+<TD><A HREF="MediaNode.html#NodeRegistered()">NodeRegistered()</A></TD>
+<TD>Hook: called when the node is registered with the Media Kit</TD>
+<TR>
+<TD><A HREF="MediaNode.html#NodeStopped()">NodeStopped()</A></TD>
+<TD>Informs interested parties when you've finished handling a stop request</TD>
+<TR>
+<TD><A HREF="MediaNode.html#node_error">node_error</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_NODE_FAILED_PREROLL">B_NODE_FAILED_PREROLL</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_NODE_FAILED_SEEK">B_NODE_FAILED_SEEK</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_NODE_FAILED_SET_RUN_MODE">B_NODE_FAILED_SET_RUN_MODE</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_NODE_FAILED_SET_TIME_SOURCE_FO">B_NODE_FAILED_SET_TIME_SOURCE_FO</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_NODE_FAILED_START">B_NODE_FAILED_START</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_NODE_FAILED_STOP">B_NODE_FAILED_STOP</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_NODE_FAILED_TIME_WARP">B_NODE_FAILED_TIME_WARP</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_NODE_IN_DISTRESS">B_NODE_IN_DISTRESS</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#node_kind">node_kind</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#node_kind">node_kind</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_OFFLINE">B_OFFLINE</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_OFFLINE">B_OFFLINE</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_PHYSICAL_INPUT">B_PHYSICAL_INPUT</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_PHYSICAL_OUTPUT">B_PHYSICAL_OUTPUT</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Preroll()">Preroll()</A></TD>
+<TD>Hook: gives the node a chance to prepare the media for use</TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_RECORDING">B_RECORDING</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_RECORDING">B_RECORDING</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Realtime Allocators and Thread Locking">Realtime Allocators and Thread Locking</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Release()">Release()</A></TD>
+<TD>Releases the node</TD>
+<TR>
+<TD><A HREF="MediaNode.html#ReportError()">ReportError()</A></TD>
+<TD>Transmits an error notification to anyone that's watching</TD>
+<TR>
+<TD><A HREF="MediaNode.html#RequestCompleted()">RequestCompleted()</A></TD>
+<TD>Hook: called when requests have been completed or have failed</TD>
+<TR>
+<TD><A HREF="MediaNode.html#RunMode()">RunMode()</A></TD>
+<TD>Returns the node's run_mode</TD>
+<TR>
+<TD><A HREF="MediaNode.html#run_mode">run_mode</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#run_mode">run_mode</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Seek()">Seek()</A></TD>
+<TD>Hook: seeks to the specified time in the media</TD>
+<TR>
+<TD><A HREF="MediaNode.html#SetRunMode()">SetRunMode()</A></TD>
+<TD>Hook: sets the node's run mode</TD>
+<TR>
+<TD><A HREF="MediaNode.html#SetTimeSource()">SetTimeSource()</A></TD>
+<TD>Hook: specifies the time source the node should be synchronized to</TD>
+<TR>
+<TD><A HREF="MediaNode.html#Special Considerations">Special Considerations</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#Start()">Start()</A></TD>
+<TD>Hook: specifies a time at which the node should start</TD>
+<TR>
+<TD><A HREF="MediaNode.html#Stop()">Stop()</A></TD>
+<TD>Hook: stops the node</TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_SYSTEM_MIXER">B_SYSTEM_MIXER</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#TimeSource()">TimeSource()</A></TD>
+<TD>Returns the BTimeSource to which the node is slaved</TD>
+<TR>
+<TD><A HREF="MediaNode.html#TimeWarp()">TimeWarp()</A></TD>
+<TD>Hook: informs the node of a sudden change in its time source's time</TD>
+<TR>
+<TD><A HREF="MediaNode.html#B_TIME_SOURCE">B_TIME_SOURCE</A></TD>
+<TD></TD>
+<TR>
+<TD><A HREF="MediaNode.html#TimerExpired()">TimerExpired()</A></TD>
+<TD>Notify interested parties when a notify point is reached</TD>
+<TR>
+<TD><A HREF="MediaNode.html#WaitForMessage()">WaitForMessage()</A></TD>
+<TD>Waits for the given amount of time, or until a message is received.</TD>
+</TABLE>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

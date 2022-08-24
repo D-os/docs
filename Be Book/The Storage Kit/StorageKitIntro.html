@@ -1,0 +1,87 @@
+<HTML><HEAD><TITLE>The Storage Kit: The Storage Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Storage%20Kit"></A>The Storage Kit
+</H1>
+<P>
+The Storage Kit is a set of C++ classes and C functions that let you access the file system; in particular, the kit lets you...
+<P>
+<LI>navigate the file hierarchy
+<P>
+<LI>read and write files
+<P>
+<LI>monitor changes to specific files (the Node Monitor)
+<P>
+<LI>ask for a set of files based on their characteristics (queries and attributes)
+<P>
+</UL>
+<P>
+The basic functionality of the kit&mdash;such as reading and writing files&mdash;is also provided by the Be-supported POSIX functions (<B><TT>open()</TT></B>, <B><TT>read()</TT></B>, <B><TT>write()</TT></B>, <B><TT>close()</TT></B>, and so on) such that if you don't want to use the Storage Kit, you don't have to.  But keep in mind that the Storage Kit's classes are <I>not</I> covers for POSIX functions.  The POSIX functions and the Storage Kit classes are separate branches that dissolve into the same implementation&mdash;the one isn't implemented in terms of the other.  POSIX is straight C, so it avoids the C++ overhead; but language efficiency aside, the POSIX functions aren't innately faster than the Storage Kit class functions.  
+<P>
+The Storage Kit includes some additional C functions (beyond the standard POSIX implementation) so that almost everything that can be done from the C++ level can also be done in C, and vice versa.  There are a few exceptions, notably these two:
+<P>
+<UL>
+<LI>You can't create a file system index from the C++ classes.
+<P>
+<LI>You can't create a live query with the C functions.
+<P>
+</UL>
+<P>
+The next few sections provide some basic Storage Kit concepts, but most of the interesting stuff is in the class descriptions.  The C functions that "imitate" the C++ layer are described at the end of the chapter.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The standard POSIX functions are not documented in this book.  Refer to an authorized POSIX pamphlet if you're interested in learning more about these functions.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

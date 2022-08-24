@@ -1,0 +1,177 @@
+<HTML><HEAD><TITLE>The Application Kit: BCursor</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BCursor"></A>BCursor
+</H1>
+<P>
+Derived from:  public <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Cursor.h">be/app/Cursor.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Cursor.summary.html"><i>Summary</i></A></H6>
+<P>
+You can use a BCursor to represent a mouse cursor as an object instead of as a block of pixel data; this can be more convenient in some situations.  Also, if you want to call <B><TT><A HREF="Application.html#SetCursor()">BApplication::SetCursor()</A></TT></B> without forcing an immediate sync of the Application Server, you have to use a BCursor.
+<P>
+The default BCursors are <B><TT>B_CURSOR_SYSTEM_DEFAULT</TT></B> for the hand cursor and <B><TT>B_CURSOR_I_BEAM</TT></B> for the I-beam text editing cursor.
+<P>
+<A NAME="Cursor%20Data%20Format"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Cursor%20Data%20Format"></A>Cursor Data Format
+</H3>
+<P>
+<UL>
+<LI>The first four bytes of cursor data give information about the cursor:
+<P>
+<LI>Byte 1: <I>Size in pixels-per-side</I>.  Cursors are always square; currently, only 16-by-16 cursors are allowed.
+<P>
+<LI>Byte 2:  <I>Color depth in bits-per-pixel</I>.  Currently, only one-bit monochrome is allowed.
+<P>
+<LI>Bytes 3&amp;4:  <I>Hot spot coordinates</I>.  Given in "cursor coordinates" where (0,0) is the upper left corner of the cursor grid, byte 3 is the hot spot's y coordinate, and byte 4 is its x coordinate.  The hot spot is a single pixel that's "activated" when the user clicks the mouse.  To push a button, for example, the hot spot must be within the button's bounds.
+<P>
+<LI>Next comes an array of pixel color data.  Pixels are specified from left to right in rows starting at the top of the image and working downward.  The size of an array element is the depth of the image.  In one-bit depth...
+<P>
+<LI>the 16x16 array fits in 32 bytes.  
+<P>
+<LI>1 is black and 0 is white.
+<P>
+<LI>Then comes the pixel transparency bitmask, given left-to-right and top-to-bottom.  1 is opaque, 0 is transparent.  Transparency only applies to white pixels&mdash;black pixels are always opaque.  
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BCursor()"></A>BCursor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BCursor(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>cursorData</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BCursor(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the new cursor object.  If you specify a non-<B><TT>NULL</TT></B> value for <I><FONT  color=991122 face=HELVETICA>cursorData</I></FONT>, the cursor is initialized with the specified cursor data.
+<P>
+If you specify a <B><TT>NULL</TT></B> value for <I><FONT  color=991122 face=HELVETICA>cursorData</I></FONT>, the cursor is useless; since this class doesn't currently provide a means of setting the cursor data once the object is instantiated, you're out of luck, so why bother?
+<P>
+BCursor doesn't currently implement archiving, so you shouldn't use the second form.
+<P>
+<HR>
+<H3>
+<A NAME="~BCursor()"></A>~BCursor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BCursor()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Releases any resources used by the cursor.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Not currently implemented; always returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="Application.html#Archive()">Archive()</A></TT></B>  
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

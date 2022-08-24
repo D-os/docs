@@ -1,0 +1,344 @@
+<HTML><HEAD><TITLE>The Interface Kit: BPopUpMenu</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BPopUpMenu"></A>BPopUpMenu
+</H1>
+<P>
+Derived from:  public <A HREF="Menu.html#BMenu">BMenu</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/PopUpMenu.h">be/interface/PopUpMenu.h</A>
+<P>
+Library:  libbe.so 
+<P>
+<H6><A HREF="PopUpMenu.summary.html"><i>Summary</i></A></H6>
+<P>
+A BPopUpMenu is a menu that's typically used in isolation, rather than as part of an extensive menu hierarchy.  By default, it operates in radio mode&mdash;the last item selected by the user, and only that item, is marked in the menu.
+<P>
+A menu of this kind can be used to choose one from a set of mutually exclusive states&mdash;to pick a paper size or paragraph style, for example.  It shouldn't be used to group different kinds of choices (as other menus may), nor should it include items that initiate actions rather than set states, except in certain well-defined cases.
+<P>
+A pop-up menu can be used in any of three ways:
+<P>
+<UL>
+<LI>It can be controlled by a <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> object, often one that contains just a single item.  The <A HREF="MenuBar.html#BMenuBar">BMenuBar</A>, in effect, functions as a button that pops up a list.  The label of the marked item in the list can be displayed as the label of the controlling item in the BMenuBar.  In this way, the <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> is able to show the current state of the hidden menu.  When this is the case, the menu pops up so its marked item is directly over the controlling item.
+<P>
+<LI>A BPopUpMenu can also be controlled by a view other than a BMenuBar.  It might be associated with a particular image the view displays, for example, and appear over the image when the user moves the cursor there and presses the mouse button.  Or it might be associated with the view as a whole and come up under the cursor wherever the cursor happens to be. When the view is notified of a mouse-down event, it calls BPopUpMenu's <B><TT><A HREF="#Go()">Go()</A></TT></B> function to show the menu on-screen.
+<P>
+<LI>The BPopUpMenu might also be controlled by a particular mouse button, typically the secondary mouse button.  When the user presses the button, the menu appears at the location of the cursor.  Instead of passing responsibility for the mouse-down event to a <A HREF="View.html#BView">BView</A>, the <A HREF="Window.html#BWindow">BWindow</A> would intercept it and place the menu on-screen.
+<P>
+</UL>
+<P>
+Other than <B><TT><A HREF="#Go()">Go()</A></TT></B> (and the constructor), this class implements no functions that you ever need to call from application code.  In all other respects, a BPopUpMenu can be treated like any other BMenu.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BPopUpMenu()"></A>BPopUpMenu()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPopUpMenu(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>radioMode</I></FONT> = <FONT  face=HELVETICA>true</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>labelFromMarked</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;menu_layout&nbsp;<I><FONT  color=991122 face=HELVETICA>layout</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_ITEMS_IN_COLUMN</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPopUpMenu(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BPopUpMenu object.  If the object is added to a <A HREF="MenuBar.html#BMenuBar">BMenuBar</A>, its <I><FONT  color=991122 face=HELVETICA>name</I></FONT> also becomes the initial label of its controlling item (just as for other BMenus).
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>labelFromMarked</I></FONT> flag is <B><TT>true</TT></B> (as it is by default), the label of the controlling item will change to reflect the label of the item that the user last selected.  In addition, the menu will operate in radio mode (regardless of the value passed as the <I><FONT  color=991122 face=HELVETICA>radioMode</I></FONT> flag).  When the menu pops up, it will position itself so that the marked item appears directly over the controlling item in the BMenuBar.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>labelFromMarked</I></FONT> is <B><TT>false</TT></B>, the menu pops up so that its first item is over the controlling item.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>radioMode</I></FONT> flag is <B><TT>true</TT></B> (as it is by default), the last item selected by the user will always be marked.  In this mode, one and only one item within the menu can be marked at a time.  If <I><FONT  color=991122 face=HELVETICA>radioMode</I></FONT> is <B><TT>false</TT></B>, items aren't automatically marked or unmarked.
+<P>
+However, the <I><FONT  color=991122 face=HELVETICA>radioMode</I></FONT> flag has no effect unless the <I><FONT  color=991122 face=HELVETICA>labelFromMarked</I></FONT> flag is <B><TT>false</TT></B>.  As long as <I><FONT  color=991122 face=HELVETICA>labelFromMarked</I></FONT> is <B><TT>true</TT></B>, radio mode will also be <B><TT>true</TT></B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>layout</I></FONT> of the items in a BPopUpMenu can be either <B><TT><A HREF="Menu.html#B_ITEMS_IN_ROW">B_ITEMS_IN_ROW</A></TT></B> or the default <B><TT><A HREF="Menu.html#B_ITEMS_IN_COLUMN">B_ITEMS_IN_COLUMN</A></TT></B>.  It should never be <B><TT><A HREF="Menu.html#B_ITEMS_IN_MATRIX">B_ITEMS_IN_MATRIX</A></TT></B>.  The menu is resized so that it exactly fits the items that are added to it.
+<P>
+The new BPopUpMenu is empty; you add items to it by calling BMenu's <B><TT><A HREF="OutlineListView.html#AddItem()">AddItem()</A></TT></B> function.
+<P>
+<B>See also:  <TT><A HREF="Menu.html#SetRadioMode()">BMenu::SetRadioMode()</A></TT></B>, <B><TT><A HREF="Menu.html#SetLabelFromMarked()">BMenu::SetLabelFromMarked()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BPopUpMenu()"></A>~BPopUpMenu()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BPopUpMenu()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Does nothing.  The <A HREF="Menu.html#BMenu">BMenu</A> destructor is sufficient to clean up after a BPopUpMenu.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BPopUpMenu object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message doesn't contain data for a <A HREF="#BPopUpMenu">BPopUpMenu</A>, this function returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="Menu.html#Archive()">BMenu::Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Archive()"></A>Archive()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Archive(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>deep</I></FONT> = <FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Calls the inherited version of <B><TT><A HREF="#Archive()">Archive()</A></TT></B> and stores the BPopUpMenu in the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A></TT></B>, <B><TT><A HREF="#Instantiate()">Instantiate()</A></TT></B> static function 
+<P>
+<HR>
+<H3>
+<A NAME="Go()"></A>Go()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="MenuItem.html#BMenuItem">BMenuItem</A> *<B><TT><FONT  color=000022 size=+1>Go(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>screenPoint</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>deliversMessage</I></FONT> = <FONT  face=HELVETICA>false</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>openAnyway</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>asynchronous</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<A HREF="MenuItem.html#BMenuItem">BMenuItem</A> *<B><TT><FONT  color=000022 size=+1>Go(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>screenPoint</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>deliversMessage</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>openAnyway</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A>&nbsp;<I><FONT  color=991122 face=HELVETICA>clickToOpenRect</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;<I><FONT  color=991122 face=HELVETICA>asynchronous</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Places the pop-up menu on-screen so that its left top corner is located at <I><FONT  color=991122 face=HELVETICA>screenPoint</I></FONT> in the screen coordinate system.  If the <I><FONT  color=991122 face=HELVETICA>asynchronous</I></FONT> flag is <B><TT>true</TT></B>, <B><TT><A HREF="#Go()">Go()</A></TT></B> returns right away; the return value is <B><TT>NULL</TT></B>.  Otherwise, it doesn't return until the user dismisses the menu from the screen.  If the user invoked an item in the menu, it returns a pointer to the item.  If no item was invoked, it returns <B><TT>NULL</TT></B>.
+<P>
+<B><TT><A HREF="#Go()">Go()</A></TT></B> is typically called from within the <B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B> function of a BView.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::MouseDown(BPoint point)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    BMenuItem *selected;
+&nbsp;&nbsp;&nbsp;    BMessage *copy;
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;    ConvertToScreen(&amp;point);
+&nbsp;&nbsp;&nbsp;    selected = myPopUp->Go(point);
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;    if ( selected ) {
+&nbsp;&nbsp;&nbsp;        BLooper *looper;
+&nbsp;&nbsp;&nbsp;        BHandler *target = selected->Target(&amp;looper);
+&nbsp;&nbsp;&nbsp;        looper->PostMessage(selected->Message(), target);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="#Go()">Go()</A></TT></B> operates in two modes:
+<P>
+<UL>
+<LI>If the <I><FONT  color=991122 face=HELVETICA>deliversMessage</I></FONT> flag is <B><TT>true</TT></B>, the BPopUpMenu works just like a menu that's controlled by a BMenuBar.  When the user invokes an item in the menu, the item posts a message to its target.
+<P>
+<LI>If the <I><FONT  color=991122 face=HELVETICA>deliversMessage</I></FONT> flag is <B><TT>false</TT></B>, a message is not posted.  Invoking an item doesn't automatically accomplish anything.  It's up to the application to look at the returned <A HREF="MenuItem.html#BMenuItem">BMenuItem</A> and decide what to do.  It can mimic the behavior of other menus and post the message&mdash;as shown in the example above&mdash;or it can take some other course of action.
+<P>
+</UL>
+<P>
+<B><TT><A HREF="#Go()">Go()</A></TT></B> always puts the pop-up menu on-screen, but ordinarily keeps it there only as long as the user holds a mouse button down.  When the user releases the button, the menu is hidden and <B><TT><A HREF="#Go()">Go()</A></TT></B> returns.  However, the <I><FONT  color=991122 face=HELVETICA>openAnyway</I></FONT> flag and the <I><FONT  color=991122 face=HELVETICA>clickToOpenRect</I></FONT> arguments can alter this behavior so that the menu will stay open even when the user releases the mouse button (or even if a mouse button was never down).  It will take another user action&mdash;such as invoking an item in the menu or clicking elsewhere&mdash;to dismiss the menu.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>openAnyway</I></FONT> flag is <B><TT>true</TT></B>, <B><TT><A HREF="#Go()">Go()</A></TT></B> keeps the menu on-screen even if no mouse buttons are held down.  This permits a user to open and operate a pop-up menu from the keyboard.  If <I><FONT  color=991122 face=HELVETICA>openAnyway</I></FONT> is <B><TT>false</TT></B>, mouse actions determine whether the menu stays on-screen.
+<P>
+If the user has the click-to-open menu preference turned on and releases the mouse button while the cursor lies inside the <I><FONT  color=991122 face=HELVETICA>clickToOpenRect</I></FONT> rectangle, <B><TT><A HREF="#Go()">Go()</A></TT></B> interprets the action as clicking to open the menu and keeps it on-screen.  If the cursor is outside the rectangle when the mouse button goes up, the menu is removed from the screen and <B><TT><A HREF="#Go()">Go()</A></TT></B> returns.  The rectangle should be stated in the screen coordinate system.
+<P>
+Once <B><TT>Go()</TT></B> returns, your application should delete the BPopUpMenu object.
+<P>
+<B>See also:  <TT>BMenuItem::SetMessage()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ScreenLocation()"></A>ScreenLocation()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="Point.html#BPoint">BPoint</A> <B><TT><FONT  color=000022 size=+1>ScreenLocation(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Determines where the pop-up menu should appear on-screen (when it's being run automatically, not by <B><TT><A HREF="#Go()">Go()</A></TT></B>).  As explained in the description of the class constructor, this largely depends on whether the label of the superitem changes to reflect the item that's currently marked in the menu.  The point returned is stated in the screen coordinate system.
+<P>
+This function is called only for BPopUpMenus that have been added to a menu hierarchy (a BMenuBar).  You should not call it to determine the point to pass to <B><TT><A HREF="#Go()">Go()</A></TT></B>.  However, you can override it to change where a customized pop-up menu defined in a derived class appears on-screen when it's controlled by a BMenuBar.
+<P>
+<B>See also:  <TT><A HREF="Menu.html#SetLabelFromMarked()">BMenu::SetLabelFromMarked()</A></TT></B>, <B><TT><A HREF="Menu.html#ScreenLocation()">BMenu::ScreenLocation()</A></TT></B>, the BPopUpMenu constructor 
+<P>
+<HR>
+<H3>
+<A NAME="SetAsyncAutoDestruct()"></A>SetAsyncAutoDestruct()
+, 
+<A NAME="AsyncAutoDestruct()"></A>AsyncAutoDestruct()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetAsyncAutoDestruct(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>state</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>AsyncAutoDestruct(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const<B><TT><FONT  color=000022 size=+1>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetAsyncAutoDestruct()">SetAsyncAutoDestruct()</A></TT></B> lets you specify whether you want BPopUpMenu to automatically delete its <A HREF="Menu.html#BMenu">BMenu</A> when the pop-up menu closes.  If you want the <A HREF="Menu.html#BMenu">BMenu</A> to be deleted, specify true for state.
+<P>
+<B><TT><A HREF="#AsyncAutoDestruct()">AsyncAutoDestruct()</A></TT></B> returns the current state of the flag.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

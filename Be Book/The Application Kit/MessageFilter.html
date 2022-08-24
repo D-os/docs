@@ -1,0 +1,416 @@
+<HTML><HEAD><TITLE>The Application Kit: BMessageFilter</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMessageFilter"></A>BMessageFilter
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/MessageFilter.h">be/app/MessageFilter.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="MessageFilter.summary.html"><i>Summary</i></A></H6>
+<P>
+A BMessageFilter is a message-screening function that you "attach" to a <A HREF="Looper.html#BLooper">BLooper</A> or BHandler.  The message filter sees messages just before they're dispatched (i.e. just before <B><TT><A HREF="Looper.html#DispatchMessage()">BLooper::DispatchMessage()</A></TT></B>),  and can modify or reject the message, change the message's designated handler, or whatever else it wants to do&mdash;the implementation of the filter function isn't restricted.  
+<P>
+To define a message filter, you have to provide a message-filtering function.  You do this by implementing the <B><TT><A HREF="#Filter()">Filter()</A></TT></B> hook function in a BMessageFilter subclass, or by supplying a <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> function to the BMessageFilter constructor.  Only one filter function per object is called.  If you implement <B><TT><A HREF="#Filter()">Filter()</A></TT></B> <I>and</I> provide a <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> function, the <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> will win.
+<P>
+To attach a message filter to a looper, call <B><TT>BLooper::AddCommonFilter()</TT></B>.  To add it to a handler, call <B><TT><A HREF="Handler.html#AddFilter()">BHandler::AddFilter()</A></TT></B>.  Looper filters see all incoming messages; handler filters see only those messages that are targetted for that particular handler.
+<P>
+A <A HREF="Looper.html#BLooper">BLooper</A> or <A HREF="Handler.html#BHandler">BHandler</A> can have more than one message filter.  Furthermore, a looper can have two sets of filters:  a looper set and a handler set (keep in mind that <A HREF="Looper.html#BLooper">BLooper</A> is derived from BHandler).  Looper filters are applied before handler filters.
+<P>
+A BMessageFilter object can be assigned to only one <A HREF="Handler.html#BHandler">BHandler</A> or <A HREF="Looper.html#BLooper">BLooper</A> at a time.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+The BMessageFilter class is intended to be used as part of the system-defined messaging system.  If you try to use one outside this system, your results may not be what you expect. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#Filter()">Filter()</A></TT></B>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<A NAME="17208:%20funcNameFirst:%20BMessageFilter()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="BMessageFilter()"></A>BMessageFilter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessageFilter(<A HREF="#message_delivery">message_delivery</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>delivery</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#message_source">message_source</A></TT></B> <I><FONT  color=991122 face=HELVETICA>source</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B>&nbsp;<I><FONT  color=991122 face=HELVETICA>command</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> <I><FONT  color=991122 face=HELVETICA>filter</I></FONT>&nbsp;=&nbsp;<B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessageFilter(<A HREF="#message_delivery">message_delivery</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>delivery</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#message_source">message_source</A></TT></B> <I><FONT  color=991122 face=HELVETICA>source</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> <I><FONT  color=991122 face=HELVETICA>filter</I></FONT>&nbsp;=&nbsp;<B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessageFilter(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></FONT>&nbsp;<I><FONT  color=991122 face=HELVETICA>command</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> <I><FONT  color=991122 face=HELVETICA>filter</I></FONT>&nbsp;=&nbsp;<B><TT>NULL</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessageFilter(const</TT></B></FONT> <B><TT><A HREF="#BMessageFilter">BMessageFilter</A></TT></B> &amp;<I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessageFilter(const</TT></B></FONT> <B><TT><A HREF="#BMessageFilter">BMessageFilter</A></TT></B> *<I><FONT  color=991122 face=HELVETICA>object</I></FONT><B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates and returns a new BMessageFilter.  The first three arguments define the types of messages that the object wants to see:
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>delivery</I></FONT> specifies how the message must arrive:  drag-and-drop (<B><TT><A HREF="misc.html#B_DROPPED_DELIVERY">B_DROPPED_DELIVERY</A></TT></B>), programmatically (<B><TT><A HREF="misc.html#B_PROGRAMMED_DELIVERY">B_PROGRAMMED_DELIVERY</A></TT></B>), or either (<B><TT><A HREF="misc.html#B_ANY_DELIVERY">B_ANY_DELIVERY</A></TT></B>).  The default is <B><TT><A HREF="misc.html#B_ANY_DELIVERY">B_ANY_DELIVERY</A></TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>source</I></FONT> specifes whether the sender of the message must be local vis-a-vis this app (<B><TT><A HREF="misc.html#B_LOCAL_SOURCE">B_LOCAL_SOURCE</A></TT></B>), remote (<B><TT><A HREF="misc.html#B_REMOTE_SOURCE">B_REMOTE_SOURCE</A></TT></B>), or either (<B><TT><A HREF="misc.html#B_ANY_SOURCE">B_ANY_SOURCE</A></TT></B>).  The default is <B><TT><A HREF="misc.html#B_ANY_SOURCE">B_ANY_SOURCE</A></TT></B>.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>command</I></FONT> is a command constant.  If supplied, the <B><TT>what</TT></B> value of the incoming message must match this value.
+<P>
+</UL>
+<P>
+Messages that don't fit the definition won't be sent to the object's filter function.   
+<P>
+The <I><FONT  color=991122 face=HELVETICA>filter</I></FONT> argument is a pointer to a <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> function.  This is the function that's invoked when a message needs to be examined (see <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> for the protocol).  You don't have to supply a <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> function; instead, you can implement BMessageFilter's <B><TT><A HREF="#Filter()">Filter()</A></TT></B> function in a subclass. 
+<P>
+For more information, refer to the description of the member <B><TT><A HREF="#Filter()">Filter()</A></TT></B> function.
+<P>
+<HR>
+<H3>
+<A NAME="~BMessageFilter()"></A>~BMessageFilter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><FONT  color=000022 size=+1>~BMessageFilter()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Does nothing.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Command()"></A>Command()
+, 
+<A NAME="FiltersAnyCommand()"></A>FiltersAnyCommand()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B> <B><TT><FONT  color=000022 size=+1>Command(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <B><TT><FONT  color=000022 size=+1>FiltersAnyCommand(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Command()">Command()</A></TT></B> returns the command constant (the <A HREF="Message.html#BMessage">BMessage</A> <B><TT>what</TT></B> value) that an arriving message must match for the filter to apply.  <B><TT><A HREF="#FiltersAnyCommand()">FiltersAnyCommand()</A></TT></B> returns <B><TT>true</TT></B> if the filter applies to all messages, and <B><TT>false</TT></B> if it's limited to a specific command.
+<P>
+Because all command constants are valid, including negative numbers and 0, <B><TT><A HREF="#Command()">Command()</A></TT></B> returns a reliable result only if <B><TT><A HREF="#FiltersAnyCommand()">FiltersAnyCommand()</A></TT></B> returns <B><TT>false</TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="Filter()"></A>Filter()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>virtual</TT></B> <B><TT><A HREF="#filter_result">filter_result</A></TT></B> <B><TT><FONT  color=000022 size=+1>Filter(<A HREF="Message.html#BMessage">BMessage</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>message</I></FONT>, <B><TT><A HREF="Handler.html#BHandler">BHandler</A> **</TT></B><I><FONT  color=991122 face=HELVETICA>target</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to examine an arriving message just before it's dispatched.   The first two arguments are the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> that's being considered, and the proposed <A HREF="Handler.html#BHandler">BHandler</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT>.  You can alter the contents of the message, and alter or even replace the handler.  If you replace the handler, the new handler must belong to the same looper as the original.  The new handler is given an opportunity to filter the message before it's dispatched.
+<P>
+The return value must be one of these two values:
+<P>
+<UL>
+<LI><B><TT><A HREF="misc.html#B_DISPATCH_MESSAGE">B_DISPATCH_MESSAGE</A></TT></B>.  The message and handler are passed (by the caller) to the looper's <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> function.
+<P>
+<LI><B><TT><A HREF="misc.html#B_SKIP_MESSAGE">B_SKIP_MESSAGE</A></TT></B>.  The message goes no further&mdash;it's immediately thrown away by the caller.
+<P>
+</UL>
+<P>
+The default version of this function returns <B><TT><A HREF="misc.html#B_DISPATCH_MESSAGE">B_DISPATCH_MESSAGE</A></TT></B>.
+<P>
+It's possible to call your <B><TT><A HREF="#Filter()">Filter()</A></TT></B> function yourself (i.e. outside the message-passing mechanism), but keep in mind that it's the caller's responsibility to interpret the return value.
+<P>
+Rather than implement the <B><TT><A HREF="#Filter()">Filter()</A></TT></B> function, you can supply the BMessageFilter with a <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> callback when you construct the object.   If you do both, the <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> (and not <B><TT><A HREF="#Filter()">Filter()</A></TT></B>) will be invoked when the object is asked to examine a message.
+<P>
+<HR>
+<H3>FiltersAnyCommand()   see <A HREF="#Command()">Command()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Looper()"></A>Looper()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="Looper.html#BLooper">BLooper</A> *</TT></B><B><TT><FONT  color=000022 size=+1>Looper(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="Looper.html#BLooper">BLooper</A> whose messages this object filters, or <B><TT>NULL</TT></B> if the BMessageFilter hasn't yet been assigned to a <A HREF="Handler.html#BHandler">BHandler</A> or BLooper.  To attach a BMessageFilter to a looper or handler, use <B><TT>BLooper::AddCommonFilter()</TT></B> or <B><TT><A HREF="Handler.html#AddFilter()">BHandler::AddFilter()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="MessageDelivery()"></A>MessageDelivery()
+, 
+<A NAME="MessageSource()"></A>MessageSource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="#message_delivery">message_delivery</A></TT></B> <B><TT><FONT  color=000022 size=+1>MessageDelivery(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+
+<TR><TD>
+<B><TT><A HREF="#message_source">message_source</A></TT></B> <B><TT><FONT  color=000022 size=+1>MessageSource(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> <B><TT>const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+These functions return constants, set when the BMessageFilter object was constructed, that describe the categories of messages that can be filtered.  <B><TT><A HREF="#MessageDelivery()">MessageDelivery()</A></TT></B> returns a constant that specifies how the message must be delivered (<B><TT><A HREF="misc.html#B_DROPPED_DELIVERY">B_DROPPED_DELIVERY</A></TT></B>, <B><TT><A HREF="misc.html#B_PROGRAMMED_DELIVERY">B_PROGRAMMED_DELIVERY</A></TT></B>, or <B><TT><A HREF="misc.html#B_ANY_DELIVERY">B_ANY_DELIVERY</A></TT></B>).  <B><TT><A HREF="#MessageSource()">MessageSource()</A></TT></B> returns how the source of the message is constrained (<B><TT><A HREF="misc.html#B_LOCAL_SOURCE">B_LOCAL_SOURCE</A></TT></B>, <B><TT><A HREF="misc.html#B_REMOTE_SOURCE">B_REMOTE_SOURCE</A></TT></B>, or <B><TT><A HREF="misc.html#B_ANY_SOURCE">B_ANY_SOURCE</A></TT></B>). 
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="="></A>=
+ (copy)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="#BMessageFilter">BMessageFilter</A> &amp;</TT></B><B><TT><FONT  color=000022 size=+1>operator=(</TT></B></FONT>const BMessageFilter&amp;<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Copies the filtering criteria and <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> pointer (if any) from the right-side object into the left-side object.
+<P>
+<HR>
+<H2>
+<A NAME="Constants%20and%20Defined%20Types"></A><FONT SIZE=6>C</FONT>onstants and <FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="filter_hook"></A>filter_hook
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="#filter_result">filter_result</A></TT></B> (*<B><TT><FONT  color=000022 size=+1>filter_hook</TT></B></FONT>)(<B><TT><A HREF="Message.html#BMessage">BMessage</A>&nbsp;*</TT></B><I><FONT  color=991122 face=HELVETICA>message</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="Handler.html#BHandler">BHandler</A>&nbsp;**</TT></B><I><FONT  color=991122 face=HELVETICA>target</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#BMessageFilter">BMessageFilter</A>&nbsp;*</TT></B><I><FONT  color=991122 face=HELVETICA>messageFilter</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> defines the protocol for message-filtering functions.  The first two arguments are the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> that's being considered, and the proposed <A HREF="Handler.html#BHandler">BHandler</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT>.  You can alter the contents of the message, and alter or even replace the handler.    If you replace the handler, the new handler must belong to the same looper as the original.  The new handler is given an opportunity to filter the message before it's dispatched.
+<P>
+<I><FONT  color=991122 face=HELVETICA>messageFilter</I></FONT> is a pointer to the object on whose behalf this function is being called; you mustn't delete this object.  More than one BMessageFilter can use the same <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> function.
+<P>
+The return value must be one of these two values:
+<P>
+<UL>
+<LI><B><TT><A HREF="misc.html#B_DISPATCH_MESSAGE">B_DISPATCH_MESSAGE</A></TT></B>.  The message and handler are passed (by the caller) to the looper's <B><TT><A HREF="Looper.html#DispatchMessage()">DispatchMessage()</A></TT></B> function.
+<P>
+<LI><B><TT><A HREF="misc.html#B_SKIP_MESSAGE">B_SKIP_MESSAGE</A></TT></B>.  The message goes no further&mdash;it's immediately thrown away by the caller.
+<P>
+</UL>
+<P>
+It's possible to call your filter function yourself (i.e. outside the message-passing mechanism), but keep in mind that it's the caller's responsibility to interpret the return value.
+<P>
+You supply a BMessageFilter with a <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> function when you constuct the object.  Alternatively, you can subclass BMessageFilter and provide an implementation of <B><TT><A HREF="#Filter()">Filter()</A></TT></B>.  If you do both, the <B><TT><A HREF="#filter_hook">filter_hook</A></TT></B> (and not <B><TT><A HREF="#Filter()">Filter()</A></TT></B>) will be invoked when the object is asked to examine a message.
+<P>
+<HR>
+<H3>
+<A NAME="message_source"></A>message_source
+</H3>
+<P>
+<HR>
+<H3>
+<A NAME="message_delivery"></A>message_delivery
+</H3>
+<P>
+<HR>
+<H3>
+<A NAME="filter_result"></A>filter_result
+</H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

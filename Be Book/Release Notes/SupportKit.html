@@ -1,0 +1,72 @@
+<HTML><HEAD><TITLE>Release Notes: The Support Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Support%20Kit"></A>The Support Kit
+</H1>
+<P>
+<HR>
+<H2>
+<A NAME="System%20Beep"></A><FONT SIZE=6>S</FONT>ystem <FONT SIZE=6>B</FONT>eep
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/support/Beep.h">support/Beep.h</A>
+<P>
+Two new system beep functions:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/Functions.html#add_system_beep_event()">add_system_beep_event()</A></TT></B> lets you register a "system beep event."  A system beep event is registered and identified by name. 
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/Functions.html#system_beep()">system_beep()</A></TT></B> plays the soundfile that's associated with the named system beep event.
+<P>
+</UL>
+<P>
+The user is responsible for associating a system beep event with a soundfile; this is done through the <B>Sounds</B> preference.  You can associate an event with a soundfile programmatically by using a <A HREF="../The%20Media%20Kit/MediaFiles.html#BMediaFiles">BMediaFiles</A> object; note that the API defined in <B>Beep.h</B> doesn't help in this regard.
+<P>
+Currently, the BeOS defines three system beep events:  "Startup", "Beep", and "New E-mail".  If you pass <B><TT>NULL</TT></B> to<B><TT> <A HREF="../The%20Support%20Kit/Functions.html#system_beep()">system_beep()</A></TT></B>, the "Beep" sound is played.
+<P>
+The old <B><TT><A HREF="../The%20Support%20Kit/Functions.html#beep()">beep()</A></TT></B> function is supported, but deprecated.  <B><TT><A HREF="../The%20Support%20Kit/Functions.html#beep()">beep()</A></TT></B> is now a cover for
+<P>
+<PRE>&nbsp;&nbsp;&nbsp; system_beep(NULL)</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

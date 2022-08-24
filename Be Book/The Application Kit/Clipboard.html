@@ -1,0 +1,492 @@
+<HTML><HEAD><TITLE>The Application Kit: BClipboard</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BClipboard"></A>BClipboard
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Clipboard.h">be/app/Clipboard.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor, on the stack, or use the 
+<P>
+<H6><A HREF="Clipboard.summary.html"><i>Summary</i></A></H6>
+<P>
+A BClipboard object is an interface to a <I>clipboard</I>, a resource that provides system-wide, temporary data storage.  Clipboards are identified by name; if two apps want to refer to the same clipboard, they simply create respective BClipboard objects with the same name:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* App A:  This creates a clipboard named "MyClipboard". */
+&nbsp;&nbsp;&nbsp;BClipboard *appAclipboard = new BClipboard("MyClipboard");
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* App B:  This object refers to the clipboard already created by App A. */
+&nbsp;&nbsp;&nbsp;BClipboard *appBclipboard = new BClipboard("MyClipboard");</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="The%20System%20Clipboard"></A>The System Clipboard
+</H3>
+<P>
+In practice, you rarely need to construct your own BClipboard object; instead, you use the BClipboard that's created for you by your <A HREF="Application.html#BApplication">BApplication</A> object.  This object, which you refer to through the global <B><TT><A HREF="misc.html#be_clipboard">be_clipboard</A></TT></B> variable, accesses the default system clipboard.  Data that you write to your <B><TT><A HREF="misc.html#be_clipboard">be_clipboard</A></TT></B> object can be read from any other app's <B><TT><A HREF="misc.html#be_clipboard">be_clipboard</A></TT></B>.  For example, the cut/copy/paste operations defined by <A HREF="../Release%20Notes/InterfaceKit.html#BTextView">BTextView</A> transfer data through the system clipboard.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+To access the system clipboard without creating a <A HREF="Application.html#BApplication">BApplication</A> object, construct a BClipboard object with the name "system".  The system clipboard is under the control of the user&mdash;you should only read or write the system clipboard as a direct result of the user's actions.  If you create your own clipboards don't name them "system".
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<A NAME="40056:%20head2:%20The%20Data%20Message"></A>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Clipboard%20Message"></A>The Clipboard Message
+</H3>
+<P>
+To access a clipboard's data, you call functions on a <A HREF="Message.html#BMessage">BMessage</A> that the BClipboard object hands you (through its <B><TT><A HREF="#Data()">Data()</A></TT></B> function).  The <A HREF="Message.html#BMessage">BMessage</A> follows these conventions:
+<P>
+<UL>
+<LI>The <B><TT>what</TT></B> value is unused.   
+<P>
+<LI>The data is stored in a message field.  The field should be typed as <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MIME_TYPE">B_MIME_TYPE</A></TT></B>; the MIME type that describes the data should be used as the name of the field that holds the data (see <a href="#Writing%20to%20the%20Clipboard">"Writing to the Clipboard"</a> for an example).
+<P>
+<LI>If the <A HREF="Message.html#BMessage">BMessage</A> contains more than one field, each field should present the same data in a different format.  For example, the <B>StyledEdit</B> app writes text data in its own format (in order to encode the fonts, colors, etc.) and also writes the data as plain ASCII text (MIME type "text/plain").
+<P>
+</UL>
+<A NAME="15973:%20head2:%20Writing%20to%20the%20Clipboard"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Writing%20to%20the%20Clipboard"></A>Writing to the Clipboard
+</H3>
+<P>
+The following annotated example shows how to write to the clipboard.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage *clip = (BMessage *)NULL;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (be_clipboard->Lock()<SUP>1</SUP>) {
+&nbsp;&nbsp;&nbsp;    be_clipboard->Clear()<SUP>2</SUP>;
+&nbsp;&nbsp;&nbsp;    if ((clip = be_clipboard->Data()<SUP>3</SUP>) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clip->AddData("text/MyFormat", B_MIME_TYPE, myText, myLength)<SUP>4</SUP>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clip->AddData("text/plain", B_MIME_TYPE, asciiText, asciiLength)<SUP>4</SUP>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be_clipboard->Commit()<SUP>5</SUP>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;    be_clipboard->Unlock()<SUP>6</SUP>;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><SUP>1 </B></SUP>&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#Lock()">Lock()</A></TT></B> your BClipboard object.  This uploads data  from the clipboard into your BClipboard's local <A HREF="Message.html#BMessage">BMessage</A> object, and prevents other threads in your application from accessing the BClipboard's data.  Note that locking does <I>not</I> lock the underlying clipboard data&mdash;other applications can change the clipboard while you have your object locked.
+<P>
+<B><SUP>2 </B></SUP>&nbsp;&nbsp;&nbsp;Prepare the BClipboard for writing by calling <B><TT><A HREF="#Clear()">Clear()</A></TT></B>.  This erases the data that was uploaded from the clipboard.
+<P>
+<B><SUP>3 </B></SUP>&nbsp;&nbsp;&nbsp;Call <B><TT><A HREF="#Data()">Data()</A></TT></B> to get a pointer to the BClipboard's <A HREF="Message.html#BMessage">BMessage</A> object.
+<P>
+<B><SUP>4 </B></SUP>&nbsp;&nbsp;&nbsp;Write the data by invoking <B><TT><A HREF="Message.html#AddData()">AddData()</A></TT></B> directly on the BMessage.  In the example, we write the data in two different formats.
+<P>
+<B><SUP>5 </B></SUP>&nbsp;&nbsp;&nbsp;Call <B><TT><A HREF="#Commit()">Commit()</A></TT></B> to copy your <A HREF="Message.html#BMessage">BMessage</A> back to the clipboard.  As soon as you call <B><TT><A HREF="#Commit()">Commit()</A></TT></B>, the data that you added is visible to other clipboard clients. 
+<P>
+<B><SUP>6 </B></SUP>&nbsp;&nbsp;&nbsp;<B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> balances the <B><TT><A HREF="#Lock()">Lock()</A></TT></B>.  The BClipboard object can now be accessed by other threads in your application.
+<P>
+If you decide that you don't want to commit your changes, you should call <B><TT><A HREF="#Revert()">Revert()</A></TT></B> before you unlock. 
+<P>
+<HR>
+<H3>
+<A NAME="Reading%20from%20the%20Clipboard"></A>Reading from the Clipboard
+</H3>
+<P>
+Here we show how to read a simple string from the clipboard.  
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;const char *text;
+&nbsp;&nbsp;&nbsp;int32 textLen;
+&nbsp;&nbsp;&nbsp;BMessage *clip = (BMessage *)NULL;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (be_clipboard->Lock()<SUP>1</SUP>) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((clip = be_clipboard->Data();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clip->FindData("text/plain", B_MIME_TYPE, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(const void **)&amp;text, &amp;textlen)<SUP>2</SUP>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be_clipboard->Unlock()<SUP>3</SUP>;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><SUP>1 </B></SUP>&nbsp;&nbsp;&nbsp;As in writing, we bracket the operation with <B><TT><A HREF="#Lock()">Lock()</A></TT></B> and <B><TT><A HREF="#Unlock()">Unlock()</A></TT></B>.  Keep in mind that <B><TT><A HREF="#Lock()">Lock()</A></TT></B> uploads data from the clipboard into our object.  Any changes that are made to the clipboard (by some other application) after <B><TT><A HREF="#Lock()">Lock()</A></TT></B> is called won't be seen here. 
+<P>
+<B><SUP>2 </B></SUP>&nbsp;&nbsp;&nbsp;In this example, we only look for one hard-coded format.  In a real application, you may have a list of formats that you can look for.
+<P>
+<B><SUP>3 </B></SUP>&nbsp;&nbsp;&nbsp;It isn't necessary to examine the clipboard data <I>before</I> you unlock it.  The <B><TT><A HREF="Message.html#FindData()">FindData()</A></TT></B> call could just as well have been performed after the <B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> call.
+<P>
+<HR>
+<H3>
+<A NAME="Persistence"></A>Persistence
+</H3>
+<P>
+<I>Inter-boot persistence</I>:  Clipboard data does <I>not</I> persist between boots&mdash;the constructor provides a persistence flag, but it's currently unused.
+<P>
+<I>Intra-boot persistence</I>:  Once you've created a clipboard, that clipboard will exist until you reboot your computer.  For example, let's say you design an app that creates a clipboard called "MyClip":  You launch the app, write something to "MyClip", and then quit the app.  The clipboard&mdash;and the data that you wrote to it&mdash;will still exist:  If you relaunch your app (or any app that knows about "MyClip"), you can pick up the data by reading from the "MyClip" clipboard.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BClipboard()"></A>BClipboard()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BClipboard(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>discard</I></FONT> = <FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Creates a new BClipboard object that refers to the <I><FONT  color=991122 face=HELVETICA>name</I></FONT> clipboard.  The clipboard itself is created if a clipboard of that name doesn't already exist.  
+<P>
+The <I><FONT  color=991122 face=HELVETICA>discard</I></FONT> flag is currently unused.
+<P>
+<HR>
+<H3>
+<A NAME="~BClipboard()"></A>~BClipboard()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BClipboard()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Destroys the BClipboard object.  The clipboard itself and the data it contains are not affected by the object's destruction.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Clear()"></A>Clear()
+, 
+<A NAME="Commit()"></A>Commit()
+, 
+<A NAME="Revert()"></A>Revert()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Clear(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Commit(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Revert(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions are used when you're writing data to the clipboard.  <B><TT><A HREF="#Clear()">Clear()</A></TT></B> prepares your BClipboard for writing.  You call <B><TT><A HREF="#Clear()">Clear()</A></TT></B> just before you add new data to your clipboard message.  <B><TT><A HREF="#Commit()">Commit()</A></TT></B> copies your BClipboard data back to the clipboard.  See <a href="#Writing%20to%20the%20Clipboard">"Writing to the Clipboard"</a> for an example of these functions.
+<P>
+<B><TT><A HREF="#Revert()">Revert()</A></TT></B> refreshes the BClipboard's data message by uploading it from the clipboard.  The function is provided for the (rare) case where you alter your BClipboard's data message, and then decide to back out of the change.  In this case, you should call <B><TT><A HREF="#Revert()">Revert()</A></TT></B> (rather than <B><TT><A HREF="#Commit()">Commit()</A></TT></B>).  If you don't revert, your BClipboard's message will still contain your unwanted change, even if you unlock and then re-lock the object.
+<P>
+All three functions returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if the BClipboard isn't locked, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> otherwise.
+<P>
+<HR>
+<H3>Commit()  see <A HREF="#Clear()">Clear()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Data()"></A>Data()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Message.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>Data(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the <A HREF="Message.html#BMessage">BMessage</A> object that holds the BClipboard's data, or <B><TT>NULL</TT></B> if the BClipboard isn't locked.  You're expected to read and write the <A HREF="Message.html#BMessage">BMessage</A> directly; however, you may <I>not</I> free it or dispatch it like a normal BMessage.  If you change the <A HREF="Message.html#BMessage">BMessage</A> and want to write it back to the clipboard, you have to call <B><TT><A HREF="#Commit()">Commit()</A></TT></B> after you make the change.
+<P>
+See <a href="#The%20Clipboard%20Message">"The Clipboard Message"</a> for more information.
+<P>
+<HR>
+<H3>
+<A NAME="DataSource()"></A>DataSource()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Messenger.html#BMessenger">BMessenger</A> <B><TT><FONT  color=000022 size=+1>DataSource(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a <A HREF="Messenger.html#BMessenger">BMessenger</A> that targets the <A HREF="Application.html#BApplication">BApplication</A> object of the application that last committed data to the clipboard.  The BClipboard needn't be locked.
+<P>
+<HR>
+<H3>
+<A NAME="LocalCount()"></A>LocalCount()
+, 
+<A NAME="SystemCount()"></A>SystemCount()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>LocalCount(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>SystemCount(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions return the clipboard count.  <B><TT><A HREF="#LocalCount()">LocalCount()</A></TT></B> uses a cached count, while <B><TT><A HREF="#SystemCount()">SystemCount()</A></TT></B> asks the Application Server for the more accurate system counter.
+<P>
+<HR>
+<H3>
+<A NAME="Lock()"></A>Lock()
+, 
+<A NAME="Unlock()"></A>Unlock()
+, 
+<A NAME="IsLocked()"></A>IsLocked()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Lock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Unlock(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsLocked(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Lock()">Lock()</A></TT></B> uploads data from the clipboard into your BClipboard object, and locks the object so no other thread in your application can use it.  You must call <B><TT><A HREF="#Lock()">Lock()</A></TT></B> before reading or writing the BClipboard.  <B><TT><A HREF="#Lock()">Lock()</A></TT></B> blocks if the object is already locked.  It returns <B><TT>true</TT></B> if the lock was acquired, and <B><TT>false</TT></B> if the BClipboard object was deleted while <B><TT><A HREF="#Lock()">Lock()</A></TT></B> was blocked.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+There's no way to tell <B><TT><A HREF="#Lock()">Lock()</A></TT></B> to time out.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT><A HREF="#Unlock()">Unlock()</A></TT></B> unlocks the object so other threads in your application can use it.  
+<P>
+<B><TT><A HREF="#IsLocked()">IsLocked()</A></TT></B> hardly needs to be documented. 
+<P>
+<HR>
+<H3>
+<A NAME="Name()"></A>Name()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Name(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the name of the clipboard.  The object needn't be locked.
+<P>
+<HR>
+<H3>Revert()  see <A HREF="#Clear()">Clear()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="StartWatching()"></A>StartWatching()
+, 
+<A NAME="StopWatching()"></A>StopWatching()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If you want to be alerted when the clipboard changes, call <B><TT><A HREF="#StartWatching()">StartWatching()</A></TT></B>, passing a <A HREF="Messenger.html#BMessenger">BMessenger</A> to be the target for the notification.  When the clipboard changes, a <B><TT><A HREF="../Messages/GeneralMessages.html#B_CLIPBOARD_CHANGED">B_CLIPBOARD_CHANGED</A></TT></B> message will be sent to the target.
+<P>
+<B><TT><A HREF="#StopWatching()">StopWatching()</A></TT></B> stops monitoring the clipboard for changes.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+<UL>
+<LI>Other errors. You get the idea.
+<P>
+</UL>
+<P>
+<HR>
+<H3>StopWatching()  see <A HREF="#StartWatching()">StartWatching()</A></H3>
+<P>
+<HR>
+<H3>SystemCount()  see <A HREF="#LocalCount()">LocalCount()</A></H3>
+<P>
+<HR>
+<H3>Unlock()   see <A HREF="#Lock()">Lock()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

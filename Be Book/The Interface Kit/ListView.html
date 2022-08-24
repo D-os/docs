@@ -1,0 +1,1453 @@
+<HTML><HEAD><TITLE>The Interface Kit: BListView</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BListView"></A>BListView
+</H1>
+<P>
+Derived from:  public <A HREF="View.html#BView">BView</A>, public <A HREF="../The%20Application%20Kit/Invoker.html#BInvoker">BInvoker</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/ListView.h">be/interface/ListView.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="ListView.summary.html"><i>Summary</i></A></H6>
+<P>
+A BListView displays a list of items the user can select and invoke.  Each item is a kind of <A HREF="ListItem.html#BListItem">BListItem</A> object.  The BListView manages the layout of the list and the interaction with the user; it leaves the display of each item to the <A HREF="ListItem.html#BListItem">BListItem</A> objects.  A <A HREF="ListItem.html#BListItem">BListItem</A> is not a view and draws only when called upon by the BListView.
+<P>
+The figure below depicts a window that contains a sample BListView.
+<P>
+<IMG SRC="art/listview.gif" ALIGN="bottom">
+<P>
+A BListView displays all items unindented at a single level.  A derived class, <A HREF="OutlineListView.html#BOutlineListView">BOutlineListView</A>, can arrange items in an hierarchical outline.
+<P>
+<HR>
+<H3>
+<A NAME="Lists%20and%20List%20Views"></A>Lists and List Views
+</H3>
+<P>
+This class is based on the <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> class of the Support Kit.  It implements counterparts for <I>all</I> <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> member functions, so you can treat a BListView object just like a BList.  BListView simply makes the list visible.
+<P>
+BListView functions work identically to their <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> counterparts, except for two things:
+<P>
+<UL>
+<LI>A BListView assumes that the list contains pointers to <A HREF="ListItem.html#BListItem">BListItem</A> objects, not <B><TT>void</TT></B>* pointers.
+<P>
+<LI>A BListView makes sure that the on-screen display is properly updated whenever the items in the list change.
+<P>
+</UL>
+<P>
+In both classes, the list keeps track of data pointers&mdash;<B><TT>void</TT></B>* pointers in the case of <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> and pointers to BListItems in the case of BListView.  Adding an item to the list adds only the pointer; the pointed-to object isn't copied.
+<P>
+<HR>
+<H3>
+<A NAME="Updating%20the%20List"></A>Updating the List
+</H3>
+<P>
+When the contents of the list change, the BListView makes sure the visible list on-screen is updated.  However, since it records only pointers to data, it can know that something changed only when a <A HREF="ListItem.html#BListItem">BListItem</A> is added or removed.  If an item pointer remains the same but the data the item displays is altered, the BListView won't know about it.  In this case, you must force the list to be redrawn (by calling the <B><TT><A HREF="#InvalidateItem()">InvalidateItem()</A></TT></B> function or BView's <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B>).
+<P>
+<HR>
+<H3>
+<A NAME="Selecting%20and%20Invoking%20Items"></A>Selecting and Invoking Items
+</H3>
+<P>
+The user can click an item in the list to select it and double-click an item to both select and invoke it.  The user can also select and invoke items from the keyboard.  The navigation keys (such as Down Arrow, Home, and Page Up) select items; Enter and the space bar invoke them.
+<P>
+By default, a BListView permits only one item to be selected at a time.  However, at construction and with the <B><TT><A HREF="#SetListType()">SetListType()</A></TT></B> function, you can set it up to allow multiple selections.  The user can make contiguous extensions to the current selection by holding down a Shift key, and discontinuous extensions by holding down an Option key.
+<P>
+The BListView highlights items as they're selected, but otherwise it doesn't define what, if anything, should take place when the selection changes.  You can determine that yourself either by implementing a <B><TT><A HREF="#SelectionChanged()">SelectionChanged()</A></TT></B> function in a derived class or by registering a <I>selection message</I> (a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object) with the BListView.  The function is called and the message is delivered to a target destination whenever the user modifies the selection. 
+<P>
+Similarly, the BListView doesn't define what it means to "invoke" an item.  You can register a separate <I>invocation message</I> that's sent whenever the user double-clicks an item or presses Enter or the space bar while items are selected.  For example, if the user double-clicks an item in a list of file names, the message might tell the <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> object to open that file.
+<P>
+A BListView doesn't have default selection and invocation messages.  Messages are sent only if registered with the <B><TT><A HREF="#SetSelectionMessage()">SetSelectionMessage()</A></TT></B> and <B><TT><A HREF="#SetInvocationMessage()">SetInvocationMessage()</A></TT></B> functions.  Before sending either type of message, the BListView adds information to it identifying itself and the items that are currently selected.  See the <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> function for details.
+<P>
+<HR>
+<H3>
+<A NAME="Autoscrolling%20and%20Dragging%20Items"></A>Autoscrolling and Dragging Items
+</H3>
+<P>
+BListView provides an autoscroll feature:  There's an invisible area about 25 pixels high both above and below the list view; if the user clicks inside the list view and then drags into this autoscroll area, the contents of the list will scroll in the direction of the mouse.
+<P>
+BListView also provides optional item-dragging that let's the user reorder the items in the list.  To turn on this feature, you have to subclass BListView and implement <B><TT><A HREF="#InitiateDrag()">InitiateDrag()</A></TT></B> to return <B><TT>true</TT></B>. 
+<P>
+<HR>
+<H3>
+<A NAME="Adding%20a%20Scroll%20Bar%20to%20a%20BListView"></A>Adding a Scroll Bar to a BListView
+</H3>
+<P>
+Note that although a BListView is scrollable, it doesn't provide scroll bars.  You can place the BListView inside a <A HREF="ScrollView.html#BScrollView">BScrollView</A> to get the more traditional appearance for your list:
+<P>
+<IMG SRC="art/scrolllist.GIF" ALIGN="bottom">
+<P>
+The code for this might look something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BListView *list = new BListView(r, "City", B_MULTIPLE_SELECTION_LIST);
+&nbsp;&nbsp;&nbsp;list->AddItem(new BStringItem("Chicago"));
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;theView->AddChild(new BScrollView("scroll_cities", list,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_FOLLOW_LEFT | B_FOLLOW_TOP, 0, false, true));</PRE>
+<P>
+See the <A HREF="ScrollView.html#BScrollView">BScrollView</A> class for a more in-depth explanation of scrolling views.
+<P>
+<B>See also:  </B>the <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> class in the Support Kit, the <A HREF="OutlineListView.html#BOutlineListView">BOutlineListView</A> and <A HREF="ListItem.html#BListItem">BListItem</A> classes
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<B><TT><A HREF="#InitiateDrag()">InitiateDrag()</A>
+<br>
+</TT></B>Can be implemented to permit users to drag items&mdash;for example, to reorder items in the list.
+<P>
+<B><TT><A HREF="#SelectionChanged()">SelectionChanged()</A>
+<br>
+</TT></B>Can be implemented to take collateral action each time the selection changes.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BListView()"></A>BListView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BListView(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list_view_type&nbsp;<I><FONT  color=991122 face=HELVETICA>type</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_SINGLE_SELECTION_LIST</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FOLLOW_LEFT</FONT>&nbsp;|&nbsp;<FONT  face=HELVETICA>B_FOLLOW_TOP</FONT>, uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_WILL_DRAW</FONT> | <FONT  face=HELVETICA>B_NAVIGABLE</FONT> | <FONT  face=HELVETICA>B_FRAME_EVENTS</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BListView(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the new BListView.  The <I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, <I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> arguments are identical to those declared for the <A HREF="View.html#BView">BView</A> class and are passed unchanged to the <A HREF="View.html#BView">BView</A> constructor.
+<P>
+The list <I><FONT  color=991122 face=HELVETICA>type</I></FONT> can be either:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_SINGLE_SELECTION_LIST</TT></B></TD>
+<TD>The user can select only one item in the list at a time.  This is the default setting.</TD>
+<TR>
+<TD><B><TT>B_MULTIPLE_SELECTION_LIST</TT></B></TD>
+<TD>The user can select any number of items by holding down an Option key (for discontinuous selections) or a Shift key (for contiguous selections). </TD>
+</TABLE>
+<P>
+The list begins life empty.  Call <B><TT><A HREF="#AddItem()">AddItem()</A></TT></B> or <B><TT><A HREF="#AddList()">AddList()</A></TT></B> to put items in the list.  Call <B><TT><A HREF="#Select()">Select()</A></TT></B> to select one of the items so that it's highlighted when the list is initially displayed to the user.
+<P>
+<B>See also:  </B>the <A HREF="View.html#BView">BView</A> constructor, <B><TT><A HREF="#AddItem()">AddItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="~BListView()"></A>~BListView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BListView()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the selection and invocation messages, if any, and any memory allocated to hold the list of items, but not the items themselves.
+<P>
+<HR>
+<H2>
+<A NAME="Static%20Functions"></A><FONT SIZE=6>S</FONT>tatic <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Instantiate()"></A>Instantiate()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A> *<B><TT><FONT  color=000022 size=+1>Instantiate(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a new BListView object, allocated by <B><TT>new</TT></B> and created with the version of the constructor that takes a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> <I><FONT  color=991122 face=HELVETICA>archive</I></FONT>.  However, if the <I><FONT  color=991122 face=HELVETICA>archive</I></FONT> message doesn't contain data for a BListView object, this function returns <B><TT>NULL</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Instantiate()">BArchivable::Instantiate()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/Functions.html#instantiate_object()">instantiate_object()</A></TT></B>, <B><TT><A HREF="MenuField.html#Archive()">Archive()</A></TT></B>  
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="AddItem()"></A>AddItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>AddItem(</TT></B></FONT><A HREF="ListItem.html#BListItem">BListItem</A> *<I><FONT  color=991122 face=HELVETICA>item</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>AddItem(</TT></B></FONT><A HREF="ListItem.html#BListItem">BListItem</A> *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds an <I><FONT  color=991122 face=HELVETICA>item</I></FONT> to the BListView at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>&mdash;or, if no index is supplied, at the end of the list.  If necessary, additional memory is allocated to accommodate the new item.
+<P>
+Adding an item never removes an item already in the list.  If the item is added at an index that's already occupied, items currently in the list are bumped down one slot to make room.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is out of range (greater than the current item count, or less than zero), this function fails and returns <B><TT>false</TT></B>.  Otherwise, it returns <B><TT>true</TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/List.html#AddItem()">BList::AddItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="AddList()"></A>AddList()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>AddList(</TT></B></FONT><A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *<I><FONT  color=991122 face=HELVETICA>list</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>AddList(</TT></B></FONT><A HREF="../The%20Support%20Kit/List.html#BList">BList</A> *<I><FONT  color=991122 face=HELVETICA>list</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Adds the contents of another <I><FONT  color=991122 face=HELVETICA>list</I></FONT> to this BListView.  The items from the <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> are inserted at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>&mdash;or, if no index is given, they're appended to the end of the list.  If the index is out of range, the function fails and returns <B><TT>false</TT></B>.  If successful, it returns <B><TT>true</TT></B>.
+<P>
+The BListView doesn't check to be sure that all the items it adds from the <I><FONT  color=991122 face=HELVETICA>list</I></FONT> are pointers to <A HREF="ListItem.html#BListItem">BListItem</A> objects.  It assumes that they are; if the assumption is false, subsequent BListView operations will fail.
+<P>
+<B>See also:  <TT><A HREF="#AddItem()">AddItem()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/List.html#AddList()">BList::AddList()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="AttachedToWindow()"></A>AttachedToWindow()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>AttachedToWindow(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets up the BListView and makes the <A HREF="Window.html#BWindow">BWindow</A> to which it has become attached the target for the messages it sends when items are selected or invoked&mdash;provided another target hasn't already been set.  In addition, this function calls <B><TT><A HREF="ListItem.html#Update()">Update()</A></TT></B> for each item in the list to give it a chance to adjust its layout.  The BListView's vertical scroll bar is also adjusted.
+<P>
+This function is called for you when the BListView becomes part of a window's view hierarchy.
+<P>
+<B>See also:  <TT>BView::AttachedToWindow()</TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetTarget()">BInvoker::SetTarget()</A></TT></B>, <B><TT><A HREF="ListItem.html#Update()">BListItem::Update()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="CountItems()"></A>CountItems()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CountItems(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of BListItems currently in the list.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/List.html#CountItems()">BList::CountItems()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="CurrentSelection()"></A>CurrentSelection()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>CurrentSelection(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the index of a currently selected item in the list, or a negative number if no item is selected.  The domain of the <I><FONT  color=991122 face=HELVETICA>index</I></FONT> passed as an argument is the current set of selected items; the first selected item is at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> 0, the second at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> 1, and so on, even if the selection is not contiguous.  The domain of the returned index is the set of all items in the list.
+<P>
+To get all currently selected items, increment the passed index until the function returns a negative number:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BListItem *item;
+&nbsp;&nbsp;&nbsp;int32 selected;
+&nbsp;&nbsp;&nbsp;while ( (selected = myListView->CurrentSelection(i)) >= 0 ) {
+&nbsp;&nbsp;&nbsp;    item = ItemAt(selected);
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B>See also:  <TT><A HREF="#Select()">Select()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Deselect()"></A>Deselect()
+, 
+<A NAME="DeselectAll()"></A>DeselectAll()
+, 
+<A NAME="DeselectExcept()"></A>DeselectExcept()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Deselect(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DeselectAll(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DeselectExcept(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>start</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>finish</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions deselect the item at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, all the items, or all the items except those from index <I><FONT  color=991122 face=HELVETICA>start</I></FONT> through index <I><FONT  color=991122 face=HELVETICA>finish</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="#Select()">Select()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="DoForEach()"></A>DoForEach()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DoForEach(</TT></B></FONT>bool (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(BListItem *)<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>DoForEach(</TT></B></FONT>bool (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(BListItem *, void *), void *<I><FONT  color=991122 face=HELVETICA>arg2</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls the <I><FONT  color=991122 face=HELVETICA>func</I></FONT> function once for each item in the BListView.  BListItems are visited in order, beginning with the first one in the list (index 0) and ending with the last.  If a call to <I><FONT  color=991122 face=HELVETICA>func</I></FONT> returns <B><TT>true</TT></B>, the iteration is stopped, even if some items have not yet been visited.
+<P>
+<I><FONT  color=991122 face=HELVETICA>func</I></FONT> must be a function that takes one or two arguments.  The first argument is a pointer to the BListItem; the second argument, if <I><FONT  color=991122 face=HELVETICA>func</I></FONT> requires one, is passed to <B><TT><A HREF="#DoForEach()">DoForEach()</A></TT></B> as <I><FONT  color=991122 face=HELVETICA>arg2</I></FONT>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/List.html#DoForEach()">BList::DoForEach()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Draw()"></A>Draw()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Draw(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A> <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls upon every item in the <I><FONT  color=991122 face=HELVETICA>updateRect</I></FONT> area of the view to draw itself.
+<P>
+<B><TT><A HREF="#Draw()">Draw()</A></TT></B> is called for you whenever the list view is to be updated or redisplayed; you don't need to call it yourself.  You also don't need to reimplement it; to change the way items are drawn, define a new version of <B><TT><A HREF="ListItem.html#DrawItem()">DrawItem()</A></TT></B> in a class derived from BListItem.
+<P>
+<B>See also:  <TT>BView::Draw()</TT></B>, <B><TT><A HREF="ListItem.html#DrawItem()">BListItem::DrawItem()</A></TT></B> 
+<P>
+<HR>
+<H3>FirstItem()   see <A HREF="#ItemAt()">ItemAt()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="FrameResized()"></A>FrameResized()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>FrameResized(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>width</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>height</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Updates the on-screen display in response to a notification that the BListView's frame rectangle has been resized.  In particular, this function looks for a vertical scroll bar that's a sibling of the BListView.  It adjusts this scroll bar to reflect the way the list view was resized, under the assumption that it must have the BListView as its target.
+<P>
+<B><TT><A HREF="#FrameResized()">FrameResized()</A></TT></B> is called automatically at the appropriate times; you shouldn't call it yourself.
+<P>
+<B>See also:  <TT>BView::FrameResized()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="HasItem()"></A>HasItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>HasItem(</TT></B></FONT><A HREF="ListItem.html#BListItem">BListItem</A> *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if <I><FONT  color=991122 face=HELVETICA>item</I></FONT> is in the list, and <B><TT>false</TT></B> if not.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/List.html#HasItem()">BList::HasItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="IndexOf()"></A>IndexOf()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IndexOf(</TT></B></FONT><A HREF="ListItem.html#BListItem">BListItem</A> *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IndexOf(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> *<I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the index where a particular <I><FONT  color=991122 face=HELVETICA>item</I></FONT>&mdash;or the item whose display rectangle includes a particular <I><FONT  color=991122 face=HELVETICA>point</I></FONT>&mdash;is located in the list.  If the <I><FONT  color=991122 face=HELVETICA>item</I></FONT> is in the list more than once, the index returned will be the position of its first occurrence.  To determine whether an item lies at the specified <I><FONT  color=991122 face=HELVETICA>point</I></FONT>, only the <I>y</I>-coordinate value of the point is considered.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>item</I></FONT> isn't in the list or the <I>y</I>-coordinate of the <I><FONT  color=991122 face=HELVETICA>point</I></FONT> doesn't intersect with the data rectangle of the <A HREF="#BListView">BListView</A>, the return value will be a negative number.
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/List.html#IndexOf()">BList::IndexOf()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="InitiateDrag()"></A>InitiateDrag()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>InitiateDrag(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>index</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>wasSelected</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to permit users to drag items.  This function is called from the BListView's <B><TT><A HREF="#MouseDown()">MouseDown()</A></TT></B> function; it should initiate the drag-and-drop operation and return <B><TT>true</TT></B>, or refuse to do so and return <B><TT>false</TT></B>.  By default, it always returns <B><TT>false</TT></B>.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>point</I></FONT> that's passed to <B><TT><A HREF="#InitiateDrag()">InitiateDrag()</A></TT></B> is the same as the point passed to <B><TT><A HREF="#MouseDown()">MouseDown()</A></TT></B>; it's where the cursor was located when the user pressed the mouse button.  The <I><FONT  color=991122 face=HELVETICA>index</I></FONT> of the item under the cursor (the item that would be dragged) is passed as the second argument, and the <I><FONT  color=991122 face=HELVETICA>wasSelected</I></FONT> flag indicates whether or not the item was selected before the mouse button went down.
+<P>
+A BListView allows users to autoscroll the list by holding the mouse button down and dragging outside its frame rectangle.  If a derived class implements <B><TT><A HREF="#InitiateDrag()">InitiateDrag()</A></TT></B> to drag an item each time the user moves the mouse with a button down, it will hide this autoscrolling behavior.  Therefore, derived classes typically permit users to drag items only if they're already selected (if <I><FONT  color=991122 face=HELVETICA>wasSelected</I></FONT> is <B><TT>true</TT></B>).  In other words, it takes two mouse-down events to drag an item&mdash;one to select it and one to begin dragging it.
+<P>
+<B>See also:  <TT>BView::DragMessage()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="InvalidateItem()"></A>InvalidateItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>InvalidateItem(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Invalidates the item at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> so that an update message will be sent forcing the BListView to redraw it.
+<P>
+<B>See also:  <TT>BView::Invalidate()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Invoke()"></A>Invoke()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Invoke(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="../The%20Application%20Kit/Invoker.html#BInvoker">BInvoker</A> version of <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> to add three pieces of information to each message the BListView sends:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Data name</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>When the message is sent, as measured by the number of microseconds since 12:00:00 AM 1970.</TD>
+<TR>
+<TD>"source"</TD>
+<TD><B><TT>B_POINTER_TYPE</TT></B></TD>
+<TD>A pointer to the BListView object.</TD>
+<TR>
+<TD>"index"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>An array containing the index of every selected item.</TD>
+</TABLE>
+<P>
+This function is called to send both the selection message and the invocation message.  It can also be called from application code.  The default target of the message (established by <B><TT><A HREF="#AttachedToWindow()">AttachedToWindow()</A></TT></B>) is the <A HREF="Window.html#BWindow">BWindow</A> where the BListView is located.
+<P>
+What it means to "invoke" selected items depends entirely on the invocation <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> and the receiver's response to it.  This function does nothing but send the message.
+<P>
+<B>See also:  <TT><A HREF="#Select()">Select()</A></TT></B>, <B><TT><A HREF="#SetInvocationMessage()">SetInvocationMessage()</A></TT></B>, <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetTarget()">BInvoker::SetTarget()</A></TT></B> 
+<P>
+<HR>
+<H3>IsEmpty()   see <A HREF="#MakeEmpty()">MakeEmpty()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsItemSelected()"></A>IsItemSelected()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsItemSelected(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns <B><TT>true</TT></B> if the item at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> is currently selected, and <B><TT>false</TT></B> if it's not.
+<P>
+<B>See also:  <TT><A HREF="#CurrentSelection()">CurrentSelection()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ItemAt()"></A>ItemAt()
+, 
+<A NAME="FirstItem()"></A>FirstItem()
+, 
+<A NAME="LastItem()"></A>LastItem()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="ListItem.html#BListItem">BListItem</A> *<B><TT><FONT  color=000022 size=+1>ItemAt(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="ListItem.html#BListItem">BListItem</A> *<B><TT><FONT  color=000022 size=+1>FirstItem(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="ListItem.html#BListItem">BListItem</A> *<B><TT><FONT  color=000022 size=+1>LastItem(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The first of these functions returns the <A HREF="ListItem.html#BListItem">BListItem</A> at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, or <B><TT>NULL</TT></B> if the index is out of range.  The other two functions return the very first and very last items in the list, or <B><TT>NULL</TT></B> if the list is empty.  None of the functions alters the contents of the list&mdash;they don't remove the returned item.
+<P>
+<B>See also:  <TT><A HREF="#Items()">Items()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/List.html#FirstItem()">BList::FirstItem()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/List.html#LastItem()">BList::LastItem()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/List.html#ItemAt()">BList::ItemAt()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ItemFrame()"></A>ItemFrame()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>ItemFrame(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the frame rectangle of the <A HREF="ListItem.html#BListItem">BListItem</A> at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>.  The rectangle is stated in the coordinate system of the BListView and defines the area where the item is drawn.  Items can differ in height, but all have the same width.
+<P>
+<B>See also:  <TT><A HREF="ListItem.html#DrawItem()">DrawItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Items()"></A>Items()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const <A HREF="ListItem.html#BListItem">BListItem</A> **<B><TT><FONT  color=000022 size=+1>Items(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the BListView's list of BListItems.  You can index directly into the list of items if you're certain that the index is in range:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BListItem *item = Items()[index];</PRE>
+<P>
+Although the practice is discouraged, you can also step through the list of items by incrementing the list pointer that <B><TT><A HREF="#Items()">Items()</A></TT></B> returns.  Be aware that the list isn't null-terminated&mdash;you have to detect the end of the list by some other means.  The simplest method is to count items:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BListItem **ptr = myListView->Items();
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;for ( long i = myListView->CountItems(); i > 0; i-- )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;    *ptr++;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+You should never use the items pointer to alter the contents of the list.
+<P>
+<B>See also:  <TT><A HREF="#DoForEach()">DoForEach()</A></TT></B>, <B><TT><A HREF="#SortItems()">SortItems()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/List.html#Items()">BList::Items()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="KeyDown()"></A>KeyDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>KeyDown(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>bytes</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Permits the user to operate the list using the following keys:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Keys</TH>
+<TH>Perform Action</TH>
+<TR>
+<TD>Up Arrow and Down Arrow</TD>
+<TD>Select the items that are immediately before and immediately after the currently selected item.</TD>
+<TR>
+<TD>Page Up and Page Down</TD>
+<TD>Select the items that are one viewful above and below the currently selected item&mdash;or the first and last items if there's no item a viewful away.</TD>
+<TR>
+<TD>Home and End</TD>
+<TD>Select the first and last items in the list.</TD>
+<TR>
+<TD>Enter and the space bar</TD>
+<TD>Invoke the current selection.</TD>
+</TABLE>
+<P>
+This function also incorporates the inherited <A HREF="View.html#BView">BView</A> version so that the Tab key can navigate to another view.
+<P>
+<B><TT><A HREF="#KeyDown()">KeyDown()</A></TT></B> is called to report <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> messages when the BListView is the focus view of the active window; you shouldn't call it yourself.
+<P>
+<B>See also:  <TT>BView::KeyDown()</TT></B>, <B><TT><A HREF="#Select()">Select()</A></TT></B>, <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> 
+<P>
+<HR>
+<H3>LastItem()   see <A HREF="#ItemAt()">ItemAt()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="MakeEmpty()"></A>MakeEmpty()
+, 
+<A NAME="IsEmpty()"></A>IsEmpty()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MakeEmpty(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsEmpty(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>MakeEmpty()</TT></B> empties the BListView of all its items, without freeing the <A HREF="ListItem.html#BListItem">BListItem</A> objects.
+<P>
+<B><TT>IsEmpty()</TT></B> returns <B><TT>true</TT></B> if the list is empty (if it contains no items), and <B><TT>false</TT></B> otherwise.
+<P>
+<B>See also:  <TT><A HREF="#RemoveItem()">RemoveItem()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/List.html#MakeEmpty()">BList::MakeEmpty()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MakeFocus()"></A>MakeFocus()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MakeFocus(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>focused</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>true</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Overrides the <A HREF="View.html#BView">BView</A> version of <B><TT><A HREF="#MakeFocus()">MakeFocus()</A></TT></B> to draw an indication that the BListView has become the focus for keyboard events when the <I><FONT  color=991122 face=HELVETICA>focused</I></FONT> flag is <B><TT>true</TT></B>, and to remove that indication when the flag is <B><TT>false</TT></B>.
+<P>
+<B>See also:  <TT>BView::MakeFocus()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MouseDown()"></A>MouseDown()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>MouseDown(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Responds to <B><TT><A HREF="misc.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B> messages by selecting items, invoking them (if the mouse-down event is the second of a double-click), and autoscrolling the list (when the user drags with a mouse button down).  This function also calls <B><TT><A HREF="#InitiateDrag()">InitiateDrag()</A></TT></B> to give derived classes the opportunity to drag items.  You can implement that function; you shouldn't override (or call) this one.
+<P>
+<B>See also:  <TT>BView::MouseDown()</TT></B>, <B><TT><A HREF="#Select()">Select()</A></TT></B>, <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>, <B><TT><A HREF="#InitiateDrag()">InitiateDrag()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="MoveItem()"></A>MoveItem()
+, 
+<A NAME="ReplaceItem()"></A>ReplaceItem()
+, 
+<A NAME="SwapItems()"></A>SwapItems()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>MoveItem(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>from</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>to</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>ReplaceItem(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, <A HREF="ListItem.html#BListItem">BListItem</A> *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>SwapItems(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index1</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index2</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#MoveItem()">MoveItem()</A></TT></B> moves the item located at the index <I><FONT  color=991122 face=HELVETICA>from</I></FONT> to the index specified by the <I><FONT  color=991122 face=HELVETICA>to</I></FONT> argument.
+<P>
+<B><TT><A HREF="#ReplaceItem()">ReplaceItem()</A></TT></B> replaces the item located at the specified <I><FONT  color=991122 face=HELVETICA>index</I></FONT> with the specified <I><FONT  color=991122 face=HELVETICA>item</I></FONT>.
+<P>
+<B><TT><A HREF="#SwapItems()">SwapItems()</A></TT></B> swaps the items specified by <I><FONT  color=991122 face=HELVETICA>index1</I></FONT> and <I><FONT  color=991122 face=HELVETICA>index2</I></FONT> in the list.
+<P>
+These functions return <B><TT>true</TT></B> if the requested operation is completed successfully, or <B><TT>false</TT></B> if the operation failed (for example, if a specified index is out of range).
+<P>
+<HR>
+<H3>
+<A NAME="RemoveItem()"></A>RemoveItem()
+, 
+<A NAME="RemoveItems()"></A>RemoveItems()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <A HREF="ListItem.html#BListItem">BListItem</A> *<B><TT><FONT  color=000022 size=+1>RemoveItem(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>RemoveItem(</TT></B></FONT><A HREF="ListItem.html#BListItem">BListItem</A> *<I><FONT  color=991122 face=HELVETICA>item</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual bool <B><TT><FONT  color=000022 size=+1>RemoveItems(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#RemoveItem()">RemoveItem()</A></TT></B> removes a single item from the BListView.  If passed an <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, it removes the item at that index and returns it.  If there's no item at the index, it returns <B><TT>NULL</TT></B>.  If passed an <I><FONT  color=991122 face=HELVETICA>item</I></FONT>, this function looks for that particular item in the list, removes it, and returns <B><TT>true</TT></B>.  If it can't find the item, it returns <B><TT>false</TT></B>.  If the item is in the list more than once, this function removes only its first occurrence.
+<P>
+<B><TT><A HREF="#RemoveItems()">RemoveItems()</A></TT></B> removes <I><FONT  color=991122 face=HELVETICA>count</I></FONT> number of items from the <A HREF="#BListView">BListView</A>, beginning with the item at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>.  If the list doesn't contain <I><FONT  color=991122 face=HELVETICA>count</I></FONT> items between <I><FONT  color=991122 face=HELVETICA>index</I></FONT> and the end of the list, this function removes as many items as there are.
+<P>
+The list is compacted after an item is removed.  Therefore, you shouldn't try to empty a list (or a range within a list) by removing items incrementing indices.  You should either start with the highest index and move towards the head of the list, or remove at the same index (the lowest in the range) some number of times.  As an example of the latter, the following code removes the first five items in the list:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;for ( int32 i = 0; i &lt;= 4; i++ )
+&nbsp;&nbsp;&nbsp;    myListView->RemoveItem(0);</PRE>
+<P>
+<B>See also:  <TT><A HREF="#MakeEmpty()">MakeEmpty()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/List.html#RemoveItem()">BList::RemoveItem()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ScrollTo()"></A>ScrollTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>ScrollTo(</TT></B></FONT><A HREF="Point.html#BPoint">BPoint</A> <I><FONT  color=991122 face=HELVETICA>point</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+inline void <B><TT><FONT  color=000022 size=+1>ScrollTo(</TT></B></FONT>float <I><FONT  color=991122 face=HELVETICA>x</I></FONT>, float <I><FONT  color=991122 face=HELVETICA>y</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Augments the <A HREF="View.html#BView">BView</A> version of <B><TT><A HREF="#ScrollTo()">ScrollTo()</A></TT></B> to do some class-internal housekeeping when the list is scrolled.  For all practical purposes, these functions are identical to their <A HREF="View.html#BView">BView</A> counterparts.
+<P>
+<B>See also:  <TT>BView::ScrollTo()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="ScrollToSelection()"></A>ScrollToSelection()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>ScrollToSelection(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Scrolls the list so that the first item in the current selection is visible.
+<P>
+<HR>
+<H3>
+<A NAME="Select()"></A>Select()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Select(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>extend</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Select(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>start</I></FONT>, int32&nbsp;<I><FONT  color=991122 face=HELVETICA>finish</I></FONT>, bool&nbsp;<I><FONT  color=991122 face=HELVETICA>extend</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>false</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Selects the item located at <I><FONT  color=991122 face=HELVETICA>index</I></FONT>&mdash;or all the items from the <I><FONT  color=991122 face=HELVETICA>start</I></FONT> index through the <I><FONT  color=991122 face=HELVETICA>finish</I></FONT> index&mdash;provided that none of the indices are out of range.  If the <I><FONT  color=991122 face=HELVETICA>extend</I></FONT> flag is <B><TT>false</TT></B>, as it is by default, this function removes the highlighting from the previously selected item(s) and highlights the new selection.  However, if the <I><FONT  color=991122 face=HELVETICA>extend</I></FONT> flag is <B><TT>true</TT></B>, the newly selected items are added to the current selection.
+<P>
+If you want your newly-selected item to be scrolled into view, you must call <B><TT><A HREF="#ScrollToSelection()">ScrollToSelection()</A></TT></B> after invoking <B><TT>Select()</TT></B>.  The <B><TT>Select()</TT></B> function itself does not do any scrolling.
+<P>
+<B><TT><A HREF="#Select()">Select()</A></TT></B> can be called to set an initial selection in the list or change the current selection.  It permits the program to select a number of items, even for a <B><TT>B_SINGLE_SELECTION_LIST</TT></B> list.
+<P>
+If you want to be informed of successful selections, you either have to implement <B><TT><A HREF="#SelectionChanged()">SelectionChanged()</A></TT></B> or supply a selection message (through <B><TT><A HREF="#SetSelectionMessage()">SetSelectionMessage()</A></TT></B>).  The former is invoked and the latter is sent when an item is selected.
+<P>
+<B>See also:  <TT><A HREF="#SetSelectionMessage()">SetSelectionMessage()</A></TT></B>, <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>, <B><TT><A HREF="#SelectionChanged()">SelectionChanged()</A></TT></B> , <B><TT><A HREF="#Deselect()">Deselect()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="SelectionChanged()"></A>SelectionChanged()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SelectionChanged(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Implemented by derived classes to do whatever they please when the selection changes.
+<P>
+<HR>
+<H3>
+<A NAME="SetInvocationMessage()"></A>SetInvocationMessage()
+, 
+<A NAME="InvocationMessage()"></A>InvocationMessage()
+, 
+<A NAME="InvocationCommand()"></A>InvocationCommand()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetInvocationMessage(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>InvocationMessage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>InvocationCommand(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return information about the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> that the BListView sends when currently selected items are invoked.
+<P>
+<B><TT><A HREF="#SetInvocationMessage()">SetInvocationMessage()</A></TT></B> assigns <I><FONT  color=991122 face=HELVETICA>message</I></FONT> to the <A HREF="#BListView">BListView</A>, freeing any message previously assigned.  The message becomes the responsibility of the BListView object and will be freed only when it's replaced by another message or the BListView is freed; you shouldn't free it yourself.  Passing a <B><TT>NULL</TT></B> pointer to this function deletes the current message without replacing it.
+<P>
+When sending the message, the <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> function makes a copy of it and adds two pieces of relevant information&mdash;"when" the message is sent and the "source" BListView.  These names should not be used for any data that you add to the invocation <I><FONT  color=991122 face=HELVETICA>message</I></FONT>.
+<P>
+<B><TT><A HREF="#InvocationMessage()">InvocationMessage()</A></TT></B> returns a pointer to the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> and <B><TT><A HREF="#InvocationCommand()">InvocationCommand()</A></TT></B> returns its <B><TT>what</TT></B> data member.  The message belongs to the BListView; it can be altered by adding or removing data, but it shouldn't be deleted.  To get rid of the current message, pass a <B><TT>NULL</TT></B> pointer to <B><TT><A HREF="#SetInvocationMessage()">SetInvocationMessage()</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#Invoke()">Invoke()</A></TT></B>, the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> class
+<P>
+<HR>
+<H3>
+<A NAME="SetListType()"></A>SetListType()
+, 
+<A NAME="ListType()"></A>ListType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetListType(</TT></B></FONT>list_view_type <I><FONT  color=991122 face=HELVETICA>type</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+list_view_type <B><TT><FONT  color=000022 size=+1>ListType(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>&nbsp;const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return the list type&mdash;whether or not it permits multiple selections.  The <B><TT>list_view_type</TT></B> must be either <B><TT>B_SINGLE_SELECTION_LIST</TT></B> or <B><TT>B_MULTIPLE_SELECTION_LIST</TT></B>.  The type is first set when the BListView is constructed.
+<P>
+<B>See also:  </B>the BListView constructor
+<P>
+<HR>
+<H3>
+<A NAME="SetSelectionMessage()"></A>SetSelectionMessage()
+, 
+<A NAME="SelectionMessage()"></A>SelectionMessage()
+, 
+<A NAME="SelectionCommand()"></A>SelectionCommand()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetSelectionMessage(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>SelectionMessage(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>SelectionCommand(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set, and return information about, the message that a BListView sends whenever a new item is selected.  They're exact counterparts to the functions described above under <B><TT><A HREF="#SetInvocationMessage()">SetInvocationMessage()</A></TT></B>, except that the selection message is sent whenever an item in the list is selected, rather than when invoked.  It's more common to take action (to initiate a message) when invoking an item than when selecting one.
+<P>
+<B>See also:  <TT><A HREF="#Select()">Select()</A></TT></B>, <B><TT><A HREF="#SetInvocationMessage()">SetInvocationMessage()</A></TT></B>, <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>, the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> class
+<P>
+<HR>
+<H3>
+<A NAME="SortItems()"></A>SortItems()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void *<B><TT><FONT  color=000022 size=+1>SortItems(</TT></B></FONT>int (*<I><FONT  color=991122 face=HELVETICA>compareFunc</I></FONT>)(const void *, const void *)<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Rearranges the items in the list.  The items are sorted using the <I><FONT  color=991122 face=HELVETICA>compareFunc</I></FONT> comparison function passed as an argument.  This function should return a negative number if the first item is ordered before the second, a positive number if the second comes before the first, and 0 if the two items are ordered equivalently.
+<P>
+Although the comparison function is, in the usual manner for such functions, declared to take two <B><TT>void*</TT></B> arguments, each argument should be a pointer to an item in the list&mdash;in other words, a pointer to a <A HREF="ListItem.html#BListItem">BListItem</A> pointer:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int compare_func(BListItem **firstArg, BListItem **secondArg);</PRE>
+<P>
+<B>See also:  <TT><A HREF="#Items()">Items()</A></TT></B>, <B><TT><A HREF="../The%20Support%20Kit/List.html#SortItems()">BList::SortItems()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="TargetedByScrollView()"></A>TargetedByScrollView()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>TargetedByScrollView(</TT></B></FONT><A HREF="ScrollView.html#BScrollView">BScrollView</A> *<I><FONT  color=991122 face=HELVETICA>view</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Notes the fact that the BListView is the target of a <A HREF="ScrollView.html#BScrollView">BScrollView</A> and arranges for the border of the <A HREF="ScrollView.html#BScrollView">BScrollView</A> to be highlighted when the BListView is the current focus view of the active window.
+<P>
+<B>See also:  <TT><A HREF="ScrollView.html#SetBorderHighlighted()">BScrollView::SetBorderHighlighted()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="WindowActivated()"></A>WindowActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>WindowActivated(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Makes sure that the <A HREF="ScrollView.html#BScrollView">BScrollView</A> that targets the BListView is redrawn when the window is activated and deactivated, if the BListView is the current focus view.  This gives the <A HREF="ScrollView.html#BScrollView">BScrollView</A> a chance to highlight or unhighlight its border, as appropriate.
+<P>
+<B>See also:  <TT>BView::WindowActivated()</TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Scripting%20Support"></A><FONT SIZE=6>S</FONT>cripting <FONT SIZE=6>S</FONT>upport
+</H2>
+<P>
+The BListView class implements the suite called "suite/vnd.Be-list-view" consisting of the following messages: 
+<P>
+<HR>
+<H3>
+<A NAME="The%20Item%20Property"></A>The Item Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/topic_Scripting.html#B_COUNT_PROPERTIES">B_COUNT_PROPERTIES</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns the number of BListItems currently in the list.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/topic_Scripting.html#B_EXECUTE_PROPERTY">B_EXECUTE_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_INDEX_SPECIFIER">B_INDEX_SPECIFIER</A>,
+<br>
+<A HREF="../The%20Application%20Kit/misc.html#B_REVERSE_INDEX_SPECIFIER">B_REVERSE_INDEX_SPECIFIER</A>,
+<br>
+<A HREF="../The%20Application%20Kit/misc.html#B_RANGE_SPECIFIER">B_RANGE_SPECIFIER</A>,
+<br>
+<A HREF="../The%20Application%20Kit/misc.html#B_REVERSE_RANGE_SPECIFIER">B_REVERSE_RANGE_SPECIFIER</A></TT></B></TD>
+<TD>Select and invoke the specified items, first removing any existing selection.</TD>
+</TABLE>
+<P>
+The "Item" property refers to individual BListItems in the list.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Selection%20Property"></A>The Selection Property
+</H3>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Specifiers</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/topic_Scripting.html#B_COUNT_PROPERTIES">B_COUNT_PROPERTIES</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns int32 count of items in the selection.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/topic_Scripting.html#B_EXECUTE_PROPERTY">B_EXECUTE_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Invoke items in selection.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_GET_PROPERTY">B_GET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Returns int32 indices of all items in the selection.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_INDEX_SPECIFIER">B_INDEX_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_REVERSE_INDEX_SPECIFIER">B_REVERSE_INDEX_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_RANGE_SPECIFIER">B_RANGE_SPECIFIER</A></TT></B>,
+<br>
+<B><TT><A HREF="../The%20Application%20Kit/misc.html#B_REVERSE_RANGE_SPECIFIER">B_REVERSE_RANGE_SPECIFIER</A></TT></B></TD>
+<TD>Extends current selection or deselects specified items.  Boolean field "data" chooses selection or deselection.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SET_PROPERTY">B_SET_PROPERTY</A></TT></B></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_DIRECT_SPECIFIER">B_DIRECT_SPECIFIER</A></TT></B></TD>
+<TD>Select or deselect all items in the selection.  Boolean field "data" chooses selection or deselection.</TD>
+</TABLE>
+<P>
+The "Selection" property refers to the set of selected BListItems.  If the BListView is of type <B><TT>B_SINGLE_SELECTION_LIST</TT></B>, then only one item can be selected at any given instant; the list type cannot be overridden through the scripting interface.  Attempting to access multiple selected list elements in a <B><TT>B_SINGLE_SELECTION_LIST</TT></B> results in an error.
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="MenuField.html#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_lv_type"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The list type.</TD>
+<TR>
+<TD>"_l_items" (array)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>List items in the list (deep copy only)</TD>
+<TR>
+<TD>"_msg"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>Invocation message.</TD>
+<TR>
+<TD>"_2nd_msg"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD>Selection message.</TD>
+</TABLE>
+<P>
+Some of these fields may not be present if the setting they represent isn't used, or is the default value.  For example, if there is no selection message, the "_2nd_msg" field won't be found in the archive.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

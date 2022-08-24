@@ -1,0 +1,254 @@
+<HTML><HEAD><TITLE>The Translation Kit: BBitmapStream</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BBitmapStream"></A>BBitmapStream
+</H1>
+<P>
+Derived from:  public BPositionIO
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/translation/BitmapStream.h">be/translation/BitmapStream.h</A>
+<P>
+Library:  libtranslation.so
+<P>
+<H6><A HREF="BitmapStream.summary.html"><i>Summary</i></A></H6>
+<P>
+BBitmapStream allows for the easy conversion of a <I>translator bitmap</I>, the default Translation Kit bitmap format, to a BBitmap.  It's a very limited subclass of BPositionIO capable only of reading and writing translator bitmaps; performing i/o on the object with other types of data can yield strange results.  The main attraction of the class is the <B><TT><A HREF="#DetachBitmap()">DetachBitmap()</A></TT></B> method, which returns the contents of the object as a BBitmap.
+<P>
+Most of the time, you won't need to use BBitmapStream directly; <A HREF="TranslationUtils.html#BTranslationUtils">BTranslationUtils</A> contains the functionality required to load images from files, resources, or general BPositionIOs into BBitmaps.
+<P>
+The following snippet illustrates typical usage of BBitmapStream <I>sans</I> proper error checking:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BBitmap *FetchBitmap(char *filename)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BFile file(filename, B_READ_ONLY);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTranslatorRoster *roster = BTranslatorRoster::Default();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BBitmapStream stream;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BBitmap *result = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (roster->Translate(&amp;file, NULL, NULL, &amp;stream, 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B_TRANSLATOR_BITMAP) &lt; B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stream.DetachBitmap(&amp;result);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return result;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+You can also initialize the class with a <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> and use it as input to <B><TT><A HREF="TranslatorRoster.html#Translate()">BTranslatorRoster::Translate()</A></TT></B> to save it in a different format:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void StoreTranslatorBitmap(BBitmap *bitmap, char *filename, uint32 type)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BTranslatorRoster *roster = BTranslatorRoster::Default();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BBitmapStream stream(bitmap); // init with contents of bitmap
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BFile file(filename, B_CREATE_FILE | B_WRITE_ONLY);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;roster->Translate(&amp;stream, NULL, NULL, &amp;file, type);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BBitmapStream()"></A>BBitmapStream()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BBitmapStream(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>map</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new instance of BBitmapStream.  If <I><FONT  color=991122 face=HELVETICA>map</I></FONT> is <B><TT>NULL</TT></B>, the stream is initialized to be empty.  Otherwise, the <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> is converted to a translator bitmap and placed in the stream.  The application shares the <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> with the BBitmapStream object.  It therefore shouldn't <B><TT>delete</TT></B> the <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> without first calling <B><TT><A HREF="#DetachBitmap()">DetachBitmap()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="~BBitmapStream()"></A>~BBitmapStream()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BBitmapStream()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees all memory allocated by the BTranslatorRoster.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="DetachBitmap()"></A>DetachBitmap()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>DetachBitmap(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> **<I><FONT  color=991122 face=HELVETICA>outMap</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns, in <I><FONT  color=991122 face=HELVETICA>outMap</I></FONT>, a <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> representing the image contained in the BBitmapStream.  Once <B><TT>DetachBitmap()</TT></B> has been called, no further operations should be performed on the BBitmapStream.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_ERROR">B_NO_ERROR</A></TT></B>. Success.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. <I><FONT  color=991122 face=HELVETICA>outMap</I></FONT> is NULL.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>. There is no <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> available.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Position()"></A>Position()
+, 
+<A NAME="ReadAt()"></A>ReadAt()
+, 
+<A NAME="Seek()"></A>Seek()
+, 
+<A NAME="SetSize()"></A>SetSize()
+, 
+<A NAME="WriteAt()"></A>WriteAt()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+off_t <B><TT><FONT  color=000022 size=+1>Position()</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>ReadAt(</TT></B></FONT>off_t <I><FONT  color=991122 face=HELVETICA>pos</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>buffer</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+off_t <B><TT><FONT  color=000022 size=+1>Seek(</TT></B></FONT>off_t <I><FONT  color=991122 face=HELVETICA>position</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>whence</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetSize(</TT></B></FONT>off_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>WriteAt(</TT></B></FONT>off_t <I><FONT  color=991122 face=HELVETICA>pos</I></FONT>, const void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t *<I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These methods provide the implementation for the BPositionIO.  The class functions identically to BPositionIO with the exception of <B><TT>ReadAt()</TT></B> and <B><TT>WriteAt()</TT></B>, which read and write only translator bitmaps as described in the class introduction.
+<P>
+<B>See also:  <TT>BPositionIO
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="Size()"></A>Size()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+off_t <B><TT><FONT  color=000022 size=+1>Size()</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the number of bytes in the translator bitmap in the stream.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Translation Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Translation%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Translation Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

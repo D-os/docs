@@ -1,0 +1,694 @@
+<HTML><HEAD><TITLE>The Interface Kit: Drawing</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Drawing"></A>Drawing
+</H1>
+<P>
+This section discusses the framework in which BViews draw.  Detailed descriptions of the functions mentioned here can be found in the <A HREF="View.html#BView">BView</A> and <A HREF="Window.html#BWindow">BWindow</A> class descriptions.
+<P>
+<HR>
+<H2>
+<A NAME="View%20Geometry"></A><FONT SIZE=6>V</FONT>iew <FONT SIZE=6>G</FONT>eometry
+</H2>
+<P>
+Ech view is assigned a coordinate system of its own.  By default, the coordinate origin&mdash;(0.0, 0.0)&mdash;is located at the left top corner of the view rectangle.  The <I>x</I>-axis extends to the right and the <I>y</I>-axis extends downward; coordinate units count screen pixels.  (For a detailed discussion of the coordinate systems assumed by the Interface Kit, see &nbsp;<a href="../../r3interface3_CoordinateSpace.html#The%20Coordinate%20Space%20on%20page11">"The Coordinate Space" on page11</a>.)
+<P>
+When a view is added as a child of another view, it's located within the coordinate system of its parent.  A child is considered part of the contents of the parent view.  If the parent moves, the child moves with it; if the parent view scrolls its contents, the child view is shifted along with everything else in the view.
+<P>
+Since each view retains its own internal coordinate system no matter who its parent is, where it's located within the parent, or where the parent is located, a BView's drawing and message-handling code doesn't need to be concerned about anything exterior to itself.  To do its work, a <A HREF="View.html#BView">BView</A> need look no farther than the boundaries of its own view rectangle.
+<P>
+<HR>
+<H3>
+<A NAME="Frame%20and%20Bounds%20Rectangles"></A>Frame and Bounds Rectangles
+</H3>
+<P>
+Although a <A HREF="View.html#BView">BView</A> doesn't have to look outside its own boundaries, it does have to know where those boundaries are.  It can get this information in two forms:
+<P>
+<UL>
+<LI>Since a view is located within the coordinate system of its parent, the view rectangle is initially defined in terms of the parent's coordinates.  This defining rectangle for a view is known as its <I>frame rectangle</I>.  (See the <A HREF="View.html#BView">BView</A> constructor and the <B><TT><A HREF="MenuItem.html#Frame()">Frame()</A></TT></B> function.)
+<P>
+<LI>When translated from the parent's coordinates to the internal coordinates of the view itself, the same rectangle is known as the <I>bounds rectangle</I>.  (See the <B><TT><A HREF="Bitmap.html#Bounds()">Bounds()</A></TT></B> function.)
+<P>
+</UL>
+<P>
+The following illustration shows a child view 180.0 units wide and 135.0 units high.  When viewed from the outside, from the perspective of its parent's coordinate system, it has a frame rectangle with left, top, right, and bottom coordinates at 90.0, 60.0, 270.0, and 195.0, respectively.  But when viewed from the inside, in the view's own coordinate system, it has a bounds rectangle with coordinates at 0.0, 0.0, 180.0, and 135.0: 
+<P>
+<IMG SRC="art/Drawing1.GIF" ALIGN="bottom">
+<P>
+When a view moves to a new location in its parent, its frame rectangle changes but not its bounds rectangle.  When a view scrolls its contents, its bounds rectangle changes, but not its frame.  The frame rectangle positions the view in the world outside; the bounds rectangle positions the contents inside the view.
+<P>
+Since a <A HREF="View.html#BView">BView</A> does its work in its own coordinate system, it refers to the bounds rectangle more often than to the frame rectangle.
+<P>
+<H4>
+<A NAME="Nonfractional%20Coordinates"></A>Nonfractional Coordinates
+</H4>
+<P>
+Because views are areas within windows and windows are displayed on-screen, the edges of a view must line up on rows and columns of screen pixels.  It's easy to achieve this result, since coordinate units correspond to screen pixels; one unit is the distance from the center of a pixel to the center of an adjacent pixel.  Therefore, all you must do is define the view rectangle with nonfractional coordinates, as in the illustration above.
+<P>
+<H4>
+<A NAME="Pixel%20and%20Coordinate%20Dimensions"></A>Pixel and Coordinate Dimensions
+</H4>
+<P>
+It was mentioned that the child view in the illustration above is 180.0 coordinate units wide and 135.0 units high.  However, this view actually covers 181 pixel columns and 136 pixel rows on-screen.
+<P>
+Two facts conspire to determine this result.  First, as stated, coordinate units correspond to screen pixels.  Second, the coordinate axes don't lie between pixels but right in the middle of them.  The <I>x</I>-axis splits a row of pixels and the <I>y</I>-axis runs down the center of a column of pixels; the coordinate origin where they meet is at the very center of a pixel.  Therefore, a view rectangle covers one more pixel in each direction than its coordinate dimensions would indicate.
+<P>
+Imagine an implausibly tiny frame rectangle like the one in the following diagram:
+<P>
+<IMG SRC="art/Drawing2.GIF" ALIGN="bottom">
+<P>
+Since the pixels on the edges of this 2.0 * 3.0 rectangle are treated as being inside the rectangle, the view covers a 3 pixel * 4 pixel area.
+<P>
+This fact is important when laying out views and drawing in the bounds rectangle (or drawing any rectangle, for that matter).  However, when discussing view coordinates and rectangles in general, it's easier and more accurate to speak in terms of coordinate values, not pixels&mdash;and that's the practice in this chapter.  However, see &nbsp;<a href="../../r3interface3_CoordinateSpace.html#Mapping%20Coordinates%20to%20Pixels%20on%20page14">"Mapping Coordinates to Pixels" on page14</a> for more on how coordinate values relate to pixels.
+<P>
+<HR>
+<H3>
+<A NAME="Scrolling"></A>Scrolling
+</H3>
+<P>
+A <A HREF="View.html#BView">BView</A> scrolls its contents by shifting coordinate values within the view rectangle&mdash;that is, by altering the bounds rectangle.  If, for example, the top of a view's bounds rectangle is at 100.0 and its bottom is at 200.0, scrolling downward 50.0 units would put the top at 150.0 and the bottom at 250.0.  Contents of the view with <I>y</I>-coordinate values of 150.0 to 200.0, originally displayed in the bottom half of the view, would be shifted to the top half.  Contents with <I>y</I>-coordinate values from 200.0 to 250.0, previously unseen, would become visible at the bottom of the view, as shown in the following illustration: 
+<P>
+<IMG SRC="art/Drawing3.GIF" ALIGN="bottom">
+<P>
+Scrolling doesn't move the view&mdash;it doesn't alter the frame rectangle&mdash;it moves only what's displayed inside the view.  In the illustration above, a "data rectangle" encloses everything the <A HREF="View.html#BView">BView</A> is capable of drawing.  For example, if the view is able to display an entire book, the data rectangle would be large enough to enclose all the lines and pages of the book laid end to end.  However, since a <A HREF="View.html#BView">BView</A> can draw only within its bounds rectangle, everything in the data rectangle with coordinates that fall outside the bounds rectangle would be invisible.  To make unseen data visible, the bounds rectangle must change the coordinates that it encompasses.  Scrolling can be thought of as sliding the view's bounds rectangle to a new position on its data rectangle, as is shown in the illustration above.  However, as it appears to the user, it's moving the data rectangle under the bounds rectangle.  The view doesn't move; the data does.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Clipping%20Region"></A>The Clipping Region
+</H3>
+<P>
+The Application Server clips the images that a <A HREF="View.html#BView">BView</A> produces to the region where it's permitted to draw.
+<P>
+This region is never any larger than the view's bounds rectangle; a view cannot draw outside its bounds.  Furthermore, since a child is considered part of its parent, a view can't draw outside the bounds rectangle of its parent either&mdash;or, for that matter, outside the bounds rectangle of any ancestor view.  In addition, since child views draw after, and therefore logically in front of, their parents, a view concedes some of its territory to its children.
+<P>
+Thus, the <I>visible region</I> of a view is the part of its bounds rectangle that's inside the bounds rectangles of all its ancestors, minus the frame rectangles of its children.  This is illustrated in the following figure.  It shows a hierarchy of three views&mdash;X, Y, and Z.  The area filled with a crosshatch pattern is the visible region of view X; it omits the area occupied by its child, view Y.  The visible region of view Y is colored dark gray; it omits the part of the view that lies outside its parent.  View Z has no visible region, for it lies outside the bounds rectangle of its ancestor, view X: 
+<P>
+<IMG SRC="art/Drawing4.GIF" ALIGN="bottom">
+<P>
+The visible region of a view might be further restricted if its window is obscured by another window or if the window it's in lies partially off-screen.  The visible region includes only those areas that are actually visible to the user.  For example, if the three views in the previous illustration were in a window that was partially blocked by another window, their visible regions might be considerably smaller.  This is shown in the next figure: 
+<P>
+<IMG SRC="art/Drawing5.GIF" ALIGN="bottom">
+<P>
+Note that in this case, view X has a discontinuous visible region.
+<P>
+The Application Server clips the drawing that a view does to a region that's never any larger than the visible region.  On occasion, it may be smaller.  For the sake of efficiency, while a view is being automatically updated, the <I>clipping region</I> excludes portions of the visible region that don't need to be redrawn:
+<P>
+<UL>
+<LI>When a view is scrolled, the Application Server may be able to shift some of its contents from one portion of the visible region to another.  The clipping region excludes any part of the visible region that the server was able to update on its own; it includes only the part where the <A HREF="View.html#BView">BView</A> must produce images that were not previously visible.
+<P>
+<LI>If a view is resized larger, the clipping region may include only the new areas that were added to the visible region.  (But see the <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> argument for the <A HREF="View.html#BView">BView</A> constructor.)
+<P>
+<LI>If only part of a view is invalidated (by the <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B> function), the clipping region is the intersection of the visible region and the invalid rectangle.
+<P>
+</UL>
+<P>
+An application can also limit the clipping region for a view by passing a <A HREF="Region.html#BRegion">BRegion</A> object to <B><TT><A HREF="ViewGraphicsState.html#ConstrainClippingRegion()">ConstrainClippingRegion()</A></TT></B>.  The clipping region won't include any areas that aren't in the region passed.  The Application Server calculates the clipping region as it normally would but intersects it with the specified region.
+<P>
+You can obtain the current clipping region for a view by calling <B><TT><A HREF="ViewGraphicsState.html#GetClippingRegion()">GetClippingRegion()</A></TT></B>.  (See also the <A HREF="Region.html#BRegion">BRegion</A> class description.)
+<P>
+<A NAME="24548:%20head2:%20The%20View%20Color"></A>
+<P>
+<HR>
+<H3>
+<A NAME="The%20View%20Color"></A>The View Color
+</H3>
+<P>
+Every view has a basic, underlying color.  It's the color that fills the view rectangle before the <A HREF="View.html#BView">BView</A> does any drawing.  The Application Server paints the view with this color before any view-specific drawing functions are called.  The user may catch a glimpse of the color when the view is first shown on-screen, when it's resized larger, and when it's erased in preparation for an update.  It will also be seen wherever the <A HREF="View.html#BView">BView</A> fails to draw in the visible region.
+<P>
+In a sense, the view color is the canvas on which the <A HREF="View.html#BView">BView</A> draws.  It doesn't enter into any of the object's drawing operations except to provide a background.  Although it's one of the BView's graphics parameters, it's not one that any drawing functions refer to.
+<P>
+The default view color is white.  You can assign a different color to a view by calling BView's <B><TT><A HREF="ViewGraphicsState.html#SetViewColor()">SetViewColor()</A></TT></B> function.  If you set the view color to <B><TT>B_TRANSPARENT_COLOR</TT></B>, the Application Server won't erase the view's clipping region before an update.  This is appropriate only if the view erases itself by touching every pixel in the clipping region when it draws.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Background%20Bitmap"></A>The Background Bitmap
+</H3>
+<P>
+Every view may additionally have a background bitmap.  The Application Server draws this bitmap after it fills in the view color and before any view-specific drawing functions are called.  The view color will be visible in regions the background bitmap doesn't cover.
+<P>
+A view begins life without a background bitmap.  A background bitmap may be added with BView's <B><TT><A HREF="ViewDrawing.html#SetViewBitmap()">SetViewBitmap()</A></TT></B> function and subsequently removed with <B><TT><A HREF="ViewDrawing.html#ClearViewBitmap()">ClearViewBitmap()</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="The%20Mechanics%20of%20Drawing"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>M</FONT>echanics of <FONT SIZE=6>D</FONT>rawing
+</H2>
+<P>
+Views draw through the following set of primitive functions:
+<P>
+<UL>
+<LI><B><TT>DrawString()</TT></B>  draws a string of characters.  <B><TT><A HREF="ViewDrawing.html#DrawChar()">DrawChar()</A></TT></B> is a variant of this function; it draws just a single character.
+<P>
+<LI><B><TT>DrawPicture()</TT></B> executes a set of recorded drawing instructions.
+<P>
+<LI><B><TT>DrawBitmap()</TT></B> produces an image from a bitmap.
+<P>
+<LI><B><TT><A HREF="ViewDrawing.html#CopyBits()">CopyBits()</A></TT></B> copies an image from one location to another.
+<P>
+<LI><B><TT>FillEllipse()</TT></B>, <B><TT>FillRegion()</TT></B>, and other <B><TT>Fill</TT></B>...<B><TT>()</TT></B> functions fill closed shapes.
+<P>
+<LI><B><TT>StrokeLine()</TT></B>, <B><TT>StrokeArc()</TT></B>, and other <B><TT>Stroke</TT></B>...<B><TT>()</TT></B> functions stroke lines along defined paths.
+<P>
+<LI><B><TT><A HREF="ViewDrawing.html#BeginLineArray()">BeginLineArray()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#AddLine()">AddLine()</A></TT></B>, and <B><TT><A HREF="ViewDrawing.html#EndLineArray()">EndLineArray()</A></TT></B> draw a set of straight lines, all of the same width, but possibly in different colors.
+<P>
+</UL>
+<P>
+The way these functions work depends not only on the values that they're passed&mdash;the particular string, bitmap, arc, or ellipse that's to be drawn&mdash;but on previously set values in the BView's graphics environment.
+<P>
+<HR>
+<H3>
+<A NAME="Graphics%20Environment"></A>Graphics Environment
+</H3>
+<P>
+Each <A HREF="View.html#BView">BView</A> object maintains its own graphics environment for drawing.  The view color, coordinate system, and clipping region are fundamental parts of that environment, but not the only parts.  It also includes a number of parameters that can be set and reset at will to affect the next image drawn.  These parameters are:
+<P>
+<UL>
+<LI>Font attributes that determine the appearance of text the <A HREF="View.html#BView">BView</A> draws.  (See <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B> and the <A HREF="Font.html#BFont">BFont</A> class.)
+<P>
+<LI>Two pen parameters&mdash;a location and a size.  The pen location determines where the next drawing will occur, and the pen size determines the thickness of stroked lines.  (See <B><TT><A HREF="ViewGraphicsState.html#MovePenBy()">MovePenBy()</A></TT></B> and <B><TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B>.)
+<P>
+<LI>Two current colors&mdash;a <I>high color</I> and a <I>low color</I>&mdash;that can be used either alone or in combination to form a pattern or halftone.  The high color is used for most drawing.  The low color is sometimes set to the underlying view color so that it can be used to erase other drawing or, because it matches the view background, make it appear that drawing has not touched certain pixels.
+<P>
+(The high and low colors roughly match what other systems call the fore and back, or foreground and background, colors.  However, neither color truly represents the color of the foreground or background.  The terminology <I>high</I> and <I>low</I> is meant to keep the sense of two opposing colors and to match how they're defined in a pattern.  A pattern bit is turned on for the high color and turned off for the low color.  See the <B><TT><A HREF="ViewGraphicsState.html#SetHighColor()">SetHighColor()</A></TT></B> and <B><TT><A HREF="ViewGraphicsState.html#SetLowColor()">SetLowColor()</A></TT></B> functions in the <A HREF="View.html#BView">BView</A> class description and the <a href="#Patterns">"Patterns"</a> section on &nbsp;.)
+<P>
+<LI>A drawing mode that determines how the next image is to be rendered.  (See &nbsp;<a href="#Drawing%20Modes%20on%20page19">"Drawing Modes" on page19</a> and the <B><TT><A HREF="ViewGraphicsState.html#SetDrawingMode()">SetDrawingMode()</A></TT></B> function.)
+<P>
+</UL>
+<P>
+By default, a BView's graphics parameters are set to the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>Font</TD>
+<TD>The system plain font (<B><TT><A HREF="Font.html#be_plain_font">be_plain_font</A></TT></B>)</TD>
+<TR>
+<TD>Pen position</TD>
+<TD>(0.0, 0.0)</TD>
+<TR>
+<TD>Pen size</TD>
+<TD>1.0 coordinate units</TD>
+<TR>
+<TD>High color</TD>
+<TD>Black (red, green, and blue components all equal to 0)</TD>
+<TR>
+<TD>Low color</TD>
+<TD>White (red, green, and blue components all equal to 255)</TD>
+<TR>
+<TD>Drawing mode</TD>
+<TD>Copy mode (<B><TT>B_OP_COPY</TT></B>)</TD>
+<TR>
+<TD>View color</TD>
+<TD>White (red, green, and blue components all equal to 255)</TD>
+<TR>
+<TD>Clipping region</TD>
+<TD>The visible region of the view</TD>
+<TR>
+<TD>Coordinate system</TD>
+<TD>Origin at the left top corner of the bounds rectangle </TD>
+</TABLE>
+<P>
+However, as &nbsp;<a href="#Views%20and%20the%20Server%20on%20page24">"Views and the Server" on page24</a> explains, these values have meaning only when the <A HREF="View.html#BView">BView</A> is assigned to a window.
+<P>
+<A NAME="40685:%20head3:%20The%20Pen"></A>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Pen"></A>The Pen
+</H3>
+<P>
+The pen is a fiction that encompasses two properties of a view's graphics environment: the current drawing location and the thickness of stroked lines.
+<P>
+The pen location determines where the next image will be drawn&mdash;but only if another location isn't explicitly passed to the drawing function.  Some drawing functions alter the pen location&mdash;as if the pen actually moves as it does the drawing&mdash;but usually it's set by calling <B><TT><A HREF="ViewGraphicsState.html#MovePenBy()">MovePenBy()</A></TT></B> or <B><TT><A HREF="ViewGraphicsState.html#MovePenTo()">MovePenTo()</A></TT></B>.
+<P>
+The pen that draws lines (through the various <B><TT>Stroke</TT></B>...<B><TT>()</TT></B> functions) has a malleable tip that can be made broader or narrower by calling the <B><TT><A HREF="ViewGraphicsState.html#SetPenSize()">SetPenSize()</A></TT></B> function.  The larger the pen size, the thicker the line that it draws.
+<P>
+The pen size is expressed in coordinate units, which must be translated to a particular number of pixels for the display device.  This is done by scaling the pen size to a device-specific value and rounding to the closest integer.  For example, pen sizes of 2.6 and 3.3 would both translate to 3 pixels on-screen, but to 7 and 10 pixels respectively on a 300dpi printer.
+<P>
+The size is never rounded to 0; no matter how small the pen may be, the line never disappears.  If the pen size is set to 0.0, the line will be as thin as possible&mdash;it will be drawn using the fewest possible pixels on the display device.  (In other words, it will be rounded to 1 for all devices.)
+<P>
+If the pen size translates to a tip that's broader than 1 pixel, the line is drawn with the tip centered on the path of the line.  Roughly the same number of pixels are colored on both sides of the path.
+<P>
+A later section, &nbsp;<a href="../../r3interface3_CoordinateSpace.html#Picking%20Pixels%20to%20Stroke%20and%20Fill%20on%20page15">"Picking Pixels to Stroke and Fill" on page15</a>, illustrates how pens of different sizes choose the pixels to be colored.
+<P>
+<A NAME="11161:%20head3:%20Colors"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Colors"></A>Colors
+</H3>
+<P>
+The high and low colors are specified as <B><TT><A HREF="misc.html#rgb_color">rgb_color</A></TT></B> values&mdash;full 32-bit values with separate red, green, and blue color components, plus an alpha component for transparency.  Although there may sometimes be limitations on the colors that can be rendered on-screen, there are no restrictions on the colors that can be specified.
+<P>
+<A NAME="42378:%20head3:%20Color%20Spaces"></A>
+<P>
+<H4>
+<A NAME="Color%20Spaces"></A>Color Spaces
+</H4>
+<P>
+The way colors are specified for a bitmap depends on the color space in which they're interpreted.  The color space determines the <I>depth</I> of the bitmap data (how many bits of information are stored for each pixel), the <I>interpretation</I> of the data (whether it represents shades of gray or true colors, whether it's segmented into color components, what the components are, and so on), and the <I>arrangement</I> of components within the data (whether big-endian or little-endian).  These six basic color spaces are recognized:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_GRAY1">B_GRAY1</A></TT></B></TD>
+<TD>One bit of data per pixel, where 1 is black and 0 is white.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_GRAY8">B_GRAY8</A></TT></B></TD>
+<TD>Eight bits of data per pixel, where a value of 255 is black and 0 is white.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B></TD>
+<TD>Eight bits of data per pixel, interpreted as an index into a list of 256 colors.  The list is part of the system color map and is the same for all applications.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_RGB15">B_RGB15</A></TT></B></TD>
+<TD>Three components of data per pixel&mdash;blue, green, and red, in that order&mdash;with 5 bits each for red, green, and blue.  The first bit of the pixel data is not associated with any color component.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_RGBA15">B_RGBA15</A></TT></B></TD>
+<TD>Four components of data per pixel&mdash;blue, green, red, and alpha, in that order&mdash;with 5 bits each for red, green, and blue, and 1 bit for alpha.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_RGB16">B_RGB16</A></TT></B></TD>
+<TD>Three components of data per pixel&mdash;blue, green, and red, in that order&mdash;with 5 bits each for red and blue, and 6 bits for green.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B></TD>
+<TD>Four components of data per pixel&mdash;blue, green, red, and alpha, in that order&mdash;with 8 bits per component.  A component value of 255 yields the maximum amount of red, green, or blue, and a value of 0 indicates the absence of that color.</TD>
+</TABLE>
+<P>
+The components in the <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B>, <B><TT><A HREF="misc.html#B_RGB16">B_RGB16</A></TT></B>, <B><TT><A HREF="../Release%20Notes/KernelKit.html#and">and</A></TT></B> <B><TT><A HREF="misc.html#B_RGB15">B_RGB15</A></TT></B> color spaces are meshed rather than separated into distinct planes; all four components are specified for the first pixel before the four components for the second pixel, and so on.  The order of bytes for these two types is little-endian, which means that for <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B> data, the component bytes appear in the order blue, green, red, and alpha.
+<P>
+Counterpart color spaces are defined for big-endian data.  <B><TT><A HREF="misc.html#B_RGB32_BIG">B_RGB32_BIG</A></TT></B>, <B><TT><A HREF="misc.html#B_RGB16_BIG">B_RGB16_BIG</A></TT></B>, <B><TT><A HREF="misc.html#B_RGBA15_BIG">B_RGBA15_BIG</A></TT></B>, and <B><TT><A HREF="misc.html#B_RGB15_BIG">B_RGB15_BIG</A></TT></B>, are equivalent to <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B>, <B><TT><A HREF="misc.html#B_RGB16">B_RGB16</A></TT></B>, <B><TT><A HREF="misc.html#B_RGBA15">B_RGBA15</A></TT></B>, and <B><TT><A HREF="misc.html#B_RGB15">B_RGB15</A></TT></B>&mdash;except for the order of bytes.  The Be operating system retains data in the little-endian formats; the big-endian color spaces are defined only to label noncompatible data that the system must convert and to allow drivers to communicate precise formats to the operating system.
+<P>
+Alpha should be 0 for 100% transparent, or 255 (for 8-bit alpha channels) for 100% opaque.  For 1-bit alpha channels, a value of 1 indicates opaque.
+<P>
+<H4>
+<A NAME="The%20Screen"></A>The Screen
+</H4>
+<P>
+The screen can be configured to display colors in either the <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B>, <B><TT><A HREF="misc.html#B_RGB15">B_RGB15</A></TT></B>, or <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B> color spaces.  When it's in the <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> or <B><TT><A HREF="misc.html#B_RGB15">B_RGB15</A></TT></B> color spaces, specified <B><TT><A HREF="misc.html#rgb_color">rgb_color</A></TT></B>s are displayed as the closest available color.  (See the <A HREF="Bitmap.html#BBitmap">BBitmap</A> and <A HREF="Screen.html#BScreen">BScreen</A> classes.)
+<P>
+<A NAME="24662:%20head3:%20Patterns"></A>
+<P>
+<H4>
+<A NAME="Patterns"></A>Patterns
+</H4>
+<P>
+Most functions that stroke a line or fill a closed shape don't draw directly in either the high or the low color.  Rather they take a <I>pattern</I>, an arrangement of one or both colors that's repeated over the entire surface being drawn.  A pattern might consist of just the high color, just the low color, or some combination of the two.
+<P>
+By combining the low color with the high color, patterns can produce dithered colors that lie somewhere between two hues in the <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space.  Patterns also permit drawing with less than the solid high color (for intermittent or broken lines, for example) and can take advantage of drawing modes that treat the low color as if it were transparent, as discussed in the next section.
+<P>
+A pattern is defined as an 8-pixel by 8-pixel square.  The <B><TT><A HREF="misc.html#pattern">pattern</A></TT></B> type is 8 bytes long, with 1&nbsp;byte per row and 1&nbsp;bit per pixel.  Rows are specified from top to bottom and pixels from left to right.  Bits marked&nbsp;1 designate the high color; those marked&nbsp;0 designate the low color.  For example, a pattern of wide diagonal stripes could be defined as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;pattern stripes = { 0xc7, 0x8f, 0x1f, 0x3e,
+&nbsp;&nbsp;&nbsp;                    0x7c, 0xf8, 0xf1, 0xe3 };</PRE>
+<P>
+Patterns repeat themselves across the screen, like tiles laid side by side.  The pattern defined above looks like this: 
+<P>
+<IMG SRC="art/Drawing6.GIF" ALIGN="bottom">
+<P>
+The dotted lines in this illustration show the separation of the screen into pixels.  The thicker black line outlines one 8&nbsp;*&nbsp;8 square that the pattern defines.
+<P>
+The outline of the shape being filled or the width of the line being stroked determines where the pattern is revealed.  It's as if the screen was covered with the pattern just below the surface, and stroking or filling allowed some of it to show through.  For example, stroking a 1-pixel wide horizontal path in the pattern illustrated above would result in a dotted line, with the dashes (in the high color) slightly longer than the spaces between (in the low color): 
+<P>
+<IMG SRC="art/Drawing7.GIF" ALIGN="bottom">
+<P>
+When stroking a line or filling a shape, the pattern serves as the source image for the current drawing mode, as explained in <a href="#Drawing%20Modes">"Drawing Modes"</a> next.  The nature of the mode determines how the pattern interacts with the destination image, the image already in place.
+<P>
+The Interface Kit defines three patterns:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#Pattern%20Constants">B_SOLID_HIGH</A></TT></B></TD>
+<TD>Consists only of the high color.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#Pattern%20Constants">B_SOLID_LOW</A></TT></B></TD>
+<TD>Has only the low color.</TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#Pattern%20Constants">B_MIXED_COLORS</A></TT></B></TD>
+<TD>Mixes the two colors evenly, like the pattern on a checkerboard.</TD>
+</TABLE>
+<P>
+<B><TT><A HREF="misc.html#Pattern%20Constants">B_SOLID_HIGH</A></TT></B> is the default pattern for all drawing functions.  Applications can define as many other patterns as they need.
+<P>
+<A NAME="33877:%20head3:%20Drawing%20Modes"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Drawing%20Modes"></A>Drawing Modes
+</H3>
+<P>
+When a <A HREF="View.html#BView">BView</A> draws, it in effect transfers an image to a target location somewhere in the view rectangle.  The drawing mode determines how the image being transferred interacts with the image already in place at that location.  The image being transferred is known as the <I>source image</I>; it might be a bitmap or a pattern of some kind.  The image already in place is known as the <I>destination image</I>.
+<P>
+In the simplest and most straightforward kind of drawing, the source image is simply painted over the destination; the source replaces the destination.  However, there are other possibilities.  There are ten different drawing modes&mdash;ten distinct ways of combining the source and destination images.  The modes are designated by <B><TT><A HREF="misc.html#drawing_mode">drawing_mode</A></TT></B> constants that can be passed to <B><TT><A HREF="ViewGraphicsState.html#SetDrawingMode()">SetDrawingMode()</A></TT></B>:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_OP_ADD">B_OP_ADD</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B></TD>
+<TD><B><TT>B_OP_SUBTRACT</TT></B> </TD>
+<TR>
+<TD><B><TT>B_OP_ERASE</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_OP_BLEND">B_OP_BLEND</A></TT></B> </TD>
+<TR>
+<TD><B><TT>B_OP_INVERT</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_OP_MIN">B_OP_MIN</A></TT></B> </TD>
+<TR>
+<TD><B><TT>B_OP_SELECT</TT></B></TD>
+<TD><B><TT><A HREF="misc.html#B_OP_MAX">B_OP_MAX</A></TT></B> </TD>
+</TABLE>
+<P>
+<B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B> is the default mode and the simplest.  It transfers the source image to the destination, replacing whatever was there before.  The destination is ignored.
+<P>
+In the other modes, however, some of the destination might be preserved, or the source and destination might be combined to form a result that's different from either of them.  For these modes, it's convenient to think of the source image as an image that exists somewhere independent of the destination location, even though it's not actually visible.  It's the image that would be rendered at the destination in <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B> mode.
+<P>
+<H4>
+<A NAME="Bitmaps%20and%20Patterns"></A>Bitmaps and Patterns
+</H4>
+<P>
+The modes work for all <A HREF="View.html#BView">BView</A> drawing functions&mdash;including those that stroke lines and fill shapes, those that draw characters, and those that image bitmaps.  The way they work depends foremost on the nature of the source image&mdash;whether it's a <I>pattern</I> or a <I>bitmap</I>.  For the <B><TT>Fill</TT></B>...<B><TT>()</TT></B> and <B><TT>Stroke</TT></B>...<B><TT>()</TT></B> functions, the source image is a pattern that has the same shape as the area being filled or the area the pen touches as it strokes a line.  For <B><TT><A HREF="ViewDrawing.html#DrawBitmap()">DrawBitmap()</A></TT></B>, the source image is a rectangular bitmap.
+<P>
+In a sense, a pattern is simply a bitmap that's one bit deep.  It's a bitmap consisting of two colors, one which maps to the current high color and another that maps to the current low color.  As we shall see later, a <B><TT><A HREF="misc.html#B_MONOCHROME_1_BIT">B_MONOCHROME_1_BIT</A></TT></B> bitmap acts just like a pattern.  However, patterns and bitmaps generally behave differently:
+<P>
+<UL>
+<LI>Only a source pattern has designated high and low colors.  Even if a source bitmap has colors that match the current high and low colors, they're not handled like the colors in a pattern; they're treated just like any other color in the bitmap.
+<P>
+<LI>On the other hand, only a source bitmap can have transparent pixels.  In the <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space, a pixel is made transparent by assigning it the <B><TT><A HREF="#B_TRANSPARENT_MAGIC_CMAP8">B_TRANSPARENT_MAGIC_CMAP8</A></TT></B> value.  In the <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B> color space, a pixel assigned the <B><TT><A HREF="#B_TRANSPARENT_MAGIC_RGBA32">B_TRANSPARENT_MAGIC_RGBA32</A></TT></B> value is considered transparent.  These values have meaning only for source bitmaps, not for source patterns.  If the current high or low color in a pattern happens to have a transparent value, it's still treated as the high or low color, not like transparency in a bitmap.  For big endian color spaces, the transparency color should be byte-swapped from its little endian counterpart.
+<P>
+</UL>
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_TRANSPARENT_MAGIC_CMAP8"></A>B_TRANSPARENT_MAGIC_CMAP8
+</TT></B></TD>
+<TD>8-bit indexed color transparent pixel.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSPARENT_MAGIC_RGBA15"></A>B_TRANSPARENT_MAGIC_RGBA15
+</TT></B></TD>
+<TD>15-bit transparent pixel.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSPARENT_MAGIC_RGBA15"></A>B_TRANSPARENT_MAGIC_RGBA15
+_BIG</TT></B></TD>
+<TD>15-bit transparent pixel, big-endian.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSPARENT_MAGIC_RGBA32"></A>B_TRANSPARENT_MAGIC_RGBA32
+</TT></B></TD>
+<TD>32-bit transparent pixel.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRANSPARENT_MAGIC_RGBA32"></A>B_TRANSPARENT_MAGIC_RGBA32
+_BIG</TT></B></TD>
+<TD>32-bit transparent pixel, big-endian.</TD>
+</TABLE>
+<P>
+<H4>
+<A NAME="Drawing%20Modes%20and%20Color%20Spaces"></A>Drawing Modes and Color Spaces
+</H4>
+<P>
+The way the drawing modes work also depends on the color space of the source image and the color space of the destination.  The following discussion concentrates on drawing where the source and destination both contain colors.  This is the most common case, and also the one that's most general.
+<P>
+The source and destination images can have different color spaces.  For example, a source bitmap might be defined in the <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> space while the destination is displayed in the full color <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B> color space.  The drawing operation merely combines the colors in the two images in some way.  It doesn't transfer the color space of the source image to the destination.  The image that results from the drawing operation will always be in the color space of the destination image.
+<P>
+<H4>
+<A NAME="Mode%20Definitions"></A>Mode Definitions
+</H4>
+<P>
+When applied to colors, the ten drawing modes fall naturally into four groups:
+<P>
+<UL>
+<LI>The <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B> mode, which copies the source image to the destination.
+<P>
+<LI>The <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B>, <B><TT>B_OP_ERASE</TT></B>, <B><TT>B_OP_INVERT</TT></B>, and <B><TT>B_OP_SELECT</TT></B> modes, which&mdash;despite their differences&mdash;all treat the low color in a pattern as if it were transparent.
+<P>
+<LI>The <B><TT><A HREF="misc.html#B_OP_ADD">B_OP_ADD</A></TT></B>, <B><TT>B_OP_SUBTRACT</TT></B>, and <B><TT><A HREF="misc.html#B_OP_BLEND">B_OP_BLEND</A></TT></B> modes, which combine colors in the source and destination images.
+<P>
+<LI>The <B><TT><A HREF="misc.html#B_OP_MIN">B_OP_MIN</A></TT></B> and <B><TT><A HREF="misc.html#B_OP_MAX">B_OP_MAX</A></TT></B> modes, which choose between the source and destination colors.
+<P>
+</UL>
+<P>
+The following paragraphs describe each of these groups in turn.
+<P>
+<H5>
+<A NAME="Copy%20mode"></A>Copy mode
+</H5>
+<P>
+In <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B> mode, the source image replaces the destination.  This is the default drawing mode and the one most commonly used.  Because this mode doesn't have to test for particular color values in the source image, look at the colors in the destination, or compute colors in the result, it's also the fastest of the modes.
+<P>
+If the source image contains transparent pixels, their transparency will be retained in the result; the transparent value is copied just like any other color.  However, the appearance of a transparent pixel when shown on-screen is indeterminate.  If a source image has transparent portions, it's best to transfer it to the screen in <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B> or another mode.  In all modes other than <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B>, a transparent pixel in a source bitmap preserves the color of the corresponding destination pixel.
+<P>
+<H5>
+<A NAME="Transparency%20modes"></A>Transparency modes
+</H5>
+<P>
+Four drawing modes&mdash;<B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B>, <B><TT>B_OP_ERASE</TT></B>, <B><TT>B_OP_INVERT</TT></B>, and <B><TT>B_OP_SELECT</TT></B>&mdash;are designed specifically to make use of transparency in the source image; they're able to preserve some of the destination image.  In these modes (and only these modes) the low color in a source pattern acts just like transparency in a source bitmap.
+<P>
+Each of these modes has a different effect on the destination image&mdash;but only in those places where the source image is not transparent.  One of the modes, <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B>, transfers some of the source image to the destination.  The other three modes play with the destination in some way&mdash;erase it, invert it, or select colors in it&mdash;without regard to the source image.  For these modes, the only thing that matters about the source image is where it's transparent and where it's not.  Each of the four modes is described below:
+<P>
+<UL>
+<LI>The <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B> mode places the source image "over" the destination; the source provides the foreground and the destination the background.  In this mode, the source image replaces the destination image (just as in the <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B> mode)&mdash;except where a source bitmap has transparent pixels and a source pattern has the low color.  Transparency in a bitmap and the low color in a pattern retain the destination image in the result.
+<P>
+By masking out the unwanted parts of a rectangular bitmap with transparent pixels, this mode can place an irregularly shaped source image in front of a background image.  Transparency in the source foreground lets the destination background show through.  The versatility of <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B> makes it the second most commonly used mode, after <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B>.
+<P>
+<LI>The <B><TT>B_OP_ERASE</TT></B> mode doesn't draw the source image at all.  Instead, it erases the destination image.  Like <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B>, it preserves the destination image wherever a source bitmap is transparent or a source pattern has the low color.  But everywhere else&mdash;where the source bitmap isn't transparent and the source pattern has the high color&mdash;it removes the destination image, replacing it with the low color.
+<P>
+Although this mode can be used for selective erasing, it's simpler to erase by filling an area with the <B><TT><A HREF="misc.html#Pattern%20Constants">B_SOLID_LOW</A></TT></B> pattern in <B><TT><A HREF="misc.html#B_OP_COPY">B_OP_COPY</A></TT></B> mode.
+<P>
+<LI>The <B><TT>B_OP_INVERT</TT></B> mode, like <B><TT>B_OP_ERASE</TT></B>, doesn't draw the source image.  Instead, it inverts the colors in the destination image.  As in the case of the <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B> and <B><TT>B_OP_ERASE</TT></B> modes, where a source bitmap is transparent or a source pattern has the low color, the destination image remains unchanged in the result.  Everywhere else, the color of the destination image is inverted.
+<P>
+The inversion of an <B><TT><A HREF="misc.html#rgb_color">rgb_color</A></TT></B> is the complement of its color components.  For example, the inversion of a red value of 58 would be 197 (255&ndash;58).
+<P>
+<LI>The <B><TT>B_OP_SELECT</TT></B> mode also doesn't draw the source image.  It replaces the high color in the destination image with the low color and the low color with the high color.  As for the other modes in this group, where a source bitmap is transparent or a source pattern has the low color, the destination image remains unchanged in the result.  Everywhere else, the high and low colors are switched.
+<P>
+This is similar to the <B><TT>B_OP_INVERT</TT></B> mode, except that <B><TT>B_OP_SELECT</TT></B> affects at most only two colors in the destination image.  The destination is preserved not only where the source is transparent, but also where its colors don't match the current high and low colors.
+<P>
+</UL>
+<P>
+These four modes also work for monochrome images.  If the source image is monochrome, the distinction between source bitmaps and source patterns breaks down.  Two rules apply:
+<P>
+<UL>
+<LI>If the source image is a monochrome bitmap, it acts just like a pattern.  A value of 1 in the bitmap designates the current high color, and a value of 0 designates the current low color.  Thus, 0, rather than <B><TT><A HREF="#B_TRANSPARENT_MAGIC_*">B_TRANSPARENT_MAGIC_*</A></TT></B>, becomes the transparent value.
+<P>
+<LI>If the source and destination are both monochrome, the high color is necessarily black (1), and the low color is necessarily white (0)&mdash;but otherwise the drawing modes work as described.  With the possible colors this severely restricted, the three modes are reduced to boolean operations:  <B><TT><A HREF="misc.html#B_OP_OVER">B_OP_OVER</A></TT></B> is the same as a logical <I>OR</I>, <B><TT>B_OP_INVERT</TT></B> and <B><TT>B_OP_SELECT</TT></B> are the same as logical <I>exclusive OR</I>, and <B><TT>B_OP_ERASE</TT></B> is the same as an inversion of logical <I>AND</I>.
+<P>
+</UL>
+<P>
+<H5>
+<A NAME="Blending%20modes"></A>Blending modes
+</H5>
+<P>
+Three drawing modes&mdash;<B><TT><A HREF="misc.html#B_OP_ADD">B_OP_ADD</A></TT></B>, <B><TT>B_OP_SUBTRACT</TT></B>, and <B><TT><A HREF="misc.html#B_OP_BLEND">B_OP_BLEND</A></TT></B>&mdash;combine the source and destination images, pixel by pixel, and color component by color component.  As in most of the other modes, transparency in a source bitmap preserves the destination image in the result.  Elsewhere, the result is a combination of the source and destination.  The high and low colors of a source pattern aren't treated in any special way; they're handled just like other colors.
+<P>
+<UL>
+<LI><B><TT><A HREF="misc.html#B_OP_ADD">B_OP_ADD</A></TT></B> adds each component of the source color to the corresponding component of the destination color, with a component value of 255 as the limit.  Colors become brighter, closer to white.
+<P>
+By adding a uniform gray to each pixel in the destination, for example, the whole destination image can be brightened by a constant amount.
+<P>
+<LI><B><TT>B_OP_SUBTRACT</TT></B> subtracts each component of the source color from the corresponding component of the destination color, with a component value of 0 as the limit.  Colors become darker, closer to black.
+<P>
+For example, by subtracting a uniform amount from the red component of each pixel in the destination, the whole image can be made less red.
+<P>
+<LI><B><TT><A HREF="misc.html#B_OP_BLEND">B_OP_BLEND</A></TT></B> averages each component of the source and destination colors (adds the source and destination components and divides by 2).  The two images are merged into one.
+<P>
+</UL>
+<P>
+These modes work only for color images, not for monochrome ones.  If the source or destination is specified in the <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space, the color will be expanded to a full <B><TT><A HREF="misc.html#B_RGB32">B_RGB32</A></TT></B> value to compute the result; the result is then contracted to the closest color in the <B><TT><A HREF="misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space.
+<P>
+<H5>
+<A NAME="Selection%20modes"></A>Selection modes
+</H5>
+<P>
+Two drawing modes&mdash;<B><TT><A HREF="misc.html#B_OP_MAX">B_OP_MAX</A></TT></B> and <B><TT><A HREF="misc.html#B_OP_MIN">B_OP_MIN</A></TT></B>&mdash;compare each pixel in the source image to the corresponding pixel in the destination image and select one to keep in the result.  If the source pixel is transparent, both modes select the destination pixel.  Otherwise, <B><TT><A HREF="misc.html#B_OP_MIN">B_OP_MIN</A></TT></B> selects the darker of the two colors and <B><TT><A HREF="misc.html#B_OP_MAX">B_OP_MAX</A></TT></B> selects the brighter of the two.  If the source image is a uniform shade of gray, for example, <B><TT><A HREF="misc.html#B_OP_MAX">B_OP_MAX</A></TT></B> would substitute that shade for every pixel in the destination image that was darker than the gray.
+<P>
+Like the blending modes, <B><TT><A HREF="misc.html#B_OP_MIN">B_OP_MIN</A></TT></B> and <B><TT><A HREF="misc.html#B_OP_MAX">B_OP_MAX</A></TT></B> work only for color images.
+<P>
+<A NAME="15078:%20head2:%20Views%20and%20the%20Server"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Views%20and%20the%20Server"></A><FONT SIZE=6>V</FONT>iews and the <FONT SIZE=6>S</FONT>erver
+</H2>
+<P>
+Windows lead a dual life&mdash;as on-screen entities provided by the Application Server and as <A HREF="Window.html#BWindow">BWindow</A> objects in the application.  BViews have a similar dual existence&mdash;each <A HREF="View.html#BView">BView</A> object has a shadow counterpart in the server.  The server knows the view's location, its place in the window's hierarchy, its visible area, and the current state of its graphics parameters.  Because it has this information, the server can more efficiently associate a user action with a particular view and interpret the BView's drawing instructions.
+<P>
+BWindows become known to the Application Server when they're constructed; creating a <A HREF="Window.html#BWindow">BWindow</A> object causes the server to produce the window that the user will eventually see on-screen.  A <A HREF="View.html#BView">BView</A>, on the other hand, has no effect on the server when it's constructed.  It becomes known to the server only when it's attached to a BWindow.  The server must look through the application's windows to see what views it has.
+<P>
+A <A HREF="View.html#BView">BView</A> that's not attached to a window therefore lacks a counterpart in the server.  This restricts what some functions can do.  Three groups of functions are affected:
+<P>
+<UL>
+<LI>Drawing functions&mdash;<B><TT><A HREF="ViewDrawing.html#DrawBitmap()">DrawBitmap()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#FillRect()">FillRect()</A></TT></B>, <B><TT><A HREF="ViewDrawing.html#StrokeLine()">StrokeLine()</A></TT></B>, and so on&mdash;don't work for unattached views.  A <A HREF="View.html#BView">BView</A> can't draw unless it's in a window.
+<P>
+<LI>The scrolling functions&mdash;<B><TT><A HREF="ListView.html#ScrollTo()">ScrollTo()</A></TT></B> and <B><TT>ScrollBy()</TT></B>&mdash;require the <A HREF="View.html#BView">BView</A> to be in a window.  Manipulations of a view's coordinate system are carried out in its server counterpart.
+<P>
+<LI>Functions that indirectly depend on a BView's graphics parameters&mdash;such as <B><TT>GetMouse()</TT></B>, which reports the cursor location in the BView's coordinates&mdash;also require the <A HREF="View.html#BView">BView</A> to belong to a window.  These functions need information that an unattached <A HREF="View.html#BView">BView</A> can't provide.
+<P>
+</UL>
+<P>
+However, the functions that set and return graphics parameters&mdash;such as <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#SetDrawingMode()">SetDrawingMode()</A></TT></B>, <B><TT><A HREF="ViewGraphicsState.html#PenLocation()">PenLocation()</A></TT></B>, and <B><TT><A HREF="ViewGraphicsState.html#SetHighColor()">SetHighColor()</A></TT></B>&mdash;are not restricted.  A view's graphic state is kept within the server (where it's needed to carry out drawing instructions), but also cached by the BView.  Therefore, it's possible to assign a value to a graphics parameter before the server knows about the view.  The value is simply cached until the view becomes part of a window's view hierarchy; the <A HREF="View.html#BView">BView</A> then hands it to the server.  The server and the client-side cache are always kept in synch.
+<P>
+<HR>
+<H3>
+<A NAME="Attaching%20to%20a%20Window"></A>Attaching to a Window
+</H3>
+<P>
+Although you can set a BView's graphics parameters before it belongs to a window and has a counterpart in the Application Server, some of its initialization may need to wait until the <A HREF="View.html#BView">BView</A> receives an <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B> notification informing it that it has been added to a window's view hierarchy.  For example, if a view adopts the background color of its parent, it can only set the view color in <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::AttachedToWindow(void)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( Parent() )
+&nbsp;&nbsp;&nbsp;        SetViewColor(Parent()->ViewColor());
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B> is called for each view that's added to a window, beginning with the root view being attached, followed by each of its children, and so on down the hierarchy.  After all views have been notified with an <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B> function call, they each get an <B><TT><A HREF="MenuField.html#AllAttached()">AllAttached()</A></TT></B> notification, but in the reverse order.  A parent view that must adjust itself to calculations made by a child view when it's attached to a window can wait until <B><TT><A HREF="MenuField.html#AllAttached()">AllAttached()</A></TT></B> to do the work.
+<P>
+These two function calls are matched by another pair&mdash;<B><TT><A HREF="Dragger.html#DetachedFromWindow()">DetachedFromWindow()</A></TT></B> and <B><TT><A HREF="ViewHooks.html#AllDetached()">AllDetached()</A></TT></B>&mdash;which notify BViews that they're about to be removed from the window.
+<P>
+<HR>
+<H3>
+<A NAME="Preparing%20to%20Draw"></A>Preparing to Draw
+</H3>
+<P>
+A <A HREF="View.html#BView">BView</A> doesn't have to draw anything within its frame rectangle&mdash;it can just be a container for other BViews that do draw there.  However, most views that you implement will draw.  And most views draw by implementing the <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function.  This function is called upon to present the view on-screen (or, when printing, on a page).  It's implemented using the primitive drawing functions listed above.  If your <A HREF="View.html#BView">BView</A> includes a <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> implementation, you must include <B><TT><A HREF="ViewGeneral.html#B_WILL_DRAW">B_WILL_DRAW</A></TT></B> in the BView's flags upon construction.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Update%20Mechanism"></A>The Update Mechanism
+</H3>
+<P>
+The Application Server sends a message to a <A HREF="Window.html#BWindow">BWindow</A> whenever any of the views within the window need to be updated.  The <A HREF="Window.html#BWindow">BWindow</A> then calls the <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function of each out-of-date <A HREF="View.html#BView">BView</A> so that it can redraw the contents of its on-screen display.
+<P>
+Update messages can arrive at any time.  A <A HREF="Window.html#BWindow">BWindow</A> receives one when the window is first placed on screen, or is shown after being hidden
+<P>
+<UL>
+<LI>The window is first placed on-screen, or is shown again after having been hidden.
+<P>
+<LI>Any part of the window becomes visible after being obscured.
+<P>
+<LI>The views in the window are rearranged&mdash;for example, if a view is resized or a child is removed from the hierarchy.
+<P>
+<LI>Something happens to alter what a particular view displays.  For example, if the contents of a view are scrolled, the <A HREF="View.html#BView">BView</A> must draw any new images that scrolling makes visible.  If one of its children moves, it must fill in the area the child view vacated.
+<P>
+<LI>The application forces an update by "invalidating" a view, or a portion of a view.
+<P>
+</UL>
+<P>
+As update messages arrive, they jump to the head of the BWindow's message queue.
+<P>
+<H4>
+<A NAME="Forcing%20an%20Update"></A>Forcing an Update
+</H4>
+<P>
+When a user action or a <A HREF="View.html#BView">BView</A> function alters a view&mdash;if the view is scrolled, for example&mdash;an update message is sent and the BView's <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function is automatically called.  But if the <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function depends on some other state that's defined by your application, you need to tell the Application Server that your <A HREF="View.html#BView">BView</A> needs an update message.  You do this by invoking BView's <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B> function.
+<P>
+For example, let's say your "D2DView" subclass connects some dots by reading points out of a <A HREF="../The%20Support%20Kit/List.html#BList">BList</A> and drawing lines between them:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void D2DView::Draw(BRect update)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 i=1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (dotList->CountItems() > 1) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MovePenTo(*(BPoint *)dotList->ItemAt(0);&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (i &lt; dotList->CountItems()) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StrokeLine(*(BPoint *)dotList->ItemAt(i++));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Each "dot specification" is added through DotView's <B><TT>AddDot()</TT></B> function. <B><TT> AddDot()</TT></B> includes a call to <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B> in order to force the view to be redrawn:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void D2DView::AddDot(BPoint p)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dotList->AddItem(new BPoint(p));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Invalidate();
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<A NAME="18052:%20head4:%20Forcing%20an%20Update%20while%20Responding%20to%20an%20Event"></A>
+<P>
+<H5>
+<A NAME="Forcing%20an%20Update%20while%20Responding%20to%20an%20Event"></A>Forcing an Update while Responding to an Event
+</H5>
+<P>
+The hook functions that respond to user events&mdash;<B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B>, <B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B>, and so on&mdash;are executed in the same thread that receives window update messages.  If you do something in your implementation of one of these hook functions that causes an update, the update message won't be processed until your hook function exits.  If your hook function does a lot of processing, your interface can become unresponsive.  
+<P>
+To get around this problem, call BWindow's <B><TT><A HREF="Window.html#UpdateIfNeeded()">UpdateIfNeeded()</A></TT></B> function from within your hook functions' implementations.  <B><TT><A HREF="Window.html#UpdateIfNeeded()">UpdateIfNeeded()</A></TT></B> forces any pending<I> </I>update messages to be processed immediately.  The function doesn't return until the "dirty" views are all done re-drawing.  (Note that <B><TT><A HREF="Window.html#UpdateIfNeeded()">UpdateIfNeeded()</A></TT></B> <I><FONT  color=991122 face=HELVETICA>only</I></FONT> works from within the BWindow's message loop thread.)
+<P>
+For example, let's say you want to add a random dot (within a 100x100 square) everytime the user hits a key:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void D2DView::KeyDown(const char *bytes, int32 numBytes)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AddDot(BPoint(rand()%100, rand()%100);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Window()->UpdateIfNeeded();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Since <B><TT>AddDot()</TT></B> calls <B><TT><A HREF="ViewDrawing.html#Invalidate()">Invalidate()</A></TT></B>, we know that there's an update message pending.  However, the update won't normally be processed until <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> exits, so we call <B><TT><A HREF="Window.html#UpdateIfNeeded()">UpdateIfNeeded()</A></TT></B>, which sees the update and calls D2DView's <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function.  When <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> is finished, <B><TT><A HREF="Window.html#UpdateIfNeeded()">UpdateIfNeeded()</A></TT></B> returns and <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> continues.
+<P>
+<H4>
+<A NAME="Erasing%20the%20Clipping%20Region"></A>Erasing the Clipping Region
+</H4>
+<P>
+Just before sending an update message, the Application Server prepares the clipping region of each <A HREF="View.html#BView">BView</A> that is about to draw by erasing it to the view background color.  Note that only the clipping region is erased, not the entire view, and perhaps not the entire area where the <A HREF="View.html#BView">BView</A> will, in fact, draw.
+<P>
+The server forgoes this step only if the BView's background color is set to <B><TT>B_TRANSPARENT_COLOR</TT></B>.  See <a href="#The%20View%20Color">"The View Color"</a> above.
+<P>
+<H4>
+<A NAME="Drawing%20during%20an%20Update"></A>Drawing during an Update
+</H4>
+<P>
+While drawing, a <A HREF="View.html#BView">BView</A> may set and reset its graphics parameters any number of times&mdash;for example, the pen position and high color might be repeatedly reset so that whatever is drawn next is in the right place and has the right color.  These settings are temporary.  When the update is over, all graphics parameters are reset to their initial values.
+<P>
+If, for example, <B><TT>Draw()</TT></B> sets the high color to a shade of light blue, as shown below,
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;SetHighColor(152, 203, 255);</PRE>
+<P>
+it doesn't mean that the high color will be blue when <B><TT>Draw()</TT></B> is called next.  If this line of code is executed during an update, light blue would remain the high color only until the update ends or <B><TT><A HREF="ViewGraphicsState.html#SetHighColor()">SetHighColor()</A></TT></B> is called again, whichever comes first.  When the update ends, the previous graphics state, including the previous high color, is restored.
+<P>
+Although you can change most graphics parameters during an update&mdash;move the pen around, reset the font, change the high color, and so on&mdash;the coordinate system can't be touched; a view can't be scrolled while it's being updated.  If the view's coordinate system were to change, it would alter the current clipping region and confuse the update mechanism.
+<P>
+<H4>
+<A NAME="Drawing%20outside%20of%20an%20Update"></A>Drawing outside of an Update
+</H4>
+<P>
+Graphics parameters that are set outside the context of an update are not limited; they remain in effect until they're explicitly changed.  For example, if application code calls <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B>, perhaps in response to an interface message, the parameter values that <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> last sets would persist even after the function returns.  They would become the default values for the view and would be assumed the next time <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> is called.
+<P>
+Default graphics parameters are typically set as part of initializing the <A HREF="View.html#BView">BView</A> once it's attached to a window&mdash;in an <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B> function.  If you want a <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> function to assume the values set by <B><TT><A HREF="MenuField.html#AttachedToWindow()">AttachedToWindow()</A></TT></B>, it's important to restore those values after any drawing the <A HREF="View.html#BView">BView</A> does that's not the result of an update.  For example, if a <A HREF="View.html#BView">BView</A> invokes <B><TT><A HREF="ViewGraphicsState.html#SetHighColor()">SetHighColor()</A></TT></B> while drawing in response to an interface message, it will need to restore the default high color when done.
+<P>
+If <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> is called outside of an update, it can't assume that the clipping region will have been erased to the view color, nor can it assume that default graphics parameters will be restored when it's finished.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

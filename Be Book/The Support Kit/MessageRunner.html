@@ -1,0 +1,225 @@
+<HTML><HEAD><TITLE>The Support Kit: BMessageRunner</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMessageRunner"></A>BMessageRunner
+</H1>
+<P>
+Derived from:  (none)
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/MessageRunner.h">be/app/MessageRunner.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="MessageRunner.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMessageRunner class provides a handy mechanism for automatically sending an arbitrary message to a <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> at specified intervals.  The application that creates the BMessageRunner can specify the message, the <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> to send the message to, how often to send the message, and how many times it should be sent.
+<P>
+The system roster handles actually dispatching the messages to the appropriate BMessengers at the desired time intervals; this class simply acts as an intermediary through which your application asks the roster to schedule sending the messages.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMessageRunner()"></A>BMessageRunner()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessageRunner(</TT></B></FONT><A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT>, const <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>interval</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>count</I></FONT> = -1<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMessageRunner(</TT></B></FONT><A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT>, const <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t <I><FONT  color=991122 face=HELVETICA>interval</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>count</I></FONT>, <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>replyTo</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Tells the roster to send the specified <I><FONT  color=991122 face=HELVETICA>message</I></FONT> to the <I><FONT  color=991122 face=HELVETICA>target</I></FONT> <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> every <I><FONT  color=991122 face=HELVETICA>interval</I></FONT> microseconds.  The message will be sent <I><FONT  color=991122 face=HELVETICA>count</I></FONT> times (if <I><FONT  color=991122 face=HELVETICA>count</I></FONT> is -1, the message will be sent forever, or until the BMessageRunner is reconfigured or deleted).
+<P>
+The second form of the constructor lets the application specify, in <I><FONT  color=991122 face=HELVETICA>replyTo</I></FONT>, the <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> to which replies to the message should be sent.
+<P>
+The BMessageRunner can be reconfigured (to change the <I><FONT  color=991122 face=HELVETICA>interval</I></FONT> or <I><FONT  color=991122 face=HELVETICA>count</I></FONT>) by calling <B><TT><A HREF="#SetInterval()">SetInterval()</A></TT></B> and <B><TT><A HREF="#SetCount()">SetCount()</A></TT></B>.
+<P>
+After constructing a <A HREF="#BMessageRunner">BMessageRunner</A>, you should call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to ensure that the object was created properly.
+<P>
+<HR>
+<H3>
+<A NAME="~BMessageRunner()"></A>~BMessageRunner()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BMessageRunner()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Asks the roster to stop sending the message.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="GetInfo()"></A>GetInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetInfo(</TT></B></FONT>bigtime_t *<I><FONT  color=991122 face=HELVETICA>interval</I></FONT>, int32 *<I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>GetInfo()</TT></B> returns in <I><FONT  color=991122 face=HELVETICA>interval</I></FONT> the time in microseconds that will pass between messages being sent, and in <I><FONT  color=991122 face=HELVETICA>count</I></FONT> the number of times the message will be sent.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="ErrorCodes.html#B_OK">B_OK</A></TT></B>. Information returned successfully.
+<P>
+<LI><B><TT><A HREF="ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The roster returned invalid information about the BMessenger.
+<P>
+<LI><B><TT><A HREF="ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The roster returned invalid information about the BMessenger.
+<P>
+<LI>Other errors.  In general, getting an error back from this function is a bad thing.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>InitCheck()</TT></B> returns a result code indicating <B><TT><A HREF="ErrorCodes.html#B_OK">B_OK</A></TT></B> if the BMessageRunner constructor executed sucessfully, or some other value if an error occurred setting up the object.  You should call this immediately after creating a <A HREF="#BMessageRunner">BMessageRunner</A>, and shouldn't use the object if this function returns anything but <B><TT><A HREF="ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="SetCount()"></A>SetCount()
+, 
+<A NAME="SetInterval()"></A>SetInterval()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetCount(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>count</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetInterval(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>interval</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetCount()</TT></B> sets the number of times the BMessageRunner will send the message.  If you want the message to be sent forever (until the object is deleted or <B><TT>SetCount()</TT></B> is called again), specify -1.
+<P>
+<B><TT><A HREF="#SetInterval()">SetInterval()</A></TT></B> sets the number of microseconds that will pass between messages being sent.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Support Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Support%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Support Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

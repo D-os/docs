@@ -1,0 +1,67 @@
+<HTML><HEAD><TITLE>Screen Saver: Talking to ScreenSaver</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Screen Saver Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Screen%20Saver%20Master%20Index.html"><FONT face=HELVETICA>Screen Saver Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Talking%20to%20ScreenSaver"></A>Talking to ScreenSaver
+</H1>
+<P>
+If you've installed your screen saver module in the right place (see <a href="ScreenSaverAddOn.html#Building%20and%20Installing%20your%20Add-on">"Building and Installing your Add-on"</a>), the <B>ScreenSaver</B> preferences panel will automatically find it and, at the user's request, display a preview of your saver.  It does this by loading your add-on and calling your BScreenSaver's hook functions.  
+<P>
+As shown below, The panel displays two views that you can draw into:  a <I>preview monitor</I> that displays a miniature version of your screen saver, and a <I>configuration view</I> that you can fill with controls, credits, and so on.  
+<P>
+<IMG SRC="art/ScreenSaver1.gif" ALIGN="bottom">
+<P>
+The hook functions that give you access to these views are:
+<P>
+<UL>
+<LI><B><TT><A HREF="ScreenSaverClass.html#StartSaver()">StartSaver()</A></TT></B> gives you a pointer to the preview monitor.  You can initialize the view's state, but you don't draw into it from <B><TT><A HREF="ScreenSaverClass.html#StartSaver()">StartSaver()</A></TT></B>&mdash;you have to wait for <B><TT><A HREF="ScreenSaverClass.html#Draw()">Draw()</A></TT></B> to be called.  (Note that the <B>ScreenSaver</B> only calls <B><TT><A HREF="ScreenSaverClass.html#Draw()">Draw()</A></TT></B>; you can't use <B><TT><A HREF="ScreenSaverClass.html#DirectDraw()">DirectDraw()</A></TT></B> to draw your preview.)  The preview is drawn into an offscreen bitmap and then copied to the preview area for added smoothness.
+<P>
+<LI><B><TT><A HREF="ScreenSaverClass.html#StartConfig()">StartConfig()</A></TT></B> gives you a pointer to the configuration view.  You draw into the configuration view directly from within <B><TT><A HREF="ScreenSaverClass.html#StartConfig()">StartConfig()</A></TT></B>.
+<P>
+</UL>
+<P>
+Note that it's possible for your screen saver module to be loaded by the <B>ScreenSaver</B> preferences app <I>and <B>screen_blanker</B></I> at the same time.  Since copies of the add-on are loaded into separate address spaces, you don&gt;t normally need to worry about this&mdash;unless you&gt;re doing something extremely weird.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Screen Saver Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Screen%20Saver%20Master%20Index.html"><FONT face=HELVETICA>Screen Saver Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

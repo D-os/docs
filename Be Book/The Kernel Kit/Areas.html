@@ -1,0 +1,572 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Areas</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Areas"></A>Areas
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kernel/OS.h">be/kernel/OS.h</A>
+<P>
+Library:  libroot.so
+<P>
+An area is a chunk of virtual memory that can be shared between threads (possibly in different teams).  If your application needs to allocate large chunks of memory, or wants to share lots of data with another application, you should consider using an area. 
+<P>
+For more on area concepts, see <a href="AreasConcepts.html#Areas%20Concepts">"Areas Concepts"</a>.
+<P>
+For examples of creating and sharing areas, see <a href="AreasExamples.html#Area%20Examples">"Area Examples"</a>.
+<P>
+<HR>
+<H2>
+<A NAME="Area%20Functions"></A><FONT SIZE=6>A</FONT>rea <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="area_for()"></A>area_for()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+area_id <B><TT><FONT  color=000022 size=+1>area_for(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>addr</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the area that contains the given address (within your own team's address space).  The argument needn't be the starting address of an area, nor must it start on a page boundary:  If the address lies anywhere within one of your application's areas, the ID of that area is returned.  
+<P>
+Since the address is taken to be in the local address space, the area that's returned will also be local&mdash;it will have been created or cloned by your application.  
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  The address doesn't lie within an area.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#find_area()">find_area()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="clone_area()"></A>clone_area()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+area_id<B><TT><FONT  color=000022 size=+1> clone_area(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>clone_name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void **<I><FONT  color=991122 face=HELVETICA>clone_addr</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>clone_addr_spec</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>clone_protection</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id <I><FONT  color=991122 face=HELVETICA>source_area</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new area (the <I>clone</I> area) that maps to the same physical memory as an existing area (the <I>source</I> area).
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>clone_name</I></FONT> is the name that you wish to assign to the clone area.  Area names are, at most, <B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A></TT></B> characters long.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>clone_addr </I></FONT>points to a value that gives the address at which you want the clone area to start; the pointed-to value must be a multiple of <B><TT><A HREF="misc.html#B_PAGE_SIZE">B_PAGE_SIZE</A></TT></B> (4096).  The function sets the value pointed to by <I><FONT  color=991122 face=HELVETICA>clone_addr</I></FONT> to the area's actual starting address&mdash;it may be different from the one you requested.  The constancy of *<I><FONT  color=991122 face=HELVETICA>clone_addr</I></FONT> depends on the value of <I><FONT  color=991122 face=HELVETICA>clone_addr_spec</I></FONT>, as explained next.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>clone_addr_spec</I></FONT> is one of four constants that describes how <I><FONT  color=991122 face=HELVETICA>clone_addr</I></FONT> is to be interpreted.  The first three constants,<B><TT> B_EXACT_ADDRESS</TT></B>, <B><TT>B_BASE_ADDRESS</TT></B>, and <B><TT>B_ANY_ADDRESS</TT></B>, have meanings as explained under <B><TT><A HREF="#create_area()">create_area()</A></TT></B>.   
+<P>
+The fourth constant, <B><TT>B_CLONE_ADDRESS</TT></B>, specifies that the address of the cloned area should be the same as the address of the source area.  Cloning the address is convenient if you have two (or more) applications that want to pass pointers to each other&mdash;by using cloned addresses, the applications won't have to offset the pointers that they receive.  For both the <B><TT>B_ANY_ADDRESS</TT></B> and <B><TT>B_CLONE_ADDRESS</TT></B> specifications, the value that's pointed to by the <I><FONT  color=991122 face=HELVETICA>clone_addr</I></FONT> argument is ignored.
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>clone_protection</I></FONT> is one or both of <B><TT>B_READ_AREA</TT></B> and <B><TT>B_WRITE_AREA</TT></B>.  These have the same meaning as in <B><TT><A HREF="#create_area()">create_area()</A></TT></B>; keep in mind, as described there, that a cloned area can have a protection that's different from that of its source. 
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>source_area</I></FONT> is the <B><TT>area_id</TT></B> of the area that you wish to clone.  You usually supply this value by passing an area name to the <B><TT><A HREF="#find_area()">find_area()</A></TT></B> function.
+<P>
+</UL>
+<P>
+The cloned area inherits the source area's locking scheme.
+<P>
+Usually, the source area and clone area are in two different applications.  It's possible to clone an area from a source that's in the same application, but there's not much reason to do so unless you want the areas to have different protections.  
+<P>
+If <B><TT>clone_area()</TT></B> clone is successful, the clone's <B><TT>area_id</TT></B> is returned.  Otherwise, it returns a descriptive error code, listed below.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Bad argument value; you passed an unrecognized constant for <I><FONT  color=991122 face=HELVETICA>addr_spec</I></FONT> or <I><FONT  color=991122 face=HELVETICA>lock</I></FONT>, the <I><FONT  color=991122 face=HELVETICA>addr</I></FONT> value isn't a multiple of <B><TT><A HREF="misc.html#B_PAGE_SIZE">B_PAGE_SIZE</A></TT></B>, you set <I><FONT  color=991122 face=HELVETICA>addr_spec</I></FONT> to <B><TT>B_EXACT_ADDRESS</TT></B> or <B><TT>B_CLONE_ADDRESS</TT></B> but the address request couldn't be fulfilled, or<I><FONT  color=991122 face=HELVETICA> source_area</I></FONT> doesn't identify an existing area.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to allocate the system structures that support this area (unlikely).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Some other system error prevented the area from being created.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#create_area()">create_area()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="create_area()"></A>create_area()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+area_id <B><TT><FONT  color=000022 size=+1>create_area(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void **<I><FONT  color=991122 face=HELVETICA>addr</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>addr_spec</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>size</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>lock</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <I><FONT  color=991122 face=HELVETICA>protection</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new area and returns its <B><TT>area_id.
+<P>
+</TT></B><UL>
+<LI><I><FONT  color=991122 face=HELVETICA>name</I></FONT> is the name that you wish to assign to the area.  It needn't be unique.  Area names are, at most, <B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A></TT></B> (32) characters long.
+<P>
+<LI><I>addr</I> points to the address at which you want the area to start.  The value of <I><FONT  color=991122 face=HELVETICA>*addr</I></FONT> must signify a page boundary; in other words, it must be an integer multiple of <B><TT><A HREF="misc.html#B_PAGE_SIZE">B_PAGE_SIZE</A></TT></B> (4096).  Note that this is a pointer to a pointer:  *<I><FONT  color=991122 face=HELVETICA>addr</I></FONT>&mdash;not <I><FONT  color=991122 face=HELVETICA>addr</I></FONT>&mdash;should be set to the desired address; you then pass the address of <I><FONT  color=991122 face=HELVETICA>addr</I></FONT> as the argument, as shown below:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Set the address to a page boundary. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *addr = (char *)(B_PAGE_SIZE * 100);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Pass the address of addr as the second argument. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;create_area( "my area", &amp;addr, ...);</PRE>
+<P>
+The function sets the value of <I><FONT  color=991122 face=HELVETICA>*addr</I></FONT> to the area's actual starting address&mdash;it may be different from the one you requested.  The constancy of *<I><FONT  color=991122 face=HELVETICA>addr</I></FONT> depends on the value of <I><FONT  color=991122 face=HELVETICA>addr_spec</I></FONT>, as explained next.
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>addr_spec </I></FONT>is a constant that tells the function how the <I><FONT  color=991122 face=HELVETICA>*addr</I></FONT> value should be applied.  There are three useful address specification constants, and one that doesn't apply here:  
+</UL>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_EXACT_ADDRESS</TT></B></TD>
+<TD>You want the value of *<I><FONT  color=991122 face=HELVETICA>addr</I></FONT> to be taken literally and strictly.  If the area can't be allocated at that location, the function fails. </TD>
+<TR>
+<TD><B><TT>B_BASE_ADDRESS</TT></B></TD>
+<TD>The area can start at a location equal to or greater than *<I><FONT  color=991122 face=HELVETICA>addr</I></FONT>.   </TD>
+<TR>
+<TD><B><TT>B_ANY_ADDRESS</TT></B></TD>
+<TD>The starting address is determined by the system.   In this case, the value that's pointed to by <I><FONT  color=991122 face=HELVETICA>addr</I></FONT> is ignored (going into the function).</TD>
+<TR>
+<TD><B><TT>B_ANY_KERNEL_ADDRESS</TT></B></TD>
+<TD>The starting address is determined by the system, and the new area will belong to the kernel's team; it won't be deleted when the application quits.   In this case, the value that's pointed to by <I><FONT  color=991122 face=HELVETICA>addr</I></FONT> is ignored (going into the function).</TD>
+<TR>
+<TD><B><TT>B_CLONE_ADDRESS</TT></B></TD>
+<TD>  This is only meaningful to the <B><TT><A HREF="#clone_area()">clone_area()</A></TT></B> function.</TD>
+</TABLE>
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>size</I></FONT> is the size, in bytes, of the area.  The size must be an integer multiple of <B><TT><A HREF="misc.html#B_PAGE_SIZE">B_PAGE_SIZE</A></TT></B> (4096).  The upper limit of <I><FONT  color=991122 face=HELVETICA>size</I></FONT> depends on the available swap space (or RAM, if the area is to be locked).
+<P>
+<LI><I><FONT  color=991122 face=HELVETICA>lock</I></FONT> describes how the physical memory should be treated with regard to swapping.  There are four locking constants:  
+</UL>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_FULL_LOCK</TT></B></TD>
+<TD>The area's memory is locked into RAM when the area is created, and won't be swapped out.</TD>
+<TR>
+<TD><B><TT>B_CONTIGUOUS</TT></B></TD>
+<TD>Not only is the area's memory locked into RAM, it's also guaranteed to be contiguous.  This is particularly&mdash;and perhaps exclusively&mdash;useful to designers of certain types of device drivers. </TD>
+<TR>
+<TD><B><TT>B_LAZY_LOCK</TT></B></TD>
+<TD>Allows individual pages of memory to be brought into RAM through the natural order of things and <I>then</I> locks them.</TD>
+<TR>
+<TD><B><TT>B_NO_LOCK</TT></B></TD>
+<TD>Pages are never locked, they're swapped in and out as needed.</TD>
+<TR>
+<TD><B><TT>B_LOMEM</TT></B></TD>
+<TD>This is a special constant that's used for  for areas that need to be locked, contiguous, and that fit within the first 16MB of physical memory.  The folks that need this constant know who they are.</TD>
+</TABLE>
+<P>
+<UL>
+<LI><I><FONT  color=991122 face=HELVETICA>protection</I></FONT> is a mask that describes whether the memory can be written and read.  You form the mask by adding the constants <B><TT>B_READ_AREA</TT></B> (the area can be read) and <B><TT>B_WRITE_AREA</TT></B> (it can be written).  The protection you describe applies only to this area.  If your area is cloned, the clone can specify a different protection. 
+<P>
+</UL>
+<P>
+If <B><TT>create_area()</TT></B> is successful, the new<B><TT> area_id</TT></B> number is returned.  If it's unsuccessful, one of the following error constants is returned.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  Bad argument value.  You passed an unrecognized constant for <I><FONT  color=991122 face=HELVETICA>addr_spec</I></FONT> or <I><FONT  color=991122 face=HELVETICA>lock</I></FONT>, the <I><FONT  color=991122 face=HELVETICA>addr</I></FONT> or <I><FONT  color=991122 face=HELVETICA>size</I></FONT> value isn't a multiple of <B><TT><A HREF="misc.html#B_PAGE_SIZE">B_PAGE_SIZE</A></TT></B>, or you set <I><FONT  color=991122 face=HELVETICA>addr_spec</I></FONT> to <B><TT>B_EXACT_ADDRESS</TT></B> but the address request couldn't be fulfilled.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to allocate the system structures that support this area (unlikely), not enough physical memory to support a locked area, or not enough swap space to allocate virtual memory (in other words, <I><FONT  color=991122 face=HELVETICA>size</I></FONT> is too big.)
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Some other system error prevented the area from being created.  
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#clone_area()">clone_area()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="delete_area()"></A>delete_area()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>delete_area(</TT></B></FONT>area_id <I><FONT  color=991122 face=HELVETICA>area</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the designated area.  If no one other area maps to the physical memory that this area represents, the memory is freed.  After being deleted, the <I><FONT  color=991122 face=HELVETICA>area</I></FONT> value is invalid as an area identifier.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, anybody can delete any area&mdash;the act isn't denied if, for example, the <B><TT>area_id</TT></B> argument was created by another application.  This freedom will be rescinded in a later release.  Until then, try to avoid deleting other application's areas.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The area was deleted; <I><FONT  color=991122 face=HELVETICA>area</I></FONT> is now invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>area</I></FONT> doesn't designate an actual area.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="find_area()"></A>find_area()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+area_id <B><TT><FONT  color=000022 size=+1>find_area(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns an area that has a name that matches the argument.  Area names needn't be unique&mdash;successive calls to this function with the same argument value may not return the same <B><TT>area_id</TT></B>.
+<P>
+What you do with the area you've found depends on where it came from:
+<P>
+<UL>
+<LI>If you're finding an area that your own application created or cloned, you can use the returned ID directly.
+<P>
+<LI>If the area was created or cloned by some other application, you should immediately clone the area (unless you're doing something truly innocuous, such as simply examining the area's info structure). 
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NAME_NOT_FOUND">B_NAME_NOT_FOUND</A></TT></B>.  The argument doesn't identify an existing area.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#area_for()">area_for()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="get_area_info()"></A>get_area_info()
+, 
+<A NAME="get_next_area_info()"></A>get_next_area_info()
+, 
+<A NAME="area_info"></A>area_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_area_info(</TT></B></FONT>area_id <I><FONT  color=991122 face=HELVETICA>area</I></FONT>, area_info <I><FONT  color=991122 face=HELVETICA>*info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_next_area_info(</TT></B></FONT>team_id <I><FONT  color=991122 face=HELVETICA>team</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>*cookie</I></FONT>, area_info <I><FONT  color=991122 face=HELVETICA>*info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+struct {} <B><TT><FONT  color=000022 size=+1>area_info
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Copies information about a particular area into the <B><TT>area_info</TT></B> structure designated by<I><FONT  color=991122 face=HELVETICA> info</I></FONT>.  The first version of the function designates the area directly, by <B><TT>area_id</TT></B>.  
+<P>
+The <B><TT>get_next_area_info()</TT></B> version lets you step through the list of a team's areas through iterated calls on the function.  The <I><FONT  color=991122 face=HELVETICA>team</I></FONT> argument identifies the team you want to look at; a <I><FONT  color=991122 face=HELVETICA>team</I></FONT> value of 0 means the team of the calling thread.  The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> argument is a placemark; you set it to 0 on your first call, and let the function do the rest.  The function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> when there are no more areas to visit:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Get the area_info for every area in this team. */
+&nbsp;&nbsp;&nbsp;area_info info;
+&nbsp;&nbsp;&nbsp;int32 cookie = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (get_next_area_info(0, &amp;cookie, &amp;info) == B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+The <B><TT>area_info</TT></B> structure is:
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct <B><TT>area_info</TT></B> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;area_id  <B><TT>area</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char  <B><TT>name</TT></B>[<FONT  face=HELVETICA>B_OS_NAME_LENGTH</FONT>];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t  <B><TT>size</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32  <B><TT>lock</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32  <B><TT>protection</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;team_id  <B><TT>team</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t  <B><TT>ram_size</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32  <B><TT>copy_count</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32  <B><TT>in_count</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32  <B><TT>out_count</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void  *<B><TT>address</TT></B>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT>area_info</TT></B>;
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The fields are:
+<P>
+<UL>
+<LI><B><TT>area </TT></B>is the <B><TT>area_id</TT></B> that identifies the area.  
+<P>
+<LI><B><TT>name</TT></B> is the name that was assigned to the area when it was created or cloned.
+<P>
+<LI><B><TT>size</TT></B> is the (virtual) size of the area, in bytes.
+<P>
+<LI><B><TT>lock</TT></B> is a constant that represents the area's locking scheme.  This will be one of <B><TT>B_FULL_LOCK</TT></B>, <B><TT>B_CONTIGUOUS, B_LAZY_LOCK</TT></B>, <B><TT>B_NO_LOCK</TT></B>, or <B><TT>B_LOMEM</TT></B>.
+<P>
+<LI><B><TT>protection</TT></B> specifies whether the area's memory can be read or written.  It's a combination of <B><TT>B_READ_AREA</TT></B> and <B><TT>B_WRITE_AREA.
+<P>
+</TT></B><LI><B><TT>team</TT></B> is the <B><TT><A HREF="Threads.html#team_id">team_id</A></TT></B> of the team that created or cloned this area.
+<P>
+<LI><B><TT>address</TT></B> is a pointer to the area's starting address.  Keep in mind that this address is only meaningful to the team that created (or cloned) the area.
+<P>
+</UL>
+<P>
+The final four fields give information about the area that's useful in diagnosing system use.  The fields are particularly valuable if you're hunting for memory leaks:
+<P>
+<UL>
+<LI><B><TT>ram_size</TT></B> gives the amount of the area, in bytes, that's currently swapped in.
+<P>
+<LI><B><TT>copy_count</TT></B> is a "copy-on-write" count that can be ignored&mdash;it doesn't apply to the areas that you create.  The system can create copy-on-write areas (it does so when it loads the data section of an executable, for example), but you can't.
+<P>
+<LI><B><TT>in_count</TT></B> is a count of the total number of times any of the pages in the area have been swapped in.
+<P>
+<LI><B><TT>out_count</TT></B> is a count of the total number of times any of the pages in the area have been swapped out. 
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The area was found; <I><FONT  color=991122 face=HELVETICA>info</I></FONT> contains valid information.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>area</I></FONT> doesn't identify an existing area, <I><FONT  color=991122 face=HELVETICA>team</I></FONT> doesn't identify an existing team, or there are no more areas to visit.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="resize_area()"></A>resize_area()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT><FONT  color=000022 size=+1> resize_area(</TT></B></FONT>area_id <I><FONT  color=991122 face=HELVETICA>area</I></FONT>, size_t<I><FONT  color=991122 face=HELVETICA> new_size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the size of the designated area to <I><FONT  color=991122 face=HELVETICA>new_size</I></FONT>, measured in bytes.  The <I><FONT  color=991122 face=HELVETICA>new_size </I></FONT>argument must be a multiple of <B><TT><A HREF="misc.html#B_PAGE_SIZE">B_PAGE_SIZE</A></TT></B> (4096).  
+<P>
+Size modifications affect the end of the area's existing memory allocation:  If you're increasing the size of the area, the new memory is added to the end of area; if you're shrinking the area, end pages are released and freed.  In neither case does the area's starting address change, nor is existing data modified (except, of course, for data that's lost due to shrinkage).  
+<P>
+Resizing affects all areas that refer to this areas physical memory.  For example, if B is a clone of A, and you resize A, B will be automatically resized (if possible).
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The area was successfully resized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>area</I></FONT> doesn't signify a valid area, or <I><FONT  color=991122 face=HELVETICA>new_size</I></FONT> isn't a multiple of <B><TT><A HREF="misc.html#B_PAGE_SIZE">B_PAGE_SIZE</A></TT></B>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to support the new portion of the area.  This should only happen if you're increasing the size of the area.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Some other system error prevented the area from being created.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="set_area_protection()"></A>set_area_protection()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_area_protection(</TT></B></FONT>area_id<I><FONT  color=991122 face=HELVETICA> area</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>new_protection</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the given area's read and write protection.  The <I><FONT  color=991122 face=HELVETICA>new_protection</I></FONT> argument is a mask that specifies one or both of the values <B><TT>B_READ_AREA</TT></B> and <B><TT>B_WRITE_AREA</TT></B>.  The former means that the area can be read; the latter, that it can be written to.  An area's protection only applies to access to the underlying memory through that specific area.  Different area clones that refer to the same memory may have different protections. 
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The protection was changed.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>area</I></FONT> doesn't identify a valid area.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

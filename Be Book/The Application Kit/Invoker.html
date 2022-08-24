@@ -1,0 +1,561 @@
+<HTML><HEAD><TITLE>The Application Kit: BInvoker</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BInvoker"></A>BInvoker
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/app/Invoker.h">be/app/Invoker.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="Invoker.summary.html"><i>Summary</i></A></H6>
+<P>
+BInvoker is a convenience class that bundles up everything you need to create a handy message-sending package.  The BInvoker contains:  <B>(a)</B> a <A HREF="Message.html#BMessage">BMessage</A>, <B>(b)</B> a <A HREF="Messenger.html#BMessenger">BMessenger</A> (that identifies a target handler), and <B>(c)</B> an optional <A HREF="Handler.html#BHandler">BHandler</A> that handles replies.  You set these ingredients, invoke <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>, and off goes the message to the target.  Replies are sent to the reply handler (<B><TT><A HREF="Application.html#be_app">be_app</A></TT></B> by default).
+<P>
+BInvoker uses <B><TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B> to send its messages.  The invocation is asynchronous, and there's no time limit on the reply.
+<P>
+BInvoker is mostly used as a mix-in class.  A number of classes in the Interface Kit&mdash;notably <A HREF="../The%20Interface%20Kit/Control.html#BControl">BControl</A>&mdash;derive from BInvoker.  
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BInvoker()"></A>BInvoker()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BInvoker(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, <A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BInvoker(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, const <A HREF="Handler.html#BHandler">BHandler</A> *<I><FONT  color=991122 face=HELVETICA>handler</I></FONT>, const <A HREF="Looper.html#BLooper">BLooper</A> *<I><FONT  color=991122 face=HELVETICA>looper</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BInvoker(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Initializes the BInvoker by setting its message and its messenger.  
+<P>
+<UL>
+<LI>The object's <A HREF="Message.html#BMessage">BMessage</A> is taken directly as <I><FONT  color=991122 face=HELVETICA>message</I></FONT>&mdash;the object is <I>not</I> copied.  The BInvoker takes over ownership of the <A HREF="Message.html#BMessage">BMessage</A> that you pass in. 
+<P>
+<LI>The object's <A HREF="Messenger.html#BMessenger">BMessenger</A> is copied from <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT>, or initialized with <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> and <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>.  See the <A HREF="Messenger.html#BMessenger">BMessenger</A> class for details on how a <A HREF="Messenger.html#BMessenger">BMessenger</A> identifies a target.
+<P>
+</UL>
+<P>
+If you want a reply handler, you have to call <B><TT><A HREF="#SetHandlerForReply()">SetHandlerForReply()</A></TT></B> after the constructor returns.  You can reset the message and messenger through <B><TT><A HREF="#SetMessage()">SetMessage()</A></TT></B> and <B><TT><A HREF="#SetTarget()">SetTarget()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="~BInvoker()"></A>~BInvoker()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BInvoker()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Deletes the object's BMessage. 
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BeginInvokeNotify()"></A>BeginInvokeNotify()
+, 
+<A NAME="EndInvokeNotify()"></A>EndInvokeNotify()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>BeginInvokeNotify(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>kind</I></FONT> = <FONT  face=HELVETICA>B_CONTROL_INVOKED</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>EndInvokeNotify()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+If for some reason you need to implement a method that emulates an <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B> call inside an <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> implementation, you should wrap the invocation code in these functions.  They set up and tear down an <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B> context.
+<P>
+<HR>
+<H3>Command()   see <A HREF="#SetMessage()">SetMessage()</A></H3>
+<P>
+<HR>
+<H3>HandlerForReply()   see <A HREF="#SetHandlerForReply()">SetHandlerForReply()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Invoke()"></A>Invoke()
+, 
+<A NAME="InvokeNotify()"></A>InvokeNotify()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Invoke(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InvokeNotify(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>kind</I></FONT> = <FONT  face=HELVETICA>B_CONTROL_INVOKED</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> tells the BInvoker's messenger to send a message.  If <I><FONT  color=991122 face=HELVETICA>message</I></FONT> is non-<B><TT>NULL</TT></B>, that message is sent, otherwise the object sends its default message (i.e. the <A HREF="Message.html#BMessage">BMessage</A> that was passed in the constructor or in <B><TT><A HREF="#SetMessage()">SetMessage()</A></TT></B>).  The message is sent asynchronously with no time limit on the reply.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Regarding the use of the default message <I>vs</I> the argument, a common practice is to reserve the default message as a template, and pass a fine-tuned copy to <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>:
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<PRE>&nbsp;&nbsp;&nbsp;/* Add the current system time to a copy of the default message. */
+&nbsp;&nbsp;&nbsp;BMessage copy(invoker.Message());
+&nbsp;&nbsp;&nbsp;copy.AddInt64("when", system_time());
+&nbsp;&nbsp;&nbsp;invoker.Invoke(&amp;copy);</PRE>
+<P>
+The <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B> function sends the <I><FONT  color=991122 face=HELVETICA>message</I></FONT> to the target, using the notification change code specified by <I><FONT  color=991122 face=HELVETICA>kind</I></FONT>.  If message is <B><TT>NULL</TT></B>, nothing gets sent to the target, but any watchers of the invoker's handler will receive their expected notifications.  By default, the <I><FONT  color=991122 face=HELVETICA>kind</I></FONT> is <B><TT><A HREF="../Messages/GeneralMessages.html#B_CONTROL_INVOKED">B_CONTROL_INVOKED</A></TT></B>&mdash;the same <I><FONT  color=991122 face=HELVETICA>kind</I></FONT> sent by a straight <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In general, you should call <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B> instead of <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> in new BeOS applications that run under BeOS 5 and later.  You can map old code to new like this:
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>BeOS 4.5.x</B></TH>
+<TH>BeOS 5</TH>
+<TR>
+<TD>Invoke()</TD>
+<TD>InvokeNotify(Message())</TD>
+<TR>
+<TD>Invoke(Message())</TD>
+<TD>InvokeNotify(Message())</TD>
+<TR>
+<TD>Invoke(ModificationMessage())</TD>
+<TD>InvokeNotify(ModificationMessage(), B_CONTROL_MODIFIED)</TD>
+</TABLE>
+<P>
+<B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> doesn't call <B><TT><A HREF="../Release%20Notes/AppKit.html#SendNotices()">SendNotices()</A></TT></B> by default; you'll have to implement code to do it yourself.  Here's how:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;status_t BControl::Invoke(BMessage *msg) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool notify = false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 kind = InvokeKind(&amp;notify);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage clone(kind);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err = B_BAD_VALUE;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!msg &amp;&amp; !notify) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// If no message is supplied, pull it from the BInvoker.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// However, ONLY do so if this is not an InvokeNotify()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// context -- otherwise, this is not the default invocation
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// message, so we don&gt;t want it to get in the way here.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// For example, a control may call InvokeNotify() with their
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// "modification" message...  if that message isn&gt;t set,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// we still want to send notification to any watchers, but
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// -don&gt;t- want to send a message through the invoker.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg = Message();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!msg) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// If not being watched, there is nothing to do.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if( !IsWatched() ) return err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clone = *msg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clone.AddInt64("when", system_time());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clone.AddPointer("source", this);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clone.AddInt32("be:value",fValue);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clone.AddMessenger(B_NOTIFICATION_SENDER, BMessenger(this));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if( msg ) err = BInvoker::Invoke(&amp;clone);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Also send invocation to any observers of this handler.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SendNotices(kind, &amp;clone);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return err;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The message was sent.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  No default message, and no <I><FONT  color=991122 face=HELVETICA>message</I></FONT> argument.
+<P>
+<LI><I>Other errors forwarded from</I> <B><TT><A HREF="Messenger.html#SendMessage()">BMessenger::SendMessage()</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="InvokeKind()"></A>InvokeKind()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>InvokeKind(</TT></B></FONT>bool *<I><FONT  color=991122 face=HELVETICA>notify</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the kind passed to <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B>.  This should be called from within your implementation of <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> if you need to determine what kind was specified when <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B> was called.  If you care whether <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> or <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B> was originally called, you can specify a pointer to a bool, <I><FONT  color=991122 face=HELVETICA>notify</I></FONT>, which is set to <B><TT>true</TT></B> if <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B> was called, or <B><TT>false</TT></B> if <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> was called.
+<P>
+This lets you fetch the <B><TT><A HREF="#InvokeNotify()">InvokeNotify()</A></TT></B> arguments from your <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> code without breaking compatibility with older applications by adding arguments to <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B>.
+<P>
+<HR>
+<H3>InvokeNotify()   see <A HREF="#Invoke()">Invoke()</A></H3>
+<P>
+<HR>
+<H3>IsTargetLocal()   see <A HREF="#SetTarget()">SetTarget()</A></H3>
+<P>
+<HR>
+<H3>Message()   see <A HREF="#SetMessage()">SetMessage()</A></H3>
+<P>
+<HR>
+<H3>Messenger()   see <A HREF="#SetTarget()">SetTarget()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetHandlerForReply()"></A>SetHandlerForReply()
+, 
+<A NAME="HandlerForReply()"></A>HandlerForReply()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetHandlerForReply(</TT></B></FONT><A HREF="Handler.html#BHandler">BHandler</A> *<I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>HandlerForReply(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetHandlerForReply()">SetHandlerForReply()</A> </TT></B>sets the <A HREF="Handler.html#BHandler">BHandler</A> object that handles replies that are sent back by the target.  By default (or if <I><FONT  color=991122 face=HELVETICA>replyHandler</I></FONT> is <B><TT>NULL</TT></B>), replies are sent to the <A HREF="Application.html#BApplication">BApplication</A> object.
+<P>
+<B><TT><A HREF="#HandlerForReply()">HandlerForReply()</A></TT></B> returns the object set through <B><TT><A HREF="#SetHandlerForReply()">SetHandlerForReply()</A></TT></B>.  If the reply handler isn't set, this function returns <B><TT>NULL</TT></B>, it <I>doesn't</I> return <B><TT><A HREF="Application.html#be_app">be_app</A></TT></B> (even though <B><TT><A HREF="Application.html#be_app">be_app</A></TT></B> will be handling the reply).
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="#SetHandlerForReply()">SetHandlerForReply()</A></TT></B> always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>&mdash;it doesn't check for validity.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetMessage()"></A>SetMessage()
+, 
+<A NAME="Message()"></A>Message()
+, 
+<A NAME="Command()"></A>Command()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetMessage(</TT></B></FONT><A HREF="Message.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Message.html#BMessage">BMessage</A> *<B><TT><FONT  color=000022 size=+1>Message(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>Command(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetMessage()">SetMessage()</A></TT></B> sets the BInvoker's default message to point to <I><FONT  color=991122 face=HELVETICA>message</I></FONT> (the message is <I>not</I> copied).  The previous default message (if any) is deleted; a <B><TT>NULL</TT></B> <I><FONT  color=991122 face=HELVETICA>message</I></FONT> deletes the previous message without setting a new one.  The BInvoker owns the <A HREF="Message.html#BMessage">BMessage</A> that you pass in; you mustn't <B><TT>delete</TT></B> it yourself.
+<P>
+<B><TT><A HREF="#Message()">Message()</A></TT></B> returns a pointer to the default message, and <B><TT><A HREF="#Command()">Command()</A></TT></B> returns its <B><TT>what</TT></B> data member.  Lacking a default message, the functions return <B><TT>NULL</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="#SetMessage()">SetMessage()</A></TT></B> always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetTarget()"></A>SetTarget()
+, 
+<A NAME="Target()"></A>Target()
+, 
+<A NAME="IsTargetLocal()"></A>IsTargetLocal()
+, 
+<A NAME="Messenger()"></A>Messenger()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetTarget(</TT></B></FONT><A HREF="Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>messenger</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>SetTarget(</TT></B></FONT>const <A HREF="Handler.html#BHandler">BHandler</A> *<I><FONT  color=991122 face=HELVETICA>handler</I></FONT>, const <A HREF="Looper.html#BLooper">BLooper</A> *<I><FONT  color=991122 face=HELVETICA>looper</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<A HREF="Handler.html#BHandler">BHandler</A> *<B><TT><FONT  color=000022 size=+1>Target(</TT></B></FONT><A HREF="Looper.html#BLooper">BLooper</A> **<I><FONT  color=991122 face=HELVETICA>looper</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsTargetLocal(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+<A HREF="Messenger.html#BMessenger">BMessenger</A> <B><TT><FONT  color=000022 size=+1>Messenger(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and query the BInvoker's target.  This is the <A HREF="Handler.html#BHandler">BHandler</A> to which the object sends a message when <B><TT><A HREF="#Invoke()">Invoke()</A></TT></B> is called.  The target is represented by a <A HREF="Messenger.html#BMessenger">BMessenger</A> object; you can set the <A HREF="Messenger.html#BMessenger">BMessenger</A> as a copy of <I><FONT  color=991122 face=HELVETICA>messenger, </I></FONT>or initialize it with <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> and <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>.  See the <A HREF="Messenger.html#BMessenger">BMessenger</A> class for details on how a <A HREF="Messenger.html#BMessenger">BMessenger</A> identifies a target.
+<P>
+<B><TT><A HREF="#Target()">Target()</A></TT></B> returns the <A HREF="Handler.html#BHandler">BHandler</A> that's targeted by the object's messenger.  If <I><FONT  color=991122 face=HELVETICA>looper</I></FONT> is non-<B><TT>NULL</TT></B>, the <A HREF="Looper.html#BLooper">BLooper</A> that owns the <A HREF="Handler.html#BHandler">BHandler</A> is returned by reference.  If the target was set as a looper's preferred handler (i.e. <B><TT>SetTarget(NULL, looper)</TT></B>), or if the target hasn't been set yet, <B><TT><A HREF="#Target()">Target()</A></TT></B> returns <B><TT>NULL</TT></B>. The function returns <B><TT>NULL</TT></B> for both objects if the target is remote.
+<P>
+<B><TT><A HREF="#IsTargetLocal()">IsTargetLocal()</A></TT></B> returns <B><TT>true</TT></B> if the target lives within the BInvoker's application, and <B><TT>false</TT></B> if it belongs to some other app.
+<P>
+<B><TT><A HREF="#Messenger()">Messenger()</A></TT></B> returns a copy of the <A HREF="Messenger.html#BMessenger">BMessenger</A> object the BInvoker uses to send messages. If a target hasn't been set yet, the return will be invalid.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The target was successfully set.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The proposed <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> doesn't belong to a BLooper.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MISMATCHED_VALUES">B_MISMATCHED_VALUES</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>handler</I></FONT> doesn't belong to <I><FONT  color=991122 face=HELVETICA>looper</I></FONT>.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT><A HREF="#SetTarget()">SetTarget()</A></TT></B> doesn't detect invalid BLoopers and BMessengers.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="SetTimeout()"></A>SetTimeout()
+, 
+<A NAME="Timeout()"></A>Timeout()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTimeout(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>timeout</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+bigtime_t <B><TT><FONT  color=000022 size=+1>Timeout(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#SetTimeout()">SetTimeout()</A></TT></B> sets the timeout that will be used when sending the invocation message to the invoker's target.  By default this is <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#B_INFINITE_TIMEOUT">B_INFINITE_TIMEOUT</A></TT></B>.
+<P>
+<B><TT><A HREF="#Timeout()">Timeout()</A></TT></B> returns the current setting for this value.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><UL>
+<LI><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  No error.
+<P>
+</UL>
+<P>
+<HR>
+<H3>Target()   see <A HREF="#SetTarget()">SetTarget()</A></H3>
+<P>
+<HR>
+<H3>Timeout()   see <A HREF="#SetTimeout()">SetTimeout()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Application Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Application%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Application Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

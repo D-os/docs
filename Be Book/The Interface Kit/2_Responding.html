@@ -1,0 +1,544 @@
+<HTML><HEAD><TITLE>The Interface Kit: Listening to the User</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Listening%20to%20the%20User"></A>Listening to the User
+</H1>
+<P>
+When the user fiddles with the mouse or keyboard, the Application Server figures out which window the event is intended for, and then forms an <I>interface message</I> that it sends to the <A HREF="Window.html#BWindow">BWindow</A> object.  The <A HREF="Window.html#BWindow">BWindow</A> receives the message in its <B><TT><A HREF="Window.html#DispatchMessage()">DispatchMessage()</A></TT></B> function and invokes an <I>interface hook function</I> declared by <A HREF="Window.html#BWindow">BWindow</A> or BView.  If your application wants to respond to an event it simply implements the appropriate hook function.  For example, if you want to watch for mouse down events within a view, you implement <B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B> in your <A HREF="View.html#BView">BView</A> subclass.
+<P>
+You can also find out what's going on with the keyboard and mouse through the (global) <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_key_info()">get_key_info()</A> </TT></B>function and the <B><TT>BView::GetMouse()</TT></B> function.  You typically use these functions within the implementation of an interface hook function to get more information about the keyboard or mouse. 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+You <I>shouldn't</I> call <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_key_info()">get_key_info()</A></TT></B> or <B><TT>BView::GetMouse()</TT></B> in a loop to track the keyboard or mouse unless you really know what you're doing (some game developers may need to poll).  To track the keyboard, you implement BView's <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> and <B><TT><A HREF="ViewHooks.html#KeyUp()">KeyUp()</A></TT></B> functions.  To track the mouse, implement <B><TT>MouseDown()</TT></B>, <B><TT><A HREF="TextView.html#MouseMoved()">MouseMoved()</A></TT></B>, and <B><TT><A HREF="ViewHooks.html#MouseUp()">MouseUp()</A></TT></B>.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<A NAME="10188:%20head1:%20Interface%20Messages"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Interface%20Messages"></A><FONT SIZE=6>I</FONT>nterface <FONT SIZE=6>M</FONT>essages
+</H2>
+<P>
+The interface messages are reasonably self-explanatory.  See the notes below and the documentation of the individual hook functions for more information.
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Message</TH>
+<TH>Hook function</TH>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_ZOOM">B_ZOOM</A></TT></B></TD>
+<TD><B><TT><A HREF="Window.html#Zoom()">BWindow::Zoom()</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_MINIMIZE">B_MINIMIZE</A></TT></B></TD>
+<TD><B><TT><A HREF="Window.html#Minimize()">BWindow::Minimize()</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B></TD>
+<TD><B><TT>BView::KeyDown()</TD>
+<TR>
+<TD><A HREF="misc.html#B_KEY_UP">B_KEY_UP</A></TT></B></TD>
+<TD><B><TT>BView::KeyUp()</TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B></TD>
+<TD><B><TT>BView::MouseDown()</TD>
+<TR>
+<TD><A HREF="misc.html#B_MOUSE_UP">B_MOUSE_UP</A></TT></B></TD>
+<TD><B><TT>BView::MouseUp()</TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_MOUSE_MOVED">B_MOUSE_MOVED</A></TT></B></TD>
+<TD><B><TT>BView::MouseMoved()</TD>
+<TR>
+<TD><A HREF="misc.html#B_VIEW_MOVED">B_VIEW_MOVED</A></TT></B></TD>
+<TD><B><TT>BView::FrameMoved()</TD>
+<TR>
+<TD><A HREF="misc.html#B_VIEW_RESIZED">B_VIEW_RESIZED</A></TT></B></TD>
+<TD><B><TT>BView::FrameResized()</TD>
+<TR>
+<TD><A HREF="../Messages/GeneralMessages.html#B_VALUE_CHANGED">B_VALUE_CHANGED</A></TT></B></TD>
+<TD><B><TT>BScrollBar::ValueChanged()</TD>
+<TR>
+<TD><A HREF="misc.html#B_WINDOW_ACTIVATED">B_WINDOW_ACTIVATED</A></TT></B></TD>
+<TD><B><TT>BWindow::WindowActivated()
+<br>
+BView::WindowActivated()</TD>
+<TR>
+<TD><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B></TD>
+<TD><B><TT>BLooper::QuitRequested()</TD>
+<TR>
+<TD><A HREF="misc.html#B_WINDOW_MOVED">B_WINDOW_MOVED</A></TT></B></TD>
+<TD><B><TT><A HREF="Window.html#FrameMoved()">BWindow::FrameMoved()</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_WINDOW_RESIZED">B_WINDOW_RESIZED</A></TT></B></TD>
+<TD><B><TT><A HREF="Window.html#FrameResized()">BWindow::FrameResized()</A></TD>
+<TR>
+<TD><A HREF="misc.html#B_SCREEN_CHANGED">B_SCREEN_CHANGED</A></TT></B></TD>
+<TD><B><TT>BWindow::ScreenChanged()</TD>
+<TR>
+<TD><A HREF="../Messages/GeneralMessages.html#B_WORKSPACE_ACTIVATED">B_WORKSPACE_ACTIVATED</A></TT></B></TD>
+<TD><B><TT>BWindow::WorkspaceActivated()</TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="../Messages/GeneralMessages.html#B_WORKSPACES_CHANGED">B_WORKSPACES_CHANGED</A></TT></B></TD>
+<TD><B><TT>BWindow::WorkspacesChanged()</TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="misc.html#B_PULSE">B_PULSE</A></TT></B></TD>
+<TD><B><TT>BView::Pulse()</TD>
+</TABLE></TT></B>
+<P>
+Notes:
+<P>
+<UL>
+<LI><B><TT><A HREF="misc.html#B_ZOOM">B_ZOOM</A></TT></B> is usually caused by the user operating the zoom button in the window's title tab. 
+<P>
+<LI><B><TT><A HREF="misc.html#B_MINIMIZE">B_MINIMIZE</A></TT></B> tells the window to hide/show itself.  This message is usually caused by the user double-clicking the window's tab (to hide), and clicking the window token in the application's window list (in the DeskBar).
+<P>
+<LI><B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> and  <B><TT><A HREF="misc.html#B_KEY_UP">B_KEY_UP</A></TT></B> report that the user pressed and then release a <I>character key</I>.  When the key is held down, repeated <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> messages are sent.  If a key is mapped to a string of characters, a <B><TT>B_KEY_DOWN/B_KEY_UP</TT></B> pair is generated for each character.  Pressing a<I> modifier keys</I> on its own doesn't generate key messages.
+<P>
+<LI><B><TT><A HREF="misc.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B>, <B><TT><A HREF="misc.html#B_MOUSE_MOVED">B_MOUSE_MOVED</A></TT></B>, and <B><TT><A HREF="misc.html#B_MOUSE_UP">B_MOUSE_UP</A></TT></B> are delivered (as hook functions) to the <A HREF="View.html#BView">BView</A> that the mouse is over at the time, regardless of where it started.  For example, if the user drags the mouse through your view, you'll get a series of <B><TT><A HREF="misc.html#B_MOUSE_MOVED">B_MOUSE_MOVED</A></TT></B> messages without getting a <B><TT><A HREF="misc.html#B_MOUSE_UP">B_MOUSE_UP</A></TT></B> or a <B><TT><A HREF="misc.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B>.  The <B><TT>BView::MouseMoved()</TT></B> function has a code that tells you whether the mouse is just entering, inside, or exiting your view.  You can tell your <A HREF="View.html#BView">BView</A> to track the mouse even when it's outside your view through <B><TT>BView::SetMouseEventMask(</TT></B>).
+<P>
+<LI>A <B><TT><A HREF="../Messages/GeneralMessages.html#B_VALUE_CHANGED">B_VALUE_CHANGED</A></TT></B> message reports that the Application Server changed a value associated with a <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> objects.
+<P>
+<LI><B><TT><A HREF="../Messages/GeneralMessages.html#B_WORKSPACE_ACTIVATED">B_WORKSPACE_ACTIVATED</A></TT></B> reports that the active workspace (the one displayed on-screen) has changed.  The message is only sent to windows that live in one of the affected workspaces.
+<P>
+<LI><B><TT><A HREF="../Messages/GeneralMessages.html#B_WORKSPACES_CHANGED">B_WORKSPACES_CHANGED</A></TT></B> notifies the window that the set of workspaces in which it can be displayed has changed.
+<P>
+<LI>A <A HREF="Window.html#BWindow">BWindow</A> reinterprets a <B><TT><A HREF="misc.html#B_QUIT_REQUESTED">B_QUIT_REQUESTED</A></TT></B> message, originally defined for the <A HREF="../The%20Application%20Kit/Looper.html#BLooper">BLooper</A> class in the Application Kit, to mean a user request to close the window.  However, it doesn't redeclare the <B><TT><A HREF="../The%20Application%20Kit/Application.html#QuitRequested()">QuitRequested()</A></TT></B> hook function that it inherits from BLooper.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Tracking%20the%20Keyboard"></A>Tracking the Keyboard
+</H3>
+<P>
+The view that's responsible for handling keyboard events is called as the <I>focus view</I>.  The focus view is the view within the active window that's displaying the current selection, or the control that's marked to show that it can be operated from the keyboard.  Only one view in the window can be in focus at a time.
+<P>
+You promote a view to focus by calling <B><TT>BView::MakeFocus()</TT></B>, and you ask for the current focus through <B><TT><A HREF="Window.html#CurrentFocus()">BWindow::CurrentFocus()</A></TT></B>.
+<P>
+<H4>
+<A NAME="Focus%20View%20Commands"></A>Focus View Commands
+</H4>
+<P>
+The table below maps a keyboard action to the hook function it invokes or the message it sends.  In each of these cases, the function or message is sent to the <I>current</I> focus view (which may change between a key down and a key up)
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>User action</TH>
+<TH>Function or message</TH>
+<TR>
+<TD>Press a character key</TD>
+<TD><B><TT>BView::KeyDown()</TD>
+<TR>
+<TD></TT></B>Release a character key</TD>
+<TD><B><TT>BView::KeyUp()</TD>
+<TR>
+<TD></TT><U>Command</B></U>+<B><U>a</B></U></TD>
+<TD><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_SELECT_ALL">B_SELECT_ALL</A></TD>
+<TR>
+<TD></TT><U>Command</B></U>+<B><U>c</B></U></TD>
+<TD><B><TT>B_SELECT_COPY</TD>
+<TR>
+<TD></TT><U>Command</B></U>+<B><U>x</B></U></TD>
+<TD><B><TT>B_SELECT_CUT</TD>
+<TR>
+<TD></TT><U>Command</B></U>+<B><U>v</B></U></TD>
+<TD><B><TT>B_SELECT_PASTE</TD>
+</TABLE></TT></B>
+<P>
+The focus view needn't respond to all of these functions and commands, but a <A HREF="View.html#BView">BView</A>  that doesn't respond to any of them should never promote itself to focus.
+<P>
+<H4>
+<A NAME="Other%20Keyboard%20Commands"></A>Other Keyboard Commands
+</H4>
+<P>
+There are four other built-in keyboard commands:   
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>User action</B></TH>
+<TH>Message or Action</TH>
+<TH>Target</TH>
+<TR>
+<TD><B><U>Command</B></U>+<B><U>w</B></U></TD>
+<TD><B><TT>B_QUIT_REQUESTED</TT></B></TD>
+<TD>The active window.</TD>
+<TR>
+<TD><B><U>Command</B></U>+<B><U>q</B></U></TD>
+<TD><B><TT>B_QUIT_REQUESTED</TT></B></TD>
+<TD>The active app.</TD>
+<TR>
+<TD><B><U>Option</B></U>+<B><U>Tab</B></U></TD>
+<TD>Changes focus to the next navigable view.</TD>
+<TD>The active window.</TD>
+<TR>
+<TD><B><U>Enter</B></U></TD>
+<TD>Activates the default button.</TD>
+<TD>The active window.</TD>
+</TABLE>
+<P>
+<H4>
+<A NAME="Kinds%20of%20Keyboard%20Messages"></A>Kinds of Keyboard Messages
+</H4>
+<P>
+<B><TT><A HREF="misc.html#B_KEY_UP">B_KEY_UP</A></TT></B> events are always assigned to the view that's in focus when the user releases the key&mdash;even if the previous <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message performed a shortcut, forced keyboard navigation, or was assigned to the default button.
+<P>
+<A NAME="40737:%20head2:%20Message%20Protocols"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Message%20Protocols"></A>Message Protocols
+</H3>
+<P>
+The event messages that the Application Server sends to a <A HREF="Window.html#BWindow">BWindow</A> usually have more information in them than is passed to the corresponding hook function.  For example, while a <B><TT><A HREF="misc.html#B_MOUSE_DOWN">B_MOUSE_DOWN</A></TT></B>  message knows where, when, and which mouse button was pressed (among other things), only the "where" information is passed to the <B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B> function. 
+<P>
+You can retrieve the message that initiated a hook function from within the hook function itself by calling BWindow::CurrentMessage() function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::MouseDown(BPoint where)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMessage *msg = Window()->CurrentMessage();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...</PRE>
+<P>
+<HR>
+<H2>
+<A NAME="The%20User%20Interface"></A><FONT SIZE=6>T</FONT>he <FONT SIZE=6>U</FONT>ser <FONT SIZE=6>I</FONT>nterface
+</H2>
+<P>
+The Interface Kit provides interface mechanisms that your classes can participate in, if they coordinate with kit-defined code.  Two such mechanisms are described below&mdash;keyboard navigation and the drag-and-drop delivery of messages.
+<P>
+<A NAME="11705:%20head2:%20Keyboard%20Navigation"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Keyboard%20Navigation"></A>Keyboard Navigation
+</H3>
+<P>
+Keyboard navigation is a mechanism for allowing users to manipulate views&mdash;especially buttons, check boxes, and other control devices&mdash;from the keyboard.  It gives users the ability to:  
+<P>
+<UL>
+<LI>Move the focus of keyboard actions from view to view within a window by pressing the <B><U>Tab</B></U> key.
+<P>
+<LI>Operate the view that's currently in focus by pressing <B><U>spacebar</B></U> and <B><U>Enter</B></U> (to invoke it) or the arrow keys (to move around inside it).
+<P>
+</UL>
+<P>
+The first ability&mdash;navigation between views&mdash;is implemented by the Interface Kit.  The second&mdash;navigation within a view&mdash;is up to individual applications (although the <A HREF="Control.html#BControl">BControl</A> class helps a little), as are most view-specific aspects of the user interface.  The only trick, and it's not a difficult one, is to make the two kinds of navigation work together.
+<P>
+To participate in the navigation mechanism, a class derived from <A HREF="View.html#BView">BView</A> needs to coordinate three aspects of its code&mdash;setting navigation flags, drawing an indication that the <A HREF="View.html#BView">BView</A> is in focus, and responding to keyboard events.  The following sections discuss each of these elements.
+<P>
+<H4>
+<A NAME="Setting%20Navigation%20Flags"></A>Setting Navigation Flags
+</H4>
+<P>
+The <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE">B_NAVIGABLE</A></TT></B> flag marks a <A HREF="View.html#BView">BView</A> as an eligible target for keyboard navigation.  It's one flag in a mask that the <A HREF="View.html#BView">BView</A> constructor sets, along with other view attributes.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;MyView::MyView(BRect frame, const char *name, 
+&nbsp;&nbsp;&nbsp;                         uint32 resizingMode, uint32 flags)
+&nbsp;&nbsp;&nbsp;   : BView(frame, name, resizingMode, flags|B_NAVIGIBLE|B_WILL_DRAW)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+When the user presses the <B><U>Tab</B></U> key, the focus moves from one <B><TT>B_NAVIGIBLE</TT></B> target to the next, working first down and then across the view hierarchy.  That is, if a <A HREF="View.html#BView">BView</A> has both <B><TT>B_NAVIGIBLE</TT></B> children and <B><TT>B_NAVIGIBLE</TT></B> siblings, the children will be targeted before the siblings.
+<P>
+The flag should be removed from the mask when the view is disabled or cannot become the focus view for any reason, and included again when it's re-enabled.  The mask can be altered with the <B><TT><A HREF="Font.html#SetFlags()">SetFlags()</A></TT></B> function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if ( /* cannot become the focus view */ )
+&nbsp;&nbsp;&nbsp;    SetFlags(Flags() &amp; ~B_NAVIGIBLE);
+&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;    SetFlags(Flags() | B_NAVIGIBLE);</PRE>
+<P>
+Most navigible BViews are control devices and derive from the <A HREF="Control.html#BControl">BControl</A> class.  All BControls are navigible by default and <A HREF="Control.html#BControl">BControl</A> has a <B><TT><A HREF="MenuField.html#SetEnabled()">SetEnabled()</A></TT></B> function that turns the <B><TT>B_NAVIGIBLE</TT></B> flag on and off, so this work is already done for objects that inherit from BControl.
+<P>
+You may also want to set a view's <B><TT>B_NAVIGIBLE_JUMP</TT></B> flag to permit larger jumps between navigible views.  <B><U>Control</B></U>+<B><U>Tab</B></U> moves the focus from one group of views to another, where the groups are (hopefully) obvious to the user from their arrangement in the window.
+<P>
+<B><TT>B_NAVIGIBLE_JUMP</TT></B> marks positions in the view hierarchy for these larger jumps.  When the user presses <B><U>Control</B></U>+<B><U>Tab</B></U>, focus jumps to the next <B><TT>B_NAVIGIBLE_JUMP</TT></B> view.  If a <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE_JUMP">B_NAVIGABLE_JUMP</A></TT></B> view isn't also <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE">B_NAVIGABLE</A></TT></B>, focus moves to the next available <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE">B_NAVIGABLE</A></TT></B> view.  For example, if a <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE_JUMP">B_NAVIGABLE_JUMP</A></TT></B> parent view is not navigible itself but has navigible children, <B><U>Control</B></U>+<B><U>Tab</B></U> focusses on the first <B><TT><A HREF="ViewGeneral.html#B_NAVIGABLE">B_NAVIGABLE</A></TT></B> child.
+<P>
+<H4>
+<A NAME="Drawing%20the%20Focus%20Indicator"></A>Drawing the Focus Indicator
+</H4>
+<P>
+When the user navigates to a view, the <A HREF="View.html#BView">BView</A> needs to draw some sort of visual indication that it's the current focus for keyboard actions.  Be-defined views underline text (for example, a button label) when the view is in focus, or draw a rectangular outline of the view.  The underline and outline are drawn in the color returned by <B><TT><A HREF="functions.html#keyboard_navigation_color()">keyboard_navigation_color()</A></TT></B>.  Using this color lends consistency to the user interface.
+<P>
+A <A HREF="View.html#BView">BView</A> learns that the focus has changed when its <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> hook function is called.  It's up to <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> to ensure that the focus indicator is drawn or erased, depending on the BView's new status.  It's usually simplest for <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> to call <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> and have it do the work.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::MakeFocus(bool focused)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    if ( focused != IsFocus() ) {
+&nbsp;&nbsp;&nbsp;        <I>baseClass</I>::MakeFocus(focused);
+&nbsp;&nbsp;&nbsp;        Draw(Bounds());
+&nbsp;&nbsp;&nbsp;        Flush();
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The <A HREF="Control.html#BControl">BControl</A> class has a <B><TT><A HREF="MenuField.html#MakeFocus()">MakeFocus()</A></TT></B> function that calls <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B>, so if your class derives from <A HREF="Control.html#BControl">BControl</A>, all you need to do is implement <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B>.  <B><TT><A HREF="MenuField.html#Draw()">Draw()</A></TT></B> can call <B><TT><A HREF="Tab.html#IsFocus()">IsFocus()</A></TT></B> to test the BView's current status.  Here's a rough example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::Draw(BRect updateRect)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    rgb_color navigationColor = keyboard_navigation_color();
+&nbsp;&nbsp;&nbsp;    BRect r = Bounds()
+&nbsp;&nbsp;&nbsp;    r.InsetBy(2.0, 2.0)
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;    rgb_color c = HighColor();
+&nbsp;&nbsp;&nbsp;    if ( IsFocus() ) {
+&nbsp;&nbsp;&nbsp;        /* draw the indicator */
+&nbsp;&nbsp;&nbsp;        SetHighColor(navigationColor);
+&nbsp;&nbsp;&nbsp;        StrokeRect(r);
+&nbsp;&nbsp;&nbsp;        SetHighColor(c);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;    else {
+&nbsp;&nbsp;&nbsp;        /* erase the indicator */
+&nbsp;&nbsp;&nbsp;        SetHighColor(ViewColor());
+&nbsp;&nbsp;&nbsp;        StrokeRect(r);
+&nbsp;&nbsp;&nbsp;        SetHighColor(c);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<A NAME="26844:%20head3:%20Handling%20Keyboard%20Actions"></A>
+<P>
+<H4>
+<A NAME="Handling%20Keyboard%20Actions"></A>Handling Keyboard Actions
+</H4>
+<P>
+Finally, your <A HREF="View.html#BView">BView</A> may need to override <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> to handle the keystrokes that are used to operate the view (for view-internal navigation).  Always incorporate the inherited version of <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> so that it can take care of navigation between views.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::KeyDown(const char *bytes, int32 numBytes)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    switch ( bytes[0] ) {
+&nbsp;&nbsp;&nbsp;        case B_ENTER:
+&nbsp;&nbsp;&nbsp;        case B_SPACE:
+&nbsp;&nbsp;&nbsp;            /* take action */
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;        case B_UP_ARROW:
+&nbsp;&nbsp;&nbsp;        case B_DOWN_ARROW:
+&nbsp;&nbsp;&nbsp;        case B_RIGHT_ARROW:
+&nbsp;&nbsp;&nbsp;        case B_LEFT_ARROW:
+&nbsp;&nbsp;&nbsp;            /* move within the view */
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;        default:
+&nbsp;&nbsp;&nbsp;            <I>baseClass</I>::KeyDown(bytes, numBytes);
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Again, the <A HREF="Control.html#BControl">BControl</A> class implements a <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> function that invokes the control device when the user presses the space bar or Enter key.  If your class derives from <A HREF="Control.html#BControl">BControl</A> and it doesn't have to do any other view-internal navigation, the <A HREF="Control.html#BControl">BControl</A> function may be adequate for your needs.
+<P>
+<A NAME="15212:%20head2:%20Drag%20and%20Drop"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Drag%20and%20Drop"></A>Drag and Drop
+</H3>
+<P>
+The <A HREF="View.html#BView">BView</A> class supports a drag-and-drop user interface.  The user can transfer a parcel of information from one place to another by dragging an image from a source view and dropping it on a destination view&mdash;perhaps a view in a different window in a different application.
+<P>
+A source <A HREF="View.html#BView">BView</A> initiates dragging by calling <B><TT>DragMessage()</TT></B> from within its <B><TT><A HREF="MenuField.html#MouseDown()">MouseDown()</A></TT></B> function.  The <A HREF="View.html#BView">BView</A> bundles all information relevant to the dragging session into a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object and passes it to <B><TT>DragMessage()</TT></B>.  It also passes an image or a rectangle to represent the data package on-screen.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void MyView::MouseDown(BPoint point)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;    if ( aRect.Contains(point) ) {
+&nbsp;&nbsp;&nbsp;        BMessage message(SOME_WORDS_OF_ENCOURAGEMENT);
+&nbsp;&nbsp;&nbsp;        message.AddString("words", theEncouragingWords);
+&nbsp;&nbsp;&nbsp;        DragMessage(&amp;message, aRect);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;    . . .
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The Application Server then takes charge of the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object and animates the image as the user drags it on-screen.  As the image moves across the screen, the views it passes over are informed with <B><TT><A HREF="TextView.html#MouseMoved()">MouseMoved()</A></TT></B> function calls.  These notifications give views a chance to show the user whether or not they're willing to accept the message being dragged.  When the user releases the mouse button, dropping the dragged message, the message is delivered to the <A HREF="Window.html#BWindow">BWindow</A> and targeted to the destination BView.
+<P>
+A <A HREF="View.html#BView">BView</A> is notified that a message has arrived by a <B><TT><A HREF="ColorControl.html#MessageReceived()">MessageReceived()</A></TT></B> function call.  This is the same function that announces the arrival of other messages.  By calling <B><TT><A HREF="../The%20Application%20Kit/Message.html#WasDropped()">WasDropped()</A></TT></B>, you can ask the message whether it was dropped on the view or delivered in some other way.  If it was dropped, you can find out where by calling <B><TT><A HREF="../The%20Application%20Kit/Message.html#DropPoint()">DropPoint()</A></TT></B>.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void AnotherView::MessageReceived(BMessage *message)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;    switch ( Message->what ) {
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;        case SOME_WORDS_OF_ENCOURAGEMENT:
+&nbsp;&nbsp;&nbsp;        {
+&nbsp;&nbsp;&nbsp;            char *words;
+&nbsp;&nbsp;&nbsp;            if ( message->FindString("words", &amp;words) != B_OK )
+&nbsp;&nbsp;&nbsp;                return;
+&nbsp;&nbsp;&nbsp;            if ( message->WasDropped() ) {
+&nbsp;&nbsp;&nbsp;                BPoint where = DropPoint();
+&nbsp;&nbsp;&nbsp;                ConvertFromScreen(&amp;where);
+&nbsp;&nbsp;&nbsp;                PleaseInsertTheseWords(words, where);
+&nbsp;&nbsp;&nbsp;            }
+&nbsp;&nbsp;&nbsp;            break;
+&nbsp;&nbsp;&nbsp;        }
+&nbsp;&nbsp;&nbsp;        . . .
+&nbsp;&nbsp;&nbsp;        default:
+&nbsp;&nbsp;&nbsp;            <I>baseClass</I>::MessageReceived(message);
+&nbsp;&nbsp;&nbsp;    }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Aside from creating a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> object and passing it to <B><TT>DragMessage()</TT></B>, or implementing <B><TT><A HREF="TextView.html#MouseMoved()">MouseMoved()</A></TT></B> and <B><TT><A HREF="ColorControl.html#MessageReceived()">MessageReceived()</A></TT></B> functions to handle any messages that come its way, there's nothing an application needs to do to support a drag-and-drop user interface.  The bulk of the work is done by the Application Server and Interface Kit.
+<P>
+<A NAME="36442:%20head1:%20Character%20Encoding"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Character%20Encoding"></A><FONT SIZE=6>C</FONT>haracter <FONT SIZE=6>E</FONT>ncoding
+</H2>
+<P>
+The BeOS encodes characters using the UTF-8 transformation of Unicode character values.  Unicode is a standard encoding scheme for all the major scripts of the world&mdash;including, among others, extended Latin, Cyrillic, Greek, Devanagiri, Telugu, Hebrew, Arabic, Tibetan, and the various character sets used by Chinese, Japanese, and Korean.  It assigns a unique and unambiguous 16-bit value to each character, making it possible for characters from various languages to co-exist in the same document.  Unicode makes it simpler to write language-aware software (though it doesn't solve all the problems).  It also makes a wide variety of symbols available to an application, even if it's not concerned with covering more than one language.
+<P>
+Unicode's one disadvantage is that all characters have a width of 16 bits.  Although 16 bits are necessary for a universal encoding system and a fixed width for all characters is important for the standard, there are many contexts in which byte-sized characters would be easier to work with and take up less memory (besides being more familiar and backwards compatible with existing code).  UTF-8 is designed to address this problem.
+<P>
+<HR>
+<H3>
+<A NAME="UTF-8"></A>UTF-8
+</H3>
+<P>
+UTF-8 stands for "UCS Transformation Format, 8-bit form" (and UCS stands for "Universal Multiple-Octet Character Set," another name for Unicode).  UTF-8 transforms 16-bit Unicode values into a variable number of 8-bit units.  It takes advantage of the fact that for values equal to or less than 0x007f, the Unicode character set matches the 7-bit ASCII character set&mdash;in other words, Unicode adopts the ASCII standard, but encodes each character in 16 bits.  UTF-8 strips ASCII values back to 8 bits and uses two or three bytes to encode Unicode values over 0x007f.
+<P>
+The high bit of each UTF-8 byte indicates the role it plays in the encoding:
+<P>
+<UL>
+<LI>If the high bit is 0, the byte stands alone and encodes an ASCII value.
+<P>
+<LI>If the high bit is 1, the byte is part of a multiple-byte character representation.
+<P>
+</UL>
+<P>
+In addition, the first byte of a multibyte character indicates how many bytes are in the encoding:  The number of high bits that are set to 1 (before a bit is 0) is the number of bytes it takes to represent the character.  Therefore, the first byte of a multibyte character will always have at least two high bits set.  The other bytes in a multibyte encoding have just one high bit set.
+<P>
+To illustrate, a character encoded in one UTF-8 byte will look like this (where a '1' or a '0' indicates a control bit specified by the standard and an 'x' is a bit that contributes to the character value): 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;0xxxxxxx</PRE>
+<P>
+A character encoded in two bytes has the following arrangement of bits:  
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;110xxxxx 10xxxxxx </PRE>
+<P>
+And a character encoded in three bytes is laid out as follows: 
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;1110xxxx 10xxxxxx 10xxxxxx </PRE>
+<P>
+Note that any 16-bit value can be encoded in three UTF-8 bytes.  However, UTF-8 discards leading zeroes and always uses the fewest possible number of bytes&mdash;so it can encode Unicode values less than 0x0080 in a single byte and values less than 0x0800 in two bytes.
+<P>
+In addition to the codings illustrated above, UTF-8 takes four bytes to translate a Unicode <I>surrogate pair</I>&mdash;two conjoined 16-bit values that together encode a character that's not part of the standard.  Surrogates are extremely rare.
+<P>
+<HR>
+<H3>
+<A NAME="ASCII%20Compatibility"></A>ASCII Compatibility
+</H3>
+<P>
+The UTF-8 encoding scheme has several advantages:
+<P>
+<UL>
+<LI>The single byte that encodes an ASCII value can't be confused with a byte that's part of a multiple-byte encoding.  You can test a UTF-8 byte for an ASCII value without considering surrounding bytes; if there's a match, you can be sure the byte is the ASCII character.  UTF-8 is fully compatible with ASCII.
+<P>
+<LI>The first (or only) byte of a character can't be confused with a byte inside a multibyte sequence.  It's simple to find where a character begins.  For example, this macro will do it:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define BEGINS_CHAR(byte) ((byte &amp; 0xc0) != 0x80)</PRE>
+<P>
+<UL>
+<LI>The string functions in the standard C library&mdash;for example, <B><TT>strcat()</TT></B> and <B><TT>strlen()</TT></B>&mdash;can operate on a UTF-8 string.
+<P>
+However, it's important to remember that <B><TT>strlen()</TT></B> measures the string in bytes, not characters.  Some Interface Kit functions, like <B><TT><A HREF="Font.html#GetEscapements()">GetEscapements()</A></TT></B> in the <A HREF="Font.html#BFont">BFont</A> class, ask for a character count; <B><TT>strlen()</TT></B> can't provide the answer.  Instead, you need to do something like this to count the characters in a string:
+<P>
+</UL>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 count = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while ( *p != '0' ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    if ( BEGINS_CHAR(*p) )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        count++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    p++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<UL>
+<LI>UTF-8 preserves the numerical ordering of Unicode character values.  String comparison functions&mdash;such as <B><TT>strcasecmp()</TT></B>&mdash;will put UTF-8 strings in the correct order. 
+<P>
+However, you should be careful when using the string comparison functions to order a set of UTF-8 strings.  Unicode tries for a universal encoding and orders characters in a way that's generically correct, but it may not be correct for specific characters in specific languages.  (Because it follows ASCII, UTF-8 is correct for English.)
+<P>
+<LI>For European languages, UTF-8 generally yields more compact data representations than would Unicode.  Most of the characters in a string can be encoded in a single byte.  In many other cases, UTF-8 is no less compact than Unicode.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="UTF-8%20and%20the%20BeOS"></A>UTF-8 and the BeOS
+</H3>
+<P>
+The BeOS assumes UTF-8 encoding in most cases.  For example, a <B><TT><A HREF="misc.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message reports the character that's mapped to the key the user pressed as a UTF-8 value.  That value is then passed as a string to <B><TT><A HREF="MenuField.html#KeyDown()">KeyDown()</A></TT></B> along with the byte count:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+virtual void <B><TT>KeyDown(</TT></B>const char *<I><FONT  color=991122 face=HELVETICA>bytes</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>numBytes<B><TT>)</TT></B></I></FONT>;
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+You can expect the <I><FONT  color=991122 face=HELVETICA>bytes</I></FONT> string to always contain at least one byte.  And, of course, you can test it for an ASCII value without caring whether it's UTF-8:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;if ( bytes[0] == B_TAB )
+&nbsp;&nbsp;&nbsp;    . . .</PRE>
+<P>
+Similarly, objects that display text in the user interface&mdash;such as window titles and button labels&mdash;expect to be passed UTF-8 encoded strings, and hand you a UTF-8 string if you ask for the title or label.  These objects display text using a system font&mdash;either the system plain font (<B><TT><A HREF="Font.html#be_plain_font">be_plain_font</A></TT></B>) or the bold font (<B><TT><A HREF="Font.html#be_bold_font">be_bold_font</A></TT></B>).  The <A HREF="Font.html#BFont">BFont</A> class allows other character encodings, which you may need to use in limited circumstances from time to time, but the system fonts are constrained to UTF-8 (<B><TT><A HREF="misc.html#B_UNICODE_UTF8">B_UNICODE_UTF8</A></TT></B> encoding).  The FontPanel preferences application doesn't permit users to change the encoding of a system font.
+<P>
+Unicode and UTF-8 are documented in <B>The Unicode Standard, Version 2.0</B>, published by Addison-Wesley.  See that book for complete information on Unicode and for a description of how UTF-8 encodes surrogate pairs.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

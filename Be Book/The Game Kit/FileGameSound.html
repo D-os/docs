@@ -1,0 +1,299 @@
+<HTML><HEAD><TITLE>The Game Kit: BFileGameSound</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BFileGameSound"></A>BFileGameSound
+</H1>
+<P>
+Derived from:  <A HREF="StreamingGameSound.html#BStreamingGameSound">BStreamingGameSound</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/game/FileGameSound.h">be/game/FileGameSound.h</A>
+<P>
+Library:  libgame.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="FileGameSound.summary.html"><i>Summary</i></A></H6>
+<P>
+If you want to play back audio from a disk file, such as background music, or low-priority sound effects, BFileGameSound is for you.  Keep in mind that if the sound needs to play at precise moments, or latency is an issue, that BFileGameSound may not be appropriate for your needs.
+<P>
+Using BFileGameSound is easy, and it supports automatically looping sounds.  The following code snippet starts up the theme music for the hot new game "Mystery Warriors From the Doomed Planet Z":
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BFileGameSound themeSong("music/theme.aif", true);
+&nbsp;&nbsp;&nbsp;themeSong.StartPlaying();</PRE>
+<P>
+This starts up a looped sound from the file <B>music/theme.aif</B>.  If you want the theme to only play through once, just specify <B><TT>false</TT></B> instead of <B><TT>true</TT></B> for the looping argument to the BFileGameSound constructor.
+<P>
+You can pause the BFileGameSound by calling <B><TT><A HREF="#SetPaused()">SetPaused()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;themeSong.SetPaused(true, 0);</PRE>
+<P>
+This pauses the sound, effective immediately.  The pause can optionally be ramped, so that the sound slows down or speeds up to reach the new setting.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;themeSong.SetPaused(true, 2);</PRE>
+<P>
+This causes the sound to slow down over the course of two seconds, until it's stopped.
+<P>
+The inverse is also possible:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;themeSong.SetPaused(false, 0);</PRE>
+<P>
+This resumes playback immediately.  You can ramp the resume by specifying a non-zero value for the ramp time.
+<P>
+BFileGameSound uses the <A HREF="../Release%20Notes/MediaKit.html#BMediaFile">BMediaFile</A> class to access the sound file.  If <A HREF="../Release%20Notes/MediaKit.html#BMediaFile">BMediaFile</A> can't identify the sound, the file is assumed to contain raw 44.1kHz, 16-bit stereo.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BFileGameSound()"></A>BFileGameSound()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BFileGameSound(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>inFile</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>looping</I></FONT> = <FONT  face=HELVETICA>true</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGameSoundDevice *<I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BFileGameSound(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>inFile</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>looping</I></FONT> = <FONT  face=HELVETICA>true</FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BGameSoundDevice *<I><FONT  color=991122 face=HELVETICA>device</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Prepares the object to play the specified sound file, which can be specified either by entry_ref or pathname in the <I><FONT  color=991122 face=HELVETICA>inFile</I></FONT> argument.
+<P>
+If the looping flag is <B><TT>true</TT></B> (which it is by default), the sound automatically loops back to the beginning and replays when the end of the sound is reached.  This is useful for easily playing background music (for example).
+<P>
+In both cases, <I><FONT  color=991122 face=HELVETICA>device</I></FONT> specifies the sound device that should be used for playing the sound; <B><TT>NULL</TT></B> uses the default sound player.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <I><FONT  color=991122 face=HELVETICA>device</I></FONT> must always be <B><TT>NULL</TT></B>.
+<P>
+</UL>
+<P>
+After instantiating the BFileGameSound object, you should call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to determine whether or not the sound was successfully created.
+<P>
+<HR>
+<H3>
+<A NAME="~BFileGameSound"></A>~BFileGameSound
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BFileGameSound()</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+A typical destructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a status_t indicating whether or not the object was successfully instantiated.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The sound was successfully initialized.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  Unable to create a sound player.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Can't get enough memory to preload the sound.
+<P>
+<LI><I>Other errors</I>.  The sound player may return errors.
+<P>
+</UL>
+<I><P>
+</I><HR>
+<H3>IsPaused() see <A HREF="#SetPaused()">SetPaused()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Preload()"></A>Preload()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Preload(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Preload()</TT></B>  preloads enough of the sound file into memory that starting playback of the sound won't cuase a delay while the first chunk of data is fetched from disk.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Preloading was successful.
+<P>
+<UL>
+<LI>Port errors.  Unable to communicate with the streaming sound port.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetPaused()"></A>SetPaused()
+, 
+<A NAME="IsPaused()"></A>IsPaused()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetPaused(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>isPaused</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>rampTime</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>IsPaused(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetPaused()</TT></B> pauses if <I><FONT  color=991122 face=HELVETICA>isPaused</I></FONT> is <B><TT>true</TT></B>, and unpauses if <I><FONT  color=991122 face=HELVETICA>isPaused</I></FONT> is <B><TT>false</TT></B>.  If <I><FONT  color=991122 face=HELVETICA>rampTime</I></FONT> is nonzero, the sound ramps up to speed (or down to stopped) instead of instantly changing state.  The number of microseconds specified by <I><FONT  color=991122 face=HELVETICA>rampTime</I></FONT> indicates how long the change should take to complete.
+<P>
+<B><TT>IsPaused()</TT></B> returns value indicating whether or not the sound is paused, or if a pause is in process of being initiated (if ramping is underway).  The result is one of these values:
+<P>
+<UL>
+<LI><B><TT>B_NOT_PAUSED</TT></B>&mdash;the sound is playing normally.
+<P>
+<LI><B><TT>B_PAUSE_IN_PROGRESS</TT></B>&mdash;the sound is ramping toward or away from a paused state.
+<P>
+<LI><B><TT>B_PAUSED</TT></B>&mdash;the sound is paused.
+<P>
+</UL>
+<P>
+Because these constants are members of the BFileGameSound class, be sure to refer to them as <B><TT>BFileGameSound::B_NOT_PAUSED</TT></B> and so forth.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The pause occurred without error.
+<P>
+<UL>
+<LI><B><TT>EALREADY</TT></B>.  The sound is already in the requested state.
+<P>
+<LI>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Game Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Game%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Game Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

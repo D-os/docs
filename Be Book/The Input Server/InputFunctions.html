@@ -1,0 +1,1018 @@
+<HTML><HEAD><TITLE>The Input Server: Input Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Input%20Functions"></A>Input Functions
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/InterfaceDefs.h">be/interface/InterfaceDefs.h</A>
+<P>
+Library:  libbe.so
+<P>
+This section describes the global mouse and keyboard functions.
+<P>
+<HR>
+<H2>
+<A NAME="Mouse%20Functions"></A><FONT SIZE=6>M</FONT>ouse <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>get_click_speed()   see <A HREF="#set_click_speed()">set_click_speed()</A></H3>
+<P>
+<HR>
+<H3>get_mouse_map()   see <A HREF="#set_mouse_map()">set_mouse_map()</A></H3>
+<P>
+<HR>
+<H3>get_mouse_speed()   see <A HREF="#set_mouse_map()">set_mouse_map()</A></H3>
+<P>
+<HR>
+<H3>get_mouse_acceleration()   see <A HREF="../Release%20Notes/InterfaceKit.html#set_mouse_acceleration()">set_mouse_acceleration()</A></H3>
+<P>
+<HR>
+<H3>get_mouse_type()   see <A HREF="#set_mouse_map()">set_mouse_map()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="set_click_speed()"></A>set_click_speed()
+, 
+<A NAME="get_click_speed()"></A>get_click_speed()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_click_speed(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>interval</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_click_speed(</TT></B></FONT>bigtime_t *<I><FONT  color=991122 face=HELVETICA>interval</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and report the timing for multiple-clicks.  For successive mouse-down events to count as a multiple-click, they must occur within the <I><FONT  color=991122 face=HELVETICA>interval</I></FONT> set by <B><TT><A HREF="#set_click_speed()">set_click_speed()</A></TT></B> and provided by <B><TT><A HREF="#get_click_speed()">get_click_speed()</A></TT></B>.  The interval is measured in microseconds; it's usually set by the user in the Mouse preferences application.  The smallest possible interval is 100,000 microseconds (0.1 second).
+<P>
+If successful, these functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>; if unsuccessful, they return an error code, which may be just <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="set_mouse_map()"></A>set_mouse_map()
+, 
+<A NAME="get_mouse_map()"></A>get_mouse_map()
+, 
+<A NAME="set_mouse_type()"></A>set_mouse_type()
+, 
+<A NAME="get_mouse_type()"></A>get_mouse_type()
+, 
+<A NAME="set_mouse_speed()"></A>set_mouse_speed()
+, 
+<A NAME="get_mouse_speed()"></A>get_mouse_speed()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_mouse_map(</TT></B></FONT>mouse_map *<I><FONT  color=991122 face=HELVETICA>map</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_mouse_map(</TT></B></FONT>mouse_map *<I><FONT  color=991122 face=HELVETICA>map</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_mouse_type(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>numButtons</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_mouse_type(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>numButtons</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_mouse_speed(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>speed</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_mouse_speed(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>speed</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_mouse_acceleration(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>acceleration</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_mouse_acceleration(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>acceleration</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions configure the mouse and supply information about the current configuration.  The configuration should usually be left to the user and the Mouse preferences application.
+<P>
+<B><TT><A HREF="#set_mouse_map()">set_mouse_map()</A></TT></B>  maps the buttons of the mouse to their roles in the user interface, and <B><TT><A HREF="#get_mouse_map()">get_mouse_map()</A></TT></B>  writes the current map into the variable referred to by <I><FONT  color=991122 face=HELVETICA>map</I></FONT>.  The <B><TT><A HREF="../The%20Interface%20Kit/misc.html#mouse_map">mouse_map</A></TT></B> structure has a field for each button on a three-button mouse:
+<P>
+uint32 <B><TT>
+<A NAME="left"></A>left
+<br>
+</TT></B>The button on the left of the mouse 
+<P>
+uint32 <B><TT>
+<A NAME="right"></A>right
+<br>
+</TT></B>The button on the right of the mouse 
+<P>
+uint32 <B><TT>
+<A NAME="middle"></A>middle
+<br>
+</TT></B>The button in the middle, between the other two buttons
+<P>
+Each field is set to one of the following constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD>
+</UL>
+<B><TT><A NAME="B_PRIMARY_MOUSE_BUTTON"></A>B_PRIMARY_MOUSE_BUTTON
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SECONDARY_MOUSE_BUTTON"></A>B_SECONDARY_MOUSE_BUTTON
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TERTIARY_MOUSE_BUTTON"></A>B_TERTIARY_MOUSE_BUTTON
+</TT></B> </TD>
+</TABLE>
+<P>
+The same role can be assigned to more than one physical button.  If all three buttons are set to <B><TT><A HREF="#B_PRIMARY_MOUSE_BUTTON">B_PRIMARY_MOUSE_BUTTON</A></TT></B>, they all function as the primary button; if two of them are set to <B><TT><A HREF="#B_SECONDARY_MOUSE_BUTTON">B_SECONDARY_MOUSE_BUTTON</A></TT></B>, they both function as the secondary button; and so on.
+<P>
+<B><TT><A HREF="#set_mouse_type()">set_mouse_type()</A></TT></B> informs the system of how many buttons the mouse actually has.  If it has two buttons, only the <B><TT><A HREF="#left">left</A></TT></B> and <B><TT><A HREF="#right">right</A></TT></B> fields of the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#mouse_map">mouse_map</A></TT></B> are operative.  If it has just one button, only the <B><TT><A HREF="#left">left</A></TT></B> field is operative.  <B><TT><A HREF="#set_mouse_type()">set_mouse_type()</A></TT></B> writes the current number of buttons into the variable referred to by <I><FONT  color=991122 face=HELVETICA>numButtons</I></FONT>.
+<P>
+<B><TT><A HREF="#set_mouse_speed()">set_mouse_speed()</A></TT></B> sets the speed of the mouse&mdash;the rate at which the cursor image moves on-screen relative to the actual speed at which the user moves the mouse on its pad.  A <I><FONT  color=991122 face=HELVETICA>speed</I></FONT> value of 0 is the slowest movement rate.  The maximum rate is 20, though even 10 is too fast for most users.  <B><TT><A HREF="#get_mouse_speed()">get_mouse_speed()</A></TT></B> writes the current speed into the variable referred to by <I><FONT  color=991122 face=HELVETICA>speed</I></FONT>.
+<P>
+<B><TT><A HREF="../Release%20Notes/InterfaceKit.html#set_mouse_acceleration()">set_mouse_acceleration()</A></TT></B> sets the mouse's acceleration&mdash;the rate at which the cursor image gains and loses speed as the user begins and ceases moving the mouse.  An <I><FONT  color=991122 face=HELVETICA>acceleration</I></FONT> value of 0 is the slowest movement rate.  The maximum rate is 20, though even 10 is too fast for most users.  <B><TT><A HREF="../Release%20Notes/InterfaceKit.html#get_mouse_acceleration()">get_mouse_acceleration()</A></TT></B> writes the current acceleration into the variable referred to by <I><FONT  color=991122 face=HELVETICA>acceleration</I></FONT>.
+<P>
+All six functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if successful, and an error code, typically <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>, if not.
+<P>
+<A NAME="Keyboard%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Keyboard%20Functions"></A><FONT SIZE=6>K</FONT>eyboard <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="get_key_info()"></A>get_key_info()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_key_info(</TT></B></FONT>key_info *<I><FONT  color=991122 face=HELVETICA>keyInfo</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Writes information about the state of the keyboard into the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#key_info">key_info</A></TT></B> structure referred to by <I><FONT  color=991122 face=HELVETICA>keyInfo</I></FONT>.  This function lets you get information about the keyboard in the absence of <B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> messages.  The <B><TT><A HREF="../The%20Interface%20Kit/misc.html#key_info">key_info</A></TT></B> structure has just two fields:
+<P>
+uint32 <B><TT>
+<A NAME="modifiers"></A>modifiers
+<br>
+</TT></B>A mask indicating which modifier keys are down and which keyboard locks are on.
+<P>
+uint8 <B><TT>
+<A NAME="key_states"></A>key_states
+</TT></B>[16]
+<br>
+A bit array that records the state of all the keys on the keyboard, and all the keyboard locks.  This array works identically to the "states" array passed in a key-down message.  See "Key States" in the <B>Keyboard Information</B> appendix for information on how to read information from the array.
+<P>
+<B><TT><A HREF="#get_key_info()">get_key_info()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if it was able to get the requested information, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if the return results are unreliable.
+<P>
+<B>See also:  <TT>BView::KeyDown()</TT></B>, the <B>Keyboard Information</B> appendix, <B><TT><A HREF="#modifiers()">modifiers()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="get_key_map()"></A>get_key_map()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>get_key_map(</TT></B></FONT>key_map&nbsp;**<I><FONT  color=991122 face=HELVETICA>keys</I></FONT>, char&nbsp;**<I><FONT  color=991122 face=HELVETICA>chars</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Provides a pointer to a copy of the system key map&mdash;the structure that describes the role of each key on the keyboard.  The pointers returned by the function are yours; you must <B><TT><A HREF="../Drivers/area_malloc.html#free()">free()</A></TT></B> them when you're finished with them.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+In versions of the BeOS before Release 4, the pointers used to belong to the operating system.  Now they're yours to do with as you please.  Please update your applications as necessary to avoid leaking memory.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Through the Keymap preferences application, users can configure the keyboard to their liking.  The user's preferences are stored in a file (<B>Key_map</B> within the <B><TT>B_USER_SETTINGS_DIRECTORY</TT></B>, returned by the <B><TT><A HREF="../The%20Storage%20Kit/Directory.html#find_directory()">find_directory()</A></TT></B> function).  When the machine reboots, the key map is read from this file.  If the file doesn't exist, the original map encoded in the Application Server is used.
+<P>
+The <B><TT><A HREF="../The%20Interface%20Kit/misc.html#key_map">key_map</A></TT></B> structure contains a large number of fields, but it can be broken down into these six parts:
+<P>
+<UL>
+<LI>A version number.
+<P>
+<LI>A series of fields that determine which keys will function as modifier keys&mdash;such as Shift, Control, or Num Lock.
+<P>
+<LI>A field that sets the initial state of the keyboard locks in the default key map.
+<P>
+<LI>A series of ordered tables that assign character values to keys.  Except for a handful of modifier keys, all keys are mapped to characters, though they may not be mapped for all modifier combinations.
+<P>
+<LI>A series of tables that locate the dead keys for diacritical marks and determine how a combination of a dead key plus another key is mapped to a particular character.
+<P>
+<LI>A set of masks that determine which modifier keys are required for a key to be considered dead.
+<P>
+</UL>
+<P>
+The following sections describe the parts of the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#key_map">key_map</A></TT></B> structure.
+<P>
+<H5>
+<A NAME="Version"></A>Version
+</H5>
+<P>
+The first field of the key map is a version number:
+<P>
+uint32 <B><TT>
+<A NAME="version"></A>version
+<br>
+</TT></B>An internal identifier for the key map.
+<P>
+The version number doesn't change when the user configures the keyboard, and shouldn't be changed programmatically either.  You can ignore it.
+<P>
+<H5>
+<A NAME="Modifiers"></A>Modifiers
+</H5>
+<P>
+Modifier keys set states that affect other user actions on the keyboard and mouse.  Eight modifier states are defined&mdash;Shift, Control, Option, Command, Menu, Caps Lock, Num Lock, and Scroll Lock.  These states are discussed under "Modifier Keys" in the <B>Keyboard Information</B> appendix.  They fairly closely match the key caps found on a Macintosh keyboard, but only partially match those on a standard PC keyboard&mdash;which generally has a set of Alt(ernate) keys, rarely Option keys, and only sometimes Command and Menu keys.  Because of these differences, the mapping of keys to modifiers is the area of the key map most open to the user's personal judgement and taste, and consequently to changes in the default configuration. 
+<P>
+Since two keys, one on the left and one on the right, can be mapped to the Shift, Control, Option, and Command modifiers, the keyboard can have as many as twelve modifier keys.  The <B><TT><A HREF="../The%20Interface%20Kit/misc.html#key_map">key_map</A></TT></B> structure has one field for each key:
+<P>
+uint32 <B><TT>
+<A NAME="caps_key"></A>caps_key
+<br>
+</TT></B>The key that functions as the Caps Lock key; by default, this is the key labeled "Caps Lock," key 0x3b.
+<P>
+uint32 <B><TT>
+<A NAME="scroll_key"></A>scroll_key
+<br>
+</TT></B>The key that functions as the Scroll Lock key; by default, this is the key labeled "Scroll Lock," key 0x0f.
+<P>
+uint32 <B><TT>
+<A NAME="num_key"></A>num_key
+<br>
+</TT></B>The key that functions as the Num Lock key; by default, this is the key labeled "Num Lock," key 0x22.
+<P>
+uint32 <B><TT>
+<A NAME="left_shift_key"></A>left_shift_key
+<br>
+</TT></B>A key that functions as a Shift key; by default, this is the key on the left labeled "Shift," key 0x4b.
+<P>
+uint32 <B><TT>
+<A NAME="right_shift_key"></A>right_shift_key
+<br>
+</TT></B>Another key that functions as a Shift key; by default, this is the key on the right labeled "Shift," key 0x56.
+<P>
+uint32 <B><TT>
+<A NAME="left_command_key"></A>left_command_key
+<br>
+</TT></B>A key that functions as a Command key; by default, this is key 0x5d, sometimes labeled "Alt."
+<P>
+uint32 <B><TT>
+<A NAME="right_command_key"></A>right_command_key
+<br>
+</TT></B>Another key that functions as a Command key; by default, this is key 0x5f, sometimes labeled "Alt."
+<P>
+uint32 <B><TT>
+<A NAME="left_control_key"></A>left_control_key
+<br>
+</TT></B>A key that functions as a Control key; by default, this is the key labeled "Control" on the left, key 0x5c.
+<P>
+uint32 <B><TT>
+<A NAME="right_control_key"></A>right_control_key
+<br>
+</TT></B>Another key that functions as a Control key; by default on keyboards that have Option keys, this key is the key labeled "Control" on the right, key 0x60.  For keyboards that don't have Option keys, this field is unmapped (its value is 0); key 0x60 is used as an Option key.
+<P>
+uint32 <B><TT>
+<A NAME="left_option_key"></A>left_option_key
+<br>
+</TT></B>A key that functions as an Option key; by default, this is key 0x66, which has different labels on different keyboards&mdash;"Option," "Command," or a Windows symbol.  This key doesn't exist on, and therefore isn't mapped for, a standard 101-key keyboard.
+<P>
+uint32 <B><TT>
+<A NAME="right_option_key"></A>right_option_key
+<br>
+</TT></B>A key that functions as an Option key; by default, this is key 0x67, which has different labels on different keyboards&mdash;"Option," "Command," or a Windows symbol.  For keyboards without this key, the field is mapped to the key labeled "Control" on the right, key 0x60.
+<P>
+uint32 <B><TT>
+<A NAME="menu_key"></A>menu_key
+<br>
+</TT></B>A key that initiates keyboard navigation of the menu hierarchy; by default, this is the key labeled with a menu symbol, key 0x68.  This key doesn't exist on, and therefore isn't mapped for, a standard 101-key keyboard.
+<P>
+Each field names the key that functions as that modifier.  For example, when the user holds down the key whose code is set in the <B><TT>right_option_key</TT></B> field, the <B><TT><A HREF="#B_OPTION_KEY">B_OPTION_KEY</A></TT></B> and <B><TT><A HREF="#B_RIGHT_OPTION_KEY">B_RIGHT_OPTION_KEY</A></TT></B> bits are turned on in the modifiers mask that the <B><TT><A HREF="#modifiers()">modifiers()</A></TT></B> function returns.  When the user then strikes a character key, the <B><TT><A HREF="#B_OPTION_KEY">B_OPTION_KEY</A></TT></B> state influences the character that's generated.
+<P>
+If a modifier field is set to a value that doesn't correspond to an actual key on the keyboard (including 0), that field is not mapped.  No key fills that particular modifier role.
+<P>
+<H5>
+<A NAME="Keyboard%20locks"></A>Keyboard locks
+</H5>
+<P>
+One field of the key map sets initial modifier states:
+<P>
+uint32 <B><TT>
+<A NAME="lock_settings"></A>lock_settings
+<br>
+</TT></B>A mask that determines which keyboard locks are turned on when the machine reboots or when the default key map is restored.
+<P>
+The mask can be 0 or may contain any combination of these three constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT><A HREF="#B_CAPS_LOCK">B_CAPS_LOCK</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#B_SCROLL_LOCK">B_SCROLL_LOCK</A></TT></B> </TD>
+<TR>
+<TD><B><TT><A HREF="#B_NUM_LOCK">B_NUM_LOCK</A></TT></B> </TD>
+</TABLE>
+<P>
+It's 0 by default; there are no initial locks.
+<P>
+Altering the <B><TT><A HREF="#lock_settings">lock_settings</A></TT></B> field has no effect unless the altered key map is made the default.
+<P>
+<A NAME="25876:%20head4:%20Character%20maps.%20The%20principal%20job%20of%20the%20key%20map%20is%20to%20assign%20character%20values%20to%20keys."></A>
+<P>
+<H5>
+<A NAME="Character%20maps"></A>Character maps
+</H5>
+<P>
+The principal job of the key map is to assign character values to keys.  This is done in a series of nine tables:
+<P>
+int32 <B><TT>
+<A NAME="control_map"></A>control_map
+</TT></B>[128]
+<br>
+The characters that are produced when a Control key is down but both Command keys are up.
+<P>
+int32 <B><TT>
+<A NAME="option_caps_shift_map"></A>option_caps_shift_map
+</TT></B>[128]
+<br>
+The characters that are produced when Caps Lock is on and both a Shift key and an Option key are down.
+<P>
+int32 <B><TT>
+<A NAME="option_caps_map"></A>option_caps_map
+</TT></B>[128]
+<br>
+The characters that are produced when Caps Lock is on and an Option key is down.
+<P>
+int32 <B><TT>
+<A NAME="option_shift_map"></A>option_shift_map
+</TT></B>[128]
+<br>
+The characters that are produced when both a Shift key and an Option key are down.
+<P>
+int32 <B><TT>
+<A NAME="option_map"></A>option_map
+</TT></B>[128]
+<br>
+The characters that are produced when an Option key is down.
+<P>
+int32 <B><TT>
+<A NAME="caps_shift_map"></A>caps_shift_map
+</TT></B>[128]
+<br>
+The characters that are produced when Caps Lock is on and a Shift key is down.
+<P>
+int32 <B><TT>
+<A NAME="caps_map"></A>caps_map
+</TT></B>[128]
+<br>
+The characters that are produced when Caps Lock is on.
+<P>
+int32 <B><TT>
+<A NAME="shift_map"></A>shift_map
+</TT></B>[128]
+<br>
+The characters that are produced when a Shift key is down.
+<P>
+int32 <B><TT>
+<A NAME="normal_map"></A>normal_map
+</TT></B>[128]
+<br>
+The characters that are produced when none of the other tables apply.
+<P>
+Each of these tables is an array of 128 offsets into another array, the <I><FONT  color=991122 face=HELVETICA>chars</I></FONT> array of Unicode UTF-8 character encodings.  <B><TT><A HREF="#get_key_map()">get_key_map()</A></TT></B> provides a pointer to the <I><FONT  color=991122 face=HELVETICA>chars</I></FONT> array as its second argument.  
+<P>
+Key codes are used as indices into the character tables.  The offset stored at any particular index maps a character to that key.  For example, the code assigned to the <I>M</I> key is 0x52; at index 0x52 in the <B><TT><A HREF="#option_caps_map">option_caps_map</A></TT></B> is an offset; at that offset in the <I><FONT  color=991122 face=HELVETICA>chars</I></FONT> array, you'll find the character that's mapped to the <I>M</I> key when an Option key is held down and Caps Lock is on.
+<P>
+This indirection&mdash;an index to an offset to a character&mdash;is required because characters are encoded as Unicode UTF-8 strings.  Character values of 127 or less (7-bit ASCII)  are just a single byte, but UTF-8 takes two, three, or (rarely) four bytes to encode values over 127.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>chars</I></FONT> array represents each character as a Pascal string&mdash;the first byte in the string tells how many other bytes the string contains.  For example, the string for the trademark symbol ((TM) ) looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;x03xE2x84xA2</PRE>
+<P>
+The first byte (x03) indicates that Unicode UTF-8 takes 3 bytes to represent the trademark symbol, and those bytes follow (xE2x84xA2).  Pascal strings are not null-terminated.
+<P>
+Here's an example showing you how to decode the character tables.  This sample prints out a simple chart of the <B><TT><A HREF="#normal_map">normal_map</A></TT></B>, <B><TT><A HREF="#shift_map">shift_map</A></TT></B>, <B><TT><A HREF="#option_map">option_map</A></TT></B>, and <B><TT><A HREF="#option_shift_map">option_shift_map</A></TT></B> characters:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;#include &lt;interface/InterfaceDefs.h>
+&nbsp;&nbsp;&nbsp;#include &lt;stdio.h>
+&nbsp;&nbsp;&nbsp;#include &lt;string.h>
+&nbsp;&nbsp;&nbsp;#include &lt;stdlib.h>
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;static void print_key( char *chars, int32 offset )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int size = chars[offset++];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch( size ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case 0:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Not mapped
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf( "N/A" );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case 1:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 1-byte UTF-8/ASCII character
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf( "%c", chars[offset] );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 2-, 3-, or 4-byte UTF-8 character
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *str = new char[size + 1];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;strncpy( str, &amp;(chars[offset]), size );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf( "%s", str );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete [] str;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf( "t" );
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;int main( void )
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Get the current key map.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;key_map *keys;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *chars;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;get_key_map( &amp;keys, &amp;chars );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Print a chart of the normal, shift, option, and option+shift
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// keys.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf( "Key #tNormaltShifttOptiontOption+Shiftn" );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for( int idx = 0; idx &lt; 128; idx++ ) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf( " %3dt", idx );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print_key( chars, keys->normal_map[idx] );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print_key( chars, keys->shift_map[idx] );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print_key( chars, keys->option_map[idx] );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print_key( chars, keys->option_shift_map[idx] );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf( "n" );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Free our copy of the key map.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free( chars );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free( keys );
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return EXIT_SUCCESS;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The character map tables are ordered.  Values from the first applicable table are used, even if another table might also seem to apply.  For example, if Caps Lock is on and a Control key is down (and both Command keys are up), the <B><TT><A HREF="#control_map">control_map</A></TT></B> array is used, not <B><TT><A HREF="#caps_map">caps_map</A></TT></B>.  If a Shift key is down and Caps Lock is on, the <B><TT><A HREF="#caps_shift_map">caps_shift_map</A></TT></B> is used, not <B><TT><A HREF="#shift_map">shift_map</A></TT></B> or <B><TT><A HREF="#caps_map">caps_map</A></TT></B>.
+<P>
+Notice that the last eight tables (all except <B><TT><A HREF="#control_map">control_map</A></TT></B>) are paired, with a table that names the Shift key (...<B><TT>_shift_map</TT></B>) preceding an equivalent table without Shift:
+<P>
+<UL>
+<LI><B><TT><A HREF="#option_caps_shift_map">option_caps_shift_map</A></TT></B> is paired with <B><TT><A HREF="#option_caps_map">option_caps_map</A></TT></B>,
+<P>
+<LI><B><TT><A HREF="#option_shift_map">option_shift_map</A></TT></B> with <B><TT><A HREF="#option_map">option_map</A></TT></B>,
+<P>
+<LI><B><TT><A HREF="#caps_shift_map">caps_shift_map</A></TT></B> with <B><TT><A HREF="#caps_map">caps_map</A></TT></B>, and
+<P>
+<LI><B><TT><A HREF="#shift_map">shift_map</A></TT></B> with <B><TT><A HREF="#normal_map">normal_map</A></TT></B>.
+<P>
+</UL>
+<P>
+These pairings are important for a special rule that applies to keys on the numerical keypad when Num Lock is on:
+<P>
+<UL>
+<LI>If the Shift key is down, the non-Shift table is used.
+<P>
+<LI>However, if the Shift key is <I>not</I> down, the Shift table is used.
+<P>
+</UL>
+<P>
+In other words, Num Lock inverts the Shift and non-Shift tables for keys on the numerical keypad.
+<P>
+Not every key needs to be mapped to a character.  If the <I><FONT  color=991122 face=HELVETICA>chars</I></FONT> array has a 0-length string for a key, the key is not mapped to a character (given the particular modifier states the table represents).  Generally, modifier keys are not mapped to characters, but all other keys are, at least for some tables.  Key-down events are not generated for unmapped keys.
+<P>
+<H5>
+<A NAME="Dead%20keys"></A>Dead keys
+</H5>
+<P>
+Next are the tables that map combinations of keys to single characters.  The first key in the combination is "dead"&mdash;it doesn't produce a key-down event until the user strikes another character key.  When the user hits the second key, one of two things will happen:  If the second key is one that can be used in combination with the dead key, a single key-down event reports the combination character.  If the second key doesn't combine with the dead key, two key-down events occur, one reporting the dead-key character and one reporting the second character.
+<P>
+There are five dead-key tables:
+<P>
+int32 <B><TT>
+<A NAME="acute_dead_key"></A>acute_dead_key
+</TT></B>[32]
+<br>
+The table for combining an acute accent (xab ) with other characters.
+<P>
+int32 <B><TT>
+<A NAME="grave_dead_key"></A>grave_dead_key
+</TT></B>[32]
+<br>
+The table for combining a grave accent (Q) with other characters.
+<P>
+int32 <B><TT>
+<A NAME="circumflex_dead_key"></A>circumflex_dead_key
+</TT></B>[32]
+<br>
+The table for combining a circumflex (xf6 ) with other characters.
+<P>
+int32 <B><TT>
+<A NAME="dieresis_dead_key"></A>dieresis_dead_key
+</TT></B>[32]
+<br>
+The table for combining a dieresis (xac ) with other characters.
+<P>
+int32 <B><TT>
+<A NAME="tilde_dead_key"></A>tilde_dead_key
+</TT></B>[32]
+<br>
+The table for combining a tilde (xf7 ) with other characters
+<P>
+The tables are named after diacritical marks that can be placed on more than one character.  However, the name is just a mnemonic; it means nothing.  The contents of the table determine what the dead key is and how it combines with other characters.  It would be possible, for example, to remap the <B><TT><A HREF="#tilde_dead_key">tilde_dead_key</A></TT></B> table so that it had nothing to do with a tilde.
+<P>
+Each table consists of a series of up to 16 offset pairs&mdash;where, as in the case of the character maps, each offset picks a character from the <I><FONT  color=991122 face=HELVETICA>chars</I></FONT> character array.  The first character in the pair is the one that must be typed immediately after the dead key.  The second character is the resulting character, the character that's produced by the combination of the dead key plus the first character in the pair.  For example, if the first character is 'o', the second might be '&ocirc;'&mdash;meaning that the combination of a dead key plus the character 'o' produces a circumflexed '&ocirc;'.
+<P>
+The character pairs for the default <B><TT><A HREF="#grave_dead_key">grave_dead_key</A></TT></B> array look something like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&gt; &gt;, &gt;'&gt;,
+&nbsp;&nbsp;&nbsp;&gt;A&gt;, &gt;&Agrave;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;E&gt;, &gt;&Egrave;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;I&gt;, &gt;&Igrave;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;O&gt;, &gt;&Ograve;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;U&gt;, &gt;&Ugrave;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;a&gt;, &gt;&agrave;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;e&gt;, &gt;&egrave;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;i&gt;, &gt;&igrave;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;o&gt;, &gt;&ograve;&gt;,
+&nbsp;&nbsp;&nbsp;&gt;u&gt;, &gt;&ugrave;&gt;,
+&nbsp;&nbsp;&nbsp;. . .</PRE>
+<P>
+By convention, the first offset in each array is to the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_SPACE">B_SPACE</A></TT></B> character and the second is to the dead-key character itself.  This pair does double duty:  It states that the dead key plus a space yields the dead-key character, and it also names the dead key.  The system understands what the dead key is from the second offset in the array.
+<P>
+<H5>
+<A NAME="Character%20tables%20for%20dead%20keys"></A>Character tables for dead keys
+</H5>
+<P>
+As mentioned above, for a key to be dead, it must be mapped to the character picked by the second offset in a dead-key array.  However, it's not typical for every key that's mapped to the character to be dead.  Usually, there's a requirement that the user must hold down certain modifier keys (often the Option key).  In other words, a key is dead only if selected character-map tables map it to the requisite character.
+<P>
+Five additional fields of the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#key_map">key_map</A></TT></B> structure specify what those character-map tables are&mdash;which modifiers are required for each of the dead keys:
+<P>
+uint32 <B><TT>
+<A NAME="acute_tables"></A>acute_tables
+<br>
+</TT></B>The character tables that cause a key to be dead when they map it to the second character in the <B><TT><A HREF="#acute_dead_key">acute_dead_key</A></TT></B> array.
+<P>
+uint32 <B><TT>
+<A NAME="grave_tables"></A>grave_tables
+<br>
+</TT></B>The character tables that cause a key to be dead when they map it to the second character in the <B><TT><A HREF="#grave_dead_key">grave_dead_key</A></TT></B> array.
+<P>
+uint32 <B><TT>
+<A NAME="circumflex_tables"></A>circumflex_tables
+<br>
+</TT></B>The character tables that cause a key to be dead when they map it to the second character in the <B><TT><A HREF="#circumflex_dead_key">circumflex_dead_key</A></TT></B> array.
+<P>
+uint32 <B><TT>
+<A NAME="dieresis_tables"></A>dieresis_tables
+<br>
+</TT></B>The character tables that cause a key to be dead when they map it to the second character in the <B><TT><A HREF="#dieresis_dead_key">dieresis_dead_key</A></TT></B> array.
+<P>
+uint32 <B><TT>
+<A NAME="tilde_tables"></A>tilde_tables
+<br>
+</TT></B>The character tables that cause a key to be dead when they map it to the second character in the <B><TT><A HREF="#tilde_dead_key">tilde_dead_key</A></TT></B> array.
+<P>
+Each of these fields contains a mask formed from the following constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_CONTROL_TABLE"></A>B_CONTROL_TABLE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_CAPS_SHIFT_TABLE"></A>B_CAPS_SHIFT_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_CAPS_SHIFT_TABLE"></A>B_OPTION_CAPS_SHIFT_TABLE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_CAPS_TABLE"></A>B_CAPS_TABLE
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_OPTION_CAPS_TABLE"></A>B_OPTION_CAPS_TABLE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_SHIFT_TABLE"></A>B_SHIFT_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_SHIFT_TABLE"></A>B_OPTION_SHIFT_TABLE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_NORMAL_TABLE"></A>B_NORMAL_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_TABLE"></A>B_OPTION_TABLE
+</TT></B> </TD>
+<TD></TD>
+</TABLE>
+<P>
+The mask designates the character-map tables that permit a key to be dead.  For example, if the mask for the <B><TT><A HREF="#grave_tables">grave_tables</A></TT></B> field is,
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;B_OPTION_TABLE | B_OPTION_CAPS_SHIFT_TABLE</PRE>
+<P>
+a key would be dead whenever either of those tables mapped the key to the character of the second offset in the <B><TT><A HREF="#grave_dead_key">grave_dead_key</A></TT></B> array ('Q' in the example above).  A key mapped to the same character by another table would not be dead.
+<P>
+<B>See also:  <TT><A HREF="#get_key_info()">get_key_info()</A></TT></B>, <B><TT><A HREF="#modifiers()">modifiers()</A></TT></B>, the <B>Keyboard Information</B> appendix, <B><TT><A HREF="#set_modifier_key()">set_modifier_key()</A></TT></B> 
+<P>
+<HR>
+<H3>get_key_repeat_delay()   see <A HREF="#set_key_repeat_rate()">set_key_repeat_rate()</A></H3>
+<P>
+<HR>
+<H3>get_key_repeat_rate()   see <A HREF="#set_key_repeat_rate()">set_key_repeat_rate()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="get_keyboard_id()"></A>get_keyboard_id()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_keyboard_id(</TT></B></FONT>uint16 *<I><FONT  color=991122 face=HELVETICA>id</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Obtains the keyboard identifier from the Application Server and device driver and writes it into the variable referred to by <I><FONT  color=991122 face=HELVETICA>id</I></FONT>.  This number reveals what kind of keyboard is currently attached to the computer.
+<P>
+The identifier for the standard 101-key PC keyboard&mdash;and for keyboards with a similar set of keys&mdash;is 0x83ab.
+<P>
+If unsuccessful for any reason, <B><TT><A HREF="#get_keyboard_id()">get_keyboard_id()</A></TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  If successful, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="modifiers()"></A>modifiers()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>modifiers(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a mask that has a bit set for each modifier key the user is holding down and for each keyboard lock that's set.  The mask can be tested against these constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_SHIFT_KEY"></A>B_SHIFT_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_COMMAND_KEY"></A>B_COMMAND_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_CAPS_LOCK"></A>B_CAPS_LOCK
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_KEY"></A>B_CONTROL_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_MENU_KEY"></A>B_MENU_KEY
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_SCROLL_LOCK"></A>B_SCROLL_LOCK
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_KEY"></A>B_OPTION_KEY
+</TT></B></TD>
+<TD></TD>
+<TD><B><TT>
+<A NAME="B_NUM_LOCK"></A>B_NUM_LOCK
+</TT></B> </TD>
+</TABLE>
+<P>
+No bits are set (the mask is 0) if no locks are on and none of the modifiers keys are down.
+<P>
+If it's important to know which physical key the user is holding down, the one on the right or the one on the left, the mask can be further tested against these constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_LEFT_SHIFT_KEY"></A>B_LEFT_SHIFT_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_SHIFT_KEY"></A>B_RIGHT_SHIFT_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LEFT_CONTROL_KEY"></A>B_LEFT_CONTROL_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_CONTROL_KEY"></A>B_RIGHT_CONTROL_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LEFT_OPTION_KEY"></A>B_LEFT_OPTION_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_OPTION_KEY"></A>B_RIGHT_OPTION_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LEFT_COMMAND_KEY"></A>B_LEFT_COMMAND_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_COMMAND_KEY"></A>B_RIGHT_COMMAND_KEY
+</TT></B> </TD>
+</TABLE>
+<P>
+By default, the keys closest to the space bar function as Command keys, no matter what their labels on particular keyboards.  If a keyboard doesn't have Option keys (for example, a standard 101-key keyboard), the key on the right labeled "Control" functions as the right Option key, and only the left "Control" key is available to function as a Control modifier.  However, users can change this configuration with the <B>/bin/keymap</B> application.
+<P>
+<HR>
+<H3>
+<A NAME="set_key_repeat_rate()"></A>set_key_repeat_rate()
+, 
+<A NAME="get_key_repeat_rate()"></A>get_key_repeat_rate()
+, 
+<A NAME="set_key_repeat_delay()"></A>set_key_repeat_delay()
+, 
+<A NAME="get_key_repeat_delay()"></A>get_key_repeat_delay()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_key_repeat_rate(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>rate</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_key_repeat_rate(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>rate</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_key_repeat_delay(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>delay</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_key_repeat_delay(</TT></B></FONT>bigtime_t *<I><FONT  color=991122 face=HELVETICA>delay</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions set and report the timing of repeating keys.  When the user presses a character key on the keyboard, it produces an immediate <B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> message.  If the user continues to hold the key down, it will, after an initial delay, continue to produce messages at regularly spaced intervals&mdash;until the user releases the key or presses another key.  The delay and the spacing between messages are both preferences the user can set with the Keyboard application.
+<P>
+<B><TT><A HREF="#set_key_repeat_rate()">set_key_repeat_rate()</A></TT></B> sets the number of messages repeating keys produce per second.  For a standard PC keyboard, the <I><FONT  color=991122 face=HELVETICA>rate</I></FONT> can be as low as 2 and as high as 30; <B><TT><A HREF="#get_key_repeat_rate()">get_key_repeat_rate()</A></TT></B> writes the current setting into the integer that <I><FONT  color=991122 face=HELVETICA>rate</I></FONT> refers to.
+<P>
+<B><TT><A HREF="#set_key_repeat_delay()">set_key_repeat_delay()</A></TT></B> sets the length of the initial delay before the key begins repeating.  Acceptable values are 250,000, 500,000, 750,000 and 1,000,000 microseconds (.25, .5, .75, and 1.0 second); <B><TT><A HREF="#get_key_repeat_delay()">get_key_repeat_delay()</A></TT></B> writes the current setting into the variable that <I><FONT  color=991122 face=HELVETICA>delay</I></FONT> points to.
+<P>
+All four functions return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if they successfully communicate with the Application Server, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if not.  It's possible for the <B><TT>set</TT></B>...<B><TT>()</TT></B> functions to communicate with the server but not succeed in setting the <I><FONT  color=991122 face=HELVETICA>rate</I></FONT> or <I><FONT  color=991122 face=HELVETICA>delay</I></FONT> (for example, if the <I><FONT  color=991122 face=HELVETICA>delay</I></FONT> isn't one of the listed four values).
+<P>
+<HR>
+<H3>
+<A NAME="set_keyboard_locks()"></A>set_keyboard_locks()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>set_keyboard_locks(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Turns the keyboard locks&mdash;Caps Lock, Num Lock, and Scroll Lock&mdash;on and off.  The keyboard locks that are listed in the <I><FONT  color=991122 face=HELVETICA>modifiers</I></FONT> mask passed as an argument are turned on; those not listed are turned off.  The mask can be 0 (to turn off all locks) or it can contain any combination of the following constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_CAPS_LOCK"></A>B_CAPS_LOCK
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NUM_LOCK"></A>B_NUM_LOCK
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SCROLL_LOCK"></A>B_SCROLL_LOCK
+</TT></B> </TD>
+</TABLE>
+<P>
+<B>See also:  <TT><A HREF="#get_key_map()">get_key_map()</A></TT></B>, <B><TT><A HREF="#modifiers()">modifiers()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="set_modifier_key()"></A>set_modifier_key()
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>set_modifier_key(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>modifier</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>key</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Maps a <I><FONT  color=991122 face=HELVETICA>modifier</I></FONT> role to a particular <I><FONT  color=991122 face=HELVETICA>key</I></FONT> on the keyboard, where <I><FONT  color=991122 face=HELVETICA>key</I></FONT> is a key identifier and <I><FONT  color=991122 face=HELVETICA>modifier</I></FONT> is one of the these constants:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_CAPS_LOCK%20"></A>B_CAPS_LOCK 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_LEFT_SHIFT_KEY"></A>B_LEFT_SHIFT_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_SHIFT_KEY%20"></A>B_RIGHT_SHIFT_KEY 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_NUM_LOCK%20"></A>B_NUM_LOCK 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_LEFT_CONTROL_KEY"></A>B_LEFT_CONTROL_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_CONTROL_KEY%20"></A>B_RIGHT_CONTROL_KEY 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_SCROLL_LOCK%20"></A>B_SCROLL_LOCK 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_LEFT_OPTION_KEY"></A>B_LEFT_OPTION_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_OPTION_KEY%20"></A>B_RIGHT_OPTION_KEY 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_MENU_KEY%20"></A>B_MENU_KEY 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_LEFT_COMMAND_KEY"></A>B_LEFT_COMMAND_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_COMMAND_KEY%20"></A>B_RIGHT_COMMAND_KEY 
+</TD>
+</TABLE></TT></B>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>key</I></FONT> in question serves as the named modifier key, unmapping any key that previously played that role.  The change remains in effect until the default key map is restored.  In general, the user's preferences for modifier keys&mdash;expressed in the Keymap application&mdash;should be respected.
+<P>
+Modifier keys can also be mapped by calling <B><TT><A HREF="#get_key_map()">get_key_map()</A></TT></B> and altering the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#key_map">key_map</A></TT></B> structure directly.  This function is merely a convenient alternative for accomplishing the same thing.  (It's currently not possible to alter the key map; <B><TT><A HREF="#get_key_map()">get_key_map()</A></TT></B> looks at a copy.)
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

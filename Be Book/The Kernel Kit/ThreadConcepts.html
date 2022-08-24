@@ -1,0 +1,277 @@
+<HTML><HEAD><TITLE>The Kernel Kit: Thread and Team Concepts</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Thread%20and%20Team%20Concepts"></A>Thread and Team Concepts
+</H1>
+<P>
+A thread is a synchronous process that executes a series of program instructions.  A team is a group of threads that make up a single program or application.
+<P>
+Every application has at least one thread:  When you launch an application, an initial thread&mdash;the <I>main thread</I>&mdash;is automatically created (or <I>spawned</I>) and told to run.  The main thread executes the ubiquitous <B><TT>main()</TT></B> function, winds through the functions that are called from <B><TT>main()</TT></B>, and is automatically deleted (or <I>killed</I>) when <B><TT>main()</TT></B> exits. 
+<P>
+The Be operating system is <I>multithreaded</I>:  from the main thread you can spawn and run additional threads; from each of these threads you can spawn and run more threads, and so on.  All the threads in all applications run concurrently and asynchronously with each other.  
+<P>
+Threads are independent of each other.  Most notably, a given thread doesn't own the other threads it has spawned.  For example, if thread A spawns thread B, and thread A dies (for whatever reason), thread B will continue to run.  (But before you get carried away with the idea of leap-frogging threads, you should take note of the caveat in <a href="#Death%20and%20the%20Main%20Thread">"Death and the Main Thread"</a>.)
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>Threads and the POSIX fork() function are not compatible.</B>  You can't mix calls to <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B> (the function that creates a new thread) and <B><TT>fork()</TT></B> in the same application:  If you call <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B> and then try to call <B><TT>fork()</TT></B>, the <B><TT>fork()</TT></B> call will fail.  And vice versa.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+Although threads are independent, they do fall into groups called <I>teams</I>.  A team consists of a main thread and all other threads that "descend" from it (that are spawned by the main thread directly, or by any thread that was spawned by the main thread, and so on).  Viewed from a higher level, a team is the group of threads that are created by a single application.  You can't "transfer" threads from one team to another.  The team is set when the thread is spawned; it remains the same throughout the thread's life.
+<P>
+All the threads in a particular team share the same address space:  Global variables that are declared by one thread will be visible to all other threads in that team.  
+<P>
+<A NAME="27137:%20head2:%20Spawning"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Spawning%20a%20Thread"></A>Spawning a Thread
+</H3>
+<P>
+You spawn a thread by calling the <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B> function.  The function assigns and returns a system-wide <B><TT><A HREF="Threads.html#thread_id">thread_id</A></TT></B> number that you use to identify the new thread in subsequent function calls.  Valid <B><TT><A HREF="Threads.html#thread_id">thread_id</A></TT></B> numbers are positive integers; you can check the success of a spawn thus:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;thread_id my_thread = spawn_thread(...);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if ((my_thread) &lt; B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* failure */
+&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* success */ </PRE>
+<P>
+The arguments to <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B>, which are examined throughout this description, supply information such as what the thread is supposed to do, the urgency of its operation, and so on.
+<P>
+<H4>
+<A NAME="Threads%20and%20App%20Images"></A>Threads and App Images
+</H4>
+<P>
+A conceptual neighbor of spawning a thread is the act of loading an executable (or loading an <I>app</I> <I>image</I>).  This is performed by calling the <B><TT><A HREF="Images.html#load_image()">load_image()</A> </TT></B>function.  Loading an image causes a separate program, identified as a file, to be launched by the system.  For more information on the<B><TT> <A HREF="Images.html#load_image()">load_image()</A></TT></B> function, see <A HREF="Images.html#Images">Images</A>.
+<P>
+<HR>
+<H3>
+<A NAME="Telling%20a%20Thread%20to%20Run"></A>Telling a Thread to Run
+</H3>
+<P>
+Spawning a thread isn't enough to make it run.  To tell a thread to start running, you must pass its <B><TT><A HREF="Threads.html#thread_id">thread_id</A></TT></B> number to either the <B><TT><A HREF="Threads.html#resume_thread()">resume_thread()</A></TT></B> or <B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B> function:
+<P>
+<UL>
+<LI><B><TT><A HREF="Threads.html#resume_thread()">resume_thread()</A></TT></B> starts the new thread running and immediately returns.  The new thread runs concurrently and asynchronously with the thread in which <B><TT><A HREF="Threads.html#resume_thread()">resume_thread()</A></TT></B> was called. 
+<P>
+<LI><B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B> starts the thread running but doesn't return until the thread has finished.  (You can also call <B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B> on a thread that's already running.) 
+<P>
+</UL>
+<P>
+Of these two functions, <B><TT><A HREF="Threads.html#resume_thread()">resume_thread()</A></TT></B> is the more common means for starting a thread that was created through<B><TT> <A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B>.  <B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B> is typically used to start the thread that was created through <B><TT><A HREF="Images.html#load_image()">load_image()</A></TT></B>.
+<P>
+<A NAME="15888:%20head2:%20The%20Thread%20Function"></A>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Thread%20Function"></A>The Thread Function
+</H3>
+<P>
+When you call <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B>, you must identify the new thread's <I>thread function</I>.  This is a global C function (or a static C++ member function) that the new thread will execute when it's told to run.  The thread function, defined as <B><TT><A HREF="Threads.html#thread_func">thread_func</A></TT></B>,  takes a single (<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">void *</A></TT></B>) argument and returns an <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> error code.  When the thread function exits, the thread is automatically killed.  
+<P>
+You pass a thread function as the first argument to <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B>.  For example, here we spawn a thread that uses a function called <B><TT>lister()</TT></B> as its thread function.  The last argument to spawn_thread() is forwarded to the thread function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int32 lister(void *data)
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Cast the argument. */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BList *listObj = (BList *)data;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;int32 main() 
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BList *listObj = new BList();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;thread_id my_thread;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my_thread = spawn_thread(lister, ..., (void *)listObj);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;resume_thread(my_thread);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+See <a href="#Passing%20Data%20to%20a%20Thread">Passing Data to a Thread</a> for other methods of passing data to a thread.
+<P>
+<HR>
+<H3>
+<A NAME="Thread%20Names"></A>Thread Names
+</H3>
+<P>
+A thread can be given a name which you assign through the second argument to <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B>.  The name can be 32 characters long (as represented by the <B><TT><A HREF="misc.html#B_OS_NAME_LENGTH">B_OS_NAME_LENGTH</A> </TT></B>constant) and needn't be unique&mdash;more than one thread can have the same name.  
+<P>
+You can look for a thread based on its name by passing the name to the <B><TT><A HREF="Threads.html#find_thread()">find_thread()</A></TT></B> function; the function returns the <B><TT><A HREF="Threads.html#thread_id">thread_id</A></TT></B> of the so-named thread.  If two or more threads bear the same name, the <B><TT><A HREF="Threads.html#find_thread()">find_thread()</A></TT></B> function returns the first of these threads that it finds.  
+<P>
+You can retrieve the <B><TT><A HREF="Threads.html#thread_id">thread_id</A></TT></B> of the calling thread by passing <B><TT>NULL</TT></B> to<B><TT> <A HREF="Threads.html#find_thread()">find_thread()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;thread_id this_thread = find_thread(NULL);</PRE>
+<P>
+To retrieve a thread's name, you must look in the thread's <B><TT><A HREF="Threads.html#thread_info">thread_info</A></TT></B> structure.  This structure is described in the <B><TT><A HREF="Threads.html#get_thread_info()">get_thread_info()</A></TT></B> function description.
+<P>
+Dissatisfied with a thread's name?  Use the <B><TT><A HREF="Threads.html#rename_thread()">rename_thread()</A> </TT></B>function to change it.  Fool your friends.
+<P>
+<A NAME="37672:%20head2:%20Thread%20Priority"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Thread%20Priorities"></A>Thread Priorities
+</H3>
+<P>
+In a multi-threaded environment, the CPUs must divide their attention between the candidate threads, executing a few instructions from this thread, then a few from that thread, and so on.  But the division of attention isn't always equal:  You can assign a higher or lower <I>priority </I>to a thread and so declare it to be more or less important than other threads.  
+<P>
+You assign a thread's priority (an integer) as the third argument to <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B>.  There are two categories of priorities:  "time-sharing" and "real-time." 
+<P>
+<UL>
+<LI><B>Time-sharing (<I>values from 1 to 99</I>)</B>.  A time-sharing thread is executed only if there are no real-time threads in the ready queue.  In the absence of real-time threads, a time-sharing thread is elected to run once every "scheduler quantum" (currently, every three milliseconds).  The higher the time-sharing thread's priority value, the greater the chance that it will be the next thread to run.
+<P>
+<LI><B>Real-time (<I>100 and greater</I>)</B>.  A real-time thread  is executed as soon as it's ready.  If more than one real-time thread is ready at the same time, the thread with the highest priority is executed first.  The thread is allowed to run without being preempted (except by a real-time thread with a higher priority) until it blocks, snoozes, is suspended, or otherwise gives up its plea for attention.
+<P>
+</UL>
+<P>
+The Kernel Kit defines seven priority constants (see <A HREF="Threads.html#Thread%20Priority%20Values">Thread Priority Values</A> for the list).  Although you can use other, "in-between" value as the priority argument to <B><TT><A HREF="Threads.html#spawn_thread()">spawn_thread()</A></TT></B>, it's suggested that you stick with these.  
+<P>
+Furthermore, you can call the <B><TT><A HREF="Threads.html#suggest_thread_priority()">suggest_thread_priority()</A></TT></B> function to let the Kernel Kit determine a good priority for your thread.  This function takes information about the thread's scheduling and CPU needs, and returns a reasonable priority value to use when spawning the thread.
+<P>
+<A NAME="35151:%20head2:%20Synchronizing%20Threads"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Synchronizing%20Threads"></A>Synchronizing Threads
+</H3>
+<P>
+There are times when you may want a particular thread to pause at a designated point until some other (known) thread finishes some task.  Here are three ways to effect this sort of synchronization:
+<P>
+<UL>
+<LI>The most general means for synchronizing threads is to use a semaphore.  The semaphore mechanism is described in great detail in 
+<P>
+<HR>
+<H3>
+<A NAME="Semaphores"></A>Semaphores
+</H3>
+<P>
+.
+<P>
+<LI>Synchronization is sometimes a side-effect of sending data between threads.  This is explained in <a href="#Passing%20Data%20to%20a%20Thread">"Passing Data to a Thread"</a>, and in 
+<P>
+<HR>
+<H3>
+<A NAME="Ports"></A>Ports
+</H3>
+<P>
+.
+<P>
+<LI>Finally, you can tell a thread to wait for some other thread to die by calling <B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B>, as described earlier.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Controlling%20a%20Thread"></A>Controlling a Thread
+</H3>
+<P>
+There are four ways to control a thread while it's running:
+<P>
+<UL>
+<LI>You can put the calling thread to sleep for some number of microseconds through the <B><TT><A HREF="Threads.html#snooze()">snooze()</A> </TT></B>and <B><TT><A HREF="Threads.html#snooze_until()">snooze_until()</A> </TT></B>functions.
+<P>
+<LI>You can suspend the execution of any thread through the <B><TT><A HREF="Threads.html#suspend_thread()">suspend_thread()</A></TT></B> function.  The thread remains suspended until you "unsuspend" it through a call to <B><TT><A HREF="Threads.html#resume_thread()">resume_thread()</A></TT></B> or <B><TT><A HREF="Threads.html#wait_for_thread()">wait_for_thread()</A></TT></B>.
+<P>
+<LI>You can send a POSIX "signal" to a thread through the <B><TT>send_signal()</TT></B> function.  The <B><TT>SIGCONT</TT></B> signal tries to unblock a blocked or sleeping thread without killing it; all other signals kill the thread.  To override this behavior, you can install your own signal handlers.
+<P>
+<LI>You can kill the calling thread through <B><TT><A HREF="Threads.html#exit_thread()">exit_thread()</A></TT></B>, or kill some other thread through <B><TT><A HREF="Threads.html#kill_thread()">kill_thread()</A></TT></B>.  Feeling itchy?  Try killing an entire team of threads:  The<B><TT> kill_team()</TT></B> function is more than a system call.  It's therapy.
+<P>
+</UL>
+<A NAME="18664:%20head3:%20Death%20and%20the%20Main%20Thread"></A>
+<P>
+<H4>
+<A NAME="Death%20and%20the%20Main%20Thread"></A>Death and the Main Thread
+</H4>
+<P>
+As mentioned earlier, the control that's imposed upon a particular thread isn't visited upon the "children" that have been spawned from that thread.  However, the death of an application's main thread can affect the other threads: 
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B>When a main thread dies, the game is pretty much over. </B>  The main thread takes the team's heap, its statically allocated objects, and other team-wide resources&mdash;such as access to standard IO&mdash;with it.  This may seriously cripple any threads that linger beyond the death of the main thread. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+It's possible to create an application in which the main thread sets up one or more other threads, gets them running, and then dies.  But such applications should be rare.  In general, you should try to keep your main thread around until all other threads in the team are dead.  
+<P>
+<A NAME="20400:%20head2:%20Passing%20Data%20to%20a%20Thread"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Passing%20Data%20to%20a%20Thread"></A>Passing Data to a Thread
+</H3>
+<P>
+Every thread has a <I>message cache</I>.   You can write to a thread's message cache through the <B><TT><A HREF="Threads.html#send_data()">send_data()</A></TT></B> function.  The thread can pick up your message (a combination of an integer and a buffer) through <B><TT><A HREF="Threads.html#receive_data()">receive_data()</A></TT></B>.  The cache is only one message deep; if there's a message already in the cache, send_data will block.  Conversely, if there's no message in the cache, receive_data() will block.
+<P>
+You can also pass data to thread through a port.  Arbitrarily deep, ports are more flexible than the message cache.  See <A HREF="#Ports">Ports</A> for details.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Kernel Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Kernel%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Kernel Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

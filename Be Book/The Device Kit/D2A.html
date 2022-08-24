@@ -1,0 +1,171 @@
+<HTML><A NAME="24501:%20className:%20The%20GeekPort%20and%20its%20Classes"></A>
+<HEAD><TITLE>The Device Kit: The GeekPort and its Classes</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Device Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Device%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Device Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20GeekPort%20and%20its%20Classes"></A>The GeekPort and its Classes
+</H1>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+This documentation applies to the BeBox hardware only. 
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The GeekPort is a piece of hardware on the back of the BeBox that communicates with external devices.  Depending on how you use the GeekPort's ports, you can get up to 24 independent data paths:
+<P>
+<UL>
+<LI>Four 12-bit analog input channels.
+<P>
+<LI>Four 8-bit analog output channels
+<P>
+<LI>Two 8-bit wide digital ports (16 paths, total) that can act as inputs or outputs.
+<P>
+</UL>
+<P>
+To provide high-level access to these data paths, the Device Kit defines three classes:
+<P>
+<UL>
+<LI>The BA2D class ("analog to digital") lets you get at the analog input channels. 
+<P>
+<LI>The BD2A class ("digital to analog") does the same for the analog output channels.
+<P>
+<LI>The BDigitalPort class lets you configure, read, and write the digital ports.
+<P>
+</UL>
+<P>
+The signals and data that these classes read and write appear at the GeekPort connector, a 37-pin female connector that you'll find at the back of every BeBox.  In addition to the pins that correspond to the analog and data paths, the GeekPort provides power and ground pins.  Everything you need to feed your external gizmo is right there.
+<P>
+The GeekPort connector's pins are assigned thus:  
+<P>
+<IMG SRC="art/D2A1.gif" ALIGN="bottom">
+<P>
+<A NAME="15313:%20head2:%20The%20ADC%20and%20DAC"></A>
+<P>
+<HR>
+<H3>
+<A NAME="The%20ADC%20and%20DAC%20"></A>The ADC and DAC 
+</H3>
+<P>
+The GeekPort provides four channels of simultaneous analog-to-digital (a/d) and four channels of simultaneous digital-to-analog (d/a) conversion.  The signals that feed the ADC arrive on pins 25-28 of the GeekPort connector; the signals that are produced by the DAC depart through pins 29-32 (as depicted below).  Pins 24 and 33 are DC reference levels (ground) for the a/d and d/a signals, respectively (<I>don't</I> use pins 24 or 33 as power grounds):  
+<A NAME="GeekPort%20connector%20illustration"></A>
+<P>
+In the illustration, the a/d and d/a pins are labelled ("A2D1", "A2D2", etc.) as they are known to the BA2D and BD2A classes.
+<P>
+If you've read the GeekPort hardware specification, you'll have discovered that the ADC can be placed in a few different modes (the DAC is less flexible).  The BA2D and BD2A classes (more accurately, the ADC and DAC drivers) refine the GeekPort specification, as described in the following sections.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Keep in mind that the a/d and d/a converters that the GeekPort uses are <I>not</I> part of the Crystal codec that's used by the audio software (and brought into your application through the Media Kit).  The two sets of converters are completely separate and can be used independently and simultaneously.  If you're doing on-board high-fidelity sound processing (or generation) in real time, you should stick with the Crystal convertors.  
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<H4>
+<A NAME="The%20ADC"></A>The ADC
+</H4>
+<P>
+The ADC accepts signals in the range [0,&nbsp;+4.096] Volts, performs a linear conversion, and spits out unsigned 12-bit data.  The 4.096V to 12-bit conversion produces a convenient one-digital-step per milliVolt of input.
+<P>
+A/d conversion is performed on-demand:  When you read a value from the ADC, the voltage that lies on the specified pin is immediately sampled (this is the "Single Shot" mode described in the GeekPort hardware specification).  In other words, the ADC doesn't perform a sample and hold&mdash;it doesn't constantly and regularly measure the voltages at its inputs.  Nonetheless, you <I>can't </I>retrieve samples at an arbitrarily high frequency simply by reading in a tight loop.  This is because of the "sampling latency":  When you ask for a sample, it takes the driver about ten milliseconds to process the request, not counting the (slight) overhead imposed by the C++ call (from your BA2D object).  Therefore, the fastest rate at which you can get samples from the ADC is a bit less than 100 kHz.
+<P>
+Furthermore, the ADC driver "fakes" the four channels of a/d conversion.  In reality, there's only one ADC data path; the driver multiplexes the path to create four independent signals.  This means that the optimum 100 kHz sampling frequency is divided by the number of channels that you want to read.  If all four channels are being read at the same time, you'll find that successive samples on a <I>particular</I> channel arrive slightly less often than once every 40 milliseconds (a rate of &lt; 25 kHz).
+<P>
+Finally, the ADC hardware is shared by the GeekPort and the two joysticks.  This cooperative use shouldn't affect your application&mdash;you can treat the ADC as if it were all your own&mdash;but this increases the multiplexing.  In general, joysticks shouldn't need to sample very often, so while the theoretical "worst hit" on the ADC is a sample every 60 milliseconds, the reality should be much better.  If we can assume that a joystick-reading application isn't oversampling, then the BA2D "sampling latency" should stay near the 10 milliseconds per channel measurement.  
+<P>
+<H4>
+<A NAME="The%20DAC"></A>The DAC
+</H4>
+<P>
+The DAC accepts 8-bit unsigned data and converts it, in 16 mV steps, to an analog signal in the range [0,&nbsp;+4.080] Volts.  Again, the quantization is linear.  The DAC output isn't filtered; if you need to smooth the stair-step output, you have to build a filter into the gizmo that you're connecting to the GeekPort.  
+<P>
+Each of the d/a pins is protected by an in-series 4.7 kOhm resistor; however, pin 33, the d/a DC reference (ground) pin, is not similarly impeded.  If you want to attach an op-amp circuit to the DAC output, you should hang a 4.7 kOhm resistor on the ground pin that you're using. 
+<P>
+When you write a digital sample to the DAC, the specified pin is immediately set to the converted voltage.  The pin continues to produce that voltage until you write another sample.  
+<P>
+Unlike the ADC, the DAC is truly a four-channel device, so there's no multiplexing imposition to slow things down.  Furthermore, writing to the DAC is naturally faster than writing to the ADC.  You should be able to write to the DAC as frequently as you want, without worrying about a hardware-imposed "sampling latency." 
+<P>
+<A NAME="13606:%20head2:%20The%20Digital%20Ports"></A>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Digital%20Ports"></A>The Digital Ports
+</H3>
+<P>
+The following illustration shows the disposition of the GeekPort connector pins as they are assigned to the digital ports:  
+<P>
+Each pin in a digital port transmits the value of a single bit; the pins are labelled by bit position.  Thus, A0 is the least significant bit of digital port A, and A7 is its most significant bit.  You can use any of the seven ground pins (1, 6, 8, 10, 12, 14, and 19) in your digital port circuit.  The unmarked pins (24-33) are the analog ports; see the BA2D and BD2A classes for more information on these ports.
+<P>
+Devices that you connect to the digital ports should send and (expect to) receive voltages that are below 0.8 Volts or above 2.0 Volts.  These thresholds correspond, respectively, to the greatest value for digital 0 and the least for digital 1 (as depicted below).  The correspondence to bit value for voltages between these limits is undefined.   
+<P>
+Although there's no lower voltage limit for digital 0, nor upper limit for digital 1, the BeBox outputs voltages that are no less than 0 Volts, nor no more than +5 Volts.  Your input device can exceed this range without damaging the BeBox circuitry:  Excessive input emf is clipped to fall within [-0.5V, +5.5V].
+<P>
+Be aware that behind each digital port pin lies a 1 kOhm resistor.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Device Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Device%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Device Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved.
+<p>Text last modified </font>March 21, 2000.
+</body>
+</html>
+

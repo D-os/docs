@@ -1,0 +1,312 @@
+<HTML><HEAD><TITLE>The Interface Kit: BPictureButton</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BPictureButton"></A>BPictureButton
+</H1>
+<P>
+Derived from:  <A HREF="Control.html#BControl">BControl</A> > <A HREF="View.html#BView">BView</A> > <A HREF="../The%20Application%20Kit/Handler.html#BHandler">BHandler</A> > <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/PictureButton.h">be/interface/PictureButton.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="PictureButton.summary.html"><i>Summary</i></A></H6>
+<P>
+A BPictureButton draws a button that displays an image (a <A HREF="Picture.html#BPicture">BPicture</A> object) rather than a text label.  A BPictureButton can be either a one-state or a two-state control<B><TT>
+<A NAME=":"></A>:
+<P>
+</TT></B><UL>
+<LI><B>One-state</B>.  Acts like a normal BButton:  The value is <B><TT>B_CONTROL_ON</TT></B> while the object is being pressed and <B><TT>B_CONTROL_OFF</TT></B> otherwise.   The images for these two states should be different; by convention, the "on" image is a highlighted version of the "off" image.   If the button can be disabled, it needs an additional "disabled" image.
+<P>
+<LI><B>Two-state</B>.  Acts like a checkbox:  Its value switches between <B><TT>B_CONTROL_ON</TT></B> and <B><TT>B_CONTROL_OFF</TT></B> every time the user presses (and releases) the button.  If the button can be disabled, it needs two additional "disabled" images:  One for disabled-while-on and the other for disabled-while-off.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BPictureButton()"></A>BPictureButton()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPictureButton(</TT></B></FONT><A HREF="Rect.html#BRect">BRect</A>&nbsp;<I><FONT  color=991122 face=HELVETICA>frame</I></FONT>, const&nbsp;char*&nbsp;<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Picture.html#BPicture">BPicture</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>off</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Picture.html#BPicture">BPicture</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>on</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A>&nbsp;*<I><FONT  color=991122 face=HELVETICA>message</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>behavior</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_ONE_STATE_BUTTON</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>resizingMode</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_FOLLOW_LEFT</FONT>&nbsp;|&nbsp;<FONT  face=HELVETICA>B_FOLLOW_TOP</FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32&nbsp;<I><FONT  color=991122 face=HELVETICA>flags</I></FONT>&nbsp;=&nbsp;<FONT  face=HELVETICA>B_WILL_DRAW</FONT>&nbsp;|&nbsp;<FONT  face=HELVETICA>B_NAVIGABLE</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT><B><TT><FONT  color=000022 size=+1> 
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BPictureButton(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BPictureButton.  The <I><FONT  color=991122 face=HELVETICA>off</I></FONT> and an <I><FONT  color=991122 face=HELVETICA>on</I></FONT> images correspond to the object's <B><TT>B_CONTROL_OFF</TT></B> and <B><TT>B_CONTROL_ON</TT></B> values; the <I><FONT  color=991122 face=HELVETICA>behavior</I></FONT> argument sets the object to be a one-state (<B><TT>B_ONE_STATE_BUTTON</TT></B>) or two-state (<B><TT>B_TWO_STATE_BUTTON</TT></B>) control, as explained in the class description.  The other arguments are inherited from the <A HREF="View.html#BView">BView</A> and <A HREF="Control.html#BControl">BControl</A> constructors.  The object's initial value is <B><TT>B_CONTROL_OFF</TT></B>.
+<P>
+If the BPictureButton can be disabled, it needs additional "disabled" images, as set through <B><TT><A HREF="#SetDisabledOff()">SetDisabledOff()</A></TT></B> and <B><TT><A HREF="#SetDisabledOn()">SetDisabledOn()</A></TT></B>.
+<P>
+The BPictureButton copies all BPictures that are passed to it.  It's the caller's responsibility to free the <A HREF="Picture.html#BPicture">BPicture</A> objects that are passed as arguments.
+<P>
+<HR>
+<H3>
+<A NAME="~BPictureButton()"></A>~BPictureButton()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BPictureButton()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the object and its data.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>Behavior()   see <A HREF="#SetBehavior()">SetBehavior()</A></H3>
+<P>
+<HR>
+<H3>DisabledOff(), DisabledOn(), EnabledOff(), EnabledOn()  see <A HREF="#SetEnabledOff()">SetEnabledOff()</A></H3>
+<P>
+<HR>
+<H3>BView::Draw()</H3>
+<P>
+<HR>
+<H3>KeyDown()  (implementation detail)  see <A HREF="Control.html#KeyDown()">BControl::KeyDown()</A></H3>
+<P>
+<HR>
+<H3>BControl::MouseDown()</H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetBehavior()"></A>SetBehavior()
+, 
+<A NAME="Behavior()"></A>Behavior()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetBehavior(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>behavior</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>Behavior(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions set and return whether the BPictureButton is a one-state (<B><TT>B_ONE_STATE_BUTTON</TT></B>) or a two-state (<B><TT>B_TWO_STATE_BUTTON</TT></B>) control.  A one-state object acts like a normal button:  It's on while the user is pressing it, and off otherwise.  A two-state object switches to the opposite state each time the user presses and release the button. 
+<P>
+<HR>
+<H3>
+<A NAME="SetEnabledOff()"></A>SetEnabledOff()
+, 
+<A NAME="SetEnabledOn()"></A>SetEnabledOn()
+, 
+<A NAME="SetDisabledOff()"></A>SetDisabledOff()
+, 
+<A NAME="SetDisabledOn()"></A>SetDisabledOn()
+, 
+<A NAME="EnabledOff()"></A>EnabledOff()
+, 
+<A NAME="EnabledOn()"></A>EnabledOn()
+, 
+<A NAME="DisabledOff()"></A>DisabledOff()
+, 
+<A NAME="DisabledOn"></A>DisabledOn
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetEnabledOff(</TT></B></FONT>BPicture<A HREF="Picture.html#BPicture">BControl::MouseDown()</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Picture.html#BPicture">BPicture</A> *<B><TT><FONT  color=000022 size=+1>EnabledOff(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetEnabledOn(</TT></B></FONT><A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Picture.html#BPicture">BPicture</A> *<B><TT><FONT  color=000022 size=+1>EnabledOn(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetDisabledOff(</TT></B></FONT><A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Picture.html#BPicture">BPicture</A> *<B><TT><FONT  color=000022 size=+1>DisabledOff(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>SetDisabledOn(</TT></B></FONT><A HREF="Picture.html#BPicture">BPicture</A> *<I><FONT  color=991122 face=HELVETICA>picture</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<A HREF="Picture.html#BPicture">BPicture</A> *<B><TT><FONT  color=000022 size=+1>DisabledOn(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These pairs of functions set and return one of the four images the BPictureButton displays:  enabled-and-on, enabled-and-off, disabled-and-on, and disabled-and-off, respectively.  If this is a one-state object, the disabled-and-on image needn't be set since a disabled one-state control can never be on.
+<P>
+The BPicture-retrieving functions return <B><TT>NULL</TT></B> if the requested image hasn't been set.
+<P>
+The BPictureButton copies all BPictures that are passed to it.  It's the caller's responsibility to free the <A HREF="Picture.html#BPicture">BPicture</A> objects that are passed as arguments.
+<P>
+<A NAME="31106:%20head1:%20xa5%20%20Archived%20Fields"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Archived%20Fields"></A><FONT SIZE=6>A</FONT>rchived <FONT SIZE=6>F</FONT>ields
+</H2>
+<P>
+The <B><TT><A HREF="MenuField.html#Archive()">Archive()</A></TT></B> function adds the following fields to its <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> argument:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH><B>Type code</B></TH>
+<TH><B>Meaning</TH>
+<TR>
+<TD></B>"_e_on"
+<br>
+(deep copy only)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD><A HREF="Picture.html#BPicture">BPicture</A> displayed when control is enabled and on.</TD>
+<TR>
+<TD>"_e_off"
+<br>
+(deep copy only)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD><A HREF="Picture.html#BPicture">BPicture</A> displayed when control is enabled and off.</TD>
+<TR>
+<TD>"_d_on"
+<br>
+(deep copy only)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD><A HREF="Picture.html#BPicture">BPicture</A> displayed when control is disabled and on.</TD>
+<TR>
+<TD>"_d_off"
+<br>
+(deep copy only)</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_MESSAGE_TYPE">B_MESSAGE_TYPE</A></TT></B></TD>
+<TD><A HREF="Picture.html#BPicture">BPicture</A> displayed when control is disabled and off.</TD>
+<TR>
+<TD>"_behave"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>BPictureButton behavior either <B><TT>B_ONE_STATE_BUTTON</TT></B> or <B><TT>B_TWO_STATE_BUTTON</TT></B></TD>
+</TABLE>
+<P>
+<B>See also:  <TT><A HREF="../The%20Support%20Kit/Archivable.html#Archive()">BArchivable::Archive()</A>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+</TT></B>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

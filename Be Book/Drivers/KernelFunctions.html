@@ -1,0 +1,846 @@
+<HTML><HEAD><TITLE>Drivers: Functions for Drivers &amp; Modules</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Functions%20for%20Drivers%20&amp;%20Modules"></A>Functions for Drivers &amp; Modules
+</H1>
+<P>
+The kernel exports a number of functions that device drivers can call.  The device driver accesses these functions directly in the kernel, not through a library.
+<P>
+Remember when writing a driver that calls one of these functions to link against  <B>_KERNEL_</B>.  This will instruct the loader to dynamically locate the symbols in the current kernel when the driver is loaded.
+<P>
+<A NAME="42582:%20funcName:%20acquire_spinlock(),%20release_spinlock()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="acquire_spinlock()"></A>acquire_spinlock()
+, 
+<A NAME="release_spinlock()"></A>release_spinlock()
+, 
+<A NAME="spinlock"></A>spinlock
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>acquire_spinlock(</TT></B></FONT>spinlock *<I><FONT  color=991122 face=HELVETICA>lock</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>release_spinlock(</TT></B></FONT>spinlock *<I><FONT  color=991122 face=HELVETICA>lock</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+typedef vlong <B><TT><FONT  color=000022 size=+1>spinlock
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Spinlocks are mutually exclusive locks that are used to protect sections of code that must execute atomically.   Unlike semaphores, spinlocks can be safely used when interrupts are disabled (in fact, you <I>must</I> have interrupts disabled).
+<P>
+To create a spinlock, simply declare a <B><TT>spinlock</TT></B> variable and initialize it 0:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;spinlock lock = 0;</PRE>
+<P>
+The functions acquire and release the <I><FONT  color=991122 face=HELVETICA>lock</I></FONT> spinlock.  When you acquire and release a spinlock, you <I>must</I> have interrupts disabled; the structure of your code will look like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;cpu_status former = disable_interrupts();
+&nbsp;&nbsp;&nbsp;acquire_spinlock(&amp;lock);
+&nbsp;&nbsp;&nbsp;/* <I>critical section goes here</I> */
+&nbsp;&nbsp;&nbsp;release_spinlock(&amp;lock);
+&nbsp;&nbsp;&nbsp;restore_interrupts(former);</PRE>
+<P>
+The spinlock should be held as briefly as possible, and acquisition must not be nested within the critical section.
+<P>
+Spinlocks are designed for use in a multi-processor system (on a single processor system simply turning off interrupts is enough to guarantee that the critical section will be atomic).  Nonetheless, you <I>can</I> use spinlocks on a single processor&mdash;you don't have to predicate your code based on the number of CPUs in the system.
+<P>
+<HR>
+<H3>add_debugger_command()   see <A HREF="#kernel_debugger()">kernel_debugger()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="add_timer()"></A>add_timer()
+, 
+<A NAME="cancel_timer()"></A>cancel_timer()
+, 
+<A NAME="timer_hook"></A>timer_hook
+, 
+<A NAME="qent"></A>qent
+, 
+<A NAME="timer"></A>timer
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef int32 (*<B><TT><FONT  color=000022 size=+1>timer_hook</TT></B></FONT>)(timer *)
+<P>
+
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>quent</TT></B></FONT> = {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64&nbsp;&nbsp;&nbsp;key;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;qent&nbsp;&nbsp;&nbsp;*next;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;qent&nbsp;&nbsp;&nbsp;*prev;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+
+<TR><TD>
+struct <B><TT><FONT  color=000022 size=+1>timer</TT></B></FONT> = {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;qent&nbsp;&nbsp;&nbsp;entry;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16&nbsp;&nbsp;&nbsp;flags;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint16&nbsp;&nbsp;&nbsp;cpu;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timer_hook hook;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bigtime_t&nbsp;&nbsp;&nbsp;period;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>add_timer(</TT></B></FONT>timer *<I><FONT  color=991122 face=HELVETICA>theTimer</I></FONT>, timer_hook <I><FONT  color=991122 face=HELVETICA>hookFunction</I></FONT>, bigtime_t <I><FONT  color=991122 face=HELVETICA>period</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>cancel_timer(</TT></B></FONT>timer_t *<I><FONT  color=991122 face=HELVETICA>theTimer</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>add_timer()</TT></B> installs a new timer interrupt.  A timer interrupt causes the specified <I><FONT  color=991122 face=HELVETICA>hookFunction</I></FONT> to be called when the desired amount of time has passed.  On entry, you should pass a pointer to a timer structure in <I><FONT  color=991122 face=HELVETICA>theTimer</I></FONT>; this will be filled out with data describing the new timer interrupt you've installed.  The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> argument provides control over how the timer functions, which affects the meaning of the <I><FONT  color=991122 face=HELVETICA>period</I></FONT> argument as follows:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>
+</UL>
+Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_ONE_SHOT_ABSOLUTE_TIMER</TT></B></TD>
+<TD>The timer will fire once at the system time specified by <I><FONT  color=991122 face=HELVETICA>period</I></FONT>.</TD>
+<TR>
+<TD><B><TT>B_ONE_SHOT_RELATIVE_TIMER</TT></B></TD>
+<TD>The timer will fire once in approximately <I><FONT  color=991122 face=HELVETICA>period</I></FONT> microseconds.</TD>
+<TR>
+<TD><B><TT>B_PERIODIC_TIMER</TT></B></TD>
+<TD>The timer will fire every <I><FONT  color=991122 face=HELVETICA>period</I></FONT> microseconds, starting in <I><FONT  color=991122 face=HELVETICA>period</I></FONT> microseconds.</TD>
+</TABLE>
+<P>
+<B><TT>cancel_timer()</TT></B> cancels the specified timer.  If it's already fired, it returns true; otherwise false is returned.  It's guaranteed that once <B><TT>cancel_timer()</TT></B> returns, if the timer was in the process of running when <B><TT>cancel_timer()</TT></B> was called, the timer function will be finished executing.  The only exception to this is if <B><TT>cancel_timer()</TT></B> was called from inside a timer handler (in which case trying to wait for the handler to finish running would result in deadlock).
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The timer was installed (<B><TT>add_timer()</TT></B> only).
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The timer couldn't be installed because the period was invalid (probably because a relative time or period was negative; unfortunately, Be hasn't mastered the intricacies of installing timers to fire in the past).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="call_all_cpus()"></A>call_all_cpus()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>call_all_cpus(</TT></B></FONT>void (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(void *, int), void *<I><FONT  color=991122 face=HELVETICA>cookie</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Calls the function specified by <I><FONT  color=991122 face=HELVETICA>func</I></FONT> on all CPUs.  The <I><FONT  color=991122 face=HELVETICA>cookie</I></FONT> can be anything your needs require.
+<P>
+<HR>
+<H3>cancel_timer() see <A HREF="#add_timer()">add_timer()</A></H3>
+<P>
+<A NAME="10379:%20funcName:%20disable_interrupts(),%20restore_interrupts()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="disable_interrupts()"></A>disable_interrupts()
+, 
+<A NAME="restore_interrupts()"></A>restore_interrupts()
+, 
+<A NAME="cpu_status"></A>cpu_status
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef ulong <B><TT><FONT  color=000022 size=+1>cpu_status
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+cpu_status <B><TT><FONT  color=000022 size=+1>disable_interrupts(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>restore_interrupts(</TT></B></FONT>cpu_status <I><FONT  color=991122 face=HELVETICA>status</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions disable and restore interrupts on the CPU that the caller is currently running on.  <B><TT>disable_interrupts() </TT></B>returns its previous state (i.e. whether or not interrupts were already disabled).  <B><TT>restore_interrupts()</TT></B> restores the previous <I><FONT  color=991122 face=HELVETICA>status</I></FONT> of the CPU, which should be the value that <B><TT>disable_interrupts()</TT></B> returned:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;cpu_status former = disable_interrupts();
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;restore_interrupts(former);</PRE>
+<P>
+As long as the CPU state is properly restored (as shown here), the disable/restore functions can be nested.
+<P>
+<B>See also:  <TT><A HREF="#install_io_interrupt_handler()">install_io_interrupt_handler()</A></TT></B>  
+<P>
+<A NAME="41507:%20funcName:%20dprintf(),%20set_dprintf_enabled(),%20kernel_debugger()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="dprintf()"></A>dprintf()
+, 
+<A NAME="set_dprintf_enabled()"></A>set_dprintf_enabled()
+, 
+<A NAME="panic()"></A>panic()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>dprintf(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>format</I></FONT>, ...<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>set_dprintf_enabled(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>panic(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>format</I></FONT>, ...<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>dprintf()</TT></B> is a debugging function that has the same syntax and behavior as standard C <B><TT>printf()</TT></B>, except that it writes its output to the serial port at a data rate of 19,200 bits per second.  The output is sent to <B>/dev/ports/serial4</B> on BeBoxes, <B>/dev/modem</B> on Macs, and <B>/dev/ports/serial1</B> on Intel machines.  By default, <B><TT>dprintf()</TT></B> is disabled.
+<P>
+<B><TT>set_dprintf_enabled()</TT></B> enables <B><TT>dprintf()</TT></B> if the <I><FONT  color=991122 face=HELVETICA>enabled</I></FONT> flag is <B><TT>true</TT></B>, and disables it if the flag is <B><TT>false</TT></B>.  It returns the previous enabled state, thus permitting intelligent nesting:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Turn on dprintf */
+&nbsp;&nbsp;&nbsp;bool former = set_dprintf_enabled(true);
+&nbsp;&nbsp;&nbsp;...
+&nbsp;&nbsp;&nbsp;/* Now restore it to its previous state. */
+&nbsp;&nbsp;&nbsp;set_dprintf_enabled(former);</PRE>
+<P>
+<B><TT>panic()</TT></B> is similar to <B><TT>dprintf()</TT></B>, except it hangs the computer after printing the message.
+<P>
+<A NAME="26939:%20funcName:%20get_memory_map()"></A>
+<P>
+<HR>
+<H3>
+<A NAME="get_memory_map()"></A>get_memory_map()
+, 
+<A NAME="physical_entry"></A>physical_entry
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+long <B><TT><FONT  color=000022 size=+1>get_memory_map(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>address</I></FONT>, ulong <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;physical_entry *<I><FONT  color=991122 face=HELVETICA>table</I></FONT>, long <I><FONT  color=991122 face=HELVETICA>numEntries</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+typedef struct {&nbsp;&nbsp;&nbsp;void *<FONT  face=HELVETICA>address</FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ulong <FONT  face=HELVETICA>size;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT>} <B><TT><FONT  color=000022 size=+1>physical_entry
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the physical memory chunks that map to the virtual memory that starts at <I><FONT  color=991122 face=HELVETICA>address</I></FONT> and extends for <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>.  Each chunk of physical memory is returned as a <B><TT>physical_entry</TT></B> structure; the series of structures is returned in the <I><FONT  color=991122 face=HELVETICA>table</I></FONT> array. (which you have to allocate yourself).  <I>numEntries</I> is the number of elements in the array that you're passing in.  As shown in the example, you should lock the memory that you're about to inspect:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;physical_entry table[count];
+&nbsp;&nbsp;&nbsp;lock_memory(addr, extent, 0);
+&nbsp;&nbsp;&nbsp;get_memory_map(addr, extent, table, count);
+&nbsp;&nbsp;&nbsp;. . .
+&nbsp;&nbsp;&nbsp;unlock_memory(someAddress, someNumberOfBytes, 0);</PRE>
+<P>
+The end of the <I><FONT  color=991122 face=HELVETICA>table</I></FONT> array is indicated by (<B><TT>size</TT></B> == 0):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;long k;
+&nbsp;&nbsp;&nbsp;while (table[k].size > 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* A legitimate entry */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (++k == count) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Not enough entries */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break; }
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If all of the entries have non-zero sizes, then table wasn't big enough; call  <B><TT>get_memory_map()</TT></B> again with more table entries.
+<P>
+<b>RETURN CODES</b>
+<P>
+The function always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="#lock_memory()">lock_memory()</A></TT></B>, <B><TT>start_isa_dma()</TT></B>  
+<P>
+<HR>
+<H3>
+<A NAME="has_signals_pending()"></A>has_signals_pending()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>has_signals_pending(</TT></B></FONT>struct thread_rec *<I><FONT  color=991122 face=HELVETICA>thr</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a bitmask of the currently pending signals for the current thread.  <I><FONT  color=991122 face=HELVETICA>thr</I></FONT> should always be <B><TT>NULL</TT></B>; passing other values will yield meaningless results.  <B><TT>has_signals_pending()</TT></B> returns 0 if no signals are pending.
+<P>
+<HR>
+<H3>
+<A NAME="install_io_interrupt_handler()"></A>install_io_interrupt_handler()
+, 
+<A NAME="remove_io_interrupt_handler()"></A>remove_io_interrupt_handler()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+long <B><TT><FONT  color=000022 size=+1>install_io_interrupt_handler(</TT></B></FONT>long <I><FONT  color=991122 face=HELVETICA>interrupt_number</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interrupt_handler <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, ulong <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+long <B><TT><FONT  color=000022 size=+1>remove_io_interrupt_handler(</TT></B></FONT>long <I><FONT  color=991122 face=HELVETICA>interrupt_number</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interrupt_handler <I><FONT  color=991122 face=HELVETICA>handler</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>install_io_interrupt_handler()</TT></B> adds the handler <I><FONT  color=991122 face=HELVETICA>function</I></FONT> to the chain of functions that will be called each time the specified <I><FONT  color=991122 face=HELVETICA>interrupt</I></FONT> occurs.  This function should have the following syntax:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+int32 <B><TT>handler(</TT></B>void *<I>data<B><TT>)
+<P>
+</TT></B></I>						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+The <I><FONT  color=991122 face=HELVETICA>data</I></FONT> passed to <B><TT>install_io_interrupt_handler()</TT></B> will be passed to the handler function each time it's called.  It can be anything that might be of use to the handler, or <B><TT>NULL</TT></B>.  If the interrupt handler must return one of the following values:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Constant</B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_UNHANDLED_INTERRUPT</TT></B></TD>
+<TD>The interrupt handler didn't handle the interrupt; the kernel will keep looking for someone to handle it.</TD>
+<TR>
+<TD><B><TT>B_HANDLED_INTERRUPT</TT></B></TD>
+<TD>The interrupt handler handled the interrupt.  The kernel won't keep looking for a handler to handle it.</TD>
+<TR>
+<TD><B><TT>B_INVOKE_SCHEDULER</TT></B></TD>
+<TD>The interrupt handler handled the interrupt.  This tells the kernel to invoke the scheduler immediately after the handler returns.</TD>
+</TABLE>
+<P>
+If <B><TT>B_INVOKE_SCHEDULER</TT></B> is returned by the interrupt handler, the kernel will immediately invoke the scheduler, to dispatch processor time to tasks that need handling.  This is especially useful if your interrupt handler has released a semaphore (see <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#release_sem_etc()">release_sem_etc()</A></TT></B> in the Kernel Kit).
+<P>
+The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> parameter is a bitmask of options.  The only option currently defined is <B><TT>B_NO_ENABLE_COUNTER</TT></B>.  By default, the OS keeps track of the number of functions handling a given interrupt.  If this counter changes from 0 to 1, then the system enables the irq for that interrupt.  Conversely, if the counter changes from 1 to 0, the system disables the irq.  Setting the <B><TT>B_NO_ENABLE_COUNTER</TT></B> flag instructs the OS to ignore the handler for the purpose of enabling and disabling the irq.
+<P>
+<B><TT>install_io_interrupt_handler()</TT></B> returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if successful in installing the handler, and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if not.  An error occurs when either the <I><FONT  color=991122 face=HELVETICA>interrupt_number</I></FONT> is out of range or there is not enough room left in the interrupt chain to add the handler.
+<P>
+<B><TT>remove_io_interrupt()</TT></B> removes the named <I><FONT  color=991122 face=HELVETICA>interrupt</I></FONT> from the interrupt chain.  It returns <B><TT>B_OK</TT></B> if successful in removing the handler, and <B><TT>B_ERROR</TT></B> if not.
+<P>
+<HR>
+<H3>io_card_version()   see <A HREF="#motherboard_version()">motherboard_version()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="kernel_debugger()"></A>kernel_debugger()
+, 
+<A NAME="add_debugger_command()"></A>add_debugger_command()
+, 
+<A NAME="remove_debugger_command()"></A>remove_debugger_command()
+, 
+<A NAME="load_driver_symbols()"></A>load_driver_symbols()
+, 
+<A NAME="kprintf()"></A>kprintf()
+, 
+<A NAME="parse_expression()"></A>parse_expression()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>kernel_debugger(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>add_debugger_command(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(int, char **), char *<I><FONT  color=991122 face=HELVETICA>help</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>remove_debugger_command(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, int (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(int, char **)<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>load_driver_symbols(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>driverName</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>kprintf(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>format</I></FONT>, ...<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+ulong <B><TT><FONT  color=000022 size=+1>parse_expression(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>kernel_debugger()</TT></B> drops the calling thread into a debugger that writes its output to the serial port at 19,200 bits per second, just as <B><TT>dprintf()</TT></B> does.  This debugger produces <I><FONT  color=991122 face=HELVETICA>string</I></FONT> as its first message; it's not affected by <B><TT>set_dprintf_enabled()</TT></B>.
+<P>
+<B><TT>kernel_debugger()</TT></B> is identical to the <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#debugger()">debugger()</A></TT></B> function documented in the Kernel Kit, except that it works in the kernel and engages a different debugger.  Drivers should use it instead of <B><TT><A HREF="../The%20Kernel%20Kit/misc.html#debugger()">debugger()</A></TT></B>.
+<P>
+<B><TT>add_debugger_command()</TT></B> registers a new command with the kernel debugger.  When the user types in the command <I><FONT  color=991122 face=HELVETICA>name</I></FONT>, the kernel debugger calls func with the remainder of the command line as <I><FONT  color=991122 face=HELVETICA>argc</I></FONT>/<I><FONT  color=991122 face=HELVETICA>argv</I></FONT>-style arguments.  The help string for the command is set to <I><FONT  color=991122 face=HELVETICA>help</I></FONT>.
+<P>
+<B><TT>remove_debugger_command()</TT></B> removes the specified kernel debugger command.
+<P>
+<B><TT>load_driver_symbols()</TT></B> loads symbols from the specified kernel driver into the kernel debugger.  <B>driver_name</B> is the path-less name of the driver which must be located in one of the standard kernel driver directories.  The function returns <B><TT>B_OK</TT></B> on success and <B><TT>B_ERROR</TT></B> on failure.
+<P>
+<B><TT>kprintf()</TT></B> outputs messages to the serial port.  It should be used instead of <B><TT>dprintf()</TT></B> from new debugger commands because <B><TT>dprintf()</TT></B> depends too much upon the state of the kernel to be reliable from within the debugger.
+<P>
+<B><TT>parse_expression()</TT></B> takes a C expression and returns the result.  It only handles integer arithmetic.  The logical and relational operations are accepted.  It can also supports variables and assignments.  This is useful for strings with multiple expressions, which should be separated with semicolons.  Finally, the special variable "." refers to the value from the previous expression.  This function is designed to help implement new debugger commands.
+<P>
+<B>See also:  <TT><A HREF="../The%20Kernel%20Kit/misc.html#debugger()">debugger()</A></TT></B> in the Kernel Kit
+<P>
+<HR>
+<H3>kprintf()   see <A HREF="#kernel_debugger()">kernel_debugger()</A></H3>
+<P>
+<HR>
+<H3>load_driver_symbols()   see <A HREF="#kernel_debugger()">kernel_debugger()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="lock_memory()"></A>lock_memory()
+, 
+<A NAME="unlock_memory()"></A>unlock_memory()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+long <B><TT><FONT  color=000022 size=+1>lock_memory(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>address</I></FONT>, ulong <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>, ulong <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+long <B><TT><FONT  color=000022 size=+1>unlock_memory(</TT></B></FONT>const void *<I><FONT  color=991122 face=HELVETICA>address</I></FONT>, ulong <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>, ulong <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>lock_memory()</TT></B> makes sure that all the memory beginning at the specified virtual <I><FONT  color=991122 face=HELVETICA>address</I></FONT> and extending for <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> is resident in RAM, and locks it so that it won't be paged out until <B><TT>unlock_memory()</TT></B> is called.  It pages in any of the memory that isn't resident at the time it's called.  It is typically used in preparation for a DMA transaction.
+<P>
+The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> field contains a bitmask of options.  Currently, two options, <B><TT>B_DMA_IO</TT></B> and <B><TT>B_READ_DEVICE</TT></B>, are defined.  <B><TT>B_DMA_IO</TT></B> should be set if any part of the memory range will be modified by something other than the CPU while it's locked, since that change won't otherwise be noticed by the system and the modified pages may not be written to disk by the virtual memory system.  Typically, this sort of change is performed through DMA.  <B><TT>B_READ_DEVICE</TT></B>, if set, indicates that the caller intends to fill the memory (read <I>from</I> the device).  If cleared, it indicates the memory will be written to the device and will not be altered.
+<P>
+<B><TT>unlock_memory()</TT></B> releases locked memory and should be called with the same flags as passed into the corresponding <B><TT>lock_memory()</TT></B> call.
+<P>
+Each of these functions returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if successful and <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B> if not.  The main reason that <B><TT>lock_memory()</TT></B> would fail is that you're attempting to lock more memory than can be paged in.
+<P>
+<HR>
+<H3>
+<A NAME="map_physical_memory()"></A>map_physical_memory()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+area_id <B><TT><FONT  color=000022 size=+1>map_physical_memory(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>areaName</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>physicalAddress</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;size_t <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>spec</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>protection</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;void **<I><FONT  color=991122 face=HELVETICA>virtualAddress</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function allows you to map the memory in physical memory starting at <I><FONT  color=991122 face=HELVETICA>physicalAddress</I></FONT> and extending for <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> bytes into your team's address space.  The kernel creates an area named <I><FONT  color=991122 face=HELVETICA>areaName</I></FONT> mapped into the memory address <I><FONT  color=991122 face=HELVETICA>virtualAddress</I></FONT> and returns its area_id to the caller.  <I><FONT  color=991122 face=HELVETICA>numBytes</I></FONT> must be a multiple of <B><TT>B_PAGE_SIZE</TT></B> (4096).
+<P>
+<I><FONT  color=991122 face=HELVETICA>spec</I></FONT> must be either <B><TT>B_ANY_KERNEL_ADDRESS</TT></B> or <B><TT>B_ANY_KERNEL_BLOCK_ADDRESS</TT></B>.  If <I><FONT  color=991122 face=HELVETICA>spec</I></FONT> is <B><TT>B_ANY_KERNEL_ADDRESS</TT></B>, the memory will begin at an arbitrary location in the kernel address space.  If <I><FONT  color=991122 face=HELVETICA>spec</I></FONT> is <B><TT>B_ANY_KERNEL_BLOCK_ADDRESS</TT></B>, then the memory will be mapped into a memory location aligned on a multiple of <B><TT>B_PAGE_SIZE</TT></B>.
+<P>
+<I><FONT  color=991122 face=HELVETICA>protection</I></FONT> is a bitmask consisting of the fields <B><TT>B_READ_AREA</TT></B> and <B><TT>B_WRITE_AREA</TT></B>, as discussed in <B><TT><A HREF="../The%20Kernel%20Kit/Areas.html#create_area()">create_area()</A></TT></B>.
+<P>
+<B><TT>create_area()</TT></B> returns an area_id for the newly-created memory if successful or an error code on failure.  The error codes are the same as those for <B><TT><A HREF="../The%20Kernel%20Kit/Areas.html#create_area()">create_area()</A></TT></B>.
+<P>
+<B>See also:  <TT><A HREF="../The%20Kernel%20Kit/Areas.html#create_area()">create_area()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="motherboard_version()"></A>motherboard_version()
+, 
+<A NAME="io_card_version()"></A>io_card_version()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+long <B><TT><FONT  color=000022 size=+1>motherboard_version(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+long <B><TT><FONT  color=000022 size=+1>io_card_version(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions return the current versions of the motherboard and of the I/O card.  These functions are only available on PowerPC-based systems (they're intended for use on the BeBox).
+<P>
+<HR>
+<H3>panic()   see <A HREF="#dprintf()">dprintf()</A></H3>
+<P>
+<HR>
+<H3>parse_expression()   see <A HREF="#kernel_debugger()">kernel_debugger()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="platform()"></A>platform()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+platform_type <B><TT><FONT  color=000022 size=+1>platform(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the current platform, as defined in <B>&lt;kernel/OS.h></B>.
+<P>
+<HR>
+<H3>
+<A NAME="register_kernel_daemon()"></A>register_kernel_daemon()
+, 
+<A NAME="unregister_kernel_daemon()"></A>unregister_kernel_daemon()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>register_kernel_daemon(</TT></B></FONT>void (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(void *, int), void *<I><FONT  color=991122 face=HELVETICA>arg</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>freq</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>unregister_kernel_daemon(</TT></B></FONT>void (*<I><FONT  color=991122 face=HELVETICA>func</I></FONT>)(void *, int), void *<I><FONT  color=991122 face=HELVETICA>arg</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Adds or removes daemons from the kernel.  A kernel daemon function is executed approximately once every <I><FONT  color=991122 face=HELVETICA>freq</I></FONT>/10 seconds.  The kernel calls <I><FONT  color=991122 face=HELVETICA>func</I></FONT> with the arguments <I><FONT  color=991122 face=HELVETICA>arg</I></FONT> and an iteration value that increases by <I><FONT  color=991122 face=HELVETICA>freq</I></FONT> on successive calls to the daemon function.
+<P>
+<HR>
+<H3>release_spinlock()   see <A HREF="#acquire_spinlock()">acquire_spinlock()</A></H3>
+<P>
+<HR>
+<H3>remove_io_interrupt_handler()   see <A HREF="#install_io_interrupt_handler()">install_io_interrupt_handler()</A></H3>
+<P>
+<HR>
+<H3>restore_interrupts()   see <A HREF="#disable_interrupts()">disable_interrupts()</A></H3>
+<P>
+<HR>
+<H3>set_dprintf_enabled()   see <A HREF="#dprintf()">dprintf()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="send_signal_etc()"></A>send_signal_etc()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>send_signal_etc(</TT></B></FONT>pid_t <I><FONT  color=991122 face=HELVETICA>thid</I></FONT>, uint <I><FONT  color=991122 face=HELVETICA>sig</I></FONT>, uint32 <I><FONT  color=991122 face=HELVETICA>flags</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is a counterpart to <B><TT>send_signal()</TT></B> in the Posix layer, which is not exported for drivers.
+<P>
+thid is the thread_id of the thread the signal should be sent to, and sig is the signal type to send, just like in <B><TT>send_signal()</TT></B>.  The <I><FONT  color=991122 face=HELVETICA>flags</I></FONT> argument can be used to specify flags to control the function:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#B_CHECK_PERMISSION">B_CHECK_PERMISSION</A></TT></B></TD>
+<TD>The signal will only be sent if the destination thread's uid and euid are the same as the caller's.</TD>
+<TR>
+<TD><B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#B_DO_NOT_RESCHEDULE">B_DO_NOT_RESCHEDULE</A></TT></B></TD>
+<TD>The kernel won't call the scheduler after sending the signal.  You should specify this flag when calling <B><TT>send_signal_etc()</TT></B> from an interrupt handler.</TD>
+</TABLE>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The signal was sent.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The signal type is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_THREAD_ID">B_BAD_THREAD_ID</A></TT></B>.  The thread ID is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NOT_ALLOWED">B_NOT_ALLOWED</A></TT></B>.  The permission check failed (if <B><TT><A HREF="../The%20Kernel%20Kit/Semaphores.html#B_CHECK_PERMISSION">B_CHECK_PERMISSION</A></TT></B> was specified).
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="spawn_kernel_thread()"></A>spawn_kernel_thread()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+thread_id <B><TT><FONT  color=000022 size=+1>spawn_kernel_thread(</TT></B></FONT>thread_entry <I><FONT  color=991122 face=HELVETICA>func</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long <I><FONT  color=991122 face=HELVETICA>priority</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+This function is a counterpart to <B><TT><A HREF="../The%20Kernel%20Kit/Threads.html#spawn_thread()">spawn_thread()</A></TT></B> in the Kernel Kit, which is not exported for drivers.  It has the same syntax as the Kernel Kit function, but is able to spawn threads in the kernel's memory space.
+<P>
+<B>See also:  <TT><A HREF="../The%20Kernel%20Kit/Threads.html#spawn_thread()">spawn_thread()</A></TT></B> in the Kernel Kit
+<P>
+<HR>
+<H3>
+<A NAME="spin()"></A>spin()
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/drivers/KernelExport.h">be/drivers/KernelExport.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>spin(</TT></B></FONT>bigtime_t <I><FONT  color=991122 face=HELVETICA>microseconds</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Executes a delay loop lasting at least the specified number of <I><FONT  color=991122 face=HELVETICA>microseconds</I></FONT>.  It could last longer, due to rounding errors, interrupts, and context switches.
+<P>
+<HR>
+<H3>unlock_memory()   see <A HREF="#lock_memory()">lock_memory()</A></H3>
+<P>
+<HR>
+<H3>unregister_kernel_daemon()   see <A HREF="#register_kernel_daemon()">register_kernel_daemon()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Drivers Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Drivers%20Master%20Index.html"><FONT face=HELVETICA>Drivers Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

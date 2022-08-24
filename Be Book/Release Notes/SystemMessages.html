@@ -1,0 +1,139 @@
+<HTML><HEAD><TITLE>Release Notes: System Messages</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="System%20Messages"></A>System Messages
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/app/AppDefs.h">app/AppDefs.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="B_MOUSE_WHEEL_CHANGED"></A>B_MOUSE_WHEEL_CHANGED
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;The system.
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;The <A HREF="../The%20Interface%20Kit/Window.html#BWindow">BWindow</A> of the view the mouse is pointing to, and that of any other view that sets <B><TT>B_POINTER_EVENTS</TT></B> in its event mask (see <B><TT>BView::SetEventMask()</TT></B>)
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;none
+<P>
+<B><TT><A HREF="#B_MOUSE_WHEEL_CHANGED">B_MOUSE_WHEEL_CHANGED</A></TT></B> is sent when the mouse wheel is distrubed.  The message contains these fields:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Field</B></TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"when"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT64_TYPE">B_INT64_TYPE</A></TT></B></TD>
+<TD>Event time, in microseconds since 01/01/70</TD>
+<TR>
+<TD>"be:wheel_delta_x"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>The change in the wheel's horizontal position as a value between -1.0 (left) and 1.0 (right).</TD>
+<TR>
+<TD>"be:wheel_delta_x"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>The change in the wheel's vertical position as a value between -1.0 (down) and 1.0 (up).</TD>
+</TABLE>
+<P>
+<HR>
+<H3>
+<A NAME="B_OBSERVER_NOTICE_CHANGE"></A>B_OBSERVER_NOTICE_CHANGE
+</H3>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;<B><TT>BHandler::SendNotices()</TT></B>
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Other BHandlers that are watching the notice-sender
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;none
+<P>
+<B><TT><A HREF="#B_OBSERVER_NOTICE_CHANGE">B_OBSERVER_NOTICE_CHANGE</A></TT></B> is sent when the source object (a BHandler) invokes <B><TT><A HREF="AppKit.html#SendNotices()">SendNotices()</A></TT></B>, which broadcasts a notice to all of its "watchers" (other BHandlers).  A <A HREF="AppKit.html#BHandler">BHandler</A> can register to be a watcher by calling <B><TT><A HREF="../The%20Application%20Kit/Handler.html#StartWatching()">BHandler::StartWatching()</A></TT></B>.  
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>B_OBSERVE_WHICH_CHANGE</TT></B></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The change that caused the notification to be sent, as taken from an argument to <B><TT><A HREF="AppKit.html#SendNotices()">SendNotices()</A></TT></B>.</TD>
+<TR>
+<TD>"be:old_what"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The <B><TT>what</TT></B> field from the <A HREF="AppKit.html#BMessage">BMessage</A> that's passed to <B><TT><A HREF="AppKit.html#SendNotices()">SendNotices()</A></TT></B>. </TD>
+<TR>
+<TD><I>Other fields</I></TD>
+<TD><B><TT>...</TT></B></TD>
+<TD>The rest of the fields are copied from the message that's passed to <B><TT><A HREF="AppKit.html#SendNotices()">SendNotices()</A></TT></B>.</TD>
+</TABLE>
+<P>
+<HR>
+<H2>
+<A NAME="Channel%20Control%20Message"></A><FONT SIZE=6>C</FONT>hannel <FONT SIZE=6>C</FONT>ontrol <FONT SIZE=6>M</FONT>essage
+</H2>
+<P>
+<FONT face=helvetica><b>Source:</b></font>&nbsp;A BChannelControl object
+<P>
+<FONT face=helvetica><b>Target:</b></font>&nbsp;Set through <B><TT><A HREF="../The%20Application%20Kit/Invoker.html#SetTarget()">SetTarget()</A></TT></B> et al.
+<P>
+<FONT face=helvetica><b>Hook:</b></font>&nbsp;none
+<P>
+An <I><FONT  color=991122 face=HELVETICA>n</I></FONT>-channeled BChannelControl adds the following field to the BControl-defined value-changed message that it sends to its target.  
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field</TH>
+<TH>Type code</TH>
+<TH>Description</TH>
+<TR>
+<TD>"be:channel_value" [<I><FONT  color=991122 face=HELVETICA>n</I></FONT>]</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>The value of each of the object's channels.</TD>
+</TABLE>
+<P>
+This field usurps (but doesn't remove) the "be:value" field that's added by BControl.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

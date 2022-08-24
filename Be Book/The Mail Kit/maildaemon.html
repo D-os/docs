@@ -1,0 +1,586 @@
+<HTML><HEAD><TITLE>The Mail Kit: The Mail Daemon</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Mail Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Mail%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Mail Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Mail%20Daemon"></A>The Mail Daemon
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/kit/mail/E-mail.h">be/kit/mail/E-mail.h</A>
+<P>
+Library:  libmail.so
+<P>
+Every computer running the BeOS has a <B>mail daemon</B>; this is a local process that's responsible for sending e-mail to and receiving e-mail from a mail server.  The mail server that the daemon talks to is a networking application that's either part of your Internet Service Provider's services, or that's running on a local "mail repository" machine.
+<P>
+The functions described in this section tell you how to manage the mail daemon's connection with the mail server&mdash;how to tell the daemon which mail server to communicate with, how to tell the mail daemon to send and retrieve e-mail, how to automate mail retrieval, and so forth.
+<P>
+Many of the functions described here are user-accessible through the E-mail preference application.  These functions should generally not be used; the settings they control belong to the user, and your application should usually avoid changing the user's settings.  The only legitimate reason to use these configuration setting functions is if you want to build your own E-mail preference application.
+<P>
+The other functions, such as <B><TT><A HREF="#forward_mail()">forward_mail()</A></TT></B>, <B><TT><A HREF="#check_for_mail()">check_for_mail()</A></TT></B>, <B><TT><A HREF="#encode_base64()">encode_base64()</A></TT></B>, and <B><TT><A HREF="#decode_base64()">decode_base64()</A></TT></B>, might be legitimately used by your e-mail program.
+<P>
+The architecture of an e-mail message isn't discussed here; for that information, see "Mail Messages (BMailMessage)."
+<P>
+<HR>
+<H3>
+<A NAME="The%20Mail%20Daemon%20and%20the%20Mail%20Server"></A>The Mail Daemon and the Mail Server
+</H3>
+<P>
+The mail daemon can talk to two different kinds of mail server:
+<P>
+<UL>
+<LI>The <B>Post Office Protocol</B> ("POP") server manages individual mail accounts.  When the BeOS mail daemon wants to retrieve mail that's been sent to a user, it must tell the mail server which POP accouant it's retrieving mail for.
+<P>
+<LI>The <B>Simple Mail Transfer Protocol</B> ("SMTP") server manages mail that's being sent out onto the network.  Messages sent through an SMTP server will eventually find their way to a POP server to be received by the destination user.
+<P>
+</UL>
+<P>
+The POP and the SMTP servers are identified by their hosts' names (in other words, the names of the machines on which the servers are running).  The mail daemon can only talk to one POP and one SMTP server at a time, but can talk to the two of them simultaneously.  Usually&mdash;but not always&mdash;the POP and SMTP servers reside on the same machine, and so are identified by the same name.
+<P>
+To set the identities of the POP host, you fill in the fields of a <B><TT>mail_pop_account</TT></B> structure and pass the structure to the <B><TT><A HREF="#set_pop_account()">set_pop_account()</A></TT></B> function.  As the name of the structure implies, <B><TT>mail_pop_account</TT></B> encodes more than just the names of the server's host.  It also identifies a specific user's POP mail account; the complete definition of the structure is this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char pop_name[B_MAX_USER_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char pop_password[B_MAX_USER_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char pop_host[B_MAX_HOST_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char real_name[128];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char reply_to[128];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 days;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 interval;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 begin_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 end_time;
+&nbsp;&nbsp;&nbsp;} mail_pop_account;</PRE>
+<P>
+The <B><TT>pop_name</TT></B>, <B><TT>pop_password</TT></B>, and <B><TT>pop_host</TT></B> fields in the <B><TT>mail_pop_account</TT></B> structure represent the username, password, and POP server host of the e-mail user.  The <B><TT>real_name</TT></B> is the user's real name, and <B><TT>reply_to</TT></B> is the e-mail address to which replies should be sent.
+<P>
+The <B><TT>days</TT></B> field can contain any of the following flags to specify which days of the week the mail daemon should automatically check mail for the described account:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B><TT>Constant</TT></B></TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>B_CHECK_NEVER</TT></B></TD>
+<TD>Don't automatically check the account's mail.</TD>
+<TR>
+<TD><B><TT>B_CHECK_WEEKDAYS</TT></B></TD>
+<TD>Check the mail only on weekdays.</TD>
+<TR>
+<TD><B><TT>B_CHECK_DAILY</TT></B></TD>
+<TD>Check the mail every day.</TD>
+<TR>
+<TD><B><TT>B_CHECK_CONTINUOUSLY</TT></B></TD>
+<TD>Check continuously every day.</TD>
+</TABLE>
+<P>
+The <B><TT>interval</TT></B> specifies how many seconds apart each e-mail retrieval should be, and the <B><TT>begin_time</TT></B> and <B><TT>end_time</TT></B> specify the time of day (in seconds) that automatic retrieval should begin and end.
+<P>
+The SMTP server can be selected by calling <B><TT><A HREF="#set_smtp_host()">set_smtp_host()</A></TT></B>, passing in a pointer to the SMTP host's name.
+<P>
+<HR>
+<H3>
+<A NAME="Sending%20and%20Retrieving%20Mail"></A>Sending and Retrieving Mail
+</H3>
+<P>
+Messages that are retrieved (from the mail server) by the mail daemon are stored as individual files on the user's hard disk, from whence they are plucked and displayed by a mail-reading application (a "mail reader"; Be supplies a simple mail reader called BeMail).  Similarly, messages that the user composes (in a mail composition application) and sends are stored as individual files until the mail daemon comes along and passes them on to the mail server.
+<P>
+Sending and retrieving mail is the mail daemon's most important function.  Both actions (server-to-database and database-to-server transmission) are performed through the <B><TT><A HREF="#check_for_mail()">check_for_mail()</A> </TT></B>function.
+<P>
+The <A HREF="MailMessage.html#BMailMessage">BMailMessage</A> class provides a convenient means for creating and sending new mail messages; visit the section on that class for further information and a simple example.
+<P>
+Mail that has been retrieved by the mail daemon can be identified and queried using the mail attributes defined by the Mail Kit.  By using the <A HREF="../Release%20Notes/StorageKit.html#BQuery">BQuery</A> class, you can scan all newly-received mail messages and parse the message file to present each message to the user.  For a more in-depth discussion of the mail attributes and how to use them to your benefit, read "Querying Mail Messages."
+<P>
+<HR>
+<H3>
+<A NAME="Other%20Mail%20Daemon%20Features"></A>Other Mail Daemon Features
+</H3>
+<P>
+The other mail structures and functions define the other features that are provided by the mail daemon.  These features are:
+<P>
+<UL>
+<LI><B>Mail notification</B>.  The <B><TT>mail_notification</TT></B> structure (passed through the <B><TT><A HREF="#set_mail_notification()">set_mail_notification()</A></TT></B> function) lets you tell the daemon how you would like it to tap you on the shoulder when it has new mail for you to read.  Would you like it to display an alert panel?  Squawk at you?  Both?  This can be configured by the user in the E-mail preference application.
+<P>
+<LI><B>Mail forwarding</B>.  The <B><TT><A HREF="#forward_mail()">forward_mail()</A></TT></B> function lets you ask the Mail Kit to forward a message to one or more other accounts.
+<P>
+<LI><B>Base-64 encoding and decoding</B>.  The <B><TT><A HREF="#encode_base64()">encode_base64()</A></TT></B> and <B><TT><A HREF="#decode_base64()">decode_base64()</A></TT></B> functions let you easily handle ASCII-encoded file attachments.
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Functions"></A><FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="check_for_mail()"></A>check_for_mail()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>check_for_mail(</TT></B></FONT>int32 *<I><FONT  color=991122 face=HELVETICA>incoming_count</I></FONT> = NULL<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sends and retrieves mail.  More specifically, this function asks the mail daemon to retrieve incoming messages from the POP server and send any queued outgoing messages to the SMTP server.  The number of POP messages that were retrieved are stored in the variable pointed to by <I><FONT  color=991122 face=HELVETICA>incoming_count</I></FONT>.  If you specify <B><TT>NULL</TT></B> for <I><FONT  color=991122 face=HELVETICA>incoming_count</I></FONT>, <B><TT>check_for_mail()</TT></B> won't return the number of messages retrieved.  You should specify <B><TT>NULL</TT></B> unless you really want to know how many messages were retrieved, since requesting this information could potentially slow down the retrieval process.
+<P>
+If all is well in the mail world, this function returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>; otherwise, it returns a highly useful result code.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Mail was sent and retrieved without incident.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MAIL_NO_DAEMON">B_MAIL_NO_DAEMON</A></TT></B>.  The mail daemon isn't running.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MAIL_UNKNOWN_USER">B_MAIL_UNKNOWN_USER</A></TT></B>.  The POP server doesn't recognize the user name.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MAIL_WRONG_PASSWORD">B_MAIL_WRONG_PASSWORD</A></TT></B>.  The POP server doesn't recognize the password.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MAIL_UNKNOWN_HOST">B_MAIL_UNKNOWN_HOST</A></TT></B>.  The POP or SMTP server can't be found.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MAIL_ACCESS_ERROR">B_MAIL_ACCESS_ERROR</A></TT></B>.  The connection to the POP or SMTP server failed.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="count_pop_accounts()"></A>count_pop_accounts()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>count_pop_accounts(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns the number of POP accounts that have been configured.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+The mail daemon currently supports only one POP account, so this function will always return 1.  You shouldn't assume there will only be one POP account, though, as this will probably change in the future.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="decode_base64()"></A>decode_base64()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>decode_base64</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>out</I></FONT>, char *<I><FONT  color=991122 face=HELVETICA>in</I></FONT>, off_t <I><FONT  color=991122 face=HELVETICA>length</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>replace_cr = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Decodes the base-64 data pointed to by <I><FONT  color=991122 face=HELVETICA>in</I></FONT>, which is <I><FONT  color=991122 face=HELVETICA>length</I></FONT> bytes long, and writes the decoded output into the buffer pointed to by <I><FONT  color=991122 face=HELVETICA>out</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>replace_cr</I></FONT> is <B><TT>true</TT></B>, carriage return characters in the output are converted into newlines, otherwise the data is returned in its original, unaltered, form.
+<P>
+You would typically specify <I><FONT  color=991122 face=HELVETICA>replace_cr</I></FONT> as <B><TT>true</TT></B> if you're decoding an ASCII text document, and as <B><TT>false</TT></B> if decoding a binary file.
+<P>
+This function returns the size of the output data that's been stored in the <I><FONT  color=991122 face=HELVETICA>out</I></FONT> buffer.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+You must be certain, in advance, that the output buffer is large enough to hold the decoded data, or this function will do bad things.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="encode_base64()"></A>encode_base64()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+ssize_t <B><TT><FONT  color=000022 size=+1>encode_base64</TT></B></FONT>(char *<I><FONT  color=991122 face=HELVETICA>out</I></FONT>, char *<I><FONT  color=991122 face=HELVETICA>in</I></FONT>, off_t <I><FONT  color=991122 face=HELVETICA>length</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Encodes the data pointed to by <I><FONT  color=991122 face=HELVETICA>in</I></FONT>, which is <I><FONT  color=991122 face=HELVETICA>length</I></FONT> bytes long, and writes the base-64 encoded output into the buffer pointed to by <I><FONT  color=991122 face=HELVETICA>out</I></FONT>.
+<P>
+This function returns the size of the output data that's been stored in the <I><FONT  color=991122 face=HELVETICA>out</I></FONT> buffer.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+You must be certain, in advance, that the output buffer is large enough to hold the encoded data, or this function will do bad things.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="forward_mail()"></A>forward_mail()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>forward_mail</TT></B></FONT>(entry_ref *<I><FONT  color=991122 face=HELVETICA>message_ref</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>recipients</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>now = true</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Forwards the mail message specified by <I><FONT  color=991122 face=HELVETICA>message_ref</I></FONT> to the list of users given by <I><FONT  color=991122 face=HELVETICA>recipients</I></FONT>.  The list of user names specified in <I><FONT  color=991122 face=HELVETICA>recipients</I></FONT> must be separated by commas and/or whitespace, and must be null-terminated.
+<P>
+If the <I><FONT  color=991122 face=HELVETICA>now</I></FONT> parameter is <B><TT>true</TT></B>, the messages will be sent immediately; if <B><TT>false</TT></B>, the message will be queued up to be sent the next time <B><TT><A HREF="#check_for_mail()">check_for_mail()</A></TT></B> is called, or the next time the mail daemon performs an automatic mail check.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The message was forwarded without error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_MAIL_NO_RECIPIENT">B_MAIL_NO_RECIPIENT</A></TT></B>.  No valid recipients were specified.
+<P>
+<LI>Errors returned by <B><TT><A HREF="#send_queued_mail()">send_queued_mail()</A></TT></B>, if <I><FONT  color=991122 face=HELVETICA>now</I></FONT> is <B><TT>true</TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_mail_notification()"></A>get_mail_notification()
+, 
+<A NAME="set_mail_notification()"></A>set_mail_notification()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_mail_notification</TT></B></FONT>(mail_notification *<I><FONT  color=991122 face=HELVETICA>notification_settings</I></FONT>)
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_mail_notification</TT></B></FONT>(mail_notification *<I><FONT  color=991122 face=HELVETICA>notification_settings</I></FONT>, 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <I><FONT  color=991122 face=HELVETICA>save = true</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>get_mail_notification()</TT></B> fills the specified <B><TT>mail_notification</TT></B> structure with information describing how the user is currently being notified of received e-mail.  There are two possible notification signals: the mail alert panel and the system beep.  The <B><TT>mail_notification</TT></B> structure looks like this:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool alert;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool beep;
+&nbsp;&nbsp;&nbsp;} mail_notification;</PRE>
+<P>
+<B><TT>get_mail_notification()</TT></B> always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  If the current settings can't be checked (for example, if the user has never configured mail), <I><FONT  color=991122 face=HELVETICA>alert</I></FONT> will be returned as the default value of <B><TT>false</TT></B>, and <I><FONT  color=991122 face=HELVETICA>beep</I></FONT> will be <B><TT>true</TT></B>.
+<P>
+<B><TT>set_mail_notification()</TT></B> accepts a pointer to a <B><TT>mail_notification</TT></B> structure and configures the system to report incoming mail using the methods specified therein.  If the <I><FONT  color=991122 face=HELVETICA>save</I></FONT> argument is <B><TT>true</TT></B>, the change is set as the new default and will be remembered when the computer is shut down.  If <B><TT>false</TT></B>, the change is temporary.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The notification was successfully set or retrieved.
+<P>
+<LI><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_NO_REPLY">B_NO_REPLY</A></TT></B>.  The mail daemon didn't respond to the request.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_pop_account()"></A>get_pop_account()
+, 
+<A NAME="set_pop_account()"></A>set_pop_account()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_pop_account</TT></B></FONT>(mail_pop_account *<I><FONT  color=991122 face=HELVETICA>account_info</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index = 0</I></FONT>)
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_pop_account</TT></B></FONT>(mail_pop_account *<I><FONT  color=991122 face=HELVETICA>account_info</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>index = 0</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Get and set the specified POP account's information.  The <B><TT>mail_pop_account</TT></B> structure is defined as follows:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;typedef struct
+&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char pop_name[B_MAX_USER_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char pop_password[B_MAX_USER_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char pop_host[B_MAX_HOST_NAME_LENGTH];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char real_name[128];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char reply_to[128];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 days;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 interval;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 begin_time;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 end_time;
+&nbsp;&nbsp;&nbsp;} mail_pop_account;</PRE>
+<P>
+The <B><TT>pop_name</TT></B>, <B><TT>pop_password</TT></B>, and <B><TT>pop_host</TT></B> fields in the <B><TT>mail_pop_account</TT></B> structure represent the username, password, and POP server host of the e-mail user.  The <B><TT>real_name</TT></B> is the user's real name, and <B><TT>reply_to</TT></B> is the e-mail address to which replies should be sent.
+<P>
+The <B><TT>days</TT></B> field can contain any of the following flags to specify which days of the week the mail daemon should automatically check mail for the described account:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B><TT>Constant</TT></B></TH>
+<TH><B><TT>Meaning</TH>
+<TR>
+<TD>B_CHECK_NEVER</TT></B></TD>
+<TD>Don't automatically check the account's mail.</TD>
+<TR>
+<TD><B><TT>B_CHECK_WEEKDAYS</TT></B></TD>
+<TD>Check the mail only on weekdays.</TD>
+<TR>
+<TD><B><TT>B_CHECK_DAILY</TT></B></TD>
+<TD>Check the mail every day.</TD>
+<TR>
+<TD><B><TT>B_CHECK_CONTINUOUSLY</TT></B></TD>
+<TD>Check continuously every day.</TD>
+</TABLE>
+<P>
+The <B><TT>interval</TT></B> specifies how many seconds apart each e-mail retrieval should be, and the <B><TT>begin_time</TT></B> and <B><TT>end_time</TT></B> specify the time of day (in seconds) that automatic retrieval should begin and end.  If <B><TT>begin_time</TT></B> and <B><TT>end_time</TT></B> are the same, the daemon checks mail round-the-clock.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Eventually these functions will support multiple POP accounts; at this time, the Mail Kit only supports one POP account, so you must use an <I><FONT  color=991122 face=HELVETICA>index</I></FONT> of 0.  Any other index will result in a <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B> error.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>get_pop_account()</TT></B> fills the specified <B><TT>mail_pop_account</TT></B> structure with the information on the POP account, and <B><TT>set_pop_account()</TT></B> takes the information in the buffer and saves it as the new default.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The notification was successfully set or retrieved.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_INDEX">B_BAD_INDEX</A></TT></B>.  An index other than 0 was specified.
+<P>
+<LI><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_NO_REPLY">B_NO_REPLY</A></TT></B>.  The mail daemon didn't reply to the request.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_smtp_host()"></A>get_smtp_host()
+, 
+<A NAME="set_smtp_host()"></A>set_smtp_host()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_smtp_host</TT></B></FONT>(char *<I><FONT  color=991122 face=HELVETICA>smtp_host</I></FONT>)
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>set_smtp_host</TT></B></FONT>(char *<I><FONT  color=991122 face=HELVETICA>smtp_host</I></FONT>, bool <I><FONT  color=991122 face=HELVETICA>save</I></FONT> <FONT  face=HELVETICA>= true</FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>get_smtp_host()</TT></B> returns in the buffer pointed to by <I><FONT  color=991122 face=HELVETICA>smtp_host</I></FONT> the name of the SMTP host as currently configured.  The buffer should be at lest <B><TT>B_MAX_HOST_NAME_LENGTH</TT></B> bytes long.
+<P>
+<B><TT>set_smtp_host()</TT></B> sets the SMTP host through which mail will be sent in the future to the specified host.  If <I><FONT  color=991122 face=HELVETICA>save</I></FONT> is <B><TT>true</TT></B>, the new setting becomes the default and will persist through a reboot of the computer; otherwise, the change is only temporary.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The notification was successfully set or retrieved.
+<P>
+<LI><B><TT><A HREF="../The%20Application%20Kit/misc.html#B_NO_REPLY">B_NO_REPLY</A></TT></B>.  The mail daemon didn't respond to the request.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="send_queued_mail()"></A>send_queued_mail()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>send_queued_mail(</TT></B></FONT>void<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Tells the mail daemon to send all pending outgoing mail.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Mail transfer intitiated successfully.
+<P>
+<LI>Errors from BMessage::<B><TT><A HREF="../The%20Application%20Kit/Messenger.html#SendMessage()">SendMessage()</A></TT></B>.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Mail Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Mail%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Mail Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

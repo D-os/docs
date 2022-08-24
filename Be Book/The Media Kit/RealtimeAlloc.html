@@ -1,0 +1,305 @@
+<HTML><HEAD><TITLE>The Media Kit: Real-Time Allocation Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Real-Time%20Allocation%20Functions"></A>Real-Time Allocation Functions
+</H1>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/media/RealtimeAlloc.h">be/media/RealtimeAlloc.h</A>
+<P>
+Library:  libmedia.so
+<P>
+Media nodes are highly timing-sensitive creatures.  The slightest delay in performing their work can cause drastic problems in media playback or recording quality.  Virtual memory, normally of great benefit to users, can work against them when doing media work.  A poorly-timed virtual memory hit can cause breaks in media performances.
+<P>
+The realtime memory allocation and locking functions provide a means for nodes to lock down their memory to prevent it from being cached to disk by the virtual memory system.  This avoids situations in which the node has to pause while it or its memory is fetched back from the swap file.
+<P>
+The user can use the Media preference application to configure what types of nodes should use locked memory.  Nodes should typically use the realtime memory allocation functions instead of <B><TT><A HREF="../Drivers/area_malloc.html#malloc()">malloc()</A></TT></B> and <B><TT><A HREF="../Drivers/area_malloc.html#free()">free()</A></TT></B>.  <B><TT><A HREF="#rtm_alloc()">rtm_alloc()</A></TT></B> will automatically handle locking the memory if the <B><TT>B_MEDIA_REALTIME_ALLOCATOR</TT></B> flag is set, so your node doesn't have to worry about it.
+<P>
+<HR>
+<H2>
+<A NAME="Memory%20Pools"></A><FONT SIZE=6>M</FONT>emory <FONT SIZE=6>P</FONT>ools
+</H2>
+<P>
+Real-time memory blocks are allocated in <B>pools</B>.  Pools are locked into physical RAM if realtime allocators are turned on in the BMediaRoster.  While pools are locked in memory, that reduces the amount of physical RAM available to other applications, so don't use real-time blocks unless it's really going to benefit your performance.
+<P>
+When you create a pool, you specify the total size of the pool.  This size is the maximum number of bytes that can be allocated from the pool.  Memory can then be allocated out of the pool by calling <B><TT><A HREF="#rtm_alloc()">rtm_alloc()</A></TT></B>, and memory blocks in the pool can be freed by calling <B><TT><A HREF="#rtm_free()">rtm_free()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="The%20Default%20Pool"></A>The Default Pool
+</H3>
+<P>
+There's a special pool, called the default (or shared) pool.  You can allocate memory blocks in this pool if you wish, but it's a scarce resource and as a general rule  you should avoid it.
+<P>
+Instead, you should create your own pool and use that; let the media nodes and Media Kit use the default pool for its own purposes.
+<P>
+<HR>
+<H3>
+<A NAME="MALLOC_DEBUG"></A>MALLOC_DEBUG
+</H3>
+<P>
+<B><TT><A HREF="#rtm_alloc()">rtm_alloc()</A></TT></B> responds to the value of <B><TT><A HREF="#MALLOC_DEBUG">MALLOC_DEBUG</A></TT></B>.  If the <B><TT><A HREF="#MALLOC_DEBUG">MALLOC_DEBUG</A></TT></B> environment variable is set to anything other than 0, new and freed blocks will be cleared to some junk value.  If it's set to an integer greater than 1 it will also do pool, heap, and block validations at opportune times.  It's not perfect validation, but it's better than nothing.
+<P>
+<HR>
+<H2>
+<A NAME="Global%20C%20Functions"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="rtm_alloc()"></A>rtm_alloc()
+, 
+<A NAME="rtm_realloc()"></A>rtm_realloc()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT>void</TT></B> *<B><TT><FONT  color=000022 size=+1>rtm_alloc(</TT></B></FONT>rtm_pool *<I><FONT  color=991122 face=HELVETICA>pool</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> *<B><TT><FONT  color=000022 size=+1>rtm_realloc(</TT></B></FONT>void **<I><FONT  color=991122 face=HELVETICA>data</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>newSize</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#rtm_alloc()">rtm_alloc()</A> </TT></B>allocates a block of memory of <I><FONT  color=991122 face=HELVETICA>size</I></FONT> bytes in the specified <I><FONT  color=991122 face=HELVETICA>pool</I></FONT>.  If you specify <B><TT>NULL</TT></B> for <I><FONT  color=991122 face=HELVETICA>pool</I></FONT>, the memory is allocated in the default pool.
+<P>
+<B><TT><A HREF="#rtm_realloc()">rtm_realloc()</A> </TT></B>resizes the block referenced by <I><FONT  color=991122 face=HELVETICA>data</I></FONT> to be <I><FONT  color=991122 face=HELVETICA>newSize</I></FONT> bytes long.  Since the buffer may have to move to accomodate the new size, the pointer  pointed to by data may change.  If <I><FONT  color=991122 face=HELVETICA>data</I></FONT> is <B><TT>NULL</TT></B>, this is just like calling <B><TT><A HREF="#rtm_alloc()">rtm_alloc()</A></TT></B> on the default pool.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. The <I><FONT  color=991122 face=HELVETICA>data</I></FONT> pointer is <B><TT>NULL</TT></B>.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  The pool is full.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="rtm_create_pool()"></A>rtm_create_pool()
+, 
+<A NAME="rtm_delete_pool()"></A>rtm_delete_pool()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>rtm_create_pool(rtm_pool</TT></B></FONT> **<I><FONT  color=991122 face=HELVETICA>outPool</I></FONT>, size_t <I><FONT  color=991122 face=HELVETICA>totalSize</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>rtm_delete_pool(rtm_pool</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>pool</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#rtm_create_pool()">rtm_create_pool()</A></TT></B> creates a new memory pool.  The pool's rtm_pool reference is stored in <I><FONT  color=991122 face=HELVETICA>outPool</I></FONT>.  The pool is capable of holding up to <I><FONT  color=991122 face=HELVETICA>totalSize</I></FONT> bytes of data, and is given the specified <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>outPool</I></FONT> is <B><TT>NULL</TT></B>, the default pool is created if it doesn't already exist.  If it does, <B><TT>EALREADY</TT></B> is returned.
+<P>
+<B><TT><A HREF="#rtm_delete_pool()">rtm_delete_pool()</A></TT></B> deletes the specified <I><FONT  color=991122 face=HELVETICA>pool</I></FONT>.  You can't delete the default pool; passing <B><TT>NULL</TT></B> as <I><FONT  color=991122 face=HELVETICA>pool</I></FONT> will return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Be sure to delete a pool once you're finished with it.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI><B><TT>EALREADY</TT></B>. The default pool already exists (<B><TT><A HREF="#rtm_create_pool()">rtm_create_pool()</A></TT></B> only).
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. You can't delete the default pool.
+<P>
+<LI>Area errors.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="rtm_default_pool()"></A>rtm_default_pool()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT>rtm_pool</TT></B> *<B><TT><FONT  color=000022 size=+1>rtm_default_pool(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns a pointer to the default pool, or <B><TT>NULL</TT></B> if it hasn't been initialized yet.
+<P>
+<HR>
+<H3>rtm_delete_pool()   see <A HREF="#rtm_create_pool()">rtm_create_pool()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="rtm_free()"></A>rtm_free()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>rtm_free(void</TT></B></FONT> *<I><FONT  color=991122 face=HELVETICA>data</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the specified block of data.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. A <B><TT>NULL</TT></B> pointer was given.
+<P>
+</UL>
+<P>
+<HR>
+<H3>rtm_phys_size_for()   see <A HREF="#rtm_size_for()">rtm_size_for()</A></H3>
+<P>
+<HR>
+<H3>rtm_realloc()   see <A HREF="#rtm_alloc()">rtm_alloc()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="rtm_size_for()"></A>rtm_size_for()
+, 
+<A NAME="rtm_phys_size_for()"></A>rtm_phys_size_for()
+</H3>
+<P>
+<I>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+</I><B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>rtm_size_for(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>rtm_phys_size_for(</TT></B></FONT>void *<I><FONT  color=991122 face=HELVETICA>data</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#rtm_size_for()">rtm_size_for()</A> </TT></B>returns the size of the specified block of memory.
+<P>
+<B><TT><A HREF="#rtm_phys_size_for()">rtm_phys_size_for()</A> </TT></B>returns the physical size of the specified block of memory.  This is the maximum number of bytes the block can grow to without risking <B><TT><A HREF="#rtm_realloc()">rtm_realloc()</A></TT></B> actually moving the block; the physical size is always greater than or equal to the block size.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. The <I><FONT  color=991122 face=HELVETICA>data</I></FONT> pointer is <B><TT>NULL</TT></B>.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

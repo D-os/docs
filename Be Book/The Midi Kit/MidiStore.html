@@ -1,0 +1,354 @@
+<HTML><HEAD><TITLE>The Midi Kit: BMidiStore</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMidiStore"></A>BMidiStore
+</H1>
+<P>
+Derived from:  public <A HREF="Midi.html#BMidi">BMidi</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/midi/MidiStore.h">be/midi/MidiStore.h</A>
+<P>
+Library:  libmidi.so
+<P>
+<H6><A HREF="MidiStore.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMidiStore class defines a MIDI recording and playback mechanism.  The MIDI messages that a BMidiStore object receives (at its input) are stored as <I>events</I> in an <I><FONT  color=991122 face=HELVETICA>event list</I></FONT>, allowing a captured performance to be played back later.  The object can also read and write&mdash;or <I>import</I> and <I>export</I>&mdash;standard MIDI files.
+<P>
+<HR>
+<H3>
+<A NAME="Recording"></A>Recording
+</H3>
+<P>
+The ability to record a MIDI performance is vested in BMidiStore's MIDI hook functions (<B><TT>NoteOn()</TT></B>, <B><TT>NoteOff()</TT></B>, etc.).  When a MIDI hook is invoked, the function fabricates a discrete event based on the data it has received in its arguments, and adds the event to its event list.  You don't need to tell a BMidiStore to start recording; it can record from the moment it's constructed.
+<P>
+For example, to record a performance from an external MIDI keyboard, you connect a BMidiStore to a <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> object and then tell the <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> to start:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Record a keyboard performance. */
+&nbsp;&nbsp;&nbsp;BMidiStore MyStore;
+&nbsp;&nbsp;&nbsp;BMidiPort MyPort;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;MyPort.Open(...);
+&nbsp;&nbsp;&nbsp;MyPort.Connect(MyStore);
+&nbsp;&nbsp;&nbsp;MyPort.Start();
+&nbsp;&nbsp;&nbsp;/* Start playing... */</PRE>
+<P>
+At the end of the performance, you tell the <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> to stop:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;MyPort.Stop();</PRE>
+<P>
+<H4>
+<A NAME="Timestamps"></A>Timestamps
+</H4>
+<P>
+Events are added to a BMidiStore's event list immediately upon arrival.  Each event is given a timestamp as it arrives; the value of the timestamp is the value of the <I><FONT  color=991122 face=HELVETICA>time</I></FONT> argument that was passed to the MIDI hook function by the "upstream" object's spray function.  There's no guarantee that the time arguments of successive MIDI events will be in chronological order.  To ensure that the events are properly ordered, you should call <B><TT>Sort()</TT></B> before you read from the list (note that writing to a MIDI file automatically sorts the list).
+<P>
+BMidiStore's input functions don't call <B><TT><A HREF="Midi.html#SnoozeUntil()">SnoozeUntil()</A></TT></B>:  A BMidiStore writes to its event list as soon as it gets a new message, it doesn't  wait until the time indicated by the <I>time</I> argument.
+<P>
+<H4>
+<A NAME="Erasing%20and%20Editing%20a%20Recording"></A>Erasing and Editing a Recording
+</H4>
+<P>
+You can't.  If you make a mistake while you're recording (for example) and want to try again, you can simulate emptying the object by disconnecting the input to the <A HREF="#BMidiStore">BMidiStore</A>, destroying the object, making a new one, and re-connecting.  For example:
+<P>
+Editing the events in the event list is less than impossible (were such a state possible).  You can't do it, and you can't simulate it, at least not with the default implementation of BMidiStore.  If you want to edit MIDI data, you have to provide your own BMidi-derived class.
+<P>
+<HR>
+<H3>
+<A NAME="Playback"></A>Playback
+</H3>
+<P>
+To "play" a BMidiStore's list of events, you call the object's <B><TT><A HREF="Midi.html#Start()">Start()</A></TT></B> function.  As described in the <A HREF="Midi.html#BMidi">BMidi</A> class specification, <B><TT><A HREF="Midi.html#Start()">Start()</A></TT></B> invokes <B><TT><A HREF="Midi.html#Run()">Run()</A></TT></B>.  BMidiStore's <B><TT><A HREF="Midi.html#Run()">Run()</A></TT></B> reads events in the order that they appear in the event list, and sprays the appropriate messages to the connected objects.  You can interrupt a BMidiStore playback by calling <B><TT><A HREF="Midi.html#Stop()">Stop()</A></TT></B>; uninterrupted, the object will stop by itself after it has sprayed the last event in the list.
+<P>
+The events' timestamps are used as the <I><FONT  color=991122 face=HELVETICA>time</I></FONT> arguments in the spray functions that are called from within <B><TT><A HREF="Midi.html#Run()">Run()</A></TT></B>.  But with a twist:  The <I><FONT  color=991122 face=HELVETICA>time</I></FONT> argument that's passed in the first spray call (for a given performance) is always <B><TT>B_NOW</TT></B>; subsequent <I><FONT  color=991122 face=HELVETICA>time</I></FONT> arguments are re-computed to maintain the correct timing in relation to the first event.  In other words, when you tell a BMidiStore to start playing, the first event is performed immediately regardless of the actual value of its timestamp.   
+<P>
+<H4>
+<A NAME="Setting%20the%20Current%20Event"></A>Setting the Current Event
+</H4>
+<P>
+You can tell the BMidiStore to begin playing from somewhere in the middle of the list by calling <B><TT><A HREF="#SetCurrentEvent()">SetCurrentEvent()</A></TT></B> before starting the playback.  The function takes an index into the list.  
+<P>
+If you want to start playing from a particular time offset into the event list, you first have to figure out which event lies at that time.  To do this, you ask for the event that occurs at or after the time offset (in milliseconds) through the <B><TT><A HREF="#EventAtDelta()">EventAtDelta()</A> </TT></B>function.  The value that's returned by this function is suitable as the argument to <B><TT><A HREF="#SetCurrentEvent()">SetCurrentEvent()</A></TT></B>.  
+<P>
+Keep in mind that <B><TT><A HREF="#EventAtDelta()">EventAtDelta()</A></TT></B> returns the index of the first event at <I>or after </I>the desired offset.  If you need to know the actual offset of the winning event, you can pass its index to <B><TT><A HREF="#DeltaOfEvent()">DeltaOfEvent()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;long firstEvent = MyStore->EventAtDelta(3000);
+&nbsp;&nbsp;&nbsp;long actualDelta = MyStore->DeltaOfEvent(firstEvent);</PRE>
+<P>
+<HR>
+<H3>
+<A NAME="Reading%20and%20Writing%20MIDI%20Files"></A>Reading and Writing MIDI Files
+</H3>
+<P>
+You add events to a BMidiStore's event list by reading, or <I>importing</I>, a Standard MIDI File through the <B><TT><A HREF="#Import()">Import()</A></TT></B> function.  You can import any number of files into the same BMidiStore object.  After you import a file, the event list is automatically sorted.
+<P>
+One thing you shouldn't do is import a MIDI file into a BMidiStore that contains events that were previously recorded from a <A HREF="MidiPort.html#BMidiPort">BMidiPort</A> (in an attempt to mix the file and the recording).  Nor does the reverse work:  You can't import a file and <I>then</I> record from a BMidiPort.  The file's timestamps are incompatible with those that are generated for events that are received from the BMidiPort; the result certainly won't be satisfactory.  
+<P>
+To write the event list as a MIDI file, you call BMidiStore's <B><TT><A HREF="#Export()">Export()</A></TT></B> function:
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMidiStore()"></A>BMidiStore()
+, 
+<A NAME="~BMidiText()"></A>~BMidiText()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMidiStore(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+virtual<B><TT><FONT  color=000022 size=+1> ~BMidiStore()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The constructor creates a new, empty BMidiStore object.  The destructor destroys the object and its storage.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BeginTime()"></A>BeginTime()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+uint32 <B><TT>BeginTime(</TT></B>void<B><TT>) const
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Returns the time, in ticks, at which the most recent performance started.  This function is only valid if the object has actually performed. 
+<P>
+<HR>
+<H3>
+<A NAME="CountEvents()"></A>CountEvents()
+, 
+<A NAME="SortEvents()"></A>SortEvents()
+, 
+<A NAME="DeltaOfEvent()"></A>DeltaOfEvent()
+, 
+<A NAME="EventAtDelta()"></A>EventAtDelta()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>CountEvents(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) const
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SortEvents(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>force = false</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>DeltaOfEvent(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>index</I></FONT><B><TT><FONT  color=000022 size=+1>) const
+<P>
+</TT></B></FONT>
+<TR><TD>
+uint32 <B><TT><FONT  color=000022 size=+1>EventAtDelta(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>delta</I></FONT><B><TT><FONT  color=000022 size=+1>) const
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>CountEvents()</TT></B> returns the number of events in the object's event list. 
+<P>
+<B><TT>SortEvents()</TT></B> time-sorts the events in the event list.  The object maintains a (conservative) notion of whether the events are already sorted; if <I><FONT  color=991122 face=HELVETICA>force</I></FONT> is <B><TT>false</TT></B> and the object doesn't think the operation is necessary, the sorting isn't performed.  If force is <B><TT>true</TT></B>, the operation is always performed, regardless of its necessity. 
+<P>
+<B><TT>DeltaOfEvent()</TT></B> returns the "delta time" of the <I><FONT  color=991122 face=HELVETICA>index</I></FONT>'th event in the object's list of events.  An event's delta time is the time span, in milliseconds, between the first event in the event list and itself.
+<P>
+<B><TT>EventAtDelta()</TT></B> Returns the index of the event that occurs on or after <I><FONT  color=991122 face=HELVETICA>delta</I></FONT> milliseconds from the beginning of the event list.
+<P>
+<HR>
+<H3>CurrentEvent()  see <A HREF="#SetCurrentEvent()">SetCurrentEvent()</A></H3>
+<P>
+<HR>
+<H3>DeltaOfEvent()  see <A HREF="#CountEvents()">CountEvents()</A></H3>
+<P>
+<HR>
+<H3>ChrisEvert()</H3>
+<P>
+<HR>
+<H3>
+<A NAME="Export()"></A>Export()
+, 
+<A NAME="Import()"></A>Import()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT>Export(</TT></B>const entry_ref *<I><FONT  color=991122 face=HELVETICA>to_file</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>format</I><B><TT>)<A HREF="Midi.html#TempoChange(),SprayTempoChange()">ChrisEvert()</A>
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT>Import(</TT></B>const entry_ref *<I><FONT  color=991122 face=HELVETICA>from_file</I><B><TT><A HREF="Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#Export()">Export()</A></TT></B> time-sorts the object's event list, and then writes the list as a standard MIDI file in the designated format; the <I><FONT  color=991122 face=HELVETICA>format</I></FONT> argument should be either 0 or 1.  The file that <I>to_file</I> refers to must already exist, and is <I>not</I> cleared before it's written. 
+<P>
+<B><TT><A HREF="#Import()">Import()</A></TT></B> reads the standard MIDI file from the designated file and adds its events to the object's event list.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The file was successfully written or read.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B> (<B><TT>Import()</TT></B> only).  Couldn't allocate enough memory to accommodate the file.
+<P>
+<LI><I>POSIX errors</I>.  Some other file error prevented the operation. 
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetCurrentEvent()"></A>SetCurrentEvent()
+, 
+<A NAME="CurrentEvent()"></A>CurrentEvent()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT>SetCurrentEvent(</TT></B>uint32 <I><FONT  color=991122 face=HELVETICA>index</I><B><TT><A HREF="Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+<TR><TD>
+uint32 <B><TT>CurrentEvent(void)
+<P>
+</TT></B>
+</TABLE></TABLE>
+
+<P>
+Sets the object's "current event"&mdash;the event that it will perform next&mdash;to the event at <I><FONT  color=991122 face=HELVETICA>index</I></FONT> in the event list. 
+<P>
+Returns the index of the event that will be performed next.  
+<P>
+<HR>
+<H3>
+<A NAME="SetTempo()"></A>SetTempo()
+, 
+<A NAME="Tempo()"></A>Tempo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetTempo(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>beatsPerMinute</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+int32<B><TT><FONT  color=000022 size=+1> Tempo(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Sets and returns the object's tempo&mdash;the speed at which it performs events&mdash;in beats per minute.  The default tempo is 60 bpm.  
+<P>
+<HR>
+<H3>SortEvents  see <A HREF="#CountEvents()">CountEvents()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

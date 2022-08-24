@@ -1,0 +1,523 @@
+<HTML><HEAD><TITLE>The Media Kit: Reading and Writing Media Files</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Reading%20and%20Writing%20Media%20Files"></A>Reading and Writing Media Files
+</H1>
+<P>
+Working with media files becomes relatively painless when you use the <A HREF="MediaFile.html#BMediaFile">BMediaFile</A> and <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> classes.  This section looks at a sample program that converts a media file from one format to another, using these classes.
+<P>
+<HR>
+<H2>
+<A NAME="Preparing%20a%20media_format"></A><FONT SIZE=6>P</FONT>reparing a media_format
+</H2>
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void BuildMediaFormat(int32 width, int32 height, color_space cspace,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; media_format *format) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_raw_video_format *rvf = &amp;format->u.raw_video;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memset(format, 0, sizeof(*format));
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;format->type = B_MEDIA_RAW_VIDEO;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rvf->last_active = (uint32)(height - 1);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rvf->orientation = B_VIDEO_TOP_LEFT_RIGHT;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rvf->pixel_width_aspect = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rvf->pixel_height_aspect = 3;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rvf->display.format = cspace;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rvf->display.line_width = (int32)width;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rvf->display.line_count = (int32)height;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (cspace == B_RGB32)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rvf->display.bytes_per_row = 4 * width;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("can&gt;t build the format!n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exit(5);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+<B><TT>BuildMediaFormat()</TT></B> accepts as input parameters describing a video format&mdash;the width, height, and color space of the video&mdash;and returns a media_format structure describing that format.  For our purposes, we require a <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_RGB32">B_RGB32</A></TT></B> colorspace, and the frames will be in raw video format.
+<P>
+<HR>
+<H2>
+<A NAME="Converting%20the%20Files"></A><FONT SIZE=6>C</FONT>onverting the <FONT SIZE=6>F</FONT>iles
+</H2>
+<P>
+The <B><TT>transcode()</TT></B> function below handles actually converting a media file into another format, writing the newly-converted media into a new file.  We'll look at it in chunks to lighten the load.
+<P>
+<B><TT>transcode()</TT></B> accepts as input a <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> referring to the video track from the original file, and another <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> referring to the audio track.  <I><FONT  color=991122 face=HELVETICA>output</I></FONT> is the name of the new file to be created.
+<P>
+<I><FONT  color=991122 face=HELVETICA>family_name</I></FONT> specifies the file format family to be used when creating the new file, and <I><FONT  color=991122 face=HELVETICA>video_name</I></FONT> and <I><FONT  color=991122 face=HELVETICA>audio_name</I></FONT> indicate by name which encoders should be used for the video and audio tracks.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;void transcode(BMediaTrack *vidtrack, BMediaTrack *audtrack,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *output, char *family_name, char *video_name,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *audio_name) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *chunk;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *bitmap = NULL, *sound_buffer = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool found_video_encoder = false, found_audio_encoder = false;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool found_family;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 i, sz, cookie;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64 numFrames, j;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64 framesize;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaFile out;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaTrack vid = NULL, *aud = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format format, outfmt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_codec_info mci;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_file_format mfi;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_header mh;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = get_ref_for_path(output, &amp;ref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("problem with get_ref_for_path() -- %sn", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The function begins by creating an <B><TT><A HREF="../The%20Storage%20Kit/misc.html#entry_ref">entry_ref</A></TT></B> for the output file.  If an error occurs, the function terminates after displaying an error message.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cookie = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while((err = get_next_file_format(&amp;cookie, &amp;mfi)) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (strcmp(mfi.short_name, family_name) == 0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("failed to find a file format handler !n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Next, a loop is used, calling <B><TT><A HREF="functions.html#get_next_file_format()">get_next_file_format()</A></TT></B> to find the appropriate handler for the requested file format family.  If the specified <I><FONT  color=991122 face=HELVETICA>family_name</I></FONT> doesn't match the <B><TT>short_name</TT></B> field of any of the media file formats available, an error is printed and the function aborts.  Otherwise, <B><TT>mfi</TT></B> contains a description of the file format.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;out = new BMediaFile(&amp;ref, &amp;mfi);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = out->InitCheck();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err != B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("failed to properly init the output file... (%s)n", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete out;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Once the appropriate media file format has been determined, a new <A HREF="MediaFile.html#BMediaFile">BMediaFile</A> is created.  The <B><TT>entry_ref</TT></B> of the output file is specified, and the media file format we selected is provided.  This will create the new media file, with no tracks.  If this fails (<B><TT><A HREF="MediaFile.html#InitCheck()">BMediaFile::InitCheck()</A></TT></B> returns something other than <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>), an error message is displayed, the <A HREF="MediaFile.html#BMediaFile">BMediaFile</A> is deleted, and the function returns.
+<P>
+The next chunk of code handles creating the new video track.  Note that this only runs if <I><FONT  color=991122 face=HELVETICA>vidtrack</I></FONT>, the reference to the original <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A>, isn't <B><TT>NULL</TT></B>.  If it's <B><TT>NULL</TT></B>, the file is assumed not to have a video track.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (vidtrack) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vidtrack->EncodedFormat(&amp;format);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (video_name) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int width, height;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width = format.u.encoded_video.output.display.line_width;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height = format.u.encoded_video.output.display.line_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memset(&amp;format, 0, sizeof(format));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BuildMediaFormat(width, height, B_RGB32, &amp;format);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vidtrack->DecodedFormat(&amp;format);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bitmap = (char *)malloc(width * height * 4);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cookie = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (get_next_encoder(&amp;cookie, &amp;mfi, &amp;format, &amp;outfmt, &amp;mci) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("found encoder %s (%d)n", mci.pretty_name, mci.id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (strcmp(video_name, mci.short_name) == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;found_video_encoder = true;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If the video track exists, we determine the encoded format by calling <B><TT><A HREF="MediaTrack.html#EncodedFormat()">BMediaTrack::EncodedFormat()</A></TT></B>.  The returned <B><TT><A HREF="misc_api.html#media_format">media_format</A></TT></B> describes the format of the video frames in the original file.
+<P>
+If a video encoder for the output was specified, a media_format is constructed using the <B><TT>BuildMediaFormat()</TT></B> function we implemented previously.  This format will be used for reading the frames from the original file into a raw, unencoded video buffer.  We call <B><TT><A HREF="MediaTrack.html#DecodedFormat()">BMediaTrack::DecodedFormat()</A></TT></B> on the original video track, specifying that this <B><TT>format</TT></B> should be used for outputting frames.  From this point onward, frames delivered by <I><FONT  color=991122 face=HELVETICA>vidtrack</I></FONT> will be in raw video format.
+<P>
+A <B><TT>bitmap</TT></B> buffer is created.  This will contain each frame of raw video while it's being transcoded, after being decoded and before it's encoded into the new file.
+<P>
+Another loop is used to locate an encoder that can convert raw video frames into the desired output format.  This is done by calling <B><TT><A HREF="MediaFormats.html#get_next_encoder()">get_next_encoder()</A></TT></B> in a loop, looking for an encoder that can accept data in the <B><TT><A HREF="misc_api.html#media_file_format">media_file_format</A></TT></B> specified by <B><TT>mfi</TT></B>, converting the frames into the media_format specified by <B><TT>format</TT></B>.  A description of the encoder is returned in <B><TT>mci</TT></B>.  When a match is found, we check to see if it matches the encoder name, <I><FONT  color=991122 face=HELVETICA>video_name</I></FONT>, requested by the input arguments.  If it does, we accept it by setting the <B><TT>found_video_encoder</TT></B> flag to <B><TT>true</TT></B>.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (found_video_encoder) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vid = out->CreateTrack(&amp;format, &amp;mci);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vid = out->CreateTrack(&amp;format);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (vid == NULL) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Failed to create video trackn");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete out;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If a video encoder has been found, a new video track is created, using the found encoder, <B><TT>mci</TT></B>.  Otherwise, a raw video track is created.  This covers the case where the user indicates that he doesn't want any encoding (if they specify a <B><TT>NULL</TT></B> <I><FONT  color=991122 face=HELVETICA>video_name</I></FONT>).  A pointer to the new <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> is kept in <B><TT>vid</TT></B>.
+<P>
+If the track can't be created, an error message is displayed, the <A HREF="MediaFile.html#BMediaFile">BMediaFile</A> for the output is deleted, and the function returns.
+<P>
+Next, the audio track is prepared in the same way: the encoded format is determined, the decoded format is specified, and an encoder is located, followed by the creation of the new track.  A <B><TT>sound_buffer</TT></B> is allocated to contain the amount of audio data that will be stuffed into each buffer returned as the source track is read.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (audtrack) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;audtrack->EncodedFormat(&amp;format);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;audtrack->DecodedFormat(&amp;format);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sound_buffer = (char*)malloc(format.u.raw_audio.buffer_size);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;framesize = (format.u.raw_audio.format&amp;15)*format.u.raw_audio.channel_count;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (audio_name) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cookie = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (get_next_encoder(&amp;cookie, &amp;mfi, &amp;format, &amp;outfmt, &amp;mci) == B_OK) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("found encoder %s (%d)n", mci.pretty_name, mci.id);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (strcmp(audio_name, mci.short_name) == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;found_audio_encoder = true;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (found_audio_encoder) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aud = out->CreateTrack(&amp;format, &amp;mci);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aud = out->CreateTrack(&amp;format);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (aud == NULL) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Failed to create audio trackn");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete out;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Final touches are then put on the new file's header.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Add the copyright and commit the header
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;out->AddCopyright("Copyright 1999 Be Incorporated");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;out->CommitHeader();</PRE>
+<P>
+In this example, a copyright notice is added to the file by calling <B><TT><A HREF="MediaFile.html#AddCopyright()">BMediaFile::AddCopyright()</A></TT></B>.  Once everything's ready, we call <B><TT><A HREF="MediaFile.html#CommitHeader()">BMediaFile::CommitHeader()</A></TT></B> to indicate that we're about to begin writing media data into the file.
+<P>
+Then writing of the video track begins, if there is one.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Process the video track, if any
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (vidtrack) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int is_key_frame = 0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (found_video_encoder) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numFrames = vidtrack->CountFrames();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for(j = 0; j &lt; numFrames; j++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64 framecount = 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("                                r");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("processing frame: %5Ld", j);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fflush(stdout);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = vidtrack->ReadFrames(bitmap, &amp;framecount, &amp;mh);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("video: GetNextChunk error -- %sn", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = vid->WriteFrames(bitmap, 1, mh.u.encoded_video.field_flags);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("err %s (0x%x) writing video frame %Ldn",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   strerror(err), err, j);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If there's a video encoder in use (the output data will be encoded), we count up the number of frames in the video track by calling <B><TT><A HREF="MediaTrack.html#CountFrames()">BMediaTrack::CountFrames()</A></TT></B>, then loop over all of the frames.
+<P>
+For each frame, we display a status notice to let the user know what we're doing, then read in the next frame from the source file by calling <B><TT><A HREF="MediaTrack.html#ReadFrames()">BMediaTrack::ReadFrames()</A></TT></B>.  We specify the <B><TT>bitmap</TT></B> buffer as the buffer into which the frame should be read, and <B><TT>framecount</TT></B> will contain the number of read frames (it should always be 1 for video tracks).  <B><TT>mh</TT></B>, a <B><TT><A HREF="misc_api.html#media_header">media_header</A></TT></B>, will receive a description of the data in the buffer.
+<P>
+If an error occurs reading the frame, an error message is printed, and the video conversion is terminated.
+<P>
+Otherwise, the output video track, <B><TT>vid</TT></B>, is written into by calling <B><TT><A HREF="MediaTrack.html#WriteFrames()">BMediaTrack::WriteFrames()</A></TT></B>.  The new frame is automatically encoded and appended to the new file.  If an error occurs doing this, an error message is displayed and processing is terminated.
+<P>
+If there's no encoder being used (the output file is going to be written as raw or unknown-format data), the following code is used:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numFrames = vidtrack->CountFrames();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for(j = 0; j &lt; numFrames; j++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("                                r");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("processing frame: %5Ld", j);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fflush(stdout);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = vidtrack->ReadChunk(&amp;chunk, &amp;sz, &amp;mh);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("video: GetNextChunk error -- %sn", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = vid->WriteChunk(chunk, sz, mh.u.encoded_video.field_flags);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("err %s (0x%x) writing video frame %Ldn",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   strerror(err), err, j);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("r                                     r");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The only real difference here is that instead of using <B><TT><A HREF="MediaTrack.html#ReadFrames()">BMediaTrack::ReadFrames()</A></TT></B> and <B><TT><A HREF="MediaTrack.html#WriteFrames()">BMediaTrack::WriteFrames()</A></TT></B>, we use <B><TT><A HREF="MediaTrack.html#ReadChunk()">BMediaTrack::ReadChunk()</A></TT></B> and <B><TT><A HREF="MediaTrack.html#WriteChunk()">BMediaTrack::WriteChunk()</A></TT></B>.  These work with media data without attempting to interpret the data in any way.
+<P>
+One or the other of these loops will continue until either an error occurs, or the entire video track is converted.
+<P>
+Next, the audio track is converted, if there is one.  As you can see, this is done in almost exactly the same manner, except that each buffer we receive will have more than one frame of audio in it.  Note how the loop that iterates over the frames adds <B><TT>framecount</TT></B> to its counter variable each pass; <B><TT>framecount</TT></B> indicates the number of frames returned by the last call to <B><TT>ReadFrames()</TT></B> or <B><TT>ReadChunk()</TT></B>.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Process the audio track, if any
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (audtrack) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int64 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;framecount = 0;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (found_audio_encoder) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Decode and encode all the frames
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numFrames = audtrack->CountFrames();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Total frame count : %Ldn", numFrames);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (j = 0; j &lt; numFrames; j+=framecount) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = audtrack->ReadFrames(sound_buffer, &amp;framecount, &amp;mh);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("video: GetNextChunk error -- %sn", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = aud->WriteFrames(sound_buffer, framecount);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("err %s (0x%x) writing audio frame %Ldn",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   strerror(err), err, j);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("processing chunks...n");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;while (true) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = audtrack->ReadFrames(sound_buffer, &amp;framecount, &amp;mh);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("audio: GetNextChunk error -- %sn", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = aud->WriteChunk(sound_buffer, framecount*framesize);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("err %s (0x%x) writing audio chunk %Ldn",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   strerror(err), err, j);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("r                                     r");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Once converting the audio is done, there's very little left to do but release the video and audio buffers we've allocated, close the output <A HREF="MediaFile.html#BMediaFile">BMediaFile</A>, and delete it.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (bitmap)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free(bitmap);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (sound_buffer)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free(sound_buffer);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;out->CloseFile();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete out;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;out = NULL;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+After this function returns, the caller is responsible for deleting the source BMediaFile.
+<P>
+<HR>
+<H2>
+<A NAME="Using%20the%20transcode()%20Function"></A><FONT SIZE=6>U</FONT>sing the transcode() <FONT SIZE=6>F</FONT>unction
+</H2>
+<P>
+Let's look at a <B><TT>main()</TT></B> that uses the <B><TT>transcode()</TT></B> function to provide a command-line utility for converting media files from one format to another.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int main(int argc, char **argv) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status_t err;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;entry_ref ref;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;media_format format;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaFile mediaFile;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BMediaTrack *track = NULL, *vidtrack = NULL, *audtrack = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 i, numTracks;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *input = NULL, *output = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *video_encoder_name = NULL, *audio_encoder_name = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;char *family_name = NULL;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (argc &lt; 2) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("usage: %s [-info][-avi|-qt][-wav][-aiff][-v &lt;encoder_name>][-a &lt;encoder_name>] &lt;filename> [&lt;output>]n", argv[0]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If the number of arguments is less than 2, a usage notice is printed.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (i=1; i &lt; argc; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (strcmp(&amp;argv[i][0], "-info") == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dump_info();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exit(0);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (strcmp(&amp;argv[i][0], "-avi") == 0 ||
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   strcmp(&amp;argv[i][0], "-wav") == 0 ||
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   strcmp(&amp;argv[i][0], "-aiff") == 0 ||
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   strcmp(&amp;argv[i][0], "-quicktime") == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;family_name = &amp;argv[i][1];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (strcmp(&amp;argv[i][0], "-qt") == 0) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;family_name = "quicktime";
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (strcmp(&amp;argv[i][0], "-v") == 0 &amp;&amp; argv[i+1]) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;video_encoder_name = argv[i+1];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (strcmp(&amp;argv[i][0], "-a") == 0 &amp;&amp; argv[i+1]) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;audio_encoder_name = argv[i+1];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (input == NULL) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input = &amp;argv[i][0];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (output == NULL) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output = &amp;argv[i][0];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%s: extra argument %sn", &amp;argv[0][0], &amp;argv[i][0]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+The arguments are interpreted here.  The arguments are:
+<P>
+<LI>-info: Dumps information about the available media file formats and encoders; this function can be found in the description of the <B><TT><A HREF="functions.html#get_next_file_format()">get_next_file_format()</A></TT></B> function.
+<P>
+<LI>-avi: Specifies that the output file should be in AVI format; this sets the <B><TT>family_name</TT></B> to "avi".
+<P>
+<LI>-wav: Specifies that the output file should be in WAV format; this sets the <B><TT>family_name</TT></B> to "wav".
+<P>
+<LI>-aiff: Specifies that the output file should be in AIFF format; this sets the <B><TT>family_name</TT></B> to "aiff".
+<P>
+<LI>-quicktime: Specifies that the output file should be a QuickTime movie; this sets the <B><TT>family_name</TT></B> to "quicktime".
+<P>
+<LI>-qt: A shorthand form of -quicktime.
+<P>
+<LI>-v: Lets you specify a video encoder name other than one of the above, such as "-v myformat".
+<P>
+<LI>-a: Lets you specify an audio encoder name other than one of the above, such as "-a audiowonderness".
+<P>
+</UL>
+<P>
+<B><TT>input</TT></B> is the input file's name, and <B><TT>output</TT></B> is the name of the new media file to be created.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (output == NULL)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;output = "output";
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = get_ref_for_path(input, &amp;ref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("problem with get_ref_for_path() -- %sn", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If no output file name is specified, the name "output" is assumed.  An entry_ref to the input file is constructed; if the file isn't found, an error message is printed and the program exits.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mediaFile = new BMediaFile(&amp;ref);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = mediaFile->InitCheck();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("cannot contruct BMediaFile object -- %sn", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+A <A HREF="MediaFile.html#BMediaFile">BMediaFile</A> is then instantiated, referencing the <B><TT>input</TT></B> file.  If an error occurs, an error is displayed and the program terminates.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numTracks = mediaFile->CountTracks();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%s has %d media tracksn", input, numTracks);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *copyright = mediaFile->Copyright();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (copyright)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("#### copyright info: %sn", copyright);</PRE>
+<P>
+The number of tracks in the source file is obtained by calling <B><TT><A HREF="MediaFile.html#CountTracks()">BMediaFile::CountTracks()</A></TT></B>, and the file's copyright notice is obtained by calling <B><TT><A HREF="MediaFile.html#Copyright()">BMediaFile::Copyright()</A></TT></B>.  This information is printed for the user to read.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for(i=0; i &lt; numTracks; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;track = mediaFile->TrackAt(i);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!track) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("cannot get track %d?!?n", i);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// get the encoded format
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = track->EncodedFormat(&amp;format);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (err) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("BMediaTrack::EncodedFormat error -- %sn", strerror(err));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (format.type == B_MEDIA_RAW_VIDEO ||
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;format.type == B_MEDIA_ENCODED_VIDEO) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vidtrack = track;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else if (format.type == B_MEDIA_RAW_AUDIO ||
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   format.type == B_MEDIA_ENCODED_AUDIO) {
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;audtrack = track;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mediaFile->ReleaseTrack(track);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;track = NULL;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Next, a loop iterates over all the tracks in the file by calling <B><TT><A HREF="MediaFile.html#TrackAt()">BMediaFile::TrackAt()</A></TT></B> to obtain <A HREF="MediaTrack.html#BMediaTrack">BMediaTrack</A> objects referencing them, one by one.  Each track's encoded format is obtained, and is checked to see if the track represents a video or audio track.  If it's a video track, it's kept in the <B><TT>vidtrack</TT></B> variable.  If it's an audio track, it's kept in <B><TT>audtrack</TT></B>.  If it's neither, the track is released.
+<P>
+This serves to search all the tracks for a video and an audio track to be converted; most movies will only have one of each, but may have other informational tracks, which need to be ignored for our purposes.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (vidtrack == NULL &amp;&amp; audtrack == NULL) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("%s has no audio or video tracks?!?n", input);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If there's neither a video nor an audio track, the source file is empty and isn't worth converting, so an error message is displayed and the program terminates.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (family_name == NULL &amp;&amp; vidtrack == NULL)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;family_name = "wav";
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else if (family_name == NULL)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;family_name = "quicktime";</PRE>
+<P>
+If the user didn't specify an output family, and the file has no video track, the WAV file format is assumed.  You can change the program to assume AIFF for audio-only files by changing "wav" to "aiff" here.
+<P>
+For any file that has a video track, if no family is specified by the user, QuickTime format is assumed.  Again, if you want the default to be another format, you can change that here.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transcode(vidtrack, audtrack, output, family_name,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  video_encoder_name, audio_encoder_name);</PRE>
+<P>
+The conversion is performed by passing all these parameters to <B><TT>transcode()</TT></B> to do the real work.
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete mediaFile;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return 0;
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+Once <B><TT>transcode()</TT></B> returns, we simply delete the source file and exit the program.  The file has been converted (assuming no errors occurred in <B><TT>transcode()</TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="Integrating%20Into%20a%20Real%20Application"></A><FONT SIZE=6>I</FONT>ntegrating <FONT SIZE=6>I</FONT>nto a <FONT SIZE=6>R</FONT>eal <FONT SIZE=6>A</FONT>pplication
+</H2>
+<P>
+When creating a real application, you'll need to provide a way for the user to review a list of the various media file formats available, as well as the encoders provided for each format.  The <B><TT>dump_info()</TT></B> sample function discussed in the description of the <B><TT><A HREF="functions.html#get_next_file_format()">get_next_file_format()</A></TT></B> function shows how this can be done.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Media Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Media%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Media Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

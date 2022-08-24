@@ -1,0 +1,1284 @@
+<HTML><HEAD><TITLE>The Storage Kit: BMimeType</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMimeType"></A>BMimeType
+</H1>
+<P>
+Derived from:  none
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/storage/Mime.h">be/storage/Mime.h</A>
+<P>
+Library:  libbe.so
+<P>
+<H6><A HREF="MimeType.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMimeType class provides three services:
+<P>
+<UL>
+<LI><B>It can parse a MIME string</B>.  It can tell you whether the string is valid, what it's <I>supertype</I> component is, and whether it has a <I>subtype</I> component.  (The MIME string format is described in "<a href="#Valid%20MIME%20Strings">Valid MIME Strings</a>."
+<P>
+<LI><B>It gives you access to the File Type database</B>.  Given a MIME type, it can look in the database and retrieve that type's icon(s), "preferred handler" application, the filename extensions that correspond to it, and so on.
+<P>
+<LI><B>It can regard a MIME string as an application signature</B>, and so get and set the executable file, the file types, and the document icons that correspond to that signature.  
+<P>
+</UL>
+<P>
+All three services operate on MIME <I>strings</I>.  In other words, they answer questions such as "Does this <I>string</I> have a supertype?",  "Is this <I>string</I> installed in the database?", and so on.  You can get the MIME strings from anywhere: from a file's file type attribute, from and application's signature, from the header of an e-mail message, you can even make them up.  
+<P>
+<A NAME="31226:%20head2:%20Valid%20MIME%20Strings"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Valid%20MIME%20Strings"></A>Valid MIME Strings
+</H3>
+<P>
+A valid MIME string takes the form...
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+<I>supertype<B>/</B></I>[<I>subtype</I>]
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+...where <I>supertype</I> is one of the seven "media" strings:
+<P>
+<UL>
+<LI>text
+<P>
+<LI>application
+<P>
+<LI>image
+<P>
+<LI>audio
+<P>
+<LI>video
+<P>
+<LI>multipart
+<P>
+<LI>message
+<P>
+</UL>
+<P>
+...and (the optional) <I>subtype</I> can be just about anything...Except it can't include spaces or any of these forbidden characters:
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/BULLET_GOES_HERE.gif">
+					<TD><FONT FACE="helvetica">
+/  &lt; > @ , ; : " ( ) [ ] ? =
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+When you initialize a BMimeType object (through the constructor or <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> function), you have to tell it what MIME string you want it to represent:
+<P>
+<UL>
+<LI>The string can be supertype-only, or it can be supertype/subtype.
+<P>
+<LI>Currently, the supertype is <I>not</I> restricted to the seven types listed above, but you're probably making a mistake if you make up a new, unrecognized supertype.
+<P>
+<LI>Neither the supertype nor the subtype can include any of the forbidden characters.
+<P>
+<LI>The entire string must be no longer than <B><TT>B_MIME_TYPE_LENGTH</TT></B>  characters long.  (That's about 240 characters.  More than enough.)
+<P>
+</UL>
+<P>
+You can check the validity of a MIME string without constructing a BMimeType object by calling the static <B><TT><A HREF="#IsValid()">IsValid()</A></TT></B> function:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMimeType::IsValid("text/qwerty");</PRE>
+<P>
+<A NAME="17858:%20head1:%20Constructor%20and%20Destructor"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMimeType()"></A>BMimeType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMimeType(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMimeType(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>MIME_string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Constructs a new BMimeType object and initializes its MIME type to a copy of <I><FONT  color=991122 face=HELVETICA>MIME_string</I></FONT> (if the argument is given).  The rules of validity apply (see "<a href="#Valid%20MIME%20Strings">Valid MIME Strings</a>", above).  To see if the initialization was successful, call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> after you construct a new BMimeType object.
+<P>
+You can also set the MIME type through the <B><TT><A HREF="#SetTo()">SetTo()</A> </TT></B>function.
+<P>
+<HR>
+<H3>
+<A NAME="~BMimeType()"></A>~BMimeType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BMimeType()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Frees the object's MIME string and destroys the object.
+<P>
+<A NAME="27136:%20head1:%20String%20Parsing%20Functions"></A>
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Contains()"></A>Contains()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>Contains(</TT></B></FONT>const BMimeType *<I><FONT  color=991122 face=HELVETICA>other</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Compares the MIME string with <I><FONT  color=991122 face=HELVETICA>other</I></FONT>, returning <B><TT>true</TT></B> if they are identical.  If the object is a supertype and it's the supertype of <I><FONT  color=991122 face=HELVETICA>other</I></FONT>, then the method returns <B><TT>true</TT></B>.  Otherwise, it returns <B><TT>false</TT></B>.
+<P>
+<HR>
+<H3>Delete()   see  <A HREF="#Install()">Install()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetAppHint()"></A>GetAppHint()
+, 
+<A NAME="SetAppHint()"></A>SetAppHint()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAppHint(</TT></B></FONT>entry_ref *<I><FONT  color=991122 face=HELVETICA>app_ref</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetAppHint(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>app_ref</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions get and set the "app hint" for the object's application signature.  The app hint is a path that identifies the executable that should be used when launching an application that has this signature.  For example, when the Tracker needs to launch an app of type "application/YourAppHere", it asks the database for the application hint.  This hint is converted to an <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> before it is passed to the caller.  Of course, the path may not point to an application, or it might point to an application with the wrong signature (and so on)&mdash;that's why this is merely a hint.
+<P>
+<B><TT>GetAppHint()</TT></B> function initializes the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> to the hint recorded in the database; the argument must be allocated before it's passed in.
+<P>
+<B><TT><A HREF="#SetAppHint()">SetAppHint()</A></TT></B> copies the path corresponding to the <B><TT><A HREF="misc.html#entry_ref">entry_ref</A></TT></B> into the database.  <I><FONT  color=991122 face=HELVETICA>app_ref</I></FONT> should point to an executable file that has the same signature as this object's MIME type.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. The ref was successfully retrieved or set. 
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMimeType is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. (Set) The ref is uninitialized.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="NodeInfo.html#GetAppHint()">BNodeInfo::GetAppHint()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="GetAttrInfo()"></A>GetAttrInfo()
+, 
+<A NAME="SetAttrInfo()"></A>SetAttrInfo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAttrInfo(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetAttrInfo(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>info</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions use a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> to get and set the list of attributes that are typically associated with files of the MIME type.  The <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> must have the following fields:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field Name</TH>
+<TH>Type</TH>
+<TH>element[0..n]</TH>
+<TR>
+<TD>"attr:name"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Each element is the name of one attribute.</TD>
+<TR>
+<TD>"attr:public_name"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>Each element is the human-readable name of one attribute.</TD>
+<TR>
+<TD>"attr:type"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Each element is the type code for the corresponding attribute.</TD>
+<TR>
+<TD>"attr:public"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if the attribute is public, <B><TT>false</TT></B> if it's private.</TD>
+<TR>
+<TD>"attr:editable"</TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD><B><TT>true</TT></B> if the attribute should be user-editable, <B><TT>false</TT></B> if not.</TD>
+</TABLE>
+<P>
+You can actually have any fields you want; it's up to applications to determine which attributes they recognize and which they don't.
+<P>
+Each element in each field describes the next attribute.  If a file has three attributes, there should be three elements in each field, one per attribute.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>. No error.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>. Invalid file.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetFileExtensions()"></A>GetFileExtensions()
+, 
+<A NAME="SetFileExtensions()"></A>SetFileExtensions()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetFileExtensions(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>msg</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetFileExtensions(</TT></B></FONT>const <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>msg</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+The database associates a list of file extensions (".<I>xxx</I>..." filename appendages) with each file type.  If a file is otherwise untyped, clients of the database can figure out its type by matching the file's extension to the lists in the database.
+<P>
+These functions get and set the file extensions that are associated with the object's MIME type.
+<P>
+<UL>
+<LI>If you're getting the extensions, you'll find them copied into your BMessage's "extensions" field (the <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> must be allocated).  They're given as an indexed array of strings (<B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B>). 
+<P>
+<LI>Similarly, you pass in the extensions by adding strings to the message's "extensions" field.
+<P>
+<LI>The BMessage's <B><TT>what</TT></B> field is unimportant. 
+<P>
+</UL>
+<P>
+For example, to retrieve all the extensions that correspond to this object's MIME type, you would do the following:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage msg();
+&nbsp;&nbsp;&nbsp;uint32 i=0;
+&nbsp;&nbsp;&nbsp;char *ptr;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;if (mime.GetFileExtensions(&amp;msg) != B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/* Handle the error. */
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;while (true) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (msg.FindString("extensions", i++, &amp;ptr) != B_OK)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("> Extension:  %sn", ptr);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+A given extension can be associated with more than one MIME type.  
+<P>
+A <B><TT>NULL</TT></B> msg to <B><TT>SetFileExtensions()</TT></B> clears the type's extension list.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+<B><TT>SetFileExtensions()</TT></B> clobbers the existing set of extensions.  If you want to augment a type's extensions, you should retrieve the existing set, add the new ones, and <I>then</I> call <B><TT><A HREF="#SetFileExtensions()">SetFileExtensions()</A></TT></B>.
+<P>
+Also, there's no way to ask the database to give you a set of file types that map to a given extension.  To find a type for an extension, you have to get all the installed types with <B><TT><A HREF="#GetInstalledTypes()">GetInstalledTypes()</A></TT></B> and ask each one for its set of extensions.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The extensions were found or set.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMimeType is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to copy the extensions.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetIcon()"></A>GetIcon()
+, 
+<A NAME="SetIcon()"></A>SetIcon()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetIcon(</TT></B></FONT><A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>icon</I></FONT><B><TT><FONT  color=000022 size=+1>,</TT></B></FONT> icon_size <I><FONT  color=991122 face=HELVETICA>which</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetIcon(</TT></B></FONT>const <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>icon</I></FONT>, icon_size <I><FONT  color=991122 face=HELVETICA>which</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT><A HREF="#GetIcon()">GetIcon()</A></TT></B> and <B><TT><A HREF="#SetIcon()">SetIcon()</A></TT></B> get and set the icons that are associated (in the database) with this object's MIME type.  You specify which icon you want (large or small) by passing <B><TT>B_LARGE_ICON</TT></B> or <B><TT>B_MINI_ICON</TT></B> as the <I><FONT  color=991122 face=HELVETICA>which</I></FONT> argument.  The icon is passed in or returned through the <I><FONT  color=991122 face=HELVETICA>icon</I></FONT> argument.  The icon data is copied out of or into the <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> object.
+<P>
+The bitmap (if you're calling <B><TT>SetIcon()</TT></B>) or icon (if you're calling <B><TT>GetIcon()</TT></B>) must be the proper size: 32x32 for the large icon, 16x16 for the small one.  Additionally, the bitmap must be in the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space (8-bit color), or the application will crash.
+<P>
+If you want to erase the node's icon, pass <B><TT>NULL</TT></B> as the <I><FONT  color=991122 face=HELVETICA>icon</I></FONT> argument to <B><TT>SetIcon()</TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The icon was found or set.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMimeType is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The bitmap or icon wasn't the proper size.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetIconForType()"></A>GetIconForType()
+, 
+<A NAME="SetIconForType()"></A>SetIconForType()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetIconForType(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>file_type</I></FONT>, <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>icon</I></FONT><B><TT><FONT  color=000022 size=+1>,</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;icon_size <I><FONT  color=991122 face=HELVETICA>which</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetIconForType(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>file_type</I></FONT>, const <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> *<I><FONT  color=991122 face=HELVETICA>icon</I></FONT>, icon_size <I><FONT  color=991122 face=HELVETICA>which</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions get and set the icons that an application that has this object's MIME type as a signature uses to display the given file type.  <I><FONT  color=991122 face=HELVETICA>file_type</I></FONT> must be a valid MIME string.
+<P>
+The icon is passed in or returned through the <I><FONT  color=991122 face=HELVETICA>icon</I></FONT> argument:
+<P>
+<UL>
+<LI>If you're getting the icon, the <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> must be allocated; the icon data is copied into your <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> object.
+<P>
+<LI>If you're setting the icon, the bitmap must be the proper size: 32x32 for the large icon, 16x16 for the small one.   In <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> lingo, that's BRect(0, 0, 31, 31) and BRect(0, 0, 15, 15).
+<P>
+<LI>If you're setting the icon, the bitmap must be in the <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_CMAP8">B_CMAP8</A></TT></B> color space (8-bit color), or the application will crash.
+<P>
+<LI>You can remove an icon by passing <B><TT>NULL</TT></B> as the <I><FONT  color=991122 face=HELVETICA>icon</I></FONT> argument to <B><TT><A HREF="#SetIconForType()">SetIconForType()</A></TT></B>.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The icon was found or set.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMimeType is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  (<B><TT>Get</TT></B>) <B><TT>NULL</TT></B> <A HREF="../The%20Interface%20Kit/Bitmap.html#BBitmap">BBitmap</A> pointer, or <I><FONT  color=991122 face=HELVETICA>file_type</I></FONT> is invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  (<B><TT>Set</TT></B>)  The bitmap data isn't the proper size, or <I><FONT  color=991122 face=HELVETICA>file_type</I></FONT> is invalid.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetInstalledTypes()"></A>GetInstalledTypes()
+, 
+<A NAME="GetInstalledSupertypes()"></A>GetInstalledSupertypes()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>GetInstalledTypes(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>types</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>GetInstalledTypes(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>supertype</I></FONT>, <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>subtypes</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>GetInstalledSupertypes(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>supertypes</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These static functions retrieve all the file types that are currently installed in the database, all the installed subtypes for a given supertype, and all the installed supertypes.  The types are copied into the "types" field of the passed-in <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> (which must be allocated).
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The types were found.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The <I><FONT  color=991122 face=HELVETICA>supertype</I></FONT> string isn't valid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to copy the types.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetLongDescription()"></A>GetLongDescription()
+, 
+<A NAME="SetLongDescription()"></A>SetLongDescription()
+, 
+<A NAME="GetShortDescription()"></A>GetShortDescription()
+, 
+<A NAME="SetShortDescription()"></A>SetShortDescription()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetLongDescription(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>description</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetLongDescription(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>description</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetShortDescription(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>description</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetShortDescription(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>description</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Each file type has a couple of human-readable description strings associated with it.  Neither description string may be longer than <B><TT>B_MIME_TYPE_LENGTH</TT></B> characters.
+<P>
+These functions get and set the long and short description strings.  The <B><TT>Get</TT></B> functions copy the string into the argument (which must be allocated).  The <B><TT>Set</TT></B> functions copy the string that the argument points to.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The description was found or set.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMimeType is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  (<B><TT>Set</TT></B>) <I><FONT  color=991122 face=HELVETICA>description</I></FONT> is too long.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to copy the description.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetPreferredApp()"></A>GetPreferredApp()
+, 
+<A NAME="SetPreferredApp()"></A>SetPreferredApp()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetPreferredApp(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, app_verb <I><FONT  color=991122 face=HELVETICA>verb</I></FONT> <FONT  face=HELVETICA>= B_OPEN</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetPreferredApp(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, app_verb <I><FONT  color=991122 face=HELVETICA>verb</I></FONT> <FONT  face=HELVETICA>= B_OPEN</FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions get and set the "preferred app" for this object's MIME type.  The preferred app is the application that's used to access a file when, for example, the user double-clicks the file in a Tracker window:  Unless the file identifies (in its attributes) a "custom" preferred app, the Tracker will ask the File Type database for the preferred app that's associated with the file's type.
+<P>
+<UL>
+<LI>The preferred app is identified by <I><FONT  color=991122 face=HELVETICA>signature</I></FONT>, a MIME string.  A value of <B><TT>NULL</TT></B> indicates that there is no preferred app for the MIME type.
+<P>
+<LI>The <B><TT>app_verb</TT></B> argument specifies the type of access; currently, the only <B><TT>app_verb</TT></B> is <B><TT>B_OPEN</TT></B>.
+<P>
+</UL>
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The preferred app was found or set.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMimeType is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B> (<B><TT>Set...</TT></B> only).  The signature argument is too long (greater than <B><TT>B_MIME_TYPE_LENGTH</TT></B>).
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetShortDescription()   see <A HREF="#GetLongDescription()">GetLongDescription()</A></H3>
+<P>
+<HR>
+<H3>GetSupertype()   see  <A HREF="#Type()">Type()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetSupportingApps()"></A>GetSupportingApps()
+, 
+<A NAME="GetWildcardApps()"></A>GetWildcardApps()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetSupportingApps(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>msg</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>GetWildcardApps(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>msg</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These functions retrieve a list of applications (identified by signature) that know how to handle the object's MIME type (for <B><TT>GetSupportingApps()</TT></B>) or all MIME types (<B><TT>GetWildCardApps()</TT></B>). The information is returned in <I><FONT  color=991122 face=HELVETICA>msg</I></FONT>, which must be allocated by the caller.  The <I><FONT  color=991122 face=HELVETICA>msg</I></FONT> format is:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Field name</TH>
+<TH>Type</TH>
+<TH>Meaning</TH>
+<TR>
+<TD>"applications"</TD>
+<TD>B_STRING_TYPE
+<br>
+(array)</TD>
+<TD>The signatures of the application that know how to handle the MIME type.  The first <I>n</I> applications (where <I>n</I> is defined by "be:sub", below) can handle the full type (supertype <I>and</I> subtype).  The rest of the applications in the array handle the supertype only. </TD>
+<TR>
+<TD>"be:sub"</TD>
+<TD>B_INT32_TYPE</TD>
+<TD>The number of applications in the "applications" array that can handle the object's full MIME type.  These applications are listed first in the array.  This field is omitted if the object represents a supertype only.</TD>
+<TR>
+<TD>"be:super"</TD>
+<TD>B_INT32_TYPE</TD>
+<TD>The number of applications in the "applications" array that can handle the object's supertype (not counting those that can handle the full type).  These applications are listed after the full-MIME type supporters.  By definition, the <B><TT>GetWildcardApps()</TT></B> function never returns supertype-only apps.</TD>
+</TABLE>
+<P>
+For example, here we print the signatures of the apps that can handle "text/plain" and "text" (without checking for errors):
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;BMessage msg();
+&nbsp;&nbsp;&nbsp;BMimeType mime("text/plain");
+&nbsp;&nbsp;&nbsp;int32 subs=0, supers=0, n, hold;
+&nbsp;&nbsp;&nbsp;char *ptr;
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;mime.GetSupportingApps(&amp;msg);
+&nbsp;&nbsp;&nbsp;msg.FindInt32("be:subs", &amp;subs);
+&nbsp;&nbsp;&nbsp;msg.FindInt32("be:supers", &amp;supers);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;for (n = 0; n &lt; subs; n++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg.FindString("applications", n, &amp;ptr);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Full support: %sn", ptr);
+&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;hold = n;
+&nbsp;&nbsp;&nbsp;for (n = 0; n &lt; supers; n++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;msg.FindString("applications", n+hold, &amp;ptr);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Supertype support: %sn", ptr);
+&nbsp;&nbsp;&nbsp;}</PRE>
+<P>
+If an application supports both the full type <I>and</I> the supertype, it will be listed only once in the "applications" array (as a full supporter).
+<P>
+To set the types that an application supports, use <B><TT>BAppFileInfo::SetSupportedTypes()</TT></B>. To tell an app to support all types, add "application/octet-stream" to its supported-types list.
+<P>
+<B>See also:  </B>
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The signatures were found.
+<P>
+<UL>
+<LI><B><TT>B_BAD_PORT</TT></B>.  No <B><TT><A HREF="../The%20Application%20Kit/Application.html#be_app">be_app</A></TT></B> found.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  The BMimeType is uninitialized.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Insufficient memory to copy the signatures.
+<P>
+</UL>
+<P>
+<HR>
+<H3>GetWildcardApps()   see  <A HREF="#GetSupportingApps()">GetSupportingApps()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the status of the most recent construction or <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B> call.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><I>See</I> <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="Install()"></A>Install()
+, 
+<A NAME="Delete()"></A>Delete()
+, 
+<A NAME="IsInstalled()"></A>IsInstalled()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Install(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Delete(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsInstalled(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>Install()</TT></B> adds the object's MIME type to the File Type database.  <B><TT>Delete()</TT></B> removes the type from the database.  <B><TT>IsInstalled()</TT></B> tells you if the type is currently installed.  
+<P>
+None of these functions affect the object's copy of the MIME type; for instance, deleting a MIME type from the database <I>doesn't</I> uninitialize the object.
+<P>
+<b>RETURN CODES</b>
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The type was successfully added or deleted.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  The object is uninitialized.
+<P>
+</UL>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+Currently, <B><TT><A HREF="#Install()">Install()</A></TT></B> may return a random value if the object is already installed.  To avoid confusion, you should call <B><TT>IsInstalled()</TT></B> first:
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<PRE>&nbsp;&nbsp;&nbsp;if (!mime.IsInstalled())
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mime.Install();</PRE>
+<P>
+<HR>
+<H3>IsInstalled()   see  <A HREF="#Install()">Install()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="IsValid()"></A>IsValid()
+, 
+<A NAME="IsSupertypeOnly()"></A>IsSupertypeOnly()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static bool I<B><TT><FONT  color=000022 size=+1>sValid(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>MIME_string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsValid(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsSupertypeOnly(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The static <B><TT><A HREF="#IsValid()">IsValid()</A></TT></B> tests its argument for MIME validity.  See "<a href="#Valid%20MIME%20Strings">Valid MIME Strings</a>" for the rules.  The non-static version checks the validity of the object's MIME string.
+<P>
+<B><TT><A HREF="#IsSupertypeOnly()">IsSupertypeOnly()</A></TT></B> returns <B><TT>true</TT></B> if the object's MIME string doesn't include a subtype.  
+<P>
+<HR>
+<H3>SetAppHint()   see  <A HREF="#GetAppHint()">GetAppHint()</A></H3>
+<P>
+<HR>
+<H3>SetAttrInfo()   see  <A HREF="#GetAttrInfo()">GetAttrInfo()</A></H3>
+<P>
+<HR>
+<H3>GetFileExtensions() </H3>
+<P>
+<HR>
+<H3>GetIcon() </H3>
+<P>
+<HR>
+<H3>GetIconForType() </H3>
+<P>
+<HR>
+<H3>GetLongDescription() </H3>
+<P>
+<HR>
+<H3>GetPreferredApp() </H3>
+<P>
+<HR>
+<H3>GetLongDescription() </H3>
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+, 
+<A NAME="Unset()"></A>Unset()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>MIME_string</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Unset(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>SetTo()</TT></B> initializes this BMimeType object to represent <I><FONT  color=991122 face=HELVETICA>MIME_string</I></FONT>.  The object's previous MIME string is freed; the argument is then copied.  The argument can be a full supertype/subtype string, or simply a supertype.  In any case, it must pass the validity test described in <a href="#Valid%20MIME%20Strings">"Valid MIME Strings"</a>.
+<P>
+<B><TT>Unset()</TT></B> frees the object's current MIME string, and sets the object's status to <B><TT>B_NO_INIT<A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">GetLongDescription() </A></TT></B>.
+<P>
+<b>RETURN CODES</b>
+<P>
+These return codes are also returned by the <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> function.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The initialization was successful.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_INIT">B_NO_INIT</A></TT></B>.  <I><FONT  color=991122 face=HELVETICA>MIME_string</I></FONT> is <B><TT>NULL</TT></B> or invalid.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to allocate a copy of the argument.
+<P>
+</UL>
+<P>
+<B>See also:  <TT><A HREF="#InitCheck()">InitCheck()</A>
+<P>
+</TT></B><HR>
+<H3>
+<A NAME="StartWatching()"></A>StartWatching()
+, 
+<A NAME="StopWatching()"></A>StopWatching()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>StartWatching(</TT></B></FONT><A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+
+<TR><TD>
+static status_t <B><TT><FONT  color=000022 size=+1>StopWatching(</TT></B></FONT><A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>StartWatching()</TT></B> initiates the MIME monitor, which is used for keeping track of changes to the File Types database.  Change notifications will be sent via the <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT> in a <A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> with the <I><FONT  color=991122 face=HELVETICA>what</I></FONT> field set to <B><TT>B_META_MIME_CHANGED</TT></B>.
+<P>
+Notification messages have the following fields:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Name</TH>
+<TH>Type</TH>
+<TH>Description</TH>
+<TR>
+<TD>be:which</TD>
+<TD>int32</TD>
+<TD>Change bitmap (see below for a list)</TD>
+<TR>
+<TD>be:type</TD>
+<TD>string</TD>
+<TD>MIME type whose database information was changed</TD>
+<TR>
+<TD>be:extra_type</TD>
+<TD>string</TD>
+<TD>Extra MIME field used for some notifications</TD>
+<TR>
+<TD>be:large_icon</TD>
+<TD>bool</TD>
+<TD>For notifications involving icon changes,<B><TT> true</TT></B> if the large icon was changed; <B><TT>false</TT></B> otherwise</TD>
+</TABLE>
+<P>
+"be:which" is a bitmask describing the changes made to the database for MIME type "be:type".  The following masks are defined along with the BMimeType methods used to effect the changes they signal:
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>B_ICON_CHANGED</TT></B></TD>
+<TD><B><TT><A HREF="#SetIcon()">SetIcon()</A></TD>
+<TR>
+<TD>B_PREFERRED_APP_CHANGED</TT></B></TD>
+<TD><B><TT><A HREF="#SetPreferredApp()">SetPreferredApp()</A></TD>
+<TR>
+<TD>B_ATTR_INFO_CHANGED</TT></B></TD>
+<TD><B><TT><A HREF="#SetAttrInfo()">SetAttrInfo()</A></TD>
+<TR>
+<TD>B_FILE_EXTENSIONS_CHANGED</TT></B></TD>
+<TD><B><TT><A HREF="#SetFileExtensions()">SetFileExtensions()</A></TD>
+<TR>
+<TD>B_SHORT_DESCRIPTION_CHANGED</TT></B></TD>
+<TD><B><TT><A HREF="#SetShortDescription()">SetShortDescription()</A></TD>
+<TR>
+<TD>B_LONG_DESCRIPTION_CHANGED</TT></B></TD>
+<TD><B><TT><A HREF="#SetLongDescription()">SetLongDescription()</A></TD>
+<TR>
+<TD>B_ICON_FOR_TYPE_CHANGED</TT></B></TD>
+<TD><B><TT><A HREF="#SetIconForType()">SetIconForType()</A></TD>
+<TR>
+<TD>B_APP_HINT_CHANGED</TT></B></TD>
+<TD><B><TT><A HREF="#SetAppHint()">SetAppHint()</A></TD>
+</TABLE></TT></B>
+<P>
+The BMimeType methods are given for illustrative purposes only &ndash;&ndash; anything that alters the database for a MIME type will also trigger a notification message.  The "be:extra_type" field is used only in the <B><TT>B_ICON_FOR_TYPE_CHANGED</TT></B> message and indicates the application signature for which the change is valid.
+<P>
+<B><TT>StopWatching()</TT></B> terminates the MIME monitor previously initiated for the given BMessenger.
+<P>
+<HR>
+<H3>StartWatching() </H3>
+<P>
+<HR>
+<H3>
+<A NAME="Type()"></A>Type()
+, 
+<A NAME="GetSupertype()"></A>GetSupertype()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const char *<B><TT><FONT  color=000022 size=+1>Type(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetSupertype(</TT></B></FONT>BMimeType <I><FONT  color=991122 face=HELVETICA>*super</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>Type()</TT></B> returns a pointer to the object's MIME string.  If the object isn't initialized, this returns a pointer to <B><TT>NULL</TT></B>.
+<P>
+<B><TT>GetSupertype()<A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">StartWatching() </A></TT></B> initializes the argument with this object's supertype.  (You can then call <B><TT>GetType()</TT></B> on the argument to see the supertype.)  <I><FONT  color=991122 face=HELVETICA>super</I></FONT> must be allocated before it's passed in.  If this object isn't initialized, <I><FONT  color=991122 face=HELVETICA>super</I></FONT> is uninitialized.
+<P>
+<b>RETURN CODES</b>
+<P>
+The errors apply to <B><TT>GetSupertype()</TT></B> only.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  Everything's fine.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  This object isn't initialized.
+<P>
+</UL>
+<P>
+<HR>
+<H3>SetTo() </H3>
+<P>
+<HR>
+<H2>
+<A NAME="Operators"></A><FONT SIZE=6>O</FONT>perators
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="=="></A>==
+ (comparison)</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>operator</TT></B></FONT><B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const BMimeType &amp;<I><FONT  color=991122 face=HELVETICA>type</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>operator</TT></B></FONT><B><TT><FONT  color=000022 size=+1>==(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>type</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Two MIME types are equal if they are both initialized to the same string (without regard to case).
+<P>
+<HR>
+<H2>
+<A NAME="C%20Functions"></A><FONT SIZE=6>C</FONT> <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="create_app_meta_mime"></A>create_app_meta_mime
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>create_app_meta_mime</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>recursive</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>synchronous</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int <I><FONT  color=991122 face=HELVETICA>force</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates an entry in the File Types database for a specific application, or for all applications:
+<P>
+<UL>
+<LI>To create an entry for a specific application, pass the path to the application in <I><FONT  color=991122 face=HELVETICA>path</I></FONT>.  Information is taken from the app and written into the database.
+<P>
+<LI>To create entries for all applications, pass a <B><TT>NULL</TT></B> path.
+<P>
+</UL>
+<P>
+The <I><FONT  color=991122 face=HELVETICA>recursive</I></FONT> flag is currently unused.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>synchronous</I></FONT> is <B><TT>true</TT></B>, the function doesn't return until the operation is complete.  If it's <B><TT>false</TT></B>, the function returns immediately while the operation continues in the background.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>force</I></FONT> is <B><TT>true</TT></B>, entries are created even if they already exist.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT>B_OK<A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">SetTo() </A></TT></B>.  No error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_BAD_VALUE">B_BAD_VALUE</A></TT></B>.  You can't request recursive operation when a path is specified.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="get_device_icon"></A>get_device_icon
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>get_device_icon</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>device</I></FONT>, void *<I><FONT  color=991122 face=HELVETICA>icon</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>size</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Returns</TT></B> the icons that are associated with the given device.  You specify which icon you want (large or small) by passing 32 or 16 as the <I><FONT  color=991122 face=HELVETICA>size</I></FONT> argument.  The icon is then returned through the <I><FONT  color=991122 face=HELVETICA>icon</I></FONT> argument.
+<P>
+<B>See also:  <TT><A HREF="Volume.html#GetIcon()">BVolume::GetIcon()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="update_mime_info"></A>update_mime_info
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int <B><TT><FONT  color=000022 size=+1>update_mime_info</TT></B></FONT><B><TT><FONT  color=000022 size=+1>(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>path</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>recursive</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>synchronous</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int <I><FONT  color=991122 face=HELVETICA>force</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Updates the MIME information for one or more files, specified by <I><FONT  color=991122 face=HELVETICA>path</I></FONT>.  If <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is <B><TT>NULL</TT></B>, all files are scanned  recursively, and the value of <I><FONT  color=991122 face=HELVETICA>recursive</I></FONT> is ignored.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>recursive</I></FONT> is <B><TT>true</TT></B> and <I><FONT  color=991122 face=HELVETICA>path</I></FONT> indicates a directory, the directory tree contained by <I><FONT  color=991122 face=HELVETICA>path</I></FONT> is scanned, with every file in the tree being updated; otherwise, just the file indicated by path is updated.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>synchronous</I></FONT> is <B><TT>true</TT></B>, <B><TT>update_mime_info()</TT></B> doesn't return until the update operation is complete.  If it's <B><TT>false</TT></B>, <B><TT>update_mime_info()</TT></B> runs asynchronously, and returns immediately while updating continues in the background.
+<P>
+If <I><FONT  color=991122 face=HELVETICA>force</I></FONT> is <B><TT>true</TT></B>, files are updated even if they've been updated already.
+<P>
+If an error occurs, <B><TT>update_mime_info()</TT></B> returns a negative error code; otherwise, it returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

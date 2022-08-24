@@ -1,0 +1,383 @@
+<HTML><HEAD><TITLE>The Input Server: BInputServerMethod</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BInputServerMethod"></A>BInputServerMethod
+</H1>
+<P>
+Derived from:  <A HREF="InputServerFilter.html#BInputServerFilter">BInputServerFilter</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/add-ons/input_server/InputServerMethod.h">be/add-ons/input_server/InputServerMethod.h</A>
+<P>
+Library:  libbe.so
+<P>
+Allocation:  By the Input Server only
+<P>
+<H6><A HREF="InputServerMethod.summary.html"><i>Summary</i></A></H6>
+<P>
+BInputServerMethod is a base class for <I>input methods</I>; these are instances of BInputServerMethod that act as an interface between the user and languages using character sets that can&gt;t be easily represented on standard keyboards, such as the Japanese input method that comes with BeOS.
+<P>
+Input methods generally handle <B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> messages in their <B><TT><A HREF="InputServerFilter.html#Filter()">Filter()</A></TT></B> function (see BInputServerFilter), keeping some sort of state around to translate these standard keyboard messages into new <B><TT><A HREF="../Messages/GeneralMessages.html#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> messages representing another character set.  An input method can handle any input event, they&gt;re not limited to keyboard events.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+Writing an input method is an involved process, even though the BInputMethod protocol is relatively simple.  If you&gt;re working on an input method, please feel free to contact Be Developer Technical Support (devsupport@be.com) for additional information.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Input%20Method%20Events"></A>Input Method Events
+</H3>
+<P>
+Input methods insert <B><TT><A HREF="../Messages/GeneralMessages.html#B_INPUT_METHOD_EVENT">B_INPUT_METHOD_EVENT</A></TT></B> messages (using their <B><TT><A HREF="#EnqueueMessage()">EnqueueMessage()</A></TT></B> function) into the Input Server&gt;s event stream.  These messages let <A HREF="../Release%20Notes/InterfaceKit.html#BView">BView</A> subclasses work together with your input method to create a seamless experience for the user.
+<P>
+Each <B><TT><A HREF="../Messages/GeneralMessages.html#B_INPUT_METHOD_EVENT">B_INPUT_METHOD_EVENT</A></TT></B> message contains a <I><FONT  color=991122 face=HELVETICA>be:opcode</I></FONT> field (an int32 value) indicating the kind of event:
+<P>
+<UL>
+<LI><B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_STARTED">B_INPUT_METHOD_STARTED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_STOPPED">B_INPUT_METHOD_STOPPED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_CHANGED">B_INPUT_METHOD_CHANGED</A>
+<P>
+</TT></B><LI><B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_LOCATION_REQUEST">B_INPUT_METHOD_LOCATION_REQUEST</A>
+<P>
+</TT></B></UL>
+<P>
+<B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_STARTED">B_INPUT_METHOD_STARTED</A></TT></B> indicates that a new input transaction has begun.  Add a <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> in the <I><FONT  color=991122 face=HELVETICA>be:reply_to</I></FONT> field; the receiver of the message will use this messenger to communicate with you during the transaction.
+<P>
+<B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_STOPPED">B_INPUT_METHOD_STOPPED</A></TT></B> indicates that the transaction is over.
+<P>
+In between the <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_STARTED">B_INPUT_METHOD_STARTED</A></TT></B> and <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_STOPPED">B_INPUT_METHOD_STOPPED</A></TT></B> messages, you&gt;ll send <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_CHANGED">B_INPUT_METHOD_CHANGED</A></TT></B> and <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_LOCATION_REQUEST">B_INPUT_METHOD_LOCATION_REQUEST</A></TT></B> messages as the transaction proceeds.
+<P>
+<B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_CHANGED">B_INPUT_METHOD_CHANGED</A></TT></B> does most of the work in an input transaction; add the following important fields:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH><B>Entry</B></TH>
+<TH>Type</TH>
+<TH>Description</TH>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>be:string</I></FONT></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_STRING_TYPE">B_STRING_TYPE</A></TT></B></TD>
+<TD>The text the user is currently entering; the receiver will display it at the current insertion point.  BTextView also highlights the text in blue to show that it&gt;s part of a transitory transaction.</TD>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>be:selection</I></FONT></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>A pair of <B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B> offsets into the <I><FONT  color=991122 face=HELVETICA>be:string</I></FONT> if part of <I><FONT  color=991122 face=HELVETICA>be:string</I></FONT> is current selected.  <A HREF="../Release%20Notes/InterfaceKit.html#BTextView">BTextView</A> highlights this selection in red instead of drawing it in blue.</TD>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>be:clause_start</I></FONT></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Zero or more offsets into the <I><FONT  color=991122 face=HELVETICA>be:string</I></FONT> for handling languages (such as Japanese) that separate a sentence or phrase into numerous clauses.  An equal number of <I><FONT  color=991122 face=HELVETICA>be:clause_start</I></FONT> and <I><FONT  color=991122 face=HELVETICA>be:clause_end</I></FONT> pairs delimit these clauses; <A HREF="../Release%20Notes/InterfaceKit.html#BTextView">BTextView</A> separates the blue/red highlighting wherever there is a clause boundary.</TD>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>be:clause_end</I></FONT></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Zero or more offsets into <I><FONT  color=991122 face=HELVETICA>be:string</I></FONT>; there must be as many <I><FONT  color=991122 face=HELVETICA>be:clause_end</I></FONT> entries as there are <I><FONT  color=991122 face=HELVETICA>be:clause_start</I></FONT>.</TD>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>be:confirmed</I></FONT></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_BOOL_TYPE">B_BOOL_TYPE</A></TT></B></TD>
+<TD>True when the user has entered and "confirmed" the current string and wishes to end the transaction.  <A HREF="../Release%20Notes/InterfaceKit.html#BTextView">BTextView</A> unhighlights the blue/red text and waits for a <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_STOPPED">B_INPUT_METHOD_STOPPED</A></TT></B> (to close the transaction) or another <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_CHANGED">B_INPUT_METHOD_CHANGED</A></TT></B> (to start a new transaction immediately).</TD>
+</TABLE>
+<P>
+<B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_LOCATION_REQUEST">B_INPUT_METHOD_LOCATION_REQUEST</A></TT></B> is the input method&gt;s way of asking for the on-screen location of each character in <I><FONT  color=991122 face=HELVETICA>be:string</I></FONT>.  This information can be used by the input method to pop up additional windows giving the user an opportunity to select characters from a list or anything else that makes sense.  When you send a <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_LOCATION_REQUEST">B_INPUT_METHOD_LOCATION_REQUEST</A></TT></B>, the receiver will reply to the <I><FONT  color=991122 face=HELVETICA>be:reply_to</I></FONT> messenger (that you sent in your <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_STARTED">B_INPUT_METHOD_STARTED</A></TT></B> message) with a <B><TT><A HREF="../Messages/GeneralMessages.html#B_INPUT_METHOD_EVENT">B_INPUT_METHOD_EVENT</A></TT></B> message, filling in the following fields:
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Entry</TH>
+<TH>Type</TH>
+<TH>Description</TH>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>be:opcode</I></FONT></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_INT32_TYPE">B_INT32_TYPE</A></TT></B></TD>
+<TD>Set to <B><TT><A HREF="InputServerMessages.html#B_INPUT_METHOD_LOCATION_REQUEST">B_INPUT_METHOD_LOCATION_REQUEST</A></TT></B>.</TD>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>be:location_reply</I></FONT></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_POINT_TYPE">B_POINT_TYPE</A></TT></B></TD>
+<TD>The co-ordinates of each character (there should be one <I><FONT  color=991122 face=HELVETICA>be:location_reply</I></FONT> for every character in <I><FONT  color=991122 face=HELVETICA>be:string</I></FONT>) relative to the display (not your view or your window).</TD>
+<TR>
+<TD><I><FONT  color=991122 face=HELVETICA>be:height_reply</I></FONT></TD>
+<TD><B><TT><A HREF="../The%20Support%20Kit/misc.html#B_FLOAT_TYPE">B_FLOAT_TYPE</A></TT></B></TD>
+<TD>The height of each character in <I><FONT  color=991122 face=HELVETICA>be:string</I></FONT>.</TD>
+</TABLE>
+<P>
+<HR>
+<H2>
+<A NAME="Creating"></A><FONT SIZE=6>C</FONT>reating
+</H2>
+<P>
+To create a new input method, you must:
+<P>
+<UL>
+<LI>create a subclass of BInputServerMethod
+<P>
+<LI>implement the <B><TT>instantiate_input_method()</TT></B> C function to create an instance of your BInputServerMethod subclass
+<P>
+<LI>compile the class and function as an add-on
+<P>
+<LI>install the add-on in one of the input method directories
+<P>
+</UL>
+<P>
+At boot time (or whenever the Input Server is restarted; see "Dynamic Loading"), the Input Server loads the add-ons it finds in the input method directories.  For each add-on it finds, the Server invokes <B><TT>instantiate_input_method()</TT></B> to get a pointer to the add-on&gt;s BInputServerMethod object.  After constructing the object, the Server calls <B><TT><A HREF="InputServerDevice.html#InitCheck()">InitCheck()</A></TT></B> to give the add-on a chance to bail out if the constructor failed.
+<P>
+<B><HR>
+<H2>
+<A NAME="Installing%20an%20Input%20Method"></A><FONT SIZE=6>I</FONT>nstalling an <FONT SIZE=6>I</FONT>nput <FONT SIZE=6>M</FONT>ethod
+</H2>
+<P>
+</B>The input server looks for input methods in the "<B>input_server/methods</B>" subdirectories of <B><TT>B_BEOS_ADDONS_DIRECTORY</TT></B>, <B><TT>B_COMMON_ADDONS_DIRECTORY,</TT></B> and <B><TT>B_USER_ADDONS_DIRECTORY</TT></B>.  
+<P>
+<UL>
+<LI>You can install your input devices in the latter two directories&mdash;i.e. those under <B><TT>B_COMMON_ADDONS_DIRECTORY</TT></B>, and <B><TT>B_USER_ADDONS_DIRECTORY</TT></B>.  
+<P>
+<LI>The <B><TT>B_BEOS_ADDONS_DIRECTORY</TT></B> is reserved for add-ons that are supplied by the BeOS. 
+<P>
+</UL>
+<P>
+<HR>
+<H2>
+<A NAME="Hook%20Functions"></A><FONT SIZE=6>H</FONT>ook <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<UL>
+<LI><B><TT><A HREF="#MethodActivated()">MethodActivated()</A>
+<P>
+</TT></B></UL>
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BInputServerMethod()"></A>BInputServerMethod()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BInputServerMethod(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>, const uchar *<I><FONT  color=991122 face=HELVETICA>icon</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new BInputServerMethod object.  You can initialize the object&mdash;set initial values, spawn threads, etc.&mdash;either here or in the <B><TT><A HREF="InputServerDevice.html#InitCheck()">InitCheck()</A></TT></B> function, which is called immediately after the constructor.
+<P>
+<I><FONT  color=991122 face=HELVETICA>name</I></FONT> is a textual name describing the input method, and <I><FONT  color=991122 face=HELVETICA>icon</I></FONT> is the raw data for a 16x16 8-bit icon built from the standard BeOS palette.  This <I><FONT  color=991122 face=HELVETICA>name</I></FONT> and <I><FONT  color=991122 face=HELVETICA>icon</I></FONT> will be displayed in the input method menu (the little keyboard icon in the Deskbar).  When the user selects your input method from the menu, your <B><TT><A HREF="#MethodActivated()">MethodActivated()</A></TT></B> function is called.
+<P>
+<HR>
+<H3>
+<A NAME="~BInputServerMethod()"></A>~BInputServerMethod()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>~BInputServerMethod()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Deletes the BInputServerMethod object.  The destructor is invoked by the Input Server only&mdash;you never delete a BInputServerMethod object from your own code.  If this object has spawned its own threads or allocated memory on the heap, it must clean up after itself here.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="EnqueueMessage()"></A>EnqueueMessage()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>EnqueueMessage(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>message</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Inserts the specified <I><FONT  color=991122 face=HELVETICA>message</I></FONT> into the Input Server&gt;s event queue; the message continues down-stream from this point, passing through additional active input methods and input filters on its way to the App Server.
+<P>
+<HR>
+<H3>
+<A NAME="MethodActivated()"></A>MethodActivated()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t MethodActivated(bool <I><FONT  color=991122 face=HELVETICA>active</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The MethodActivated() hook function is invoked by the Input Server when the user activates your input method (<I><FONT  color=991122 face=HELVETICA>active</I></FONT> is true) or deactivates it (<I><FONT  color=991122 face=HELVETICA>active</I></FONT> is false).  This is your chance to activate any helper threads or loopers to the fact that you&gt;ll be handling input events soon.
+<P>
+Return <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B> if that&gt;s OK, or something else if it&gt;s not.  The default implementation returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="SetName()"></A>SetName()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t SetName(const char *<I><FONT  color=991122 face=HELVETICA>name</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Changes your input method&gt;s name, as found in the input method menu of the Deskbar.
+<P>
+The Input Server makes a copy of <I><FONT  color=991122 face=HELVETICA>name</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="SetIcon()"></A>SetIcon()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t SetIcon(const uchar *<I><FONT  color=991122 face=HELVETICA>icon</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Changes your input method&gt;s icon, as found in the input method menu of the Deskbar.  icon should be raw data for a 16x16 8-bit icon built from the standard BeOS palette.
+<P>
+The Input Server makes a copy of <I><FONT  color=991122 face=HELVETICA>icon</I></FONT>.
+<P>
+<HR>
+<H3>
+<A NAME="SetMenu()"></A>SetMenu()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t SetMenu(const <A HREF="../Release%20Notes/InterfaceKit.html#BMenu">BMenu</A> *<I><FONT  color=991122 face=HELVETICA>menu</I></FONT>, const <A HREF="../The%20Application%20Kit/Messenger.html#BMessenger">BMessenger</A> <I><FONT  color=991122 face=HELVETICA>target</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Lets you assign a <I><FONT  color=991122 face=HELVETICA>menu</I></FONT> to your input method&gt;s entry in the input method menu of the Deskbar.  Messages generated by the menu are sent to <I><FONT  color=991122 face=HELVETICA>target</I></FONT>.
+<P>
+Passing a <B><TT>NULL</TT></B> menu disables your input method&gt;s menu.
+<P>
+You retain ownership of <I><FONT  color=991122 face=HELVETICA>menu</I></FONT>; be careful not to delete it while the Input Server is still using it.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Input Server Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Input%20Server%20Master%20Index.html"><FONT face=HELVETICA>The Input Server Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

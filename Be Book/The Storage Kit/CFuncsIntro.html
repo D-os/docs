@@ -1,0 +1,63 @@
+<HTML><HEAD><TITLE>The Storage Kit: Global C Functions</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Global%20C%20Functions"></A>Global C Functions
+</H1>
+<P>
+The next four sections document the straight C interface to attributes, indices, queries, and file system information.  Technically, these functions are part of the Kernel Kit&mdash;their definitions live in header files in be/kernel, and their code is in <B>libroot.so</B>.
+<P>
+These functions use a global error variable (an integer), called <B><TT>errno</TT></B>, to register errors.  You can look at the <B><TT>errno</TT></B> value directly in your code after a file system function fails.  Alternatively, you can use the <B><TT>errno()</TT></B> function which prints, to standard error, its argument followed by a system-generated string that describes the current state of <B><TT>errno</TT></B>. 
+<P>
+<UL>
+<LI>Each thread maintains its own <B><TT>errno</TT></B> variable.
+<P>
+<LI><B><TT>errno</TT></B> is only set if there's an error&mdash;it never indicates success.
+<P>
+<LI><B><TT>errno</TT></B> is never cleared.  If call A fails and then you call B, C, and D, <B><TT>errno</TT></B> will still record the error from A.
+<P>
+</UL>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Storage Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Storage%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Storage Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

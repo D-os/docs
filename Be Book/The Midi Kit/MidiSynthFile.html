@@ -1,0 +1,546 @@
+<HTML><HEAD><TITLE>The Midi Kit: BMidiSynthFile</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BMidiSynthFile"></A>BMidiSynthFile
+</H1>
+<P>
+Derived from:  public <A HREF="MidiSynth.html#BMidiSynth">BMidiSynth</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/midi/MidiSynthFile.h">be/midi/MidiSynthFile.h</A>
+<P>
+Library:  libmidi.so
+<P>
+<H6><A HREF="MidiSynthFile.summary.html"><i>Summary</i></A></H6>
+<P>
+The BMidiSynthFile class reads a standard MIDI file and plays it on the General MIDI synthesizer.  Each BMidiSynthFile object can read (and play) only one file at a time.  To use a <A HREF="#BMidiSynthFile">BMidiSynthFile</A>, you create the object, load a MIDI file, and tell the object to  <B><TT><A HREF="#Start()">Start()</A></TT></B>:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;/* Create and initialize a BMidiSynthFile. */
+&nbsp;&nbsp;&nbsp;BMidiSynthFile midiSynthFile;
+&nbsp;&nbsp;&nbsp;entry_ref midiRef;
+&nbsp;&nbsp;&nbsp;get_ref_for_path("/boot/optional/midi/QuickBrownFox.mid", &amp;midiRef);
+&nbsp;&nbsp;&nbsp;midiSynthFile.LoadFile(&amp;midiRef);
+&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;/* Play the file. */
+&nbsp;&nbsp;&nbsp;midiSynthFile.Start();</PRE>
+<P>
+You should create a different BMidiSynthFile object for each MIDI file that you want to mix together into a single performance.  
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+In certain circumstances, a single BMidiSynthFile object can load and play more than one MIDI file at the same time, but you shouldn't rely on this feature.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>
+<A NAME="Loading%20and%20Playing"></A>Loading and Playing
+</H3>
+<P>
+When you call <B><TT><A HREF="#LoadFile()">LoadFile()</A></TT></B>, the BMidiSynthFile object automatically calls...
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;EnableInput(true, false)</PRE>
+<P>
+It then loads the file's MIDI data into the synthesizer, which loads all the instruments that are needed by the file.  If the file uses a lot of different instruments, loading the file can take some time.
+<P>
+When the file is finished playing (either because it's reached the end, or because you called <B><TT><A HREF="#Stop()">Stop()</A></TT></B>) the instruments are <I>not</I> unloaded.  This cuts the overhead if you play the file a second time.
+<P>
+<A NAME="19353:%20head2:%20The%20Run%20Thread%20and%20Function"></A>
+<P>
+<HR>
+<H3>
+<A NAME="The%20Run%20Thread%20and%20Function"></A>The Run Thread and Function
+</H3>
+<P>
+BMidiSynthFile is different from other <B><TT><A HREF="#Start()">Start()</A></TT></B>-able <A HREF="Midi.html#BMidi">BMidi</A> objects in that it doesn't have a run loop.  The MIDI data is parsed and realized in the synthesizer's subscriber thread (the thread that dumps data into the DAC stream).  The lack of a run loop  shouldn't affect the way you write your code, but you should be aware that the thread isn't there so you won't go looking for it while you're developing your app
+<P>
+Furthermore, BMidiSynthFile doesn't implement the <B><TT><A HREF="Midi.html#Run()">Run()</A></TT></B> function.  Starting and stopping the object's performance (activities that are normally handled in the <B><TT><A HREF="Midi.html#Run()">Run()</A> </TT></B>function) are handled by the synthesizer in its subscriber thread.  If you create a BMidiSynthFile subclass, <I>don't</I> try to resurrect the <B><TT><A HREF="Midi.html#Run()">Run()</A></TT></B> function&mdash;leave it as a no-op. 
+<P>
+As with the <A HREF="MidiSynth.html#BMidiSynth">BMidiSynth</A> class, the BMidiSynthFile MIDI hook implementations don't call the spray functions.  This means that you can't, for example, connect a BMidiSynthFile to a BMidiPort.  If you want to play a MIDI file out a MIDI port, use <A HREF="MidiStore.html#BMidiStore">BMidiStore</A> to represent and play the file.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BMidiSynthFile()"></A>BMidiSynthFile()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BMidiSynthFile(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Creates a new, empty BMidiSynthFile object.  Also constructs a BSynth object and assigns the object to the app-wide <B><TT>be_synth</TT></B> variable (if the object doesn't already exist).  To load a MIDI file into the BMidiSynthFile object, you must call <B><TT><A HREF="#LoadFile()">LoadFile()</A></TT></B> after construction.  Unlike plain <A HREF="MidiSynth.html#BMidiSynth">BMidiSynth</A> instances, however, you <I>don't</I> have to call <B><TT><A HREF="MidiSynth.html#EnableInput()">EnableInput()</A></TT></B> (<B><TT><A HREF="#LoadFile()">LoadFile()</A></TT></B> calls it for you).
+<P>
+<HR>
+<H3>
+<A NAME="~BMidiSynthFile()"></A>~BMidiSynthFile()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual<B><TT><FONT  color=000022 size=+1> </TT></B></FONT><B><TT><FONT  color=000022 size=+1>~BMidiSynthFile()
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Disconnects the object from the synthesizer, unloads the object's file (and all its instruments) and destroys the object.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="Duration()"></A>Duration()
+, 
+<A NAME="Position()"></A>Position()
+, 
+<A NAME="Seek()"></A>Seek()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>Duration(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>Position(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>ticks</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>Seek(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Duration()</TT></B> returns the length of the object's loaded data, measured in 64ths of a MIDI tick.
+<P>
+<B><TT>Position()</TT></B> sets the object's current position within the data.  
+<P>
+<B><TT>Seek()</TT></B> returns the object's current position.
+<P>
+If you want to reposition the "song pointer", you should do it as a percentage of the <B><TT>Duration()</TT></B> measurement.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/infoBullet.gif">
+					<TD><FONT FACE="helvetica">
+A MIDI tick is defined by the "MIDI Division" field at the bginning of every MIDI file; this value can be specified by the file as either "ppgn" (tempo-dependent) or frames:subframes per second (tempo-independent).  The <A HREF="MidiSynth.html#BMidiSynth">BMidiSynth</A>File class assumes that the division is tempo-independent.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT>Currently Position()</TT></B> always returns <B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  
+<P>
+<HR>
+<H3>EnableLooping()  see <A HREF="#Start()">Start()</A></H3>
+<P>
+<HR>
+<H3>GetMuteMap()  see <A HREF="#MuteTrack()">MuteTrack()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="GetPatches()"></A>GetPatches()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetPatches(</TT></B></FONT>int16 *<I><FONT  color=991122 face=HELVETICA>instruments</I></FONT>, int16 *<I><FONT  color=991122 face=HELVETICA>count</I><B><TT><A HREF="Midi.html#TempoChange(),SprayTempoChange()">)</A>
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Returns an array of the instruments numbers that are needed by the loaded MIDI file.  The <I><FONT  color=991122 face=HELVETICA>instruments</I></FONT> array should be 128 elements long (to be on the safe side), and must be allocated before it's passed in.  Upon return, function sets <I><FONT  color=991122 face=HELVETICA>count</I></FONT> to the number of instrument numbers that it placed in the array.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;int16 insts[128];
+&nbsp;&nbsp;&nbsp;int16 count;
+&nbsp;&nbsp;&nbsp;midiSynthFile.GetPatches(insts, &amp;count);
+&nbsp;&nbsp;&nbsp;for (int n = 0; n &lt; count; n++) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("The file uses instrument #%dn", insts[n]);</PRE>
+<P>
+<HR>
+<H3>GetSoloMap()  see <A HREF="#MuteTrack()">MuteTrack()</A></H3>
+<P>
+<HR>
+<H3>IsFinished()  see <A HREF="#Start()">Start()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="LoadFile()"></A>LoadFile()
+, 
+<A NAME="UnloadFile()"></A>UnloadFile()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>LoadFile(</TT></B></FONT>const entry_ref *<I><FONT  color=991122 face=HELVETICA>midiFileRef</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>UnloadFile(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+<B><TT>LoadFile()</TT></B> tells the object to load, into the synthesizer, the MIDI data from the <I><FONT  color=991122 face=HELVETICA>midiFileRef</I></FONT>.  The synthesizer caches the data for subsequent playback (which you initiate through <B><TT><A HREF="#Start()">Start()</A></TT></B>).  All instruments that are needed to play the file are loaded into the synthesizer, if they're aren't loaded already.  
+<P>
+<B><TT>UnloadFile()</TT></B> stops playback of the data that was loaded through this object (if it's playing), and flushes the data (removes it from the synthesizer).
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+In certain circumstances, a single BMidiSynthFile object can load and play more than one MIDI file at the same time, but you shouldn't rely on this feature.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The file was found and loaded.
+<P>
+<UL>
+<LI><B><TT>B_BAD_MIDI_DATA</TT></B>.  <I><FONT  color=991122 face=HELVETICA>midiFileRef</I></FONT> isn't a MIDI file, or contains corrupt data.
+<P>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_NO_MEMORY">B_NO_MEMORY</A></TT></B>.  Not enough memory to load the file.
+<P>
+<LI><I>Other POSIX errors</I>.  The file couldn't be opened or read.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="MuteTrack()"></A>MuteTrack()
+, 
+<A NAME="GetMuteMap()"></A>GetMuteMap()
+, 
+<A NAME="SoloTrack()"></A>SoloTrack()
+, 
+<A NAME="GetSoloMap()"></A>GetSoloMap()
+</H3>
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+These functions are broken; don't use them.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<HR>
+<H3>Pause()  see <A HREF="#Start()">Start()</A></H3>
+<P>
+<HR>
+<H3>Position()  see <A HREF="#Duration()">Duration()</A></H3>
+<P>
+<HR>
+<H3>Resume()  see <A HREF="#Start()">Start()</A></H3>
+<P>
+<HR>
+<H3>ScaleTempoBy()  see <A HREF="#Tempo()">Tempo()</A></H3>
+<P>
+<HR>
+<H3>Seek()  see <A HREF="#Duration()">Duration()</A></H3>
+<P>
+<HR>
+<H3>SetFileHook()  see <A HREF="#Start()">Start()</A></H3>
+<P>
+<HR>
+<H3>SetTempo()  see <A HREF="#Tempo()">Tempo()</A></H3>
+<P>
+<HR>
+<H3>SoloTrack()  see <A HREF="#MuteTrack()">MuteTrack()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Start()"></A>Start()
+, 
+<A NAME="Stop()"></A>Stop()
+, 
+<A NAME="Fade()"></A>Fade()
+, 
+<A NAME="Pause()"></A>Pause()
+, 
+<A NAME="Resume()"></A>Resume()
+, 
+<A NAME="IsFinished()"></A>IsFinished()
+, 
+<A NAME="EnableLooping()"></A>EnableLooping()
+, 
+<A NAME="SetFileHook()"></A>SetFileHook()
+, 
+<A NAME="synth_file_hook"></A>synth_file_hook
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual status_t <B><TT><FONT  color=000022 size=+1>Start(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+virtual void <B><TT><FONT  color=000022 size=+1>Stop(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Fade(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Pause(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>Resume(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+bool <B><TT><FONT  color=000022 size=+1>IsFinished(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>EnableLooping(</TT></B></FONT>bool <I><FONT  color=991122 face=HELVETICA>loop</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetFileHook(</TT></B></FONT>synth_file_hook <I><FONT  color=991122 face=HELVETICA>fileDone</I></FONT>, int32 <I><FONT  color=991122 face=HELVETICA>arg</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+typedef void (*<B><TT><FONT  color=000022 size=+1>synth_file_hook</TT></B></FONT>)(int32 <I><FONT  color=991122 face=HELVETICA>arg</I></FONT>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These functions control the object's performance.
+<P>
+<B><TT>Start()</TT></B> tells the synthesizer to start playing the object's loaded MIDI data beginning at the beginning.  Note that Start() does <I>not </I>halt a performance in progress; in other words, if the object is already playing its data, you'll get a second, performance while the first continues.
+<P>
+<B><TT>Stop()</TT></B> immediately halts the currently playing data.  <B><TT><A HREF="#Fade()">Fade()</A></TT></B> also stops playback, but is a bit more graceful:  It fades out the sound before killing it.
+<P>
+<TABLE  CELLPADDING=4>
+	<TR>
+		<TD>&nbsp;
+		<TD>
+			<HR NOSHADE>
+			<TABLE CELLPADDING=4>
+				<TR>
+					<TD VALIGN=TOP>
+						<IMG SRC="../art/warningBullet.gif">
+					<TD><FONT FACE="helvetica">
+BMidiSynthFile's <B><TT>Start()</TT></B> and <B><TT>Stop()</TT></B> replace the functions defined by BMidi; in particular, they spawn and control a "run" thread.  See &nbsp;<a href="#The%20Run%20Thread%20and%20Function%20on%20page33">"The Run Thread and Function" on page33</a> for more information.
+<P>
+						</FONT>			
+			</TABLE>
+			<HR NOSHADE>
+</TABLE>
+
+<P>
+<B><TT>Pause()</TT></B> and <B><TT>Resume()</TT></B> do as they say.  Note that when you resume playback, "old" notes are not regenerated, but exact timing is respected.  For example, lets say you have a MIDI file that contains two notes, one that starts at time 1.0 (seconds) and lasts for 10.0 seconds, and the other starts at time 9.0.  You start the file, then <B><TT><A HREF="#Pause()">Pause()</A></TT></B> at time 3.0; as expected, the first note stops.  After awhile, you <B><TT><A HREF="#Resume()">Resume()</A></TT></B>; there's a six second silence and then the second note plays.  
+<P>
+<B><TT>IsFinished()</TT></B> returns <B><TT>false</TT></B> if the object is currently playing (or paused during play).  Note that the function returns <B><TT>false</TT></B> before you load a file, and returns <B><TT>true</TT></B> after you've loaded a file but before you begin playing it.
+<P>
+<B><TT>EnableLooping(true)</TT></B> tells the object to replay the file when it reaches the end of the data.  If the argument is <B><TT>false</TT></B>, the file isn't replayed.  <B><TT>Stop()</TT></B> always shuts up playback, even if looping is enabled. 
+<P>
+<B><TT>SetFileHook()</TT></B> registers a function that's called when the object is finished playing (either because it ran out of data or <B><TT>Stop()</TT></B> was called.  <I><FONT  color=991122 face=HELVETICA>arg</I></FONT> is passed to the hook function as its sole argument.  Note that the hook function is called when the object is <I>completely</I> finished&mdash;it isn't called at the end of each pass through the data while looping is enabled.
+<P>
+<b>RETURN CODES</b>
+<P>
+Start() returns...
+<P>
+<UL>
+<LI>B_OK.  The data was successfully started.
+<P>
+<LI><B><TT>B_TOO_MANY_SONGS_PLAYING</TT></B>.  The synthesizer is too busy with other data streams.
+<P>
+</UL>
+<P>
+<HR>
+<H3>Stop()  see <A HREF="#Start()">Start()</A></H3>
+<P>
+<HR>
+<H3>synth_file_hook  see <A HREF="#Start()">Start()</A></H3>
+<P>
+<HR>
+<H3>
+<A NAME="Tempo()"></A>Tempo()
+, 
+<A NAME="SetTempo()"></A>SetTempo()
+, 
+<A NAME="ScaleTempoBy()"></A>ScaleTempoBy()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+int32 <B><TT><FONT  color=000022 size=+1>Tempo(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+void <B><TT><FONT  color=000022 size=+1>SetTempo(</TT></B></FONT>int32 <I><FONT  color=991122 face=HELVETICA>beatsPerMinute</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+<TR><TD>
+void<B><TT><FONT  color=000022 size=+1> ScaleTempoBy(</TT></B></FONT>double <I><FONT  color=991122 face=HELVETICA>scalar</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>Tempo()</TT></B> returns the tempo of the data, as read from the MIDI file (or as set by the other functions), in beats-per-minute.  The other two functions set the tempo: <B><TT>SetTempo()</TT></B> sets it absolutely in beats-per-minute, and <B><TT>ScaleTempoBy()</TT></B> scales the current tempo by the argument (<I><FONT  color=991122 face=HELVETICA>scalar</I></FONT> == 2.0 means the data is played twice as fast, <I><FONT  color=991122 face=HELVETICA>scalar</I></FONT>&nbsp;==&nbsp;.5 is twice as slow, and so on).
+<P>
+<HR>
+<H3>UnloadFile()  see <A HREF="#LoadFile()">LoadFile()</A></H3>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Midi Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Midi%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Midi Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

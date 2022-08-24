@@ -1,0 +1,2687 @@
+<HTML><br>
+<HEAD><TITLE>The Interface Kit: Global Variables, Constants, and Defined Types</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="Global%20Variables,%20Constants,%20and%20Defined%20Types"></A>Global Variables, Constants, and Defined Types
+</H1>
+<P>
+This section lists the various global variables, constants, and types that the Interface Kit defines.  
+<P>
+<HR>
+<H2>
+<A NAME="Global%20Variables"></A><FONT SIZE=6>G</FONT>lobal <FONT SIZE=6>V</FONT>ariables
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="System%20Fonts"></A>System Fonts
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/Font.h">be/interface/Font.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const <A HREF="Font.html#BFont">BFont</A> *<TT>
+<A NAME="System%20Fonts"></A>be_plain_font
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>const <A HREF="Font.html#BFont">BFont</A> *<TT>
+<A NAME="System%20Fonts"></A>be_bold_font
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>const <A HREF="Font.html#BFont">BFont</A> *<TT>
+<A NAME="System%20Fonts"></A>be_fixed_font
+<P>
+</TT>
+</TABLE></TABLE>
+
+<P>
+These global <A HREF="Font.html#BFont">BFont</A> objects are created when the <A HREF="../The%20Application%20Kit/Application.html#BApplication">BApplication</A> object is constructed.  They encapsulate the three system fonts&mdash;the plain font which is used for labels and small stretches of text in the user interface, the bold font which is used for window and group titles, and the fixed font which is used in Terminal windows and other places where a fixed-width font is required.
+<P>
+These objects cannot be modified directly, nor are they modified when the user redefines a system font.  The user's changed preferences don't affect running applications.
+<P>
+<B>See also:  </B>the <A HREF="Font.html#BFont">BFont</A> class
+<P>
+<HR>
+<H2>
+<A NAME="Constants"></A><FONT SIZE=6>C</FONT>onstants
+</H2>
+<P>
+<A NAME="12043:%20apiNameFirst:%20alert_type%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="alert_type%20Constants%20%20see%20alert_type%20(BAlert)"></A>alert_type Constants  see alert_type (BAlert)
+</H3>
+<P>
+<A NAME="27576:%20funcNameFirst:%20alignment%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="alignment%20Constants"></A>alignment Constants
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/InterfaceDefs.h">be/interface/InterfaceDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_ALIGN_LEFT"></A>B_ALIGN_LEFT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ALIGN_RIGHT"></A>B_ALIGN_RIGHT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ALIGN_CENTE"></A>B_ALIGN_CENTE
+R</TT></B> </TD>
+</TABLE>
+<P>
+These constants define the <B><TT><A HREF="#alignment">alignment</A></TT></B> data type.  They determine how lines of text and labels are aligned by <A HREF="TextView.html#BTextView">BTextView</A>, <A HREF="StringView.html#BStringView">BStringView</A>, and <A HREF="MenuField.html#BMenuField">BMenuField</A> objects.
+<P>
+<B>See also:  <TT><A HREF="TextView.html#SetAlignment()">BTextView::SetAlignment()</A></TT></B> 
+<P>
+<A NAME="37970:%20apiName:%20button_width%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="button_width%20Constants"></A>button_width Constants
+</H3>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/interface/InterfaceDefs.h">be/interface/InterfaceDefs.h</A>
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_WIDTH_AS_USUAL%20"></A>B_WIDTH_AS_USUAL 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_WIDTH_FROM_LABEL%20"></A>B_WIDTH_FROM_LABEL 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_WIDTH_FROM_WIDEST%20"></A>B_WIDTH_FROM_WIDEST 
+</TD>
+</TABLE></TT></B>
+<P>
+These constants define the <B><TT><A HREF="#button_width">button_width</A></TT></B> type.  They determine how the width of a set of buttons will be set&mdash;whether they're set to a minimal width, a width just sufficient to accommodate the button's own label, or a width sufficient to accommodate the widest label of all the buttons.
+<P>
+The constants are used by the <A HREF="Alert.html#BAlert">BAlert</A> and <A HREF="TabView.html#BTabView">BTabView</A> classes.
+<P>
+<HR>
+<H3>
+<A NAME="border_style%20Constants"></A>border_style Constants
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_PLAIN_BORDER"></A>B_PLAIN_BORDER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FANCY_BORDER"></A>B_FANCY_BORDER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NO_BORDER"></A>B_NO_BORDER
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants define how <A HREF="Box.html#BBox">BBox</A> objects and BScrollViews are bordered.
+<P>
+<B>See also:  </B>the <A HREF="ScrollView.html#BScrollView">BScrollView</A> and <A HREF="Box.html#BBox">BBox</A> classes
+<P>
+<A NAME="40323:%20apiName:%20Character%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Character%20Constants"></A>Character Constants
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Character value</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_BACKSPACE"></A>B_BACKSPACE
+</TT></B></TD>
+<TD>0x08 (same as 'b')</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ENTER"></A>B_ENTER
+</TT></B></TD>
+<TD>0x0a (same as 'n')</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RETURN"></A>B_RETURN
+</TT></B></TD>
+<TD>0x0a (synonym for <B><TT>B_ENTER</TT></B>)</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SPACE"></A>B_SPACE
+</TT></B></TD>
+<TD>0x20 (same as ' ')</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TAB"></A>B_TAB
+</TT></B></TD>
+<TD>0x09 (same as 't')</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ESCAPE"></A>B_ESCAPE
+</TT></B></TD>
+<TD>0x1b</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LEFT_ARROW"></A>B_LEFT_ARROW
+</TT></B></TD>
+<TD>0x1c</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RIGHT_ARROW"></A>B_RIGHT_ARROW
+</TT></B></TD>
+<TD>0x1d</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UP_ARROW"></A>B_UP_ARROW
+</TT></B></TD>
+<TD>0x1e</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DOWN_ARROW"></A>B_DOWN_ARROW
+</TT></B></TD>
+<TD>0x1f</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INSERT"></A>B_INSERT
+</TT></B></TD>
+<TD>0x05</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DELETE"></A>B_DELETE
+</TT></B></TD>
+<TD>0x7f</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HOME"></A>B_HOME
+</TT></B></TD>
+<TD>0x01</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_END"></A>B_END
+</TT></B></TD>
+<TD>0x04</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PAGE_UP"></A>B_PAGE_UP
+</TT></B></TD>
+<TD>0x0b</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PAGE_DOWN"></A>B_PAGE_DOWN
+</TT></B></TD>
+<TD>0x0c</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FUNCTION_KEY"></A>B_FUNCTION_KEY
+</TT></B></TD>
+<TD>0x10</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UTF8_ELLIPSIS"></A>B_UTF8_ELLIPSIS
+</TT></B></TD>
+<TD>"xE2x80xA6"</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UTF8_OPEN_QUOT"></A>B_UTF8_OPEN_QUOT
+E</TT></B></TD>
+<TD>"xE2x80x9C"</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UTF8_CLOSE_QUO"></A>B_UTF8_CLOSE_QUO
+TE</TT></B></TD>
+<TD>"xE2x80x9D"</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UTF8_COPYRIGHT"></A>B_UTF8_COPYRIGHT
+</TT></B></TD>
+<TD>"xC2xA9"</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UTF8_REGISTERED"></A>B_UTF8_REGISTERED
+</TT></B></TD>
+<TD>"xC2xAE"</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UTF8_TRADEMARK"></A>B_UTF8_TRADEMARK
+</TT></B></TD>
+<TD>"xE2x84xA2"</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UTF8_SMILING_FA"></A>B_UTF8_SMILING_FA
+CE</TT></B></TD>
+<TD>"xE2x98xBB" </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_UTF8_HIROSHI"></A>B_UTF8_HIROSHI
+</TT></B></TD>
+<TD>"xE5xBCx98" </TD>
+</TABLE>
+<P>
+Constants in the first group stand for the ASCII characters they name.  They're defined only for characters that normally don't have visible symbols.
+<P>
+Constants in the second group are Unicode UTF-8 encodings of common characters that have multibyte representations.  These constants are strings that can be concatenated with other strings&mdash;for example, to set a button label that ends in an ellipsis:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myButton->SetLablel("Options"B_UTF_ELLIPSIS);</PRE>
+<P>
+<B>See also:  </B>"Function Key Constants" below 
+<P>
+<A NAME="10753:%20funcName:%20color_space%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="color_space%20Constants"></A>color_space Constants
+</H3>
+<P>
+Declared in:  be/interface/GraphicDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Description</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_NO_COLOR_SPACE"></A>B_NO_COLOR_SPACE
+</TT></B></TD>
+<TD>Undefined color space</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB32"></A>B_RGB32
+</TT></B></TD>
+<TD>xRGB 8:8:8:8, stored as little endian uint32</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGBA32"></A>B_RGBA32
+</TT></B></TD>
+<TD>ARGB 8:8:8:8, stored as little endian uint32</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB24"></A>B_RGB24
+</TT></B></TD>
+<TD>Currently unused</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB16"></A>B_RGB16
+</TT></B></TD>
+<TD>RGB 5:6:5, stored as little endian uint16</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB15"></A>B_RGB15
+</TT></B></TD>
+<TD>xRGB 1:5:5:5, stored as little endian uint16</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGBA15"></A>B_RGBA15
+</TT></B></TD>
+<TD>ARGB 1:5:5:5, stored as little endian uint16</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CMAP8"></A>B_CMAP8
+</TT></B></TD>
+<TD>256-color index into the color table.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GRAY8"></A>B_GRAY8
+</TT></B></TD>
+<TD>256-color greyscale value.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GRAY1"></A>B_GRAY1
+</TT></B></TD>
+<TD>Each bit represents a single pixel, where 0 is the view's low color and 1 is the high color.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB32_BIG"></A>B_RGB32_BIG
+</TT></B></TD>
+<TD>xRGB 8:8:8:8, stored as big endian uint32</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGBA32_BIG"></A>B_RGBA32_BIG
+</TT></B></TD>
+<TD>ARGB 8:8:8:8, stored as big endian uint32</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB24_BIG"></A>B_RGB24_BIG
+</TT></B></TD>
+<TD>Currently unused</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB16_BIG"></A>B_RGB16_BIG
+</TT></B></TD>
+<TD>RGB 5:6:5, stored as big endian uint16</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB15_BIG"></A>B_RGB15_BIG
+</TT></B></TD>
+<TD>xRGB 1:5:5:5, stored as big endian uint16</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGBA15_BIG"></A>B_RGBA15_BIG
+</TT></B></TD>
+<TD>ARGB 1:5:5:5, stored as big endian uint16</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_YUV422"></A>B_YUV422
+</TT></B></TD>
+<TD>Currently unused.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_YUV411"></A>B_YUV411
+</TT></B></TD>
+<TD>Currently unused.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_YUV420"></A>B_YUV420
+</TT></B></TD>
+<TD>Currently unused.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_YUV444"></A>B_YUV444
+</TT></B></TD>
+<TD>Currently unused.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_YUV9"></A>B_YUV9
+</TT></B></TD>
+<TD>Currently unused.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_YUV12"></A>B_YUV12
+</TT></B></TD>
+<TD>Currently unused.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MONOCHROME_1_BIT"></A>B_MONOCHROME_1_BIT
+</TT></B></TD>
+<TD>For compatibility only: use B_GRAY1</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_GRAYSCALE_8_BIT"></A>B_GRAYSCALE_8_BIT
+</TT></B></TD>
+<TD>For compatibility only; use B_GRAY8</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_COLOR_8_BIT"></A>B_COLOR_8_BIT
+</TT></B></TD>
+<TD>For compatibility only; use B_CMAP8</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB_32_BIT"></A>B_RGB_32_BIT
+</TT></B></TD>
+<TD>For compatibility only; use B_RGB32</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RGB_16_BIT"></A>B_RGB_16_BIT
+</TT></B></TD>
+<TD>For compatibility only; use B_RGB15</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BIG_RGB_32_BIT"></A>B_BIG_RGB_32_BIT
+</TT></B></TD>
+<TD>For compatibility only; use B_RGB32_BIG</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BIG_RGB_16_BIT"></A>B_BIG_RGB_16_BIT
+</TT></B></TD>
+<TD>For compatibility only; use B_RGB15_BIG</TD>
+</TABLE>
+<P>
+These constants define the <B><TT><A HREF="#color_space">color_space</A></TT></B> data type.  A color space describes three properties of screens and bitmap images:
+<P>
+<UL>
+<LI>How many bits of information there are per pixel (the depth of the image)
+<P>
+<LI>How those bits are to be interpreted (whether as colors or on a grayscale, what the color components are, and so on).
+<P>
+<LI>How are components are arranged
+<P>
+</UL>
+<P>
+See the "Color Spaces" section in the "Drawing" section of this chapter for a fuller explanation of these color spaces.
+<P>
+<B>See also:  </B>"Colors" in the "Drawing" section of this chapter, the <A HREF="Bitmap.html#BBitmap">BBitmap</A> and <A HREF="Screen.html#BScreen">BScreen</A> classes
+<P>
+<HR>
+<H3>
+<A NAME="Control%20Values"></A>Control Values
+</H3>
+<P>
+Declared in:  be/interface/Control.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Value</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_O"></A>B_CONTROL_O
+N</TT></B></TD>
+<TD>1 </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_OF"></A>B_CONTROL_OF
+F</TT></B></TD>
+<TD>0  </TD>
+</TABLE>
+<P>
+These constants define the bipolar states of a typical control device.
+<P>
+<B>See also:  <TT><A HREF="Control.html#SetValue()">BControl::SetValue()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Cursor%20Transit%20Constants"></A>Cursor Transit Constants
+</H3>
+<P>
+Declared in:  be/interface/View.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_ENTERED_VIE"></A>B_ENTERED_VIE
+W</TT></B></TD>
+<TD>The cursor has just entered a view. </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_INSIDE_VIEW"></A>B_INSIDE_VIEW
+</TT></B></TD>
+<TD>The cursor has moved within the view. </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_EXITED_VIEW"></A>B_EXITED_VIEW
+</TT></B></TD>
+<TD>The cursor has left the view </TD>
+</TABLE>
+<P>
+These constants describe the cursor's transit through a view.  Each <B><TT>MouseMoved()</TT></B> notification includes one of these constants as an argument, to inform the <A HREF="View.html#BView">BView</A> whether the cursor has entered the view, moved while inside the view, or exited the view.
+<P>
+<B>See also:  <TT>BView::MouseMoved()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Dead-Key%20Mapping"></A>Dead-Key Mapping
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_TABLE"></A>B_CONTROL_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_CAPS_SHIFT_TA"></A>B_OPTION_CAPS_SHIFT_TA
+BLE</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_CAPS_TABLE"></A>B_OPTION_CAPS_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_SHIFT_TABLE"></A>B_OPTION_SHIFT_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OPTION_TABLE"></A>B_OPTION_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CAPS_SHIFT_TABLE"></A>B_CAPS_SHIFT_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CAPS_TABLE"></A>B_CAPS_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SHIFT_TABLE"></A>B_SHIFT_TABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NORMAL_TABLE"></A>B_NORMAL_TABLE
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants determine which combinations of modifiers can cause a key to be the "dead" member of a two-key combination.
+<P>
+<B>See also:  <TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_key_map()">get_key_map()</A></TT></B>  
+<P>
+<A NAME="26355:%20apiName:%20drawing_mode%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="drawing_mode%20Constants"></A>drawing_mode Constants
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_OP_COPY"></A>B_OP_COPY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_OP_ADD"></A>B_OP_ADD
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OP_OVER"></A>B_OP_OVER
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_OP_SUBTRA"></A>B_OP_SUBTRA
+CT</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OP_ERAS"></A>B_OP_ERAS
+E</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_OP_BLEND"></A>B_OP_BLEND
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OP_INVE"></A>B_OP_INVE
+RT</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_OP_MIN"></A>B_OP_MIN
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_OP_SELE"></A>B_OP_SELE
+CT</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_OP_MAX"></A>B_OP_MAX
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants define the <B><TT><A HREF="#drawing_mode">drawing_mode</A></TT></B> data type.  The drawing mode is a <A HREF="View.html#BView">BView</A> graphics parameter that determines how the image being drawn interacts with the image already in place in the area where it's drawn.  The various modes are explained under "Drawing Modes" in the "Drawing" section of this chapter.
+<P>
+<B>See also:  </B>"Drawing Modes" in the "Drawing" section of this chapter, <B><TT>BView::SetDrawingMode()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="font_direction%20Constants"></A>font_direction Constants
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_LEFT_TO_RIG"></A>B_FONT_LEFT_TO_RIG
+HT</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_RIGHT_TO_LE"></A>B_FONT_RIGHT_TO_LE
+FT</TT></B> </TD>
+</TABLE>
+<P>
+These constants tell whether a font is used for text that's read left-to-right or right-to-left.  Thus is an inherent property of the font.
+<P>
+<B>See also:  <TT><A HREF="Font.html#Direction()">BFont::Direction()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Font%20Encodings"></A>Font Encodings
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_UNICODE_UTF8"></A>B_UNICODE_UTF8
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_1"></A>B_ISO_8859_1
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_2"></A>B_ISO_8859_2
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_3"></A>B_ISO_8859_3
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_4"></A>B_ISO_8859_4
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_5"></A>B_ISO_8859_5
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_6"></A>B_ISO_8859_6
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_7"></A>B_ISO_8859_7
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_8"></A>B_ISO_8859_8
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_9"></A>B_ISO_8859_9
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ISO_8859_10"></A>B_ISO_8859_10
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MACINTOSH_ROMA"></A>B_MACINTOSH_ROMA
+N</TT></B> </TD>
+</TABLE>
+<P>
+The constants name the various character encodings that the BeOS supports. <B><TT><A HREF="#B_UNICODE_UTF8">B_UNICODE_UTF8</A></TT></B> is the default encoding.  It matches ASCII values for 7-bit character codes but uses multiple bytes to encode other values in the Unicode standard.
+<P>
+<B>See also:  <TT><A HREF="Font.html#SetEncoding()">BFont::SetEncoding()</A></TT></B>, "Character Encoding" in the "Responding to the User" section of this chapter 
+<P>
+<HR>
+<H3>
+<A NAME="Font%20Flags"></A>Font Flags
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_DISABLE_ANTIALIASI"></A>B_DISABLE_ANTIALIASI
+NG</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_IS_FIXED"></A>B_IS_FIXED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_HAS_TUNED_FONT"></A>B_HAS_TUNED_FONT
+</TT></B>  </TD>
+</TABLE>
+<P>
+The first flag, <B><TT>B_DISABLE_ANTIALIASING</TT></B>, is passed to a <A HREF="Font.html#BFont">BFont</A> object to turn antialiasing off.  Antialiasing should be turned off when printing, but should generally be left on when drawing to the screen.
+<P>
+The other two flags enable <B><TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> and <B><TT><A HREF="functions.html#get_font_style()">get_font_style()</A></TT></B> to give information about a font.  <B><TT><A HREF="#B_IS_FIXED">B_IS_FIXED</A></TT></B> indicates that the font is nonproportional.  <B><TT><A HREF="#B_HAS_TUNED_FONT">B_HAS_TUNED_FONT</A></TT></B> indicates that the family or style has one or more tuned fonts&mdash;bitmap fonts that have been adjusted to look good on the screen&mdash;for some set of font properties (such as size and shear).
+<P>
+<B>See also:  <TT><A HREF="Font.html#SetFlags()">BFont::SetFlags()</A></TT></B>, <B><TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Font%20Name%20Lengths"></A>Font Name Lengths
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Value</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_FAMILY_NAME_LENG"></A>B_FONT_FAMILY_NAME_LENG
+TH</TT></B></TD>
+<TD>63</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_STYLE_NAME_LENG"></A>B_FONT_STYLE_NAME_LENG
+TH</TT></B></TD>
+<TD>63</TD>
+</TABLE>
+<P>
+These constants define the maximum length of names for font families and styles, exclusive of a null terminator.  They're used in the definition of the <B><TT><A HREF="#font_family">font_family</A></TT></B> and <B><TT><A HREF="#font_style">font_style</A></TT></B> types.
+<P>
+<B>See also:  <TT><A HREF="#font_family">font_family</A></TT></B> under "Defined Types" below
+<P>
+<HR>
+<H3>
+<A NAME="Font%20Properties"></A>Font Properties
+</H3>
+<P>
+Declared in:  be/interface/View.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_FAMILY_AND_STY"></A>B_FONT_FAMILY_AND_STY
+LE</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_SIZE"></A>B_FONT_SIZE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_SHEAR"></A>B_FONT_SHEAR
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_ROTATION"></A>B_FONT_ROTATION
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_SPACING"></A>B_FONT_SPACING
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_ENCODING"></A>B_FONT_ENCODING
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_FACE"></A>B_FONT_FACE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_FLAGS"></A>B_FONT_FLAGS
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FONT_ALL"></A>B_FONT_ALL
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants list the font properites that can be set for a <A HREF="View.html#BView">BView</A> individually or in combination.  The constants form a mask that's passed, along with a <A HREF="Font.html#BFont">BFont</A> object, to BView's <B><TT><A HREF="Slider.html#SetFont()">SetFont()</A></TT></B> and BTextView's <B><TT><A HREF="TextView.html#SetFontAndColor()">SetFontAndColor()</A></TT></B> functions.  For example:
+<P>
+<PRE>&nbsp;&nbsp;&nbsp;myView->SetFont(theFont, B_FONT_SIZE | B_FONT_ENCODING);</PRE>
+<P>
+<B><TT><A HREF="#B_FONT_ALL">B_FONT_ALL</A></TT></B> stands for all properties of the BFont.
+<P>
+<B>See also:  <TT>BView::SetFont()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Font%20Spacing%20Modes"></A>Font Spacing Modes
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_CHAR_SPACING"></A>B_CHAR_SPACING
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_STRING_SPACIN"></A>B_STRING_SPACIN
+G</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BITMAP_SPACIN"></A>B_BITMAP_SPACIN
+G</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FIXED_SPACING"></A>B_FIXED_SPACING
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants enumerate the four modes for positioning characters in a line of text.
+<P>
+<B>See also:  <TT><A HREF="Font.html#SetSpacing()">BFont::SetSpacing()</A></TT></B>  
+<P>
+<A NAME="36554:%20funcName:%20Function%20Key%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="Function%20Key%20Constants"></A>Function Key Constants
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_F1_KE"></A>B_F1_KE
+Y</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_F9_KEY"></A>B_F9_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_F2_KE"></A>B_F2_KE
+Y</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_F10_KEY"></A>B_F10_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_F3_KE"></A>B_F3_KE
+Y</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_F11_KEY"></A>B_F11_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_F4_KE"></A>B_F4_KE
+Y</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_F12_KEY"></A>B_F12_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_F5_KE"></A>B_F5_KE
+Y</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_PRINT_KEY"></A>B_PRINT_KEY
+</TT></B> (the "Print Screen" key) </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_F6_KE"></A>B_F6_KE
+Y</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_SCROLL_KEY"></A>B_SCROLL_KEY
+</TT></B> (the "Scroll Lock" key) </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_F7_KE"></A>B_F7_KE
+Y</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_PAUSE_KEY"></A>B_PAUSE_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_F8_KE"></A>B_F8_KE
+Y</TT></B></TD>
+<TD> </TD>
+</TABLE>
+<P>
+These constants stand for the various keys that are mapped to the <B><TT><A HREF="#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> character.  When the <B><TT><A HREF="#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> character is reported in a key-down event, the application can determine which key produced the character by testing the key code against these constants.  (Control-<I>p</I> also produces the <B><TT><A HREF="#B_FUNCTION_KEY">B_FUNCTION_KEY</A></TT></B> character.)
+<P>
+<B>See also:  </B>"Character Mapping" in the <B>Keyboard Information</B> appendix
+<P>
+<HR>
+<H3>
+<A NAME="Interface%20Messages"></A>Interface Messages
+</H3>
+<P>
+Declared in:  be/app/AppDefs.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_ZOOM"></A>B_ZOOM
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_KEY_DOWN"></A>B_KEY_DOWN
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MINIMIZE"></A>B_MINIMIZE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_KEY_UP"></A>B_KEY_UP
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WINDOW_RESIZED"></A>B_WINDOW_RESIZED
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_MOUSE_DOWN"></A>B_MOUSE_DOWN
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WINDOW_MOVED"></A>B_WINDOW_MOVED
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_MOUSE_UP"></A>B_MOUSE_UP
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WINDOW_ACTIVATED"></A>B_WINDOW_ACTIVATED
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_MOUSE_MOVED"></A>B_MOUSE_MOVED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_QUIT_REQUESTED"></A>B_QUIT_REQUESTED
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_VIEW_RESIZED"></A>B_VIEW_RESIZED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SCREEN_CHANGED"></A>B_SCREEN_CHANGED
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_VIEW_MOVED"></A>B_VIEW_MOVED
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WORKSPACE_ACTIVAT"></A>B_WORKSPACE_ACTIVAT
+ED</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_VALUE_CHANGE"></A>B_VALUE_CHANGE
+D</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WORKSPACES_CHANG"></A>B_WORKSPACES_CHANG
+ED</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_PULSE"></A>B_PULSE
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants identify interface messages&mdash;system messages that are delivered to <A HREF="Window.html#BWindow">BWindow</A> objects.  Each constant conveys an instruction to do something in particular (<B><TT>B_ZOOM</TT></B>) or names a type of event (<B><TT>B_KEY_DOWN</TT></B>).
+<P>
+<B>See also:  </B>"Interface Messages" in the "Responding to the User" section of this chapter
+<P>
+<HR>
+<H3>
+<A NAME="list_view_type%20Constants"></A>list_view_type Constants
+</H3>
+<P>
+Declared in:  be/interface/ListView.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_SINGLE_SELECTION_LIS"></A>B_SINGLE_SELECTION_LIS
+T</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_MULTIPLE_SELECTION_"></A>B_MULTIPLE_SELECTION_
+LIST</TT></B> </TD>
+</TABLE>
+<P>
+These constants distinguish between lists that permit the user to select only one item at a time and those that allow multiple items to be selected.
+<P>
+<B>See also:  </B>the <A HREF="ListView.html#BListView">BListView</A> class
+<P>
+<HR>
+<H3>
+<A NAME="Main%20Screen"></A>Main Screen
+</H3>
+<P>
+Declared in:  be/interface/Screen.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const screen_id <B><TT><FONT  color=000022 size=+1>
+<A NAME="Main%20Screen"></A>B_MAIN_SCREEN_ID
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This constant stands for the main screen, the screen that has the origin of the screen coordinate system at its left top corner.  (Currently only one screen can be attached to the computer and it is the main screen.)
+<P>
+<B>See also:  <TT><A HREF="#screen_id">screen_id</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="menu_bar_border%20Constants"></A>menu_bar_border Constants
+</H3>
+<P>
+Declared in:  be/interface/MenuBar.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_BORDER_FRAME"></A>B_BORDER_FRAME
+</TT></B></TD>
+<TD>Put a border inside the entire frame rectangle.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BORDER_CONTEN"></A>B_BORDER_CONTEN
+TS</TT></B></TD>
+<TD>Put a border around the group of items only.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BORDER_EACH_IT"></A>B_BORDER_EACH_IT
+EM</TT></B></TD>
+<TD>Put a border around each item.</TD>
+</TABLE>
+<P>
+These constants can be passed as an argument to BMenuBar's <B><TT>SetBorder()</TT></B> function.
+<P>
+<B>See also:  <TT><A HREF="MenuBar.html#SetBorder()">BMenuBar::SetBorder()</A></TT></B> 
+<P>
+<A NAME="14601:%20funcName:%20menu_layout%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="menu_layout%20Constants"></A>menu_layout Constants
+</H3>
+<P>
+Declared in:  be/interface/Menu.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_ITEMS_IN_ROW"></A>B_ITEMS_IN_ROW
+</TT></B></TD>
+<TD>Menu items are arranged horizontally, in a row.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ITEMS_IN_COLU"></A>B_ITEMS_IN_COLU
+MN</TT></B></TD>
+<TD>Menu items are arranged vertically, in a column.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ITEMS_IN_MATRI"></A>B_ITEMS_IN_MATRI
+X</TT></B></TD>
+<TD>Menu items are arranged in a custom fashion.</TD>
+</TABLE>
+<P>
+These constants define the <B><TT><A HREF="#menu_layout">menu_layout</A></TT></B> data type.  They distinguish the ways that items can be arranged in a menu or menu bar&mdash;they can be laid out from end to end in a row like a typical menu bar, stacked from top to bottom in a column like a typical menu, or arranged in some custom fashion like a matrix.
+<P>
+<B>See also:  </B>the <A HREF="Menu.html#BMenu">BMenu</A> and <A HREF="MenuBar.html#BMenuBar">BMenuBar</A> constructors
+<P>
+<HR>
+<H3>
+<A NAME="Modifier%20States"></A>Modifier States
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDef.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_SHIFT_KEY"></A>B_SHIFT_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_OPTION_KEY"></A>B_OPTION_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LEFT_SHIFT_KEY"></A>B_LEFT_SHIFT_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_LEFT_OPTION_KEY"></A>B_LEFT_OPTION_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RIGHT_SHIFT_KEY"></A>B_RIGHT_SHIFT_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_OPTION_KEY"></A>B_RIGHT_OPTION_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CONTROL_KEY"></A>B_CONTROL_KEY
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_COMMAND_KEY"></A>B_COMMAND_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_LEFT_CONTROL_KE"></A>B_LEFT_CONTROL_KE
+Y</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_LEFT_COMMAND_KEY"></A>B_LEFT_COMMAND_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_RIGHT_CONTROL_K"></A>B_RIGHT_CONTROL_K
+EY</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_RIGHT_COMMAND_KE"></A>B_RIGHT_COMMAND_KE
+Y</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_CAPS_LOCK"></A>B_CAPS_LOCK
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_MENU_KEY"></A>B_MENU_KEY
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SCROLL_LOCK"></A>B_SCROLL_LOCK
+</TT></B> </TD>
+<TD></TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NUM_LOCK"></A>B_NUM_LOCK
+</TT></B> </TD>
+<TD></TD>
+</TABLE>
+<P>
+These constants designate the Shift, Option, Control, Command, and Menu modifier keys and the lock states set by the Caps Lock, Scroll Lock, and Num Lock keys.  They're typically used to form a mask that describes the current, or required, modifier states.
+<P>
+For each variety of modifier key, there are constants that distinguish between the keys that appear at the left and right of the keyboard, as well as one that lumps both together.  For example, if the user is holding the left Control key down, both <B><TT>B_CONTROL_KEY</TT></B> and <B><TT>B_LEFT_CONTROL_KEY</TT></B> will be set in the mask.
+<P>
+<B>See also:  <TT><A HREF="../The%20Input%20Server/InputFunctions.html#modifiers()">modifiers()</A></TT></B>, <B><TT><A HREF="Window.html#AddShortcut()">BWindow::AddShortcut()</A></TT></B>, the <A HREF="Menu.html#BMenu">BMenu</A> constructor
+<P>
+<HR>
+<H3>
+<A NAME="Mouse%20Buttons"></A>Mouse Buttons
+</H3>
+<P>
+Declared in:  be/interface/View.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_PRIMARY_MOUSE_BUTTON"></A>B_PRIMARY_MOUSE_BUTTON
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_SECONDARY_MOUSE_BUTT"></A>B_SECONDARY_MOUSE_BUTT
+ON</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TERTIARY_MOUSE_BUTTON"></A>B_TERTIARY_MOUSE_BUTTON
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants name the mouse buttons.  Buttons are identified, not by their physical positions on the mouse, but by their roles in the user interface.
+<P>
+<B>See also:  <TT>BView::GetMouse()</TT></B>, <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#set_mouse_map()">set_mouse_map()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="orientation%20Constants"></A>orientation Constants
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDef.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_HORIZONTA"></A>B_HORIZONTA
+L</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_VERTICAL"></A>B_VERTICAL
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants define the <B><TT><A HREF="#orientation">orientation</A></TT></B> data type that distinguishes between the vertical and horizontal orientation of graphic objects.  It's currently used only to differentiate scroll bars.
+<P>
+<B>See also:  </B>the <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> and <A HREF="ScrollView.html#BScrollView">BScrollView</A> classes
+<P>
+<HR>
+<H3>
+<A NAME="Pattern%20Constants"></A>Pattern Constants
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDef.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const pattern <B><TT><FONT  color=000022 size=+1>
+<A NAME="Pattern%20Constants"></A>B_SOLID_HIGH
+</TT></B></FONT> = { 0xff, 0xff, 0xff, 0xff, 0xff,0xff, 0xff, 0xff } 
+<P>
+
+
+<TR><TD>
+const pattern <B><TT><FONT  color=000022 size=+1>
+<A NAME="Pattern%20Constants"></A>B_SOLID_LOW
+</TT></B></FONT> = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } 
+<P>
+
+
+<TR><TD>
+const pattern <B><TT><FONT  color=000022 size=+1>
+<A NAME="Pattern%20Constants"></A>B_MIXED_COLORS
+</TT></B></FONT> 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= { 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55, 0xaa, 0x55 }
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These constants name the three standard patterns defined in the Interface Kit.
+<P>
+<B><TT>B_SOLID_HIGH</TT></B> is a pattern that consists of the high color only.  It's the default pattern for all <A HREF="View.html#BView">BView</A> drawing functions that stroke lines and fill shapes.
+<P>
+<B><TT>B_SOLID_LOW</TT></B> is a pattern with only the low color.  It's used mainly to erase images 
+<br>
+(to replace them with the background color). 
+<P>
+<B><TT>B_MIXED_COLORS</TT></B> alternates pixels between the high and low colors in a checkerboard pattern.  The result is a halftone midway between the two colors.  This pattern can produce fine gradations of color, especially when the high and low colors are set to two colors that are already quite similar.
+<P>
+<B>See also:  </B>"Patterns" in the "Drawing" section of this chapter
+<P>
+<HR>
+<H3>
+<A NAME="Resizing%20Modes"></A>Resizing Modes
+</H3>
+<P>
+Declared in:  be/interface/View.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constants</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_LEFT"></A>B_FOLLOW_LEFT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_RIGHT"></A>B_FOLLOW_RIGHT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_LEFT_RIGHT"></A>B_FOLLOW_LEFT_RIGHT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_H_CENTER"></A>B_FOLLOW_H_CENTER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_TOP"></A>B_FOLLOW_TOP
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_BOTTOM"></A>B_FOLLOW_BOTTOM
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_TOP_BOTTO"></A>B_FOLLOW_TOP_BOTTO
+M</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_V_CENTER"></A>B_FOLLOW_V_CENTER
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_ALL"></A>B_FOLLOW_ALL
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FOLLOW_NONE"></A>B_FOLLOW_NONE
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants are used to set the behavior of a view when its parent is resized.  They're explained under the <A HREF="View.html#BView">BView</A> constructor.
+<P>
+<B>See also:  </B>the <A HREF="View.html#BView">BView</A> constructor, <B><TT>BView::SetResizingMode()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Screen%20Spaces"></A>Screen Spaces
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDef.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TD><B><TT>
+<A NAME="B_8_BIT_640x400%20"></A>B_8_BIT_640x400 
+</TT></B></TD>
+<TD></TD>
+<TD></TD>
+<TD><B><TT></TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_8_BIT_640x480%20"></A>B_8_BIT_640x480 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_15_BIT_640x480"></A>B_15_BIT_640x480
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_16_BIT_640x480"></A>B_16_BIT_640x480
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_32_BIT_640x480%20"></A>B_32_BIT_640x480 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_8_BIT_800x600%20"></A>B_8_BIT_800x600 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_15_BIT_800x600"></A>B_15_BIT_800x600
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_16_BIT_800x600"></A>B_16_BIT_800x600
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_32_BIT_800x600%20"></A>B_32_BIT_800x600 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_8_BIT_1024x768%20"></A>B_8_BIT_1024x768 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_15_BIT_1024x768"></A>B_15_BIT_1024x768
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_16_BIT_1024x768"></A>B_16_BIT_1024x768
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_32_BIT_1024x768%20"></A>B_32_BIT_1024x768 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_8_BIT_1152x900%20"></A>B_8_BIT_1152x900 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_15_BIT_1152x900"></A>B_15_BIT_1152x900
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_16_BIT_1152x900"></A>B_16_BIT_1152x900
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_32_BIT_1152x900%20"></A>B_32_BIT_1152x900 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_8_BIT_1280x1024%20"></A>B_8_BIT_1280x1024 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_15_BIT_1280x1024"></A>B_15_BIT_1280x1024
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_16_BIT_1280x1024"></A>B_16_BIT_1280x1024
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_32_BIT_1280x1024%20"></A>B_32_BIT_1280x1024 
+</TD>
+<TR>
+<TD></TT></B><B><TT>
+<A NAME="B_8_BIT_1600x1200%20"></A>B_8_BIT_1600x1200 
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_15_BIT_1600x1200"></A>B_15_BIT_1600x1200
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_16_BIT_1600x1200"></A>B_16_BIT_1600x1200
+</TT></B></TD>
+<TD><B><TT>
+<A NAME="B_32_BIT_1600x1200%20"></A>B_32_BIT_1600x1200 
+</TD>
+</TABLE></TT></B>
+<P>
+These constants are currently used to configure the screen&mdash;to set its depth and the size of the pixel grid it displays&mdash;as well as to report which configurations are possible.  However, they may not be supported in the future.  15-bit depths are not currently supported
+<P>
+<B>See also:  <TT><A HREF="functions.html#set_screen_space()">set_screen_space()</A></TT></B>, <B><TT>get_screen_info()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Scroll%20Bar%20Constants"></A>Scroll Bar Constants
+</H3>
+<P>
+Declared in:  be/interface/ScrollBar.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_H_SCROLL_BAR_HEIG"></A>B_H_SCROLL_BAR_HEIG
+HT</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_V_SCROLL_BAR_WIDT"></A>B_V_SCROLL_BAR_WIDT
+H</TT></B> </TD>
+</TABLE>
+<P>
+These constants record the recommended thickness of scroll bars.  They should be used to help define the frame rectangles passed to the <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> constructor.
+<P>
+<B>See also:  </B>the <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> class
+<P>
+<HR>
+<H3>
+<A NAME="String%20Truncation%20Constants"></A>String Truncation Constants
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRUNCATE_END"></A>B_TRUNCATE_END
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRUNCATE_BEGINNIN"></A>B_TRUNCATE_BEGINNIN
+G</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRUNCATE_MIDDLE"></A>B_TRUNCATE_MIDDLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TRUNCATE_SMART"></A>B_TRUNCATE_SMART
+</TT></B> </TD>
+</TABLE>
+<P>
+These constants instruct a <A HREF="Font.html#BFont">BFont</A> where it should remove characters from a set of strings to shorten them.
+<P>
+<B>See also:  <TT><A HREF="Font.html#GetTruncatedStrings()">BFont::GetTruncatedStrings()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Transparency%20Constants"></A>Transparency Constants
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+const uint8 <B><TT><FONT  color=000022 size=+1>
+<A NAME="Transparency%20Constants"></A>B_TRANSPARENT_8_BIT
+</TT></B></FONT> 
+<P>
+
+<TR><TD>
+const rgb_color <B><TT><FONT  color=000022 size=+1>
+<A NAME="Transparency%20Constants"></A>B_TRANSPARENT_32_BIT
+</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These constants set transparent pixel values in a bitmap image.  <B><TT>B_TRANSPARENT_8_BIT</TT></B> designates a transparent pixel in the <B><TT><A HREF="#B_CMAP8">B_CMAP8</A></TT></B> color space, and <B><TT>B_TRANSPARENT_32_BIT</TT></B> designates a transparent pixel in the <B><TT><A HREF="#B_RGB32">B_RGB32</A></TT></B> color space.
+<P>
+Transparency is explained in the "Drawing Modes" part of the "Drawing" section of this chapter.  Drawing modes other than <B><TT><A HREF="#B_OP_COPY">B_OP_COPY</A></TT></B> preserve the destination image where a source bitmap is transparent.
+<P>
+<B>See also:  </B>"Drawing Modes" in the "Drawing" section of this chapter, the <A HREF="Bitmap.html#BBitmap">BBitmap</A> class, <B><TT>BView::SetViewColor()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="View%20Flags"></A>View Flags
+</H3>
+<P>
+Declared in:  be/interface/View.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_FULL_UPDATE_ON_RE"></A>B_FULL_UPDATE_ON_RE
+SIZE</TT></B></TD>
+<TD>Include the entire view in the clipping region.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WILL_DRAW"></A>B_WILL_DRAW
+</TT></B></TD>
+<TD>Allow the <A HREF="View.html#BView">BView</A> to draw.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_PULSE_NEEDED"></A>B_PULSE_NEEDED
+</TT></B></TD>
+<TD>Report pulse events to the BView.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_FRAME_EVENTS"></A>B_FRAME_EVENTS
+</TT></B></TD>
+<TD>Report view-resized and view-moved events.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NAVIGABLE"></A>B_NAVIGABLE
+</TT></B></TD>
+<TD>Let users navigate to the view with the Tab key.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NAVIGABLE_JUMP"></A>B_NAVIGABLE_JUMP
+</TT></B></TD>
+<TD>Mark the view for Control-Tab navigation.</TD>
+</TABLE>
+<P>
+These constants can be combined to form a mask that sets the behavior of a <A HREF="View.html#BView">BView</A> object.  They're explained in more detail under the class constructor.  The mask is passed to the constructor, or to the <B><TT>SetFlags()</TT></B> function.
+<P>
+<B>See also:  </B>the <A HREF="View.html#BView">BView</A> constructor, <B><TT>BView::SetFlags()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="Window%20Flags"></A>Window Flags
+</H3>
+<P>
+Declared in:  be/interface/Window.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_MOVABLE"></A>B_NOT_MOVABLE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_NOT_CLOSABLE"></A>B_NOT_CLOSABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_H_RESIZABLE"></A>B_NOT_H_RESIZABLE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_NOT_ZOOMABLE"></A>B_NOT_ZOOMABLE
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_V_RESIZABLE"></A>B_NOT_V_RESIZABLE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_NOT_MINIMIZABL"></A>B_NOT_MINIMIZABL
+E</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_NOT_RESIZABLE"></A>B_NOT_RESIZABLE
+</TT></B> </TD>
+<TD><B><TT>
+<A NAME="B_WILL_FLOAT"></A>B_WILL_FLOAT
+</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_WILL_ACCEPT_FIRST_CLI"></A>B_WILL_ACCEPT_FIRST_CLI
+CK</TT></B> </TD>
+<TD></TD>
+</TABLE>
+<P>
+These constants set the behavior of a window.  They can be combined to form a mask that's passed to the <A HREF="Window.html#BWindow">BWindow</A> constructor.
+<P>
+<B>See also:  </B>the <A HREF="Window.html#BWindow">BWindow</A> constructor
+<P>
+<A NAME="24891:%20funcName:%20window_type%20Constants"></A>
+<P>
+<HR>
+<H3>
+<A NAME="window_type%20Constants"></A>window_type Constants
+</H3>
+<P>
+Declared in:  be/interface/Window.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TH>Meaning</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_MODAL_WINDOW"></A>B_MODAL_WINDOW
+</TT></B></TD>
+<TD>The window is a modal window.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_BORDERED_WINDO"></A>B_BORDERED_WINDO
+W</TT></B></TD>
+<TD>The window has a border but no title tab.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_TITLED_WINDOW"></A>B_TITLED_WINDOW
+</TT></B></TD>
+<TD>The window has a border and a title tab.</TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_DOCUMENT_WINDO"></A>B_DOCUMENT_WINDO
+W</TT></B></TD>
+<TD>The window has a border, tab and resize knob.</TD>
+</TABLE>
+<P>
+These constants describe the various kinds of windows that can be requested from the Application Server.
+<P>
+<B>See also:  </B>the <A HREF="Window.html#BWindow">BWindow</A> constructor
+<P>
+<HR>
+<H3>
+<A NAME="Workspace%20Constants%20"></A>Workspace Constants 
+</H3>
+<P>
+Declared in:  be/interface/Window.h
+<P>
+<TABLE BORDER cellpadding=4>
+<TH>Constant</TH>
+<TR>
+<TD><B><TT>
+<A NAME="B_CURRENT_WORKSPA"></A>B_CURRENT_WORKSPA
+CE</TT></B> </TD>
+<TR>
+<TD><B><TT>
+<A NAME="B_ALL_WORKSPACES"></A>B_ALL_WORKSPACES
+</TD>
+</TABLE></TT></B>
+<P>
+These constants are used&mdash;along with designations of specific workspaces&mdash;to associate a set of one or more workspaces with a BWindow.
+<P>
+<B>See also:  </B>the <A HREF="Window.html#BWindow">BWindow</A> constructor, <B><TT><A HREF="Window.html#SetWorkspaces()">BWindow::SetWorkspaces()</A></TT></B> 
+<P>
+<HR>
+<H2>
+<A NAME="Defined%20Types"></A><FONT SIZE=6>D</FONT>efined <FONT SIZE=6>T</FONT>ypes
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="alert_type"></A>alert_type
+</H3>
+<P>
+Declared in:  be/interface/Alert.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>alert_type</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These constants name the various types of alert panel.
+<P>
+<B>See also:  </B>"<B><TT>alert_type</TT></B> Constants", the <A HREF="Alert.html#BAlert">BAlert</A> constructor
+<P>
+<HR>
+<H3>
+<A NAME="alignment"></A>alignment
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>alignment</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Alignment constants determine where lines of text are placed in a view.
+<P>
+<B>See also:  </B>"<B><TT>alignment</TT></B> Constants", <B><TT><A HREF="TextView.html#SetAlignment()">BTextView::SetAlignment()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="button_width"></A>button_width
+</H3>
+<P>
+Declared in:  be/interface/Alert.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>button_width</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These constants name the methods that can be used to determine how wide to make the buttons in an alert panel.
+<P>
+<B>See also:  </B>"<B><TT>button_width</TT></B> Constants", the <A HREF="Alert.html#BAlert">BAlert</A> constructor
+<P>
+<HR>
+<H3>
+<A NAME="color_map"></A>color_map
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>id</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgb_color <B><TT><FONT  color=000022 size=+1>color_list</TT></B></FONT>[256];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8 <B><TT><FONT  color=000022 size=+1>inversion_map</TT></B></FONT>[256];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8 <B><TT><FONT  color=000022 size=+1>index_map</TT></B></FONT>[32768];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>color_map</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure contains information about the 8-bit color context for a particular screen.  All applications that display on the screen share the same color map.
+<P>
+<B>See also:  <TT><A HREF="Screen.html#ColorMap()">BScreen::ColorMap()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="color_space"></A>color_space
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>color_space</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Color space constants determine the depth and interpretation of bitmap images.  They're described under "Colors" in the "Drawing" section of this chapter.
+<P>
+<B>See also:  </B>"<B><TT>color_space</TT></B> Constants"
+<P>
+<HR>
+<H3>
+<A NAME="drawing_mode"></A>drawing_mode
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>drawing_mode</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The drawing mode determines how source and destination images interact.  
+<P>
+<B>See also:  </B>"Drawing Modes" in the "Drawing" section of this chapter, "<B><TT>drawing_mode</TT></B> Constants"
+<P>
+<HR>
+<H3>
+<A NAME="edge_info"></A>edge_info
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>left</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>right</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>edge_info</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure records information about the location of a character outline within the horizontal space allotted to the character.  Edges separate one character from adjacent characters on the left and right.  They're explained under the <B><TT><A HREF="Font.html#GetEdges()">GetEdges()</A></TT></B> function in the <A HREF="Font.html#BFont">BFont</A> class.
+<P>
+<B>See also:  <TT><A HREF="Font.html#GetEscapements()">BFont::GetEscapements()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="escapement_delta"></A>escapement_delta
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>nonspace</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>space</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>escapement_delta</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure contains values that should be added to the width of each character in a string when the string is drawn.
+<P>
+<B>See also:  <TT>BView::DrawString()</TT></B>, <B><TT><A HREF="Font.html#GetEscapements()">BFont::GetEscapements()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="font_direction"></A>font_direction
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {...} <B><TT><FONT  color=000022 size=+1>font_direction</TT></B></FONT>  
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type distinguishes between fonts that are read left-to-right (<B><TT>B_FONT_LEFT_TO_RIGHT</TT></B>) and those that are read right-to-left (<B><TT>B_FONT_RIGHT_TO_LEFT</TT></B>).
+<P>
+<B>See also:  <TT><A HREF="Font.html#Direction()">BFont::Direction()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="font_family"></A>font_family
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef char <B><TT><FONT  color=000022 size=+1>font_family</TT></B></FONT>[<FONT  face=HELVETICA>B_FONT_FAMILY_LENGTH</FONT> + 1] 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type defines a string long enough to hold the name of a font family&mdash;64 characters including the null terminator.
+<P>
+<B>See also:  <TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="font_height"></A>font_height
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>ascent</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>descent</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>leading</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>font_height</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type combines the three vertical measurements that determine the height of a line of text.
+<P>
+<B>See also:  <TT><A HREF="Font.html#GetHeight()">BFont::GetHeight()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="font_style"></A>font_style
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef char <B><TT><FONT  color=000022 size=+1>font_style</TT></B></FONT>[<FONT  face=HELVETICA>B_FONT_STYLE_LENGTH</FONT> + 1] 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type defines a string long enough to hold the name of a font style&mdash;64 characters including the null terminator.
+<P>
+<B>See also:  <TT><A HREF="functions.html#get_font_style()">get_font_style()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="key_info"></A>key_info
+</H3>
+<P>
+Declared in:  be/interface/View.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>modifiers</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8 <B><TT><FONT  color=000022 size=+1>key_states</TT></B></FONT>[16];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>key_info</TT></B></FONT>  
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure is used to get information about the current state of the keyboard in the absence of <B><TT><A HREF="#B_KEY_DOWN">B_KEY_DOWN</A></TT></B> messages.
+<P>
+<B>See also:  <TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_key_info()">get_key_info()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="key_map"></A>key_map
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>version</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>caps_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>scroll_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>num_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>left_shift_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>right_shift_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>left_command_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>right_command_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>left_control_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>right_control_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>left_option_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>right_option_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>menu_key</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>lock_settings</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>control_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>option_caps_shift_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>option_caps_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>option_shift_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>option_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>caps_shift_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>caps_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>shift_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>normal_map</TT></B></FONT>[128];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>acute_dead_key</TT></B></FONT>[32];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>grave_dead_key</TT></B></FONT>[32];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>circumflex_dead_key</TT></B></FONT>[32];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>dieresis_dead_key</TT></B></FONT>[32];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>tilde_dead_key</TT></B></FONT>[32];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>acute_tables</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>grave_tables</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>circumflex_tables</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>dieresis_tables</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>tilde_tables</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>key_map</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure maps the physical keys on the keyboard to their functions in the user interface.  It holds the tables that assign characters to key codes, set up dead keys, and determine which keys function as modifiers.  There's just one key map shared by all applications running on the same machine.
+<P>
+<B>See also:  <TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_key_map()">get_key_map()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="menu_bar_border"></A>menu_bar_border
+</H3>
+<P>
+Declared in:  be/interface/MenuBar.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>menu_bar_border</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type enumerates the ways that a menu bar can be bordered.
+<P>
+<B>See also:  <TT><A HREF="MenuBar.html#SetBorder()">BMenuBar::SetBorder()</A></TT></B>, "<B><TT>menu_bar_border</TT></B> Constants" above 
+<P>
+<HR>
+<H3>
+<A NAME="menu_info"></A>menu_info
+</H3>
+<P>
+Declared in:  be/interface/Menu.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>font_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font_name <B><TT><FONT  color=000022 size=+1>font</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgb_color <B><TT><FONT  color=000022 size=+1>background_color</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>separator</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT><FONT  color=000022 size=+1>click_to_open</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT><FONT  color=000022 size=+1>triggers_always_shown</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>menu_info</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure records the user's menu preferences.
+<P>
+<B>See also:  <TT><A HREF="functions.html#set_menu_info()">set_menu_info()</A></TT></B> , the <A HREF="Menu.html#BMenu">BMenu</A> class 
+<P>
+<HR>
+<H3>
+<A NAME="menu_layout"></A>menu_layout
+</H3>
+<P>
+Declared in:  be/interface/Menu.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>menu_layout</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type distinguishes the various ways that items can arranged in a menu or menu bar. 
+<P>
+<B>See also:  </B>the <A HREF="Menu.html#BMenu">BMenu</A> class, "<B><TT>menu_layout</TT></B> Constants" above
+<P>
+<HR>
+<H3>
+<A NAME="mouse_map"></A>mouse_map
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>left</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>right</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>middle</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>mouse_map</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure maps mouse buttons to their roles as the <B><TT><A HREF="#B_PRIMARY_MOUSE_BUTTON">B_PRIMARY_MOUSE_BUTTON</A></TT></B>, <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#B_SECONDARY_MOUSE_BUTTON">B_SECONDARY_MOUSE_BUTTON</A></TT></B>, or <B><TT><A HREF="#B_TERTIARY_MOUSE_BUTTON">B_TERTIARY_MOUSE_BUTTON</A></TT></B>. 
+<P>
+<B>See also:  <TT><A HREF="../The%20Input%20Server/InputFunctions.html#set_mouse_map()">set_mouse_map()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="orientation"></A>orientation
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>orientation</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type distinguishes between the <B><TT><A HREF="#B_VERTICAL">B_VERTICAL</A></TT></B> and <B><TT>B_HORIZONTAL</TT></B> orientation of scroll bars.
+<P>
+<B>See also:  </B>the <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> and <A HREF="ScrollView.html#BScrollView">BScrollView</A> classes
+<P>
+<HR>
+<H3>
+<A NAME="pattern"></A>pattern
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>data</TT></B></FONT>[8]; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>pattern</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+A pattern is a arrangement of two colors&mdash;the high color and the low color&mdash;in an 8-pixel by 8-pixel square.  Pixels are specified in rows, with one byte per row and one bit per pixel.  Bits marked 1 designate the high color; those marked 0 designate the low color.  An example and an illustration are given under "Patterns" in the "Drawing section of this chapter.
+<P>
+<B>See also:  </B>"Pattern Constants" above
+<P>
+<HR>
+<H3>
+<A NAME="print_file_header"></A>print_file_header
+</H3>
+<P>
+Declared in:  be/interface/PrintJob.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long <B><TT><FONT  color=000022 size=+1>version</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long <B><TT><FONT  color=000022 size=+1>page_count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long <B><TT><FONT  color=000022 size=+1>_reserved_1_</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long <B><TT><FONT  color=000022 size=+1>_reserved_2_</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long <B><TT><FONT  color=000022 size=+1>_reserved_3_</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long <B><TT><FONT  color=000022 size=+1>_reserved_4_</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long <B><TT><FONT  color=000022 size=+1>_reserved_5_</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>print_file_header</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure defines the header information for a print job.  Although declared publicly, it currently is used only internally by the <A HREF="PrintJob.html#BPrintJob">BPrintJob</A> class.
+<P>
+<HR>
+<H3>
+<A NAME="rgb_color"></A>rgb_color
+</H3>
+<P>
+Declared in:  be/interface/GraphicsDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8 <B><TT><FONT  color=000022 size=+1>red</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8 <B><TT><FONT  color=000022 size=+1>green</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8 <B><TT><FONT  color=000022 size=+1>blue</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint8 <B><TT><FONT  color=000022 size=+1>alpha</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>rgb_color</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type specifies a full 32-bit color.  Each component can have a value ranging from a minimum of 0 to a maximum of 255.
+<P>
+The <B><TT>alpha</TT></B> component, which is designed to specify the coverage of the color (how transparent or opaque it is), is currently ignored.  However, an <B><TT>rgb_color</TT></B> can be made completely transparent by assigning it the special value, <B><TT><A HREF="#B_TRANSPARENT_32_BIT">B_TRANSPARENT_32_BIT</A></TT></B>.
+<P>
+<B>See also:  <TT>BView::SetHighColor()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="screen_id"></A>screen_id
+</H3>
+<P>
+Declared in:  be/interface/Screen.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct { 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>id</TT></B></FONT>; 
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>screen_id</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type is a unique identifier for a screen.  The constant <B><TT><A HREF="#B_MAIN_SCREEN_ID">B_MAIN_SCREEN_ID</A></TT></B> is a <B><TT><A HREF="#screen_id">screen_id</A></TT></B> that identifies the main screen.
+<P>
+<B>See also:  </B>the <A HREF="Screen.html#BScreen">BScreen</A> class
+<P>
+<HR>
+<H3>
+<A NAME="screen_info"></A>screen_info
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color_space <B><TT><FONT  color=000022 size=+1>mode</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Rect.html#BRect">BRect</A> <B><TT><FONT  color=000022 size=+1>frame</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint32 <B><TT><FONT  color=000022 size=+1>spaces</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>min_refresh_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>max_refresh_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>refresh_rate</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>h_position</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>v_position</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>h_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uchar <B><TT><FONT  color=000022 size=+1>v_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>screen_info</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure holds information about a screen.  Its fields are explained under the <B><TT>get_screen_info()</TT></B> global function.
+<P>
+<B>See also:  <TT>get_screen_info()</TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="scroll_bar_info"></A>scroll_bar_info
+</H3>
+<P>
+Declared in:  be/interface/InterfaceDefs.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT><FONT  color=000022 size=+1>proportional</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool <B><TT><FONT  color=000022 size=+1>double_arrows</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>knob</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>min_knob_size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>scroll_bar_info</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure captures the user's preferences for how scroll bars should behave and appear.
+<P>
+<B>See also:  <TT><A HREF="functions.html#set_scroll_bar_info()">set_scroll_bar_info()</A></TT></B>, the <A HREF="ScrollBar.html#BScrollBar">BScrollBar</A> class 
+<P>
+<HR>
+<H3>
+<A NAME="text_run"></A>text_run
+</H3>
+<P>
+Declared in:  be/interface/TextView.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>offset</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="Font.html#BFont">BFont</A> <B><TT><FONT  color=000022 size=+1>font</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rgb_color <B><TT><FONT  color=000022 size=+1>color</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>text_run</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <A HREF="TextView.html#BTextView">BTextView</A> class uses this structure to keep track of a sequence of characters that are displayed in the same font and color.
+<P>
+<B>See also:  <TT><A HREF="TextView.html#SetRunArray()">BTextView::SetRunArray()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="text_run_array"></A>text_run_array
+</H3>
+<P>
+Declared in:  be/interface/TextView.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>count</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;text_run <B><TT><FONT  color=000022 size=+1>runs</TT></B></FONT>[];
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>text_run_array</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <A HREF="TextView.html#BTextView">BTextView</A> class uses this structure to associate character formats with the text it displays.
+<P>
+<B>See also:  <TT><A HREF="TextView.html#SetRunArray()">BTextView::SetRunArray()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="tuned_font_info"></A>tuned_font_info
+</H3>
+<P>
+Declared in:  be/interface/Font.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef struct {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>size</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>shear</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;float <B><TT><FONT  color=000022 size=+1>rotation</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int32 <B><TT><FONT  color=000022 size=+1>flags</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int16 <B><TT><FONT  color=000022 size=+1>face</TT></B></FONT>;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <B><TT><FONT  color=000022 size=+1>tuned_font_info</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This structure lists the properties of a font that has a counterpart that's been tuned to improve its appearance on-screen.  The tuned counterpart will be used whenever the font is the BView's current font and <B><TT><A HREF="ViewDrawing.html#DrawString()">DrawString()</A></TT></B> draws to the screen.
+<P>
+<B>See also:  <TT><A HREF="Font.html#GetTunedInfo()">BFont::GetTunedInfo()</A></TT></B>, <B><TT><A HREF="functions.html#get_font_family()">get_font_family()</A></TT></B> 
+<P>
+<HR>
+<H3>
+<A NAME="window_type"></A>window_type
+</H3>
+<P>
+Declared in:  be/interface/Window.h
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+typedef enum {. . .} <B><TT><FONT  color=000022 size=+1>window_type</TT></B></FONT> 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+This type describes the various kinds of windows that can be requested from the Application Server.
+<P>
+<B>See also:  </B>the <A HREF="Window.html#BWindow">BWindow</A> constructor, "<B><TT>window_type</TT></B> Constants"
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Interface Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Interface%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Interface Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,282 @@
+<HTML><HEAD><TITLE>The Network Kit: BNetAddress</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Network Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Network%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Network Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="BNetAddress"></A>BNetAddress
+</H1>
+<P>
+Derived from:  <A HREF="../The%20Support%20Kit/Archivable.html#BArchivable">BArchivable</A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/be/net/NetAddress.h">be/net/NetAddress.h</A>
+<P>
+Library:  libnetapi.so
+<P>
+Allocation:  Constructor only
+<P>
+<H6><A HREF="NetAddress.summary.html"><i>Summary</i></A></H6>
+<P>
+The BNetAddress class is used to construct and represent network addresses, providing access to them in a variety of formats.  Additional functions are available to convert addresses from one format into another.
+<P>
+<HR>
+<H2>
+<A NAME="Constructor%20and%20Destructor"></A><FONT SIZE=6>C</FONT>onstructor and <FONT SIZE=6>D</FONT>estructor
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="BNetAddress()"></A>BNetAddress()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNetAddress(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>hostname</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, unsigned short <I><FONT  color=991122 face=HELVETICA>port</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNetAddress(</TT></B></FONT>const sockaddr_in &amp;<I><FONT  color=991122 face=HELVETICA>sa</I></FONT><B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNetAddress(</TT></B></FONT>in_addr <I><FONT  color=991122 face=HELVETICA>addr</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>port</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNetAddress(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>addr</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>port</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNetAddress(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>hostname</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>protocol</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>service</I></FONT><B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNetAddress(</TT></B></FONT>BNetAddress &amp;<B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BNetAddress(</TT></B></FONT><A HREF="../Release%20Notes/AppKit.html#BMessage">BMessage</A> *<I><FONT  color=991122 face=HELVETICA>archive</I></FONT><B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets up the BNetAddress object to refer to the specified address.  The address can be specified in a number of ways:
+<P>
+<LI>By <I><FONT  color=991122 face=HELVETICA>hostname</I></FONT> and <I><FONT  color=991122 face=HELVETICA>port</I></FONT> number.  For example, to connect to the HTTP port at www.be.com, you would specify "www.be.com" as the <I><FONT  color=991122 face=HELVETICA>hostname</I></FONT>, and 80 for the <I><FONT  color=991122 face=HELVETICA>port</I></FONT> number.
+<P>
+<LI>By sockaddr_in structure.  This structure contains the network family, port number, and IP address that make up the address.
+<P>
+<LI>By IP address and port number.  The IP address can be specified either using an in_addr, or by using a uint32.  The IP address must be specified in network byte order.  See the <B><TT>htonl()</TT></B> function.
+<P>
+<LI>By <I><FONT  color=991122 face=HELVETICA>hostname</I></FONT>, <I><FONT  color=991122 face=HELVETICA>protocol</I></FONT>, and <I><FONT  color=991122 face=HELVETICA>service</I></FONT> name.  This causes the port to be looked up in the <B>/etc/services</B> file by matching the protocol (typically "tcp" or "udp") and service name (such as "http" or "ftp") against the entries in the file.  See <B><TT>getservbyname()</TT></B> for details on the format of this file.
+<P>
+<LI>By copying an existing BNetAddress.
+<P>
+<LI>By unflattening an archived BNetAddress from a BMessage.
+<P>
+</UL>
+<P>
+After creating your <A HREF="#BNetAddress">BNetAddress</A>, you must call <B><TT><A HREF="#InitCheck()">InitCheck()</A></TT></B> to ensure that no errors occurred during setup.  You can change the address later by calling <B><TT><A HREF="#SetTo()">SetTo()</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="~BNetAddress"></A>~BNetAddress
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+virtual <B><TT><FONT  color=000022 size=+1>~BNetAddress() 
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+A typical destructor.
+<P>
+<HR>
+<H2>
+<A NAME="Member%20Functions"></A><FONT SIZE=6>M</FONT>ember <FONT SIZE=6>F</FONT>unctions
+</H2>
+<P>
+<HR>
+<H3>
+<A NAME="InitCheck()"></A>InitCheck()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>InitCheck(</TT></B></FONT>void<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns a status_t indicating whether or not the object was successfully instantiated.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The BNetAddress was constructed without error.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  An error occurred during construction.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="GetAddr()"></A>GetAddr()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAddr(</TT></B></FONT>char *<I><FONT  color=991122 face=HELVETICA>hostname</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, unsigned short *<I><FONT  color=991122 face=HELVETICA>port</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAddr(</TT></B></FONT>struct sockaddr_in &amp;<I><FONT  color=991122 face=HELVETICA>sa</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>GetAddr(</TT></B></FONT>in_addr &amp;<I><FONT  color=991122 face=HELVETICA>addr</I></FONT>, unsigned short *<I><FONT  color=991122 face=HELVETICA>port</I></FONT> = <FONT  face=HELVETICA>NULL</FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT> const
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Returns the address represented by the BNetAddress object in the format indicated by the form of the function used.
+<P>
+If you don't care about the hostname (in the first form), you can specify <B><TT>NULL</TT></B> for the <I><FONT  color=991122 face=HELVETICA>hostname</I></FONT> argument; if you don't care about the port number, you can specify <B><TT>NULL</TT></B> for the <I><FONT  color=991122 face=HELVETICA>port</I></FONT> argument.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The address was returned successfully.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  An error occurred fetching the address information.
+<P>
+</UL>
+<P>
+<HR>
+<H3>
+<A NAME="SetTo()"></A>SetTo()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>hostname</I></FONT>, const char *<I><FONT  color=991122 face=HELVETICA>protocol</I></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const char *<I><FONT  color=991122 face=HELVETICA>service</I></FONT><B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const char *<I><FONT  color=991122 face=HELVETICA>hostname</I></FONT> = <FONT  face=HELVETICA>NULL</FONT>, unsigned short <I><FONT  color=991122 face=HELVETICA>port</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>)</TT></B></FONT>
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>const sockaddr_in &amp;<I><FONT  color=991122 face=HELVETICA>sa</I></FONT><B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>in_addr <I><FONT  color=991122 face=HELVETICA>addr</I></FONT>, int <I><FONT  color=991122 face=HELVETICA>port</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>) </TT></B></FONT>
+<P>
+
+<TR><TD>
+status_t <B><TT><FONT  color=000022 size=+1>SetTo(</TT></B></FONT>uint32 <I><FONT  color=991122 face=HELVETICA>addr</I></FONT> = <FONT  face=HELVETICA>INADDR_ANY</FONT>, int <I><FONT  color=991122 face=HELVETICA>port</I></FONT> = 0<B><TT><FONT  color=000022 size=+1>) 
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the address represented by the BNetAddress object in the format indicated by the form of the function used.  These formats are described in the discussion of the constructor.
+<P>
+<b>RETURN CODES</b>
+<P>
+<B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_OK">B_OK</A></TT></B>.  The address was set successfully.
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Support%20Kit/ErrorCodes.html#B_ERROR">B_ERROR</A></TT></B>.  An error occurred setting the address information.
+<P>
+<LI>
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>The Network Kit Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="The%20Network%20Kit%20Master%20Index.html"><FONT face=HELVETICA>The Network Kit Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

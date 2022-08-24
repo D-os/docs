@@ -1,0 +1,509 @@
+<HTML><HEAD><TITLE>Release Notes: The Interface Kit</TITLE></HEAD><BODY BGCOLOR=#ffffff>
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<HR>
+<H1>
+<A NAME="The%20Interface%20Kit"></A>The Interface Kit
+</H1>
+<P>
+<HR>
+<H2>
+<A NAME="Mouse%20Acceleration"></A><FONT SIZE=6>M</FONT>ouse <FONT SIZE=6>A</FONT>cceleration
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/InterfaceDefs.h">interface/InterfaceDefs.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="get_mouse_acceleration()"></A>get_mouse_acceleration()
+, 
+<A NAME="set_mouse_acceleration()"></A>set_mouse_acceleration()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>get_mouse_acceleration(int32 *</TT></B></FONT><B><TT><FONT  color=000022 size=+1>accel</TT></B></FONT>) 
+<P>
+
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>set_mouse_acceleration(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A> </TT></B></FONT><B><TT><FONT  color=000022 size=+1>accel</TT></B></FONT>) 
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These new functions let you get and set the "non-linear mouse speed scalar."  The higher the acceleration factor, the farther the mouse travels as the user increases mouse velocity.  An acceleration of 0 means the mouse's velocity isn't taken into consideration&mdash;if the user moves the (physical) mouse one inch, the cursor on-screen moves the same distance no matter how fast the user moved the mouse.  The default acceleration is about 65000.  The upper practical  limit depends on who your mouse is, but 1000000 is probably about as high as you ever want to go.
+<P>
+Note that mouse acceleration is independent of mouse speed (see <B><TT><A HREF="../The%20Input%20Server/InputFunctions.html#get_mouse_speed()">get_mouse_speed()</A></TT></B>).  Currently, there's no user UI for setting mouse acceleration, only mouse speed.
+<P>
+<HR>
+<H2>
+<A NAME="UI%20Colors"></A><FONT SIZE=6>U</FONT><FONT SIZE=6>I</FONT> <FONT SIZE=6>C</FONT>olors
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/InterfaceDefs.h">interface/InterfaceDefs.h</A>
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>enum</TT></B> <B><TT><FONT  color=000022 size=+1>color_which</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_PANEL_BACKGROUND_COLOR</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_MENU_BACKGROUND_COLOR</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_MENU_SELECTION_BACKGROUND_COLOR</TT></B></FONT>, <I><FONT  color=008844 face=HELVETICA>new
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT><FONT  color=000022 size=+1>B_MENU_ITEM_TEXT_COLOR</TT></B></FONT>, <I><FONT  color=008844 face=HELVETICA>new
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT><FONT  color=000022 size=+1>B_MENU_SELECTED_ITEM_TEXT_COLOR</TT></B></FONT>, <I><FONT  color=008844 face=HELVETICA>new
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT><FONT  color=000022 size=+1>B_WINDOW_TAB_COLOR</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_KEYBOARD_NAVIGATION_COLOR</TT></B></FONT>,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_DESKTOP_COLOR
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT></B></FONT>};
+<P>
+
+</TABLE></TABLE>
+
+<P>
+The <B><TT>color_which</TT></B> constants represent the colors that are used by the Be UI. Of these colors, <B><TT>B_MENU_SELECTION_BACKGROUND_COLOR</TT></B>, <B><TT>B_MENU_ITEM_TEXT_COLOR</TT></B>, and <B><TT>B_MENU_SELECTED_ITEM_TEXT_COLOR</TT></B> are new.  Use <B><TT>ui_color()</TT></B> to convert a <B><TT>color_which</TT></B> to an <B><TT><A HREF="../The%20Interface%20Kit/misc.html#rgb_color">rgb_color</A></TT></B>.
+<P>
+<HR>
+<H2>
+<A NAME="BChannelControl%20and%20BChannelSlider"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>C</FONT>hannel<FONT SIZE=6>C</FONT>ontrol and <FONT SIZE=6>B</FONT><FONT SIZE=6>C</FONT>hannel<FONT SIZE=6>S</FONT>lider
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/ChannelControl.h ">interface/ChannelControl.h </A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/ChannelSlider.h">interface/ChannelSlider.h</A>
+<P>
+The new BChannelControl class (which derives from BControl) is an abstract class for UI objects that want to control more than one "channel" of values, such as a stereo volume control, or an rgb slider trio.  Each of the channels has its own independent value.  BChannelControl values are <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B>.    
+<P>
+The most important BChannelControl member functions are:
+<P>
+<UL>
+<LI><B><TT><A HREF="../The%20Media%20Kit/Parameter.html#SetChannelCount()">SetChannelCount()</A> </TT></B>sets the number of channels that the object will control.
+<P>
+<LI><B><TT>SetValueFor()</TT></B> sets the current value for a given channel.
+<P>
+<LI><B><TT>SetLimitsFor() </TT></B>sets the minimum and maximum values for a given channel
+<P>
+<LI><B><TT>SetLimitLabelsFor() </TT></B>sets the labels that display the minimum and maximum values.
+<P>
+<LI><B><TT>SupportsIndividualLimits()</TT></B> must be implemented by every BChannelControl subclass.  If the subclass supports independent channel value limits (and labels), then the function should be implemented to return <B><TT>true</TT></B>.  If every channel is restricted to the same value range (and the same limit labels), the function should return false.
+<P>
+</UL>
+<P>
+When the user manipulates a BChannelControl object, the object adds an array of <B><TT><A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">int32</A></TT></B> values (one per channel) to the "be:channel_value" field of the <A HREF="AppKit.html#BMessage">BMessage</A> that's sent to the object's target. 
+<P>
+BChannelSlider is an implementation of BChannelControl that draws a (horizontal or vertical) slider for each channel.  When the user clicks or drags the control with the first mouse button, all of the channels snap to the same value and drag together.  The second mouse button moves the channel sliders independently of each.
+<P>
+<HR>
+<H2>
+<A NAME="BMenu"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>M</FONT>enu
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/Menu.h">interface/Menu.h</A>
+<P>
+<A HREF="#BMenu">BMenu</A> provides a new mechanism whereby you can track the user's movements within your menu&mdash;without having to write a <A HREF="#BMenu">BMenu</A> subclass.  Instead, you provide a "tracking hook" that's invoked <I>whenever</I> the mouse moves while your menu is open.
+<P>
+<HR>
+<H3>
+<A NAME="SetTrackingHook()"></A>SetTrackingHook()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SetTrackingHook(menu_tracking_hook *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>func</I></FONT>, <B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">void *</A></TT></B><I><FONT  color=991122 face=HELVETICA>state</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the callback function that's called when the object is tracking the mouse.  Any mouse movement will cause <I><FONT  color=991122 face=HELVETICA>func</I></FONT> to be invoked&mdash;it isn't just invoked when the mouses moves to a new menu items (for example).  The <I><FONT  color=991122 face=HELVETICA>state</I></FONT> data is passed as an argument to <I><FONT  color=991122 face=HELVETICA>func</I></FONT>.  Note that <I><FONT  color=991122 face=HELVETICA>state</I></FONT> is not copied.
+<P>
+<HR>
+<H3>
+<A NAME="menu_tracking_hook"></A>menu_tracking_hook
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>typedef bool </TT></B>(*<B><TT> </TT></B><B><TT><FONT  color=000022 size=+1>menu_tracking_hook </TT></B></FONT>)(<B><TT><A HREF="#BMenu">BMenu</A> *</TT></B>, <B><TT><A HREF="../The%20Midi%20Kit/Midi.html#TempoChange(),SprayTempoChange()">void *</A></TT></B>)
+<P>
+
+</TABLE></TABLE>
+
+<P>
+Protocol for the menu-tracking hook function.  The first argument is the <A HREF="#BMenu">BMenu</A> that's being tracked; the second argument is the <I><FONT  color=991122 face=HELVETICA>state</I></FONT> argument that was passed to <B><TT><A HREF="#SetTrackingHook()">SetTrackingHook()</A></TT></B>.   If the function returns <B><TT>true</TT></B>, the <A HREF="#BMenu">BMenu</A> stops tracking the mouse; if it returns <B><TT>false</TT></B>, the tracking continues. 
+<P>
+<HR>
+<H2>
+<A NAME="BOptionControl%20and%20BOptionPopUp"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>O</FONT>ption<FONT SIZE=6>C</FONT>ontrol and <FONT SIZE=6>B</FONT><FONT SIZE=6>O</FONT>ption<FONT SIZE=6>P</FONT>op<FONT SIZE=6>U</FONT>p
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/OptionControl.h ">interface/OptionControl.h </A>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/OptionPopUp.h">interface/OptionPopUp.h</A>
+<P>
+The BOptionControl class (which derives from BControl) is an abstract class that associates a set of names with a set of values.  The names are displayed to the user; when the user selects a name, the corresponding value is returned in the value-changed message (in the normal "be:value" field).  The options in a BOptionControl object are mutually exclusive.
+<P>
+The most important member functions are:
+<P>
+<UL>
+<LI><B><TT>AddOption()</TT></B> adds a name/value pair.
+<P>
+<LI><B><TT>SelectOptionFor()</TT></B> selects an option given a name or a value.
+<P>
+<LI><B><TT>SelectedOption()</TT></B> is an abstract functions that returns (directly) the index of the currently selected option, and returns (by reference) the option's name and value.  Each subclass must implement this function.
+<P>
+</UL>
+<P>
+The BOptionPopUp class is an implementation of BOptionControl that presents the options in a pop up menu.
+<P>
+<HR>
+<H2>
+<A NAME="BRegion"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>R</FONT>egion
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/Menu.h">interface/Menu.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="BRegion()"></A>BRegion()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BRegion(const <A HREF="../The%20Interface%20Kit/Rect.html#BRect">BRect</A> </TT></B></FONT><I><FONT  color=991122 face=HELVETICA>rect</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+New <A HREF="#BRegion">BRegion</A> constructor creates a region that matches the bounds of the given <I><FONT  color=991122 face=HELVETICA>rect</I></FONT>.
+<P>
+<HR>
+<H2>
+<A NAME="BScreen"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>S</FONT>creen
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/Screen.h">interface/Screen.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="ProposeMode()"></A>ProposeMode()
+</H3>
+<P>
+This is the new name for the previously-existing <B><TT>ProposeDisplayMode()</TT></B> function.  The latter name is deprecated.
+<P>
+<HR>
+<H3>
+<A NAME="GetMode()"></A>GetMode()
+, 
+<A NAME="SetMode()"></A>SetMode()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>GetMode(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>workspace</I></FONT>,<I><FONT  color=008844 face=HELVETICA>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT>display_mode *</TT></B><I><FONT  color=991122 face=HELVETICA>mode</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#status_t">status_t</A></TT></B> <B><TT><FONT  color=000022 size=+1>SetMode(<A HREF="../The%20Support%20Kit/misc.html#Integer%20Types">uint32</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>workspace</I></FONT>,<I><FONT  color=008844 face=HELVETICA>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT>display_mode *</TT></B><I><FONT  color=991122 face=HELVETICA>mode,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</I></FONT><B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <I><FONT  color=991122 face=HELVETICA>makeDefault</I></FONT> = <B><TT>false</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These two functions are workspace-specific versions of the previously-existing <B><TT><A HREF="#GetMode()">GetMode()</A></TT></B> and <B><TT><A HREF="#SetMode()">SetMode()</A></TT></B> functions.  A workspace is indentified by its index (0-based).  The old (non-<I><FONT  color=991122 face=HELVETICA>workspace</I></FONT>) versions work on the current workspace.  
+<P>
+<HR>
+<H2>
+<A NAME="BSlider"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>S</FONT>lider
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/Slider.h">interface/Slider.h</A>
+<P>
+Slap your controls into an upright position&mdash;BSliders can now slide up and down.
+<P>
+<HR>
+<H3>
+<A NAME="BSlider"></A>BSlider
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><FONT  color=000022 size=+1>BSlider(</TT></B></FONT>...,<B><TT><A HREF="../The%20Game%20Kit/DirectWindow.html#orientation">orientation</A></TT></B> <I><FONT  color=991122 face=HELVETICA>posture</I></FONT>, ...<B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+A new version of the <A HREF="#BSlider">BSlider</A> constructor takes an additional posture argument that can be <B><TT>B_HORIZONTAL</TT></B> or <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_VERTICAL">B_VERTICAL</A></TT></B>.  Sliders are horizontal by default.
+<P>
+<HR>
+<H3>
+<A NAME="hash_mark_location"></A>hash_mark_location
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+enum <B><TT><FONT  color=000022 size=+1>hash_mark_location</TT></B></FONT> {
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_HASH_MARKS_LEFT</TT></B></FONT> = 1,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B><TT><FONT  color=000022 size=+1>B_HASH_MARKS_RIGHT</TT></B></FONT> = 2,
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;... };
+<P>
+
+</TABLE></TABLE>
+
+<P>
+These two new values are accepted by the <B><TT><A HREF="../The%20Interface%20Kit/Slider.html#SetHashMarks()">SetHashMarks()</A></TT></B> function to declare the presence of the right and left hash marks. 
+<P>
+<HR>
+<H3>
+<A NAME="Orientation()"></A>Orientation()
+, 
+<A NAME="SetOrientation()"></A>SetOrientation()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT><A HREF="../The%20Game%20Kit/DirectWindow.html#orientation">orientation</A> </TT></B><B><TT><FONT  color=000022 size=+1>Orientation(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> </TT></B><B><TT><FONT  color=000022 size=+1>SetOrientation(<A HREF="../The%20Game%20Kit/DirectWindow.html#orientation">orientation</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>which</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These new functions return and set the slider's orientation as <B><TT>B_HORIZONTAL</TT></B> or <B><TT><A HREF="../The%20Interface%20Kit/misc.html#B_VERTICAL">B_VERTICAL</A></TT></B>.
+<P>
+<HR>
+<H3>
+<A NAME="BarThickness()"></A>BarThickness()
+, 
+<A NAME="SetBarThickness()"></A>SetBarThickness()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>float </TT></B><B><TT><FONT  color=000022 size=+1>BarThickness(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Midi%20Kit/Midi.html#ControlChange(),%20SprayControlChange()">virtual void</A> </TT></B><B><TT><FONT  color=000022 size=+1>SetBarThickness(float</TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>thickness</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+These new functions return and set the thickness, in pixels, of the slider's "bar" (the track that the thumb slides along). 
+<P>
+<HR>
+<H2>
+<A NAME="BTextView"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>T</FONT>ext<FONT SIZE=6>V</FONT>iew
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/TextView.h">interface/TextView.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="HideTyping()"></A>HideTyping()
+, 
+<A NAME="IsTypingHidden()"></A>IsTypingHidden()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>HideTyping(<A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B></FONT> <I><FONT  color=991122 face=HELVETICA>hideIt</I></FONT><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+
+<TR><TD>
+<B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A></TT></B> <B><TT><FONT  color=000022 size=+1>IsTypingHidden(void</TT></B></FONT><B><TT><FONT  color=000022 size=+1>) const
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+<B><TT>HideTyping(true)</TT></B> tells the object to print an asterisk for each keystroke, thereby hiding the actual text typed.  Perfect for password panels and other paranoia. 
+<P>
+<HR>
+<H2>
+<A NAME="BView"></A><FONT SIZE=6>B</FONT><FONT SIZE=6>V</FONT>iew
+</H2>
+<P>
+Declared in:  <A HREF="/boot/develop/headers/interface/View.h">interface/View.h</A>
+<P>
+<HR>
+<H3>
+<A NAME="SetViewCursor()"></A>SetViewCursor()
+</H3>
+<P>
+
+<Table>
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<TR> 
+<TD>&nbsp;&nbsp;
+<TD><p><Table cellpadding =3 bgcolor =eeeeee> 
+
+<TR><TD>
+<B><TT>void</TT></B> <B><TT><FONT  color=000022 size=+1>SetViewCursor(const <A HREF="AppKit.html#BCursor">BCursor</A> *</TT></B></FONT><I><FONT  color=991122 face=HELVETICA>cursor</I></FONT>, <B><TT><A HREF="../The%20Support%20Kit/misc.html#bool">bool</A> </TT></B><I><FONT  color=991122 face=HELVETICA>sync</I></FONT>=<B><TT>true</TT></B><B><TT><FONT  color=000022 size=+1>)
+<P>
+</TT></B></FONT>
+</TABLE></TABLE>
+
+<P>
+Sets the cursor that's displayed when the mouse enters this views bounds.  If  <I><FONT  color=991122 face=HELVETICA>sync</I></FONT> is <B><TT>true</TT></B>, the function doesn't return until the cursor has actually been changed; otherwise, the function returns immediately.
+<P>
+</PRE></TABLE></UL></MENU></B></I></TT>
+
+
+
+<!--TOP LINKS-->
+<HR>
+<center>
+<TABLE bgcolor=ddeeee>
+<TR><TD>
+<A HREF="index.html"><FONT face=HELVETICA>Release Notes Table of Contents</FONT></A>&nbsp;&nbsp;
+<TD>
+&nbsp;&nbsp;<A HREF="Release%20Notes%20Master%20Index.html"><FONT face=HELVETICA>Release Notes Index</FONT></A>
+</TABLE></center>
+<!--TOP LINKS-->
+
+
+<!-- Footer for Release 5 HTML Be Book -->
+<hr>
+<br>
+<p>
+<center>
+<i><FONT size=6>T</FONT>he <FONT size=6 color=blue>B</FONT><FONT size=6 color=red>e</font> <FONT size=6>B</FONT>ook</i>,
+<br>...in lovely HTML...
+<br>for BeOS Release 5.
+<center>
+<br>
+<p><font face=helvetiva>Copyright &copy; 2000 Be, Inc.  All rights reserved..
+</body>
+</html>
+

@@ -1,0 +1,17 @@
+[Unit]
+Description=Binder filesystem set rights
+After=dev-binderfs.mount
+Requires=dev-binderfs.mount
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/chmod 0660 /dev/binderfs/binder
+ExecStart=/bin/chgrp users /dev/binderfs/binder
+ExecStart=/bin/ln -sf binderfs/binder /dev/binder
+ExecStop=/bin/rm -f /dev/binder
+
+[Install]
+WantedBy=sysinit.target
+WantedBy=dev-binderfs.mount
+
